@@ -1,0 +1,17 @@
+#!/usr/bin/python3
+
+from lusidtools.lpt import stdargs
+from lusidtools.lpt import lse
+from lusidtools.lpt import lpt
+
+args = stdargs.Parser('Delete Portfolio Properties',['scope','portfolio']).add('properties', nargs="+").parse()
+api = lse.connect(args)
+
+api.call.delete_portfolio_properties(
+   scope=args.scope,
+   code=args.portfolio,
+   property_keys=args.properties
+).match(
+  left=lpt.display_error,
+  right=lambda r : print("Done!")
+)

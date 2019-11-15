@@ -1,0 +1,13 @@
+instrument_name,currency,figi,price_current,ticker,isin,sedol,client_internal
+Glencore_LondonStockEx_GLEN,GBP,BBG001MM1KV4,2.762,,,,
+Kingfisher_LondonStockEx_KGF,GBP,BBG000BKH1W6,2.276,,,,
+BurfordCapital_LondonStockEx_BUR,GBP,BBG000PN88Q7,14.06,,,,
+EKFDiagnostics_LondonStockEx_EKF,GBP,BBG000BVNBN3,0.27,,,,
+JustEat_LondonStockEx_JE,GBP,BBG0065YWM39,5.464,,,,
+MicroFocus_LondonStockEx_MCRO,GBP,BBG000G4KKD2,14.535,,,,
+RELXGroup_LondonStockEx_REL,GBP,BBG000D03XD4,15.98,,,,
+Sage_LondonStockEx_SGE,GBP,BBG000BN0PP3,5.77,,,,
+WPP_LondonStockEx_WPP,GBP,BBG000BF6B57,8.71,,,,
+October 19 Calls on AMZN US,USD,BBG00NFXK409,245.28,AMZN 10/18/19 C1365,,,imd_84634539
+October 19 Puts on AAPL US,USD,BBG00NBRV912,383,AAPL 10/18/19 P140,,,imd_85345347
+September 19 Calls on BP/ LN,GBP,BBG00M2Z8958,140,BPA 09/20/19 C570,,,imd_83535553

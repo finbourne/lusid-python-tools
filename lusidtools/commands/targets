@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+
+import lusidtools.lpt.qry_target_holdings as qry
+
+qry.main()

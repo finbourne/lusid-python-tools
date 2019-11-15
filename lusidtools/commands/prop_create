@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+
+import lusidtools.lpt.create_properties as cp
+
+cp.main()

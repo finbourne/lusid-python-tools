@@ -1,0 +1,1251 @@
+import json
+import unittest
+from datetime import datetime
+from pathlib import Path
+from typing import Callable
+import lusid
+import numpy as np
+import pandas as pd
+import pytz
+from parameterized import parameterized
+from lusidtools import cocoon
+from lusidtools.cocoon.utilities import checkargs
+from lusidtools import logger
+
+
+@checkargs
+def checkargs_list(a_list: list):
+    return isinstance(a_list, list)
+
+
+@checkargs
+def checkargs_dict(a_dict: dict):
+    return isinstance(a_dict, dict)
+
+
+@checkargs
+def checkargs_tuple(a_tuple: tuple):
+    return isinstance(a_tuple, tuple)
+
+
+@checkargs
+def checkargs_function(a_function: Callable):
+    return isinstance(a_function, Callable)
+
+
+class CocoonUtilitiesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.logger = logger.LusidLogger("debug")
+
+    @parameterized.expand(
+        [
+            [
+                ["tax_lots", "cost", "amount"],
+                "CostBaseValue",
+                {"tax_lots": {"cost": {"amount": "CostBaseValue"}}},
+            ],
+            [
+                ["tax_lots", "cost", "price"],
+                "CostAveragePrice",
+                {"tax_lots": {"cost": {"price": "CostAveragePrice"}}},
+            ],
+        ]
+    )
+    def test_expand_dictionary_single_recursive(
+        self, key_list, value, expected_outcome
+    ) -> None:
+        """
+        Tests that the recursive function to create a nested dictionary from a list of keys and a final value
+        provides the expected outcome
+
+        :param list[str] key_list: The list of keys to expand into a nested dictionary
+        :param str value: The value to use against the last key
+        :param dict expected_outcome: The expected nested dictionary
+        :return: None
+        """
+
+        nested_dictionary = cocoon.utilities.expand_dictionary_single_recursive(
+            index=0, key_list=key_list, value=value
+        )
+
+        self.assertTrue(
+            expr=all(
+                value == nested_dictionary[key]
+                for key, value in expected_outcome.items()
+            ),
+            msg="The expansion of a list of keys into a nested dictionary does not match the expected outcome",
+        )
+
+    @parameterized.expand(
+        [
+            [
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "tax_lots": {
+                        "cost": {"amount": None, "currency": "Local Currency Code"},
+                        "portfolio_cost": None,
+                        "price": None,
+                        "purchase_date": None,
+                        "settlement_date": None,
+                    }
+                },
+            ]
+        ]
+    )
+    def test_expand_dictionary(self, compacted_dictionary, expected_outcome) -> None:
+        """
+        Tests that the expansion of a dictionary returns the expected result
+
+        :param: dict compacted_dictionary: The compacted dictionary with keys separated by '.' to be expanded
+        :param: dict expected_outcome: The expected expanded, nested dictionary
+
+        :return: None
+        """
+
+        expanded_dictionary = cocoon.utilities.expand_dictionary(
+            dictionary=compacted_dictionary
+        )
+
+        self.assertTrue(
+            expr=all(
+                value == expanded_dictionary[key]
+                for key, value in expected_outcome.items()
+            ),
+            msg="The expanded dictionary does not match the expected outcome",
+        )
+
+    @parameterized.expand(
+        [
+            [
+                {
+                    "portfolio_code": "FundCode",
+                    "effective_date": "Effective Date",
+                    "tax_lots": {"units": "Quantity"},
+                },
+                {
+                    "tax_lots": {
+                        "cost": {"amount": None, "currency": "Local Currency Code"},
+                        "portfolio_cost": None,
+                        "price": None,
+                        "purchase_date": None,
+                        "settlement_date": None,
+                    }
+                },
+                {
+                    "portfolio_code": "FundCode",
+                    "effective_date": "Effective Date",
+                    "tax_lots": {
+                        "cost": {"amount": None, "currency": "Local Currency Code"},
+                        "units": "Quantity",
+                        "portfolio_cost": None,
+                        "price": None,
+                        "purchase_date": None,
+                        "settlement_date": None,
+                    },
+                },
+            ]
+        ]
+    )
+    def test_update_nested_dictionary(
+        self, nested_dictionary_1, nested_dictionary_2, expected_outcome
+    ) -> None:
+        """
+        Tests that updating a nested dictionary provides the correct outcome
+
+        :param dict nested_dictionary_1: The original nested dictionary
+        :param dict nested_dictionary_2: The new nested dictionary
+        :param dict expected_outcome: The expected updated nested dictionary from updating the original with the new
+
+        :return: None
+        """
+
+        updated_dict = cocoon.utilities.update_dict(
+            orig_dict=nested_dictionary_1, new_dict=nested_dictionary_2
+        )
+
+        self.assertTrue(
+            expr=all(
+                value == updated_dict[key] for key, value in expected_outcome.items()
+            ),
+            msg="The updated of a nested dictionary does not match the expected outcome",
+        )
+
+    @parameterized.expand(
+        [
+            # Test building an InstrumentDefinition
+            [
+                lusid.models.InstrumentDefinition,
+                {
+                    "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                        key="Instrument/CreditRatings/Moodys",
+                        value=lusid.models.PropertyValue(label_value="A2"),
+                    ),
+                    "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                        key="Instrument/CreditRatings/SandP",
+                        value=lusid.models.PropertyValue(label_value="A-"),
+                    ),
+                },
+                {
+                    "Instrument/default/Figi": lusid.models.InstrumentIdValue(
+                        value="BBG000BLNNH6"
+                    ),
+                    "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
+                        value="IBM"
+                    ),
+                },
+                [],
+                {
+                    "name": "instrument_name",
+                    "look_through_portfolio_id": {
+                        "scope": "lookthrough_scope",
+                        "code": "lookthrough_code",
+                    },
+                    "definition": {
+                        "instrument_format": "format",
+                        "content": "contract",
+                    },
+                },
+                pd.Series(
+                    data=[
+                        "GlobalCreditFund",
+                        "SingaporeBranch",
+                        "PORT_12490FKS9",
+                        "json",
+                        "{asset_type: 'fund', term_sheet: 'GlobalCreditFundConstituents.pdf'}",
+                    ],
+                    index=[
+                        "instrument_name",
+                        "lookthrough_scope",
+                        "lookthrough_code",
+                        "format",
+                        "contract",
+                    ],
+                ),
+                lusid.models.InstrumentDefinition(
+                    name="GlobalCreditFund",
+                    identifiers={
+                        "Instrument/default/Figi": lusid.models.InstrumentIdValue(
+                            value="BBG000BLNNH6"
+                        ),
+                        "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
+                            value="IBM"
+                        ),
+                    },
+                    properties={
+                        "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                            key="Instrument/CreditRatings/Moodys",
+                            value=lusid.models.PropertyValue(label_value="A2"),
+                        ),
+                        "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                            key="Instrument/CreditRatings/SandP",
+                            value=lusid.models.PropertyValue(label_value="A-"),
+                        ),
+                    },
+                    look_through_portfolio_id=lusid.models.ResourceId(
+                        scope="SingaporeBranch", code="PORT_12490FKS9"
+                    ),
+                    definition=lusid.models.InstrumentEconomicDefinition(
+                        instrument_format="json",
+                        content="{asset_type: 'fund', term_sheet: 'GlobalCreditFundConstituents.pdf'}",
+                    ),
+                ),
+            ],
+            # Test building a CreateTransactionPortfolioRequest
+            [
+                lusid.models.CreateTransactionPortfolioRequest,
+                {
+                    "Portfolio/Manager/Id": lusid.models.PerpetualProperty(
+                        key="Portfolio/Manager/Id",
+                        value=lusid.models.PropertyValue(label_value="PM_1241247"),
+                    ),
+                    "Portfolio/Operations/Rebalancing_Interval": lusid.models.PerpetualProperty(
+                        key="Portfolio/Operations/Rebalancing_Interval",
+                        value=lusid.models.PropertyValue(
+                            metric_value=lusid.models.MetricValue(value=30, unit="Days")
+                        ),
+                    ),
+                },
+                None,
+                ["Transaction/Operations/Strategy_Tag"],
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                    "description": "description",
+                    "accounting_method": "accounting_method",
+                    "corporate_action_source_id": {"scope": None, "code": None},
+                },
+                pd.Series(
+                    data=[
+                        "PORT_42424",
+                        "GlobalCreditFundPortfolio",
+                        datetime(year=2019, month=10, day=5, tzinfo=pytz.UTC),
+                        "GBP",
+                        "Global Credit Fund Portfolio",
+                        "AverageCost",
+                    ],
+                    index=[
+                        "FundCode",
+                        "display_name",
+                        "created",
+                        "base_currency",
+                        "description",
+                        "accounting_method",
+                    ],
+                ),
+                lusid.models.CreateTransactionPortfolioRequest(
+                    display_name="GlobalCreditFundPortfolio",
+                    description="Global Credit Fund Portfolio",
+                    code="PORT_42424",
+                    created=datetime(
+                        year=2019, month=10, day=5, tzinfo=pytz.UTC
+                    ).isoformat(),
+                    base_currency="GBP",
+                    corporate_action_source_id=None,
+                    accounting_method="AverageCost",
+                    sub_holding_keys=["Transaction/Operations/Strategy_Tag"],
+                    properties={
+                        "Portfolio/Manager/Id": lusid.models.PerpetualProperty(
+                            key="Portfolio/Manager/Id",
+                            value=lusid.models.PropertyValue(label_value="PM_1241247"),
+                        ),
+                        "Portfolio/Operations/Rebalancing_Interval": lusid.models.PerpetualProperty(
+                            key="Portfolio/Operations/Rebalancing_Interval",
+                            value=lusid.models.PropertyValue(
+                                metric_value=lusid.models.MetricValue(
+                                    value=30, unit="Days"
+                                )
+                            ),
+                        ),
+                    },
+                ),
+            ],
+            # Test building a TransactionRequest
+            [
+                lusid.models.TransactionRequest,
+                {
+                    "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
+                        key="Transaction/Operations/Strategy_Tag",
+                        value=lusid.models.PropertyValue(
+                            label_value="QuantitativeSignal"
+                        ),
+                    ),
+                    "Transaction/Operations/Cash_Account": lusid.models.PerpetualProperty(
+                        key="Transaction/Operations/Accrued_Interest",
+                        value=lusid.models.PropertyValue(
+                            metric_value=lusid.models.MetricValue(
+                                value=30.52, unit="GBP"
+                            )
+                        ),
+                    ),
+                },
+                {
+                    "Instrument/default/Figi": "BBG000BLNNH6",
+                    "Instrument/default/Ticker": "IBM",
+                },
+                [],
+                {
+                    "portfolio_code": "FundCode",
+                    "transaction_id": "transaction_id",
+                    "type": "transaction_type",
+                    "transaction_date": "Effective Date",
+                    "settlement_date": "Effective Date",
+                    "units": "Quantity",
+                    "transaction_price": {"price": "Local Price", "type": None},
+                    "total_consideration": {
+                        "amount": "Local Market Value",
+                        "currency": "Local Currency Code",
+                    },
+                    "transaction_currency": "Local Currency Code",
+                    "exchange_rate": "exchange_rate",
+                    "source": None,
+                    "counterparty_id": None,
+                },
+                pd.Series(
+                    data=[
+                        "PORT_42424",
+                        "TID_98391235",
+                        "Buy",
+                        datetime(year=2019, month=9, day=3, tzinfo=pytz.UTC),
+                        100000,
+                        15,
+                        1500000,
+                        "USD",
+                        1.2,
+                    ],
+                    index=[
+                        "FundCode",
+                        "transaction_id",
+                        "transaction_type",
+                        "Effective Date",
+                        "Quantity",
+                        "Local Price",
+                        "Local Market Value",
+                        "Local Currency Code",
+                        "exchange_rate",
+                    ],
+                ),
+                lusid.models.TransactionRequest(
+                    transaction_id="TID_98391235",
+                    type="Buy",
+                    instrument_identifiers={
+                        "Instrument/default/Figi": "BBG000BLNNH6",
+                        "Instrument/default/Ticker": "IBM",
+                    },
+                    transaction_date="2019-09-03T00:00:00+00:00",
+                    settlement_date="2019-09-03T00:00:00+00:00",
+                    units=100000,
+                    transaction_price=lusid.models.TransactionPrice(
+                        price=15, type=None
+                    ),
+                    total_consideration=lusid.models.CurrencyAndAmount(
+                        amount=1500000, currency="USD"
+                    ),
+                    exchange_rate=1.2,
+                    transaction_currency="USD",
+                    properties={
+                        "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
+                            key="Transaction/Operations/Strategy_Tag",
+                            value=lusid.models.PropertyValue(
+                                label_value="QuantitativeSignal"
+                            ),
+                        ),
+                        "Transaction/Operations/Cash_Account": lusid.models.PerpetualProperty(
+                            key="Transaction/Operations/Accrued_Interest",
+                            value=lusid.models.PropertyValue(
+                                metric_value=lusid.models.MetricValue(
+                                    value=30.52, unit="GBP"
+                                )
+                            ),
+                        ),
+                    },
+                    source=None,
+                ),
+            ],
+            # Test building an AdjustHoldingRequest
+            [
+                lusid.models.AdjustHoldingRequest,
+                {
+                    "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
+                        key="Holding/Operations/MarketDataVendor",
+                        value=lusid.models.PropertyValue(label_value="Refinitiv"),
+                    ),
+                    "Holding/Operations/MarketValBaseCurrency": lusid.models.PerpetualProperty(
+                        key="Holding/Operations/MarketValBaseCurrency",
+                        value=lusid.models.PropertyValue(
+                            metric_value=lusid.models.MetricValue(
+                                value=4567002.43, unit="GBP"
+                            )
+                        ),
+                    ),
+                },
+                {
+                    "Instrument/default/Figi": "BBG000BLNNH6",
+                    "Instrument/default/Ticker": "IBM",
+                },
+                {
+                    "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
+                        key="Transaction/Operations/Strategy_Tag",
+                        value=lusid.models.PropertyValue(
+                            label_value="QuantitativeSignal"
+                        ),
+                    ),
+                    "Transaction/Operations/Cash_Account": lusid.models.PerpetualProperty(
+                        key="Transaction/Operations/Accrued_Interest",
+                        value=lusid.models.PropertyValue(
+                            metric_value=lusid.models.MetricValue(
+                                value=30.52, unit="GBP"
+                            )
+                        ),
+                    ),
+                },
+                {
+                    "tax_lots": {
+                        "cost": {"amount": None, "currency": "Local Currency Code"},
+                        "portfolio_cost": None,
+                        "price": None,
+                        "purchase_date": None,
+                        "settlement_date": None,
+                        "units": "QTY",
+                    }
+                },
+                pd.Series(data=["GBP", 10000], index=["Local Currency Code", "QTY"]),
+                lusid.models.AdjustHoldingRequest(
+                    instrument_identifiers={
+                        "Instrument/default/Figi": "BBG000BLNNH6",
+                        "Instrument/default/Ticker": "IBM",
+                    },
+                    properties={
+                        "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
+                            key="Holding/Operations/MarketDataVendor",
+                            value=lusid.models.PropertyValue(label_value="Refinitiv"),
+                        ),
+                        "Holding/Operations/MarketValBaseCurrency": lusid.models.PerpetualProperty(
+                            key="Holding/Operations/MarketValBaseCurrency",
+                            value=lusid.models.PropertyValue(
+                                metric_value=lusid.models.MetricValue(
+                                    value=4567002.43, unit="GBP"
+                                )
+                            ),
+                        ),
+                    },
+                    sub_holding_keys={
+                        "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
+                            key="Transaction/Operations/Strategy_Tag",
+                            value=lusid.models.PropertyValue(
+                                label_value="QuantitativeSignal"
+                            ),
+                        ),
+                        "Transaction/Operations/Cash_Account": lusid.models.PerpetualProperty(
+                            key="Transaction/Operations/Accrued_Interest",
+                            value=lusid.models.PropertyValue(
+                                metric_value=lusid.models.MetricValue(
+                                    value=30.52, unit="GBP"
+                                )
+                            ),
+                        ),
+                    },
+                    tax_lots=[
+                        lusid.models.TargetTaxLotRequest(
+                            units=10000,
+                            cost=lusid.models.CurrencyAndAmount(currency="GBP"),
+                        )
+                    ],
+                ),
+            ],
+        ]
+    )
+    def test_set_attributes(
+        self,
+        model_object,
+        properties,
+        identifiers,
+        sub_holding_keys,
+        mapping,
+        row,
+        expected_outcome,
+    ) -> None:
+        """
+        Tests that setting the attributes on a model works as expected
+        :param lusid.models model_object: The class of the model object to populate
+        :param any properties: The properties to use on this model
+        :param any identifiers: The instrument identifiers to use on this
+        :param list[str] sub_holding_keys: The sub holding keys to use on this model
+        :param dict mapping: The expanded dictionary mapping the Series columns to the LUSID model attributes
+        :param pd.Series row: The current row of the DataFrame being worked on
+        :param lusid.models expected_outcome: An instance of the model object with populated attributes
+
+        :return: None
+        """
+
+        populated_model = cocoon.utilities.set_attributes(
+            model_object=model_object,
+            mapping=mapping,
+            row=row,
+            properties=properties,
+            identifiers=identifiers,
+            sub_holding_keys=sub_holding_keys,
+        )
+
+        self.assertEqual(
+            first=populated_model,
+            second=expected_outcome,
+            msg="The populated model does not match the expected outcome",
+        )
+
+    def test_populate_model(self):
+        pass
+
+    def test_file_type_checks(self):
+        pass
+
+    @parameterized.expand(
+        [
+            ["S&PCreditRating(UK)", "SandPCreditRatingUK"],
+            ["Return%", "ReturnPercentage"],
+            ["Buy/Sell Indicator", "BuySellIndicator"],
+            ["balances.available", "balances_available"],
+        ]
+    )
+    def test_make_code_lusid_friendly_success(self, enemy_code, expected_code) -> None:
+        """
+        This tests that the utility to make codes LUSID friendly works as expected
+
+        :param str enemy_code: The unfriendly (enemy) code to convert to a LUSID friendly code
+        :param str expected_code: The expected LUSID friendly code after conversion
+        :return: None
+        """
+
+        friendly_code = cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
+
+        self.assertEqual(
+            first=friendly_code,
+            second=expected_code,
+            msg=f"The friendly code '{friendly_code}'' does not match the expected output '{expected_code}'",
+        )
+
+    @parameterized.expand(
+        [
+            [
+                "S&PCreditRating(UK)ThisIsAReallyLongCodeThatExceedsTheCharacterLimit",
+                ValueError,
+            ],
+        ]
+    )
+    def test_make_code_lusid_friendly_failure(
+        self, enemy_code, expected_exception
+    ) -> None:
+        """
+        This tests that the utility to make codes LUSID friendly works as expected
+
+        :param str enemy_code: The unfriendly (enemy) code to convert to a LUSID friendly code
+        :param expected_exception: The expected exception
+
+        :return: None
+        """
+
+        with self.assertRaises(expected_exception):
+            cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
+
+    @parameterized.expand(
+        [
+            ["05/10/19", datetime(year=2019, month=10, day=5, tzinfo=pytz.UTC)],
+            [
+                datetime(year=2019, month=8, day=5, tzinfo=None),
+                datetime(year=2019, month=8, day=5, tzinfo=pytz.UTC),
+            ],
+            [
+                pytz.timezone("America/New_York").localize(
+                    datetime(year=2019, month=8, day=5, hour=10, minute=30)
+                ),
+                datetime(
+                    year=2019, month=8, day=5, hour=14, minute=30, tzinfo=pytz.UTC
+                ),
+            ],
+        ]
+    )
+    def test_convert_datetime_utc(
+        self, original_date_value, expected_date_value
+    ) -> None:
+        """
+        This test ensures that the datetime converter works as expected
+
+        :param any original_date_value: The input date value which could be in any format
+        :param datetime expected_date_value: The expected timezone aware datetime in the UTC timezone
+        :return: None
+        """
+
+        correct_date_value = cocoon.utilities.convert_datetime_utc(
+            datetime_value=original_date_value
+        )
+
+        self.assertEqual(
+            first=correct_date_value,
+            second=expected_date_value,
+            msg=f"The output datetime {correct_date_value} does not match the expected date {expected_date_value}",
+        )
+
+    @parameterized.expand(
+        [
+            [
+                {
+                    "definitions": {
+                        "InstrumentDefinition": {
+                            "required": ["name", "identifiers"],
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "The name of the instrument.",
+                                    "type": "string",
+                                },
+                                "identifiers": {
+                                    "description": "A set of identifiers that can be used to identify the instrument. At least one of these must be configured to be a unique identifier.",
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "$ref": "#/definitions/InstrumentIdValue"
+                                    },
+                                },
+                                "properties": {
+                                    "description": "Set of unique instrument properties and associated values to store with the instrument. Each property must be from the 'Instrument' domain.",
+                                    "uniqueItems": "false",
+                                    "type": "array",
+                                    "items": {"$ref": "#/definitions/Property"},
+                                },
+                                "lookThroughPortfolioId": {
+                                    "$ref": "#/definitions/ResourceId",
+                                    "description": "The identifier of the portfolio that has been securitised to create this instrument.",
+                                },
+                                "definition": {
+                                    "$ref": "#/definitions/InstrumentEconomicDefinition",
+                                    "description": "The economic definition of the instrument where an expanded definition exists. in the case of OTC instruments this contains the definition of the non-exchange traded instrument. There is no validation on the structure of this definition. However, in order to transparently use vendor libraries it must conform to a format that LUSID understands.",
+                                },
+                            },
+                        },
+                        "InstrumentIdValue": {
+                            "required": ["value"],
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "description": "The value of the identifier.",
+                                    "type": "string",
+                                },
+                                "effectiveAt": {
+                                    "format": "date-time",
+                                    "description": "The effective datetime from which the identifier will be valid. If left unspecified the default value is the beginning of time.",
+                                    "type": "string",
+                                },
+                            },
+                        },
+                    }
+                },
+                lusid.models.InstrumentDefinition,
+                ["name", "identifiers.value"],
+            ]
+        ]
+    )
+    def test_get_required_attributes_model_recursive(
+        self, swagger_dict, model_object, expected_outcome
+    ):
+        required_attributes = cocoon.utilities.get_required_attributes_model_recursive(
+            swagger_dict=swagger_dict, model_object=model_object
+        )
+
+        required_attributes.sort()
+        expected_outcome.sort()
+
+        self.assertListEqual(required_attributes, expected_outcome)
+
+    def test_gen_dict_extract(self):
+        pass
+
+    @parameterized.expand(
+        [
+            # Test where $ref is at the top level
+            [
+                {
+                    "$ref": "#/definitions/ResourceId",
+                    "description": "The identifier of the portfolio that has been securitised to create this instrument.",
+                },
+                "ResourceId",
+            ],
+            # Test where $ref does not exist at all
+            [{"description": "The name of the instrument.", "type": "string"}, None],
+            # Test where $ref is nested under additionalProperties
+            [
+                {
+                    "description": "A set of identifiers that can be used to identify the instrument. At least one of these must be configured to be a unique identifier.",
+                    "type": "object",
+                    "additionalProperties": {"$ref": "#/definitions/InstrumentIdValue"},
+                },
+                "InstrumentIdValue",
+            ],
+            # Test where $ref is nested under items
+            [
+                {
+                    "description": "Set of unique instrument properties and associated values to store with the instrument. Each property must be from the 'Instrument' domain.",
+                    "uniqueItems": "false",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/Property"},
+                },
+                "Property",
+            ],
+        ]
+    )
+    def test_return_nested_model(
+        self, required_attribute_properties, expected_outcome
+    ) -> None:
+        """
+        Tests that the name of a nested model is successfully returned from the properties of a required attribute
+
+        :param dict required_attribute_properties:
+        :param string expected_outcome:
+
+        :return: None
+        """
+        nested_model = cocoon.utilities.return_nested_model(
+            required_attribute_properties
+        )
+
+        self.assertEqual(first=nested_model, second=expected_outcome)
+
+    @parameterized.expand(
+        [
+            # Test all required attributes exist
+            [{"name": "instrument_name"}, lusid.models.InstrumentDefinition],
+            # Test all required attributes exist as well as an extra attribute
+            [
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                    "portfolio_type": "account_type",
+                },
+                lusid.models.CreateTransactionPortfolioRequest,
+            ],
+            # Test all required attributes exist, plus an exempt attribute
+            [
+                {"name": "instrument_name", "identifiers": "instrument_internal"},
+                lusid.models.InstrumentDefinition,
+            ],
+        ]
+    )
+    def test_verify_all_required_attributes_mapped_success(
+        self, mapping, model_object
+    ) -> None:
+        """
+        Tests that you can successfully verify that all required attributes exist
+
+        :param dict mapping: The required mapping dictionary
+        :param lusid.model model_object: The model object to verify against
+
+        :return: None
+        """
+        with open(Path(__file__).parent.joinpath("data/lusid.json")) as file:
+            swagger_dict = json.loads(file.read())
+
+        cocoon.utilities.verify_all_required_attributes_mapped(
+            swagger_dict=swagger_dict,
+            mapping=mapping,
+            model_object=model_object,
+            exempt_attributes=[
+                "identifiers",
+                "properties",
+                "instrument_identifiers",
+                "sub_holding_keys",
+            ],
+        )
+
+    @parameterized.expand(
+        [
+            # Test no required attributes provided via an empty dictionary
+            [{}, lusid.models.InstrumentDefinition, ValueError],
+            # Test no required attributes required via None provided
+            [None, lusid.models.InstrumentDefinition, ValueError],
+            # Test a missing required attribute
+            [
+                {
+                    "portfolio_code": "portfolio_code",
+                    "transaction_type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                lusid.models.TransactionRequest,
+                ValueError,
+            ],
+        ]
+    )
+    def test_verify_all_required_attributes_mapped_fail(
+        self, mapping, model_object, expected_exception
+    ) -> None:
+        """
+        Test that an exception on failure is successfully raised
+
+        :param dict mapping: The required mapping dictionary
+        :param lusid.model model_object: The model object to verify against
+        :param expected_exception: The expected exception
+
+        :return: None
+        """
+        with open(Path(__file__).parent.joinpath("data/lusid.json")) as file:
+            swagger_dict = json.loads(file.read())
+
+        with self.assertRaises(expected_exception):
+            cocoon.utilities.verify_all_required_attributes_mapped(
+                swagger_dict=swagger_dict,
+                mapping=mapping,
+                model_object=model_object,
+                exempt_attributes=[
+                    "identifiers",
+                    "properties",
+                    "instrument_identifiers",
+                    "sub_holding_keys",
+                ],
+            )
+
+    @parameterized.expand(
+        [["instrumentIdentifiers", "instrument_identifiers"], ["taxLots", "tax_lots"]]
+    )
+    def test_camel_case_to_pep_8(self, attribute_name, expected_outcome) -> None:
+        """
+        Tests that the conversion from camel case e.g. instrumentIdentifiers is converted to Python PEP 8 standard
+        i.e. instrument_identifiers
+
+        :param str attribute_name: The attribute name to convert
+        :param str expected_outcome: The expected outcome
+
+        :return: None
+        """
+
+        pep_8_name = cocoon.utilities.camel_case_to_pep_8(attribute_name=attribute_name)
+
+        self.assertEqual(first=pep_8_name, second=expected_outcome)
+
+    @parameterized.expand(
+        [
+            [
+                ["Travel", "Airlines and Aviation Services"],
+                "Travel, Airlines and Aviation Services",
+            ],
+            [10, 10],
+            [
+                {"Travel": "Airlines and Aviation Services"},
+                "{'Travel': 'Airlines and Aviation Services'}",
+            ],
+            ["Rebalanced", "Rebalanced"],
+        ]
+    )
+    def test_convert_cell_value_to_string(self, data, expected_outcome) -> None:
+        """
+        Tests that data can be successfully converted to a string if it is a list or a dictionary
+
+        :param data: The data input
+        :param expected_outcome: The expected result
+
+        :return: None
+        """
+        converted_value = cocoon.utilities.convert_cell_value_to_string(data)
+
+        self.assertEqual(first=converted_value, second=expected_outcome)
+
+    @parameterized.expand(
+        [
+            # Test a column and default
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": {"column": "instrument_name", "default": "unknown_name"}},
+                [
+                    pd.DataFrame(
+                        data={
+                            "instrument_name": [
+                                "International Business Machines",
+                                "unknown_name",
+                                "Amazon",
+                                "Apple",
+                            ]
+                        }
+                    ),
+                    {"name": "instrument_name"},
+                ],
+            ],
+            # Test just a column
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": {"column": "instrument_name",}},
+                [
+                    pd.DataFrame(
+                        data={
+                            "instrument_name": [
+                                "International Business Machines",
+                                np.NaN,
+                                "Amazon",
+                                "Apple",
+                            ]
+                        }
+                    ),
+                    {"name": "instrument_name"},
+                ],
+            ],
+            # Test just a default
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": {"default": "unknown_name",}},
+                [
+                    pd.DataFrame(
+                        data={
+                            "instrument_name": [
+                                "International Business Machines",
+                                np.NaN,
+                                "Amazon",
+                                "Apple",
+                            ],
+                            "LUSID.name": [
+                                "unknown_name",
+                                "unknown_name",
+                                "unknown_name",
+                                "unknown_name",
+                            ],
+                        }
+                    ),
+                    {"name": "LUSID.name"},
+                ],
+            ],
+            # Test no nesting
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": "instrument_name"},
+                [
+                    pd.DataFrame(
+                        data={
+                            "instrument_name": [
+                                "International Business Machines",
+                                np.NaN,
+                                "Amazon",
+                                "Apple",
+                            ]
+                        }
+                    ),
+                    {"name": "instrument_name"},
+                ],
+            ],
+        ]
+    )
+    def test_handle_nested_default_and_column_mapping_success(
+        self, data_frame, mapping, expected_outcome
+    ):
+        (
+            updated_data_frame,
+            updated_mapping,
+        ) = cocoon.utilities.handle_nested_default_and_column_mapping(
+            data_frame=data_frame, mapping=mapping
+        )
+
+        self.assertTrue(expr=updated_data_frame.equals(expected_outcome[0]))
+
+        self.assertEqual(first=updated_mapping, second=expected_outcome[1])
+
+    @parameterized.expand(
+        [
+            # Test providing a dictionary with no column or default keys
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": {"columns": "instrument_name", "defaults": "unknown_name"}},
+                KeyError,
+            ],
+            # Test providing an empty dictionary
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": {}},
+                KeyError,
+            ],
+            # Test providing a list
+            [
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": ["instrument_name"]},
+                ValueError,
+            ],
+        ]
+    )
+    def test_handle_nested_default_and_column_mapping_failure(
+        self, data_frame, mapping, expected_exception
+    ):
+        with self.assertRaises(expected_exception):
+            cocoon.utilities.handle_nested_default_and_column_mapping(
+                data_frame=data_frame, mapping=mapping
+            )
+
+    @parameterized.expand(
+        [
+            # Test properties_scope as a list
+            [
+                cocoon.cocoon.load_from_data_frame,
+                TypeError,
+                [
+                    lusid.utilities.ApiClientFactory(
+                        api_secrets_filename=Path(
+                            __file__
+                        ).parent.parent.parent.joinpath("secrets.json")
+                    ),
+                    "test_scope",
+                    pd.DataFrame(),
+                    {"name": "instrument_name"},
+                    {"definition.format": "json"},
+                    "instrument",
+                ],
+                {
+                    "identifier_mapping": {},
+                    "property_columns": [],
+                    "properties_scope": ["help"],
+                },
+            ],
+            # Test with no keyword arguments and a Pandas Series instead of a DataFrame
+            [
+                cocoon.cocoon.load_from_data_frame,
+                TypeError,
+                [
+                    lusid.utilities.ApiClientFactory(
+                        api_secrets_filename=Path(
+                            __file__
+                        ).parent.parent.parent.joinpath("secrets.json")
+                    ),
+                    "test_scope",
+                    pd.Series(),
+                    {"name": "instrument_name"},
+                    {"definition.format": "json"},
+                    "instrument",
+                ],
+                {},
+            ],
+            # Test properties_scope as a list but as the first keyword argument
+            [
+                cocoon.cocoon.load_from_data_frame,
+                TypeError,
+                [
+                    lusid.utilities.ApiClientFactory(
+                        api_secrets_filename=Path(
+                            __file__
+                        ).parent.parent.parent.joinpath("secrets.json")
+                    ),
+                    "test_scope",
+                    pd.DataFrame(),
+                    {"name": "instrument_name"},
+                    {"definition.format": "json"},
+                    "instrument",
+                ],
+                {
+                    "properties_scope": ["help"],
+                    "identifier_mapping": {},
+                    "property_columns": [],
+                },
+            ],
+            # Test identifier_mapping as a string but as a positional argument
+            [
+                cocoon.cocoon.load_from_data_frame,
+                TypeError,
+                [
+                    lusid.utilities.ApiClientFactory(
+                        api_secrets_filename=Path(
+                            __file__
+                        ).parent.parent.parent.joinpath("secrets.json")
+                    ),
+                    "test_scope",
+                    pd.DataFrame(),
+                    {"name": "instrument_name"},
+                    {"definition.format": "json"},
+                    "instrument",
+                    "instrument_identifiers: figi",
+                ],
+                {"properties_scope": ["help"], "property_columns": []},
+            ],
+            # Test identifier_mapping as None with a properties scope as a list
+            [
+                cocoon.cocoon.load_from_data_frame,
+                TypeError,
+                [
+                    lusid.utilities.ApiClientFactory(
+                        api_secrets_filename=Path(
+                            __file__
+                        ).parent.parent.parent.joinpath("secrets.json")
+                    ),
+                    "test_scope",
+                    pd.DataFrame(),
+                    {"name": "instrument_name"},
+                    {"definition.format": "json"},
+                    "instrument",
+                    None,
+                ],
+                {"properties_scope": ["help"], "property_columns": []},
+            ],
+        ]
+    )
+    def test_checkargs_lusid(self, function, expected_exception, args, kwargs):
+        with self.assertRaises(expected_exception):
+            function(*args, **kwargs)
+
+    @parameterized.expand(
+        [
+            ("list_string", checkargs_list, ["a", "b", "c"]),
+            ("list_number", checkargs_list, [1, 2, 3]),
+            ("dict_string", checkargs_dict, {"a": "b"}),
+            ("dict_mixed", checkargs_dict, {"a": 1}),
+            ("dict_number", checkargs_dict, {1: 2}),
+            ("function", checkargs_function, lambda: print("lambda")),
+        ]
+    )
+    def test_checkargs(self, _, function, param):
+        self.assertTrue(function(param))
+
+    @parameterized.expand(
+        [
+            ("list_string", checkargs_list, {}),
+            ("list_none", checkargs_list, None),
+            ("dict_string", checkargs_dict, "a"),
+            ("dict_string", checkargs_dict, None),
+            ("function", checkargs_function, []),
+            ("function", checkargs_function, None),
+        ]
+    )
+    def test_checkargs_with_incorrect_type(self, _, function, param):
+        with self.assertRaises(TypeError):
+            function(param)
+
+    @parameterized.expand([["list_string", checkargs_list, {"b_list": []}]])
+    def test_checkargs_with_invalid_argument(self, _, function, kwargs):
+        with self.assertRaises(ValueError):
+            function(**kwargs)

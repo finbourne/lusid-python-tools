@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+
+import lusidtools.lpt.qry_portfolio_groups as qry
+
+qry.main()

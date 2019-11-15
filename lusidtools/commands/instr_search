@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+
+import lusidtools.lpt.search_instruments as qry
+
+qry.main()
