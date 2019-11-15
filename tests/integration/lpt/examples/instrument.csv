@@ -1,0 +1,3 @@
+﻿name,ClientInternal,Figi,P:Instrument/default/RIC,P:Instrument/default/Isin,look_through_portfolio_id.scope,look_through_portfolio_id.code
+JLH,JLH,figi-JLH,,isin-JLH,scope-JLH,code-JLH
+JLH2,JLH-IBM,,IBM,,,

@@ -1,0 +1,51 @@
+#!/usr/bin/python3
+
+from lusidtools.lpt import lpt
+from lusidtools.lpt import lse
+from lusidtools.lpt import qry_portfolios as qp
+from lusidtools.lpt import qry_transactions as qt
+import pandas as pd
+from tqdm import tqdm
+
+def remove_portfolio(parser):
+    parser.remove('portfolio')
+    parser.add('--quiet',action='store_true')
+    return parser
+
+args = qt.parse(extend=remove_portfolio)
+
+api = lse.connect(args) # stats to stdout
+
+def run_queries(df):
+    frames = []
+
+    def success(portfolio, df):
+        df.insert(0,'Portfolio', portfolio)
+        frames.append(df)
+
+    def failure(err):
+        lpt.display_error(err)
+        exit()
+
+    if len(df) > 0:
+       with tqdm(df['id.code'],disable=args.quiet,total=len(df)) as iterator:
+            for p in iterator:
+                iterator.set_description(p)
+                args.portfolio = p
+                qt.process_args(api,args).match(left=failure,right=lambda r : success(p,r))
+     
+    if len(frames) == 0:
+        print("No results")
+    else:
+        df = lpt.trim_df(pd.concat(frames,sort=False,ignore_index=True),args.limit)
+        if(args.filename):
+            df.to_csv(args.filename, index=False)
+        else:
+            lpt.display_df(df)
+
+    api.dump_stats()
+
+qp.process_args(api,qp.parse(args=[args.scope])).match(
+    left=lpt.display_error,
+    right=run_queries
+)

@@ -1,0 +1,15 @@
+{
+  "instruments": {
+    "required": {
+      "name": {
+        "column": "instrument_name",
+        "default": "TestNameNotFound"
+      }
+    },
+    "identifier_mapping": {
+      "LusidInstrumentId": "figi"
+    },
+    "optional": {
+    }
+  }
+}

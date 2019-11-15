@@ -1,0 +1,9 @@
+P:Trade/default/TradeToPortfolioRate,instrument_uid,total_consideration.currency,exchange_rate,settlement_date,total_consideration.amount,transaction_date,transaction_price.price,type,units,transaction_id,source
+1,CCY_GBP,GBP,1,2018-07-31,1500000,2018-07-31,1,FundsIn,1500000,TX#1,Client
+0.7621,CCY_USD,GBP,0.7621,2018-08-01,1500000,2018-08-01,1,FxBuy,1968245.64,TX#2,Client
+0.7673,INT:INSTR1,USD,1,2018-08-02,643320,2018-08-02,142.96,Buy,4500,TX#3,Client
+0.7681,INT:INSTR1,USD,1,2018-08-03,664650,2018-08-03,147.7,Buy,4500,TX#4,Client
+0.7728,INT:INSTR1,USD,1,2018-08-06,657135,2018-08-06,146.03,Buy,4500,TX#5,Client
+0.772,INT:INSTR1,USD,1,2018-08-07,1470100,2018-08-07,147.01,Sell,10000,TX#6,Client
+0.78,INT:INSTR1,USD,1,2018-08-08,515515,2018-08-08,147.29,Sell,3500,TX#7,Client
+0.78,CCY_USD,GBP,0.78,2018-08-08,1551229.4,2018-08-08,1,FxSell,1988755.64,TX#8,Client

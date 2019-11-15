@@ -1,0 +1,8 @@
+{
+  "env": "refinitiv",
+  "cert": "path-to-certificate-file-goes-here",
+  "user": "your-name-here" ,
+  "api": {
+    "apiUrl": "https://api-tr.lusid.com"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "transaction": {
+      "domain": "Transaction",
+      "batch_allowed": true,
+      "default_batch_size": 10000,
+      "top_level_model": "TransactionRequest",
+      "portfolio_specific": true,
+      "full_key_format": true,
+      "required_call_attributes": ["scope", "code"],
+      "unique_attributes": ["transaction_id"]
+  },
+  "holding": {
+      "domain": "Holding",
+      "default_batch_size": 100000000000,
+      "batch_allowed": false,
+      "top_level_model": "AdjustHoldingRequest",
+      "portfolio_specific": true,
+      "full_key_format": true,
+      "required_call_attributes": ["scope", "code", "effective_at"],
+      "unique_attributes": ["effective_at"]
+  },
+  "instrument": {
+      "domain": "Instrument",
+      "batch_allowed": true,
+      "default_batch_size": 2000,
+      "top_level_model": "InstrumentDefinition",
+      "portfolio_specific": false,
+      "full_key_format": false,
+      "required_call_attributes": [],
+      "unique_attributes": []
+  },
+  "portfolio": {
+      "domain": "Portfolio",
+      "batch_allowed": false,
+      "default_batch_size": 100000000000,
+      "top_level_model": "CreateTransactionPortfolioRequest",
+      "portfolio_specific": true,
+      "full_key_format": false,
+      "required_call_attributes": ["scope", "code"],
+      "unique_attributes": ["code"]
+
+  },
+  "quote": {
+      "domain": null,
+      "batch_allowed": true,
+      "default_batch_size": 2000,
+      "top_level_model": "UpsertQuoteRequest",
+      "portfolio_specific": false,
+      "full_key_format": false,
+      "required_call_attributes": ["scope"],
+      "unique_attributes": []
+  }
+}

@@ -1,0 +1,28 @@
+#!/usr/bin/python3
+
+from lusidtools.lpt import lpt
+from lusidtools.lpt import lse
+from lusidtools.lpt import stdargs
+
+args = (stdargs.Parser('identifier update')
+        .add('luid')
+        .add('type')
+        .add('identifier')
+        .add('effective_date')
+        .add('--alt-type',dest='atype',default='LusidInstrumentId',help="Alternate type (if not providing LUID)")
+        .parse())
+
+api = lse.connect(args)
+
+api.call.update_instrument_identifier(
+       identifier_type=args.atype,
+       identifier=args.luid,
+       request=api.models.UpdateInstrumentIdentifierRequest(
+           type=args.type,
+           value=args.identifier,
+           effective_at=args.effective_date
+       )
+).match(
+   left=lpt.display_error,
+   right=lambda r : print (r)
+)

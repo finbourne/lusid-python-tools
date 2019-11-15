@@ -1,0 +1,18 @@
+#!/usr/bin/python3
+
+import pandas as pd
+from lusidtools.lpt import stdargs
+from lusidtools.lpt import lse
+from lusidtools.lpt import lpt
+
+args = stdargs.Parser('Delete Portfolio',['scope','portfolio']).parse()
+
+api = lse.connect(args)
+
+api.call.delete_portfolio(
+    scope=args.scope,
+    code=args.portfolio
+).match(
+   left=lpt.display_error,
+   right=lambda r : print("Done!")
+)

@@ -1,0 +1,21 @@
+#!/usr/bin/python3
+
+import pandas as pd
+from lusidtools.lpt import stdargs
+from lusidtools.lpt import lse
+from lusidtools.lpt import lpt
+
+args = (stdargs.Parser('identifier update',['scope','portfolio'])
+        .add('ids',nargs='+')
+        .parse())
+
+api = lse.connect(args)
+
+api.call.cancel_transactions(
+       scope=args.scope,
+       code=args.portfolio,
+       transaction_ids = args.ids
+).match(
+   left=lpt.display_error,
+   right=lambda r : print (r)
+)

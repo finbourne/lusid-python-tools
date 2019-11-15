@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+
+import os
+import pandas as pd
+import lusidtools.lpt.qry_quotes as quotes
+from lusidtools.lpt import lpt
+from lusidtools.lpt import lse
+from lusidtools. lpt.either import Either
+import lusidtools.lpt.map_instruments as mi
+
+# Adds extra options to the standard parameters
+def additional_arguments(parser):
+    parser.add(
+        '--start', metavar = 'YYYY-MM-DD',
+        help='earliest date to use'
+    )
+
+def process_args(api,args):
+    results = []
+
+    def run_for_date():
+        def success(df):
+            if len(df) > 0:
+               # Add results to result set
+               date = df['Date'].max()
+               print(args.date,lpt.from_date(date),len(df))
+               results.append(
+                  df[['Date','Instrument','Quote','Unit']]
+                  .assign(Date=lpt.from_date(date),PriceDate=pd.to_datetime(df['Date'],utc=True).dt.strftime('%Y-%m-%d'))
+               )
+               # figure out next date
+               date += pd.Timedelta('-1 day')
+               # Set the arguments for the next run
+               # date should be 1 day prior to date from this run
+               args.date = lpt.from_date(date)
+
+               # Terminate if going past the lower bound
+               if args.start and args.start > args.date:
+                  return False
+               
+               # Don't want to load instruments from a file
+               args.from_file = None
+               # Instead use short-list of 'found' instruments
+               args.instrument = df['Instrument'].values
+               return True
+            # No data to continue, terminate
+            return False
+
+        return Either(quotes.process_args(api,args)).match(
+                 right=success,
+                 left = lpt.display_error
+               )
+    
+    while run_for_date():
+       pass
+        
+    df = (
+        pd.concat(
+           results, 
+           ignore_index=True,
+           sort=False
+        )
+        .sort_values(['Date','Instrument'])
+        .reset_index(drop=True)
+    )
+
+    df['LUID'] = mi.mapping_prefixes[args.identifier] + ':' + df['Instrument']
+    mi.map_instruments(api,df,'LUID')
+
+    return Either.Right(df)
+
+# Run the standard flow
+lpt.standard_flow(
+   lambda : quotes.parse(additional_arguments), 
+   lse.connect, 
+   process_args
+)

@@ -1,0 +1,18 @@
+{
+  "instruments": {
+    "required": {
+      "name": {
+        "column": "instrument_name",
+        "default": "TestNameNotFound"
+      }
+    },
+    "identifier_mapping": {
+      "Figi": "figi",
+      "Isin": "isin",
+      "ClientInternal": "client_internal",
+      "Ticker": "ticker"
+    },
+    "optional": {
+    }
+  }
+}
