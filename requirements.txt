@@ -10,5 +10,5 @@ tqdm>=4.30.0
 requests
 coloredlogs
 detect_delimiter
-pyyaml==3.12
+pyyaml==5.1
 black
