@@ -9,6 +9,30 @@ import logging
 import re
 from lusidtools.cocoon.async_tools import run_in_executor
 import asyncio
+from typing import Callable
+
+@checkargs
+def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
+    """
+    This function prepares the key for the identifier based on whether the full key or just the code is required
+
+    :param str identifier_lusid: The LUSID identifier in either full key format or code only
+    :param bool full_key_format: Whether or not they key needs to be in the full key format
+
+    :return: str: The LUSID identifier in the correct format
+    """
+    if full_key_format:
+        return (
+            identifier_lusid
+            if re.findall("Instrument/\S+/\S+", identifier_lusid)
+            else f"Instrument/default/{identifier_lusid}"
+        )
+    else:
+        return (
+            identifier_lusid.split("/")[2]
+            if re.findall("Instrument/default/\S+", identifier_lusid)
+            else identifier_lusid
+        )
 
 
 @checkargs
@@ -19,6 +43,7 @@ def create_identifiers(
     instrument_identifier_mapping: dict = None,
     unique_identifiers: list = None,
     full_key_format: bool = True,
+    prepare_key: Callable = prepare_key
 ):
     """
     This function creates identifiers to be added to a LUSID model object
@@ -29,32 +54,10 @@ def create_identifiers(
     :param dict instrument_identifier_mapping: The instrument identifier mapping to use
     :param list unique_identifiers: The list of allowable unique instrument identifiers
     :param bool full_key_format: Whether or not the full key format i.e. 'Instrument/default/Figi' is required
+    :param callable prepare_key: The function to use to prepare the key
 
     :return: dict identifiers: The identifiers to use on the request
     """
-
-    @checkargs
-    def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
-        """
-        This function prepares the key for the identifier based on whether the full key or just the code is required
-
-        :param str identifier_lusid: The LUSID identifier in either full key format or code only
-        :param bool full_key_format: Whether or not they key needs to be in the full key format
-
-        :return: str: The LUSID identifier in the correct format
-        """
-        if full_key_format:
-            return (
-                identifier_lusid
-                if re.findall("Instrument/default/\S+", identifier_lusid)
-                else f"Instrument/default/{identifier_lusid}"
-            )
-        else:
-            return (
-                identifier_lusid.split("/")[2]
-                if re.findall("Instrument/default/\S+", identifier_lusid)
-                else identifier_lusid
-            )
 
     # Populate the identifiers for this instrument
     identifiers = {
