@@ -11,6 +11,7 @@ from lusidtools.cocoon.async_tools import run_in_executor
 import asyncio
 from typing import Callable
 
+
 @checkargs
 def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
     """
@@ -43,7 +44,7 @@ def create_identifiers(
     instrument_identifier_mapping: dict = None,
     unique_identifiers: list = None,
     full_key_format: bool = True,
-    prepare_key: Callable = prepare_key
+    prepare_key: Callable = prepare_key,
 ):
     """
     This function creates identifiers to be added to a LUSID model object
