@@ -1250,11 +1250,21 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             function(**kwargs)
 
-    def test_correct_bond_price_quotes(self):
-        df = pd.DataFrame([["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 1000.0]],
+    def test_scale_quote_of_type(self):
+        df = pd.DataFrame([["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
                           columns=["name", "type", "price"])
+        mapping = {
+            "quotes": {
+                "quote_scalar": {
+                    "price": "price",
+                    "type": "type",
+                    "type_code": "b",
+                    "scale_factor": 0.01
+                }
+            }
+        }
 
-        result = cocoon.utilities.correct_bond_price_quotes(df=df, price_col="price", type_col="type", item_code="b")
+        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
 
         [self.assertEqual(100.0, row["Prices Corrected"]) for index, row in result.iterrows()]
 
