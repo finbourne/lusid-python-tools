@@ -7,6 +7,16 @@ from .refreshing_token import RefreshingToken
 
 
 def connect(config, **kwargs):
+
+    if "api" not in config.keys():
+        config["api"] = {}
+        config["api"]["tokenUrl"] = None
+        config["api"]["username"] = None
+        config["api"]["password"] = None
+        config["api"]["clientId"] = None
+        config["api"]["clientSecret"] = None
+        config["api"]["apiUrl"] = None
+
     token_url = os.getenv("FBN_TOKEN_URL", config["api"]["tokenUrl"])
     username = os.getenv("FBN_USERNAME", config["api"]["username"])
     password = quote(os.getenv("FBN_PASSWORD", config["api"]["password"]), "*!")
