@@ -146,7 +146,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 "holdings",
-                KeyError,
+                ValueError,
             ],
             [
                 "Duplication of transaction ids",
@@ -197,7 +197,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 "holdings",
-                KeyError,
+                ValueError,
             ],
             [
                 "A file type that is not supported",
