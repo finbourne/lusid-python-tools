@@ -356,11 +356,13 @@ async def construct_batches(
 
     if file_type in batching_no_portfolios:
 
+        # Everything can be sent up asynchronously, prepare batches based on batch size alone
         async_batches = [
             data_frame.iloc[i : i + batch_size]
             for i in range(0, len(data_frame), batch_size)
         ]
 
+        # Nest the async batches inside a single synchronous batch
         sync_batches = [
             {
                 "async_batches": async_batches,
@@ -373,10 +375,12 @@ async def construct_batches(
 
         if "effective_at" in domain_lookup[file_type]["required_call_attributes"]:
 
+            # Get unique effective dates
             unique_effective_dates = list(
                 data_frame[mapping_required["effective_at"]].unique()
             )
 
+            # Create a group for each effective date as they can not be batched asynchronously
             effective_at_groups = [
                 data_frame.loc[
                     data_frame[mapping_required["effective_at"]] == effective_at
@@ -384,10 +388,12 @@ async def construct_batches(
                 for effective_at in unique_effective_dates
             ]
 
+            # Create a synchronous batch for each effective date
             sync_batches = [
                 {
+                    # Different portfolio codes can be batched asynchronously inside the synchronous batch
                     "async_batches": [
-                        data_frame.loc[data_frame[mapping_required["code"]] == code]
+                        effective_at_group.loc[data_frame[mapping_required["code"]] == code]
                         for code in list(
                             effective_at_group[mapping_required["code"]].unique()
                         )
@@ -411,17 +417,19 @@ async def construct_batches(
 
             unique_portfolios = list(data_frame[mapping_required["code"]].unique())
 
+            # Different portfolio codes can be batched asynchronously
             async_batches = [
                 data_frame.loc[data_frame[mapping_required["code"]] == code]
                 for code in unique_portfolios
             ]
 
+            # Inside the synchronous batch split the values for each portfolio into appropriate batch sizes
             sync_batches = [
                 {
-                    "async_batches": async_batches,
+                    "async_batches": [async_batch.iloc[i:i+batch_size] for async_batch in async_batches],
                     "codes": [str(code) for code in unique_portfolios],
                     "effective_at": [None] * len(async_batches),
-                }
+                } for i in range(0, max([len(async_batch) for async_batch in async_batches]), batch_size)
             ]
 
     # Asynchronously load the data into LUSID
@@ -446,7 +454,7 @@ async def construct_batches(
                     sync_batch["async_batches"],
                     sync_batch["codes"],
                     sync_batch["effective_at"],
-                )
+                ) if not async_batch.empty
             ],
             return_exceptions=True,
         )
@@ -556,6 +564,13 @@ def load_from_data_frame(
         .discard_dict_keys_none_value()
         .value
     )
+
+    required_call_attributes = domain_lookup[file_type]["required_call_attributes"]
+    if "scope" in required_call_attributes: required_call_attributes.remove("scope")
+
+    # Check that all required parameters exist
+    Validator(required_call_attributes, "required_attributes_for_call") \
+        .check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
     if instrument_name_enrichment:
 
