@@ -252,7 +252,7 @@ class TxnConfigYaml:
         else:
             orig = yaml.dump(obj, width=500)
             cust = yaml.dump(obj, Dumper=CustomDumper, width=500)
-            copy = yaml.dump(yaml.load(cust), width=500)
+            copy = yaml.dump(yaml.load(cust, Loader=UpdateLoader), width=500)
 
             if orig != copy:
                 print("DIFFS - writing to orig/copy")
