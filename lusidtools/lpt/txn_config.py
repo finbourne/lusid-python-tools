@@ -113,5 +113,5 @@ def process_args(api, args):
 
 
 # Standalone tool
-def main():
+def main(parse=parse):
     lpt.standard_flow(parse, lse.connect, process_args)

@@ -24,7 +24,8 @@ import lusidtools.lpt.search_instruments as search_instruments
 import lusidtools.lpt.create_group_portfolios as cgp
 import lusidtools.lpt.upload_portfolio as up
 import lusidtools.lpt.upload_quotes as uq
-
+import lusidtools.lpt.txn_config as txn
+import os
 
 class CommandsTests(unittest.TestCase):
     test_scope = "lpt-test-scope"
@@ -303,6 +304,57 @@ class CommandsTests(unittest.TestCase):
                 ]
             ),
             display_df=self.display_df,
+        )
+
+    def test_round_trip_transaction_config(self) -> None:
+        """
+        Tests that you can get and then set a transaction type config in a round trip
+
+        :return:
+        """
+
+        file_path = "./data/transaction_types.yml"
+
+        # Ensure that file does not exist
+        self.assertFalse(
+            expr=os.path.exists(file_path)
+        )
+
+        # Get the transaction types
+        txn.main(
+            parse=lambda: txn.parse(
+                args=[
+                    "get",
+                    "-f",
+                    file_path,
+                    "--secrets",
+                    f"{self.secrets_file}"
+                ]
+            )
+        )
+
+        # Ensure that the file has been created
+        self.assertTrue(
+            expr=os.path.exists(file_path)
+        )
+
+        # Set the transaction types
+        txn.main(
+            parse=lambda: txn.parse(
+                args=[
+                    "set",
+                    "-f",
+                    file_path,
+                    "--secrets",
+                    f"{self.secrets_file}"
+                ]
+            )
+        )
+
+        # Remove the file and ensure that it is gone
+        os.remove(file_path)
+        self.assertFalse(
+            expr=os.path.exists(file_path)
         )
 
 
