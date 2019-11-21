@@ -25,7 +25,7 @@ setup(
         "requests==2.*",
         "coloredlogs==10.*",
         "detect_delimiter==0.1.*",
-        "pyyaml==5.*"
+        "pyyaml==5.*",
     ],
     include_package_data=True,
     python_requires=">=3.7",
