@@ -393,7 +393,9 @@ async def construct_batches(
                 {
                     # Different portfolio codes can be batched asynchronously inside the synchronous batch
                     "async_batches": [
-                        effective_at_group.loc[data_frame[mapping_required["code"]] == code]
+                        effective_at_group.loc[
+                            data_frame[mapping_required["code"]] == code
+                        ]
                         for code in list(
                             effective_at_group[mapping_required["code"]].unique()
                         )
@@ -426,10 +428,18 @@ async def construct_batches(
             # Inside the synchronous batch split the values for each portfolio into appropriate batch sizes
             sync_batches = [
                 {
-                    "async_batches": [async_batch.iloc[i:i+batch_size] for async_batch in async_batches],
+                    "async_batches": [
+                        async_batch.iloc[i : i + batch_size]
+                        for async_batch in async_batches
+                    ],
                     "codes": [str(code) for code in unique_portfolios],
                     "effective_at": [None] * len(async_batches),
-                } for i in range(0, max([len(async_batch) for async_batch in async_batches]), batch_size)
+                }
+                for i in range(
+                    0,
+                    max([len(async_batch) for async_batch in async_batches]),
+                    batch_size,
+                )
             ]
 
     # Asynchronously load the data into LUSID
@@ -454,7 +464,8 @@ async def construct_batches(
                     sync_batch["async_batches"],
                     sync_batch["codes"],
                     sync_batch["effective_at"],
-                ) if not async_batch.empty
+                )
+                if not async_batch.empty
             ],
             return_exceptions=True,
         )
@@ -566,11 +577,13 @@ def load_from_data_frame(
     )
 
     required_call_attributes = domain_lookup[file_type]["required_call_attributes"]
-    if "scope" in required_call_attributes: required_call_attributes.remove("scope")
+    if "scope" in required_call_attributes:
+        required_call_attributes.remove("scope")
 
     # Check that all required parameters exist
-    Validator(required_call_attributes, "required_attributes_for_call") \
-        .check_subset_of_list(list(mapping_required.keys()), "required_mapping")
+    Validator(
+        required_call_attributes, "required_attributes_for_call"
+    ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
     if instrument_name_enrichment:
 

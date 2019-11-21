@@ -199,18 +199,12 @@ class CocoonTestsTransactions(unittest.TestCase):
             identifier_mapping=identifier_mapping,
             property_columns=property_columns,
             properties_scope=properties_scope,
-            batch_size=batch_size
+            batch_size=batch_size,
         )
 
-        self.assertGreater(
-            len(responses["transactions"]["success"]),
-            0
-        )
+        self.assertGreater(len(responses["transactions"]["success"]), 0)
 
-        self.assertEqual(
-            len(responses["transactions"]["errors"]),
-            0
-        )
+        self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
         self.assertTrue(
             expr=all(
