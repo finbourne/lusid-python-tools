@@ -43,6 +43,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
                 "operations001",
+                None,
                 lusid.models.Version,
             ],
             [
@@ -70,6 +71,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
                 "operations001",
+                None,
                 lusid.models.Version,
             ],
             [
@@ -96,6 +98,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
+                None,
                 None,
                 lusid.models.Version,
             ],
@@ -124,6 +127,35 @@ class CocoonTestsTransactions(unittest.TestCase):
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
                 None,
+                None,
+                lusid.models.Version,
+            ],
+            [
+                "Try with a small batch",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "$GlobalCreditFund",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency", "source": "$default"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                None,
+                2,
                 lusid.models.Version,
             ],
         ]
@@ -138,6 +170,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         identifier_mapping,
         property_columns,
         properties_scope,
+        batch_size,
         expected_outcome,
     ) -> None:
         """
@@ -166,6 +199,17 @@ class CocoonTestsTransactions(unittest.TestCase):
             identifier_mapping=identifier_mapping,
             property_columns=property_columns,
             properties_scope=properties_scope,
+            batch_size=batch_size
+        )
+
+        self.assertGreater(
+            len(responses["transactions"]["success"]),
+            0
+        )
+
+        self.assertEqual(
+            len(responses["transactions"]["errors"]),
+            0
         )
 
         self.assertTrue(

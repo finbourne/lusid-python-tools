@@ -219,6 +219,16 @@ class CocoonTestsHoldings(unittest.TestCase):
             properties_scope=properties_scope,
         )
 
+        self.assertGreater(
+            len(responses["holdings"]["success"]),
+            0
+        )
+
+        self.assertEqual(
+            len(responses["holdings"]["errors"]),
+            0
+        )
+
         self.assertTrue(
             expr=all(
                 isinstance(succcess_response.version, expected_outcome)
