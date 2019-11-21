@@ -729,6 +729,26 @@ def parse_args(args: dict):
 
     return vars(ap.parse_args(args=args)), ap
 
+def correct_bond_price_quotes(df: pd.DataFrame, price_col: str, type_col: str, item_code: str) -> pd.DataFrame:
+    """
+    This function divides price quotes that can be identified as bonds in a dataframe by 10.
+    :param pd.DataFrame df: quotes dataframe
+    :param str price_col: Name of price column
+    :param str type_col: Name of column specifying which quote type
+    :param str item_code: Identifying value of bond quotes in quote type column e.g "b" or "BOND"
+    :return:
+    """
+    df["Prices Corrected"] = None
+
+    for index, row in df.iterrows():
+        if row[type_col] == item_code:
+            corrected_price = row[price_col]/10
+        else:
+            corrected_price = row[price_col]
+        df.at[
+            index, "Prices Corrected"] = corrected_price
+
+    return df
 
 def identify_cash_items(
     dataframe, mappings, remove_cash_items: bool = False
