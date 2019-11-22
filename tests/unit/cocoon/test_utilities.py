@@ -1250,9 +1250,49 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             function(**kwargs)
 
-    def test_scale_quote_of_type(self):
-        df = pd.DataFrame([["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
+    @parameterized.expand(
+        [
+            ("only scale bonds", [["name1", "s", 100.0],
+                        ["name2", "s", 100.0],
+                        ["name3", "b", 10000.0]], [100, 100, 100], 0.01),
+            ("missing non-type values", [["name1", "s", 100.0],
+                        ["name2", "s", None],
+                        ["name3", "b", 1000.0]], [100, None, 100.0], 0.1),
+            ("missing type values", [["name1", "s", 100.0],
+                                      ["name2", "s", 100.0],
+                                      ["name3", "b", None]], [100, 100.0, None], 0.1),
+        ]
+    )
+    def test_scale_quote_of_type(self, _, data, ground_truth, scale_factor):
+        df = pd.DataFrame(data,
                           columns=["name", "type", "price"])
+        mapping = {
+            "quotes": {
+                "quote_scalar": {
+                    "price": "price",
+                    "type": "type",
+                    "type_code": "b",
+                    "scale_factor": scale_factor
+                }
+            }
+        }
+        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
+
+        [self.assertEqual(ground_truth[index], row["__adjusted_quote"]) for index, row in result.iterrows()]
+
+
+    @parameterized.expand(
+        [
+            ("invalid_type_column", "invalid_type_name", "type", KeyError),
+            ("invalid_price_column", "invalid_price_name", "price", KeyError)
+        ]
+    )
+    def test_scale_quote_of_type_fail(self, _, col_title, column, error_type):
+        df = pd.DataFrame(
+            [["name1", "s", 100.0],
+             ["name2", "s", 100.0],
+             ["name3", "b", 10000.0]],
+            columns=["name", "type", "price"])
         mapping = {
             "quotes": {
                 "quote_scalar": {
@@ -1263,10 +1303,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 }
             }
         }
-
-        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
-
-        [self.assertEqual(100.0, row["Prices Corrected"]) for index, row in result.iterrows()]
+        mapping["quotes"]["quote_scalar"][column] = col_title
+        with self.assertRaises(error_type):
+            cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
 
     @parameterized.expand(
         [
@@ -1407,7 +1446,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         if not remove_cash_items:
             mappings_ground_truth["identifier_mapping"][
                 "Currency"
-            ] = "currency_identifier_for_LUSID"
+            ] = "__currency_identifier_for_LUSID"
 
         dataframe = pd.DataFrame(data)
 
@@ -1418,14 +1457,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             if remove_cash_items:
                 self.assertEqual(
-                    1, len(list(dataframe["currency_identifier_for_LUSID"]))
+                    1, len(list(dataframe["__currency_identifier_for_LUSID"]))
                 )
             else:
                 self.assertEqual(
-                    4, len(list(dataframe["currency_identifier_for_LUSID"]))
+                    4, len(list(dataframe["__currency_identifier_for_LUSID"]))
                 )
             self.assertEqual(
-                ground_truth, list(dataframe["currency_identifier_for_LUSID"])
+                ground_truth, list(dataframe["__currency_identifier_for_LUSID"])
             )
             self.assertEqual(mappings_ground_truth, mappings_test)
 
@@ -1533,7 +1572,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         if not remove_cash_items:
             mappings_ground_truth["identifier_mapping"][
                 "Currency"
-            ] = "currency_identifier_for_LUSID"
+            ] = "__currency_identifier_for_LUSID"
 
         dataframe = pd.DataFrame(data)
 
@@ -1541,5 +1580,5 @@ class CocoonUtilitiesTests(unittest.TestCase):
             dataframe, mappings, remove_cash_items
         )
 
-        self.assertEqual(ground_truth, list(dataframe["currency_identifier_for_LUSID"]))
+        self.assertEqual(ground_truth, list(dataframe["__currency_identifier_for_LUSID"]))
         self.assertEqual(mappings_ground_truth, mappings_test)

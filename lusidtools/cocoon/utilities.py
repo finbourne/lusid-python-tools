@@ -2,7 +2,7 @@ import argparse
 import csv
 import logging
 import os
-
+import numpy as np
 import lusid
 from collections.abc import Mapping
 import pandas as pd
@@ -730,7 +730,7 @@ def parse_args(args: dict):
     return vars(ap.parse_args(args=args)), ap
 
 
-def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str="quotes") -> pd.DataFrame:
+def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str = "quotes") -> pd.DataFrame:
     """
 
     :param string file_type: File type of data default = "quotes"
@@ -744,15 +744,25 @@ def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str="quotes"
     type_code = mapping[file_type]["quote_scalar"]["type_code"]
     scale_factor = mapping[file_type]["quote_scalar"]["scale_factor"]
 
-    df["Prices Corrected"] = None
+    for col in [price_col, type_col]:
+        if col not in df.columns:
+            logging.error(f"column {col} does not exist in quotes DataFrame.")
+            raise KeyError(f"column {col} does not exist in quotes DataFrame.")
+
+    df["__adjusted_quote"] = None
 
     for index, row in df.iterrows():
-        if row[type_col] == type_code:
-            corrected_price = row[price_col] * scale_factor
-        else:
-            corrected_price = row[price_col]
+        if np.isnan(row[price_col]) and row[type_col] == type_code:
+            logging.warning(f"Could not adjust price at row {index} because it contains no price value")
+            continue
+        elif np.isnan(row[price_col]):
+            continue
+            
+            # raise ValueError(f"row {index} in dataframe is missing a value for price")
+        __adjusted_quote = row[price_col] * scale_factor if row[type_col] == type_code else row[price_col]
+
         df.at[
-            index, "Prices Corrected"] = corrected_price
+            index, "__adjusted_quote"] = __adjusted_quote
     return df
 
 
@@ -770,9 +780,9 @@ def identify_cash_items(
     """
 
     cash_flag_specification = mappings["cash_flag"]
-    dataframe["currency_identifier_for_LUSID"] = None
+    dataframe["__currency_identifier_for_LUSID"] = None
     if not remove_cash_items:
-        mappings["identifier_mapping"]["Currency"] = "currency_identifier_for_LUSID"
+        mappings["identifier_mapping"]["Currency"] = "__currency_identifier_for_LUSID"
 
     rm_index = []
     for index, row in dataframe.iterrows():
@@ -782,7 +792,7 @@ def identify_cash_items(
                     rm_index.append(index)
                 else:
                     dataframe.at[
-                        index, "currency_identifier_for_LUSID"
+                        index, "__currency_identifier_for_LUSID"
                     ] = populate_currency_identifier_for_LUSID(
                         row, column, cash_flag_specification
                     )
