@@ -42,8 +42,8 @@ def convert_datetime_utc(datetime_value) -> datetime:
     if isinstance(datetime_value, datetime):
         # If there is no timezone assume that it is in UTC
         if (
-                datetime_value.tzinfo is None
-                or datetime_value.tzinfo.utcoffset(datetime_value) is None
+            datetime_value.tzinfo is None
+            or datetime_value.tzinfo.utcoffset(datetime_value) is None
         ):
             return datetime_value.replace(tzinfo=pytz.UTC)
         # If there is a timezone convert to UTC
@@ -70,26 +70,26 @@ def make_code_lusid_friendly(raw_code):
 
     friendly_code = (
         str(raw_code)
-            .replace(" ", "")
-            .replace("(", "")
-            .replace(")", "")
-            .replace("/", "")
-            .replace("%", "Percentage")
-            .replace("&", "and")
-            .replace(".", "_")
-            .strip()
+        .replace(" ", "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace("/", "")
+        .replace("%", "Percentage")
+        .replace("&", "and")
+        .replace(".", "_")
+        .strip()
     )
 
     return friendly_code
 
 
 def populate_model(
-        model_object,
-        required_mapping,
-        optional_mapping,
-        row,
-        properties=None,
-        identifiers=None,
+    model_object,
+    required_mapping,
+    optional_mapping,
+    row,
+    properties=None,
+    identifiers=None,
 ):
     """
     This function populates
@@ -121,7 +121,7 @@ def populate_model(
 
 
 def set_attributes(
-        model_object, mapping, row, properties=None, identifiers=None, sub_holding_keys=None
+    model_object, mapping, row, properties=None, identifiers=None, sub_holding_keys=None
 ):
     """
     This function takes a lusid.model object and an expanded mapping between its attributes and
@@ -296,7 +296,7 @@ def get_swagger_dict(api_url) -> dict:
 
 
 def verify_all_required_attributes_mapped(
-        swagger_dict, mapping, model_object, exempt_attributes=[]
+    swagger_dict, mapping, model_object, exempt_attributes=[]
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
@@ -463,7 +463,7 @@ def convert_cell_value_to_string(data):
 
 
 def handle_nested_default_and_column_mapping(
-        data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
+    data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
 ):
     """
     This function handles when a mapping is provided which contains as a value a dictionary with a column and/or default
@@ -492,14 +492,14 @@ def handle_nested_default_and_column_mapping(
 
             # If there is only a default specified, create a new column filled with the default
             elif not ("column" in list(value.keys())) and (
-                    "default" in list(value.keys())
+                "default" in list(value.keys())
             ):
                 mapping_updated[key] = f"LUSID.{key}"
                 data_frame[mapping_updated[key]] = value["default"]
 
             # If there is only a column specified unnest it
             elif ("column" in list(value.keys())) and not (
-                    "default" in list(value.keys())
+                "default" in list(value.keys())
             ):
                 mapping_updated[key] = value["column"]
 
@@ -647,7 +647,7 @@ def get_delimiter(sample_string: str):
 
 
 def check_mapping_fields_exist(
-        required_list: list, search_list: list, file_type: str
+    required_list: list, search_list: list, file_type: str
 ) -> list:
     """
     This function checks that items in one list exist in another list
@@ -679,7 +679,7 @@ def parse_args(args: dict):
         "-c",
         "--secrets_file",
         help=r"full path for credential secrets (eg. c:\Users\Joe\secrets.json). Not required if set as "
-             r"environment variables",
+        r"environment variables",
     )
     ap.add_argument(
         "-m",
@@ -730,7 +730,9 @@ def parse_args(args: dict):
     return vars(ap.parse_args(args=args)), ap
 
 
-def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str = "quotes") -> pd.DataFrame:
+def scale_quote_of_type(
+    df: pd.DataFrame, mapping: dict, file_type: str = "quotes"
+) -> pd.DataFrame:
     """
 
     :param string file_type: File type of data default = "quotes"
@@ -753,20 +755,25 @@ def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str = "quote
 
     for index, row in df.iterrows():
         if np.isnan(row[price_col]) and row[type_col] == type_code:
-            logging.warning(f"Could not adjust price at row {index} because it contains no price value")
+            logging.warning(
+                f"Could not adjust price at row {index} because it contains no price value"
+            )
             continue
         elif np.isnan(row[price_col]):
             continue
 
-        __adjusted_quote = row[price_col] * scale_factor if row[type_col] == type_code else row[price_col]
+        __adjusted_quote = (
+            row[price_col] * scale_factor
+            if row[type_col] == type_code
+            else row[price_col]
+        )
 
-        df.at[
-            index, "__adjusted_quote"] = __adjusted_quote
+        df.at[index, "__adjusted_quote"] = __adjusted_quote
     return df
 
 
 def identify_cash_items(
-        dataframe, mappings, remove_cash_items: bool = False
+    dataframe, mappings, remove_cash_items: bool = False
 ) -> (pd.DataFrame, dict):
     """
     This function identifies cash items in a dataframe and either creates a currency_identifier in a new
@@ -803,7 +810,7 @@ def identify_cash_items(
 
 
 def populate_currency_identifier_for_LUSID(
-        row: dict, column, cash_flag_specification: dict
+    row: dict, column, cash_flag_specification: dict
 ) -> str:
     """
     This function takes a cash transaction or holding in the form of a row from a dataframe and returns it's currency
@@ -873,10 +880,10 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
     domain_lookup = load_json_file("config/domain_settings.json")
     file_type = (
         Validator(file_type, "file_type")
-            .make_singular()
-            .make_lower()
-            .check_allowed_value(list(domain_lookup.keys()))
-            .value
+        .make_singular()
+        .make_lower()
+        .check_allowed_value(list(domain_lookup.keys()))
+        .value
     )
 
     # required

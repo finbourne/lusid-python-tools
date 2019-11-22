@@ -9,7 +9,12 @@ import pandas as pd
 import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
-from lusidtools.cocoon.utilities import checkargs, get_delimiter, check_mapping_fields_exist, identify_cash_items
+from lusidtools.cocoon.utilities import (
+    checkargs,
+    get_delimiter,
+    check_mapping_fields_exist,
+    identify_cash_items,
+)
 from lusidtools import logger
 
 
@@ -1252,54 +1257,63 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("only scale bonds", [["name1", "s", 100.0],
-                        ["name2", "s", 100.0],
-                        ["name3", "b", 10000.0]], [100, 100, 100], 0.01),
-            ("missing non-type values", [["name1", "s", 100.0],
-                        ["name2", "s", None],
-                        ["name3", "b", 1000.0]], [100, None, 100.0], 0.1),
-            ("missing type values", [["name1", "s", 100.0],
-                                      ["name2", "s", 100.0],
-                                      ["name3", "b", None]], [100, 100.0, None], 0.1),
+            (
+                "only scale bonds",
+                [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
+                [100, 100, 100],
+                0.01,
+            ),
+            (
+                "missing non-type values",
+                [["name1", "s", 100.0], ["name2", "s", None], ["name3", "b", 1000.0]],
+                [100, None, 100.0],
+                0.1,
+            ),
+            (
+                "missing type values",
+                [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", None]],
+                [100, 100.0, None],
+                0.1,
+            ),
         ]
     )
     def test_scale_quote_of_type(self, _, data, ground_truth, scale_factor):
-        df = pd.DataFrame(data,
-                          columns=["name", "type", "price"])
+        df = pd.DataFrame(data, columns=["name", "type", "price"])
         mapping = {
             "quotes": {
                 "quote_scalar": {
                     "price": "price",
                     "type": "type",
                     "type_code": "b",
-                    "scale_factor": scale_factor
+                    "scale_factor": scale_factor,
                 }
             }
         }
         result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
 
-        [self.assertEqual(ground_truth[index], row["__adjusted_quote"]) for index, row in result.iterrows()]
-
+        [
+            self.assertEqual(ground_truth[index], row["__adjusted_quote"])
+            for index, row in result.iterrows()
+        ]
 
     @parameterized.expand(
         [
             ("invalid_type_column", "invalid_type_name", "type", KeyError),
-            ("invalid_price_column", "invalid_price_name", "price", KeyError)
+            ("invalid_price_column", "invalid_price_name", "price", KeyError),
         ]
     )
     def test_scale_quote_of_type_fail(self, _, col_title, column, error_type):
         df = pd.DataFrame(
-            [["name1", "s", 100.0],
-             ["name2", "s", 100.0],
-             ["name3", "b", 10000.0]],
-            columns=["name", "type", "price"])
+            [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
+            columns=["name", "type", "price"],
+        )
         mapping = {
             "quotes": {
                 "quote_scalar": {
                     "price": "price",
                     "type": "type",
                     "type_code": "b",
-                    "scale_factor": 0.01
+                    "scale_factor": 0.01,
                 }
             }
         }
@@ -1580,5 +1594,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             dataframe, mappings, remove_cash_items
         )
 
-        self.assertEqual(ground_truth, list(dataframe["__currency_identifier_for_LUSID"]))
+        self.assertEqual(
+            ground_truth, list(dataframe["__currency_identifier_for_LUSID"])
+        )
         self.assertEqual(mappings_ground_truth, mappings_test)
