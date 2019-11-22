@@ -9,7 +9,7 @@ import pandas as pd
 import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
-from lusidtools.cocoon.utilities import checkargs
+from lusidtools.cocoon.utilities import checkargs, get_delimiter, check_mapping_fields_exist, identify_cash_items
 from lusidtools import logger
 
 
@@ -1249,3 +1249,336 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_checkargs_with_invalid_argument(self, _, function, kwargs):
         with self.assertRaises(ValueError):
             function(**kwargs)
+
+    @parameterized.expand(
+        [
+            ("only scale bonds", [["name1", "s", 100.0],
+                        ["name2", "s", 100.0],
+                        ["name3", "b", 10000.0]], [100, 100, 100], 0.01),
+            ("missing non-type values", [["name1", "s", 100.0],
+                        ["name2", "s", None],
+                        ["name3", "b", 1000.0]], [100, None, 100.0], 0.1),
+            ("missing type values", [["name1", "s", 100.0],
+                                      ["name2", "s", 100.0],
+                                      ["name3", "b", None]], [100, 100.0, None], 0.1),
+        ]
+    )
+    def test_scale_quote_of_type(self, _, data, ground_truth, scale_factor):
+        df = pd.DataFrame(data,
+                          columns=["name", "type", "price"])
+        mapping = {
+            "quotes": {
+                "quote_scalar": {
+                    "price": "price",
+                    "type": "type",
+                    "type_code": "b",
+                    "scale_factor": scale_factor
+                }
+            }
+        }
+        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
+
+        [self.assertEqual(ground_truth[index], row["__adjusted_quote"]) for index, row in result.iterrows()]
+
+
+    @parameterized.expand(
+        [
+            ("invalid_type_column", "invalid_type_name", "type", KeyError),
+            ("invalid_price_column", "invalid_price_name", "price", KeyError)
+        ]
+    )
+    def test_scale_quote_of_type_fail(self, _, col_title, column, error_type):
+        df = pd.DataFrame(
+            [["name1", "s", 100.0],
+             ["name2", "s", 100.0],
+             ["name3", "b", 10000.0]],
+            columns=["name", "type", "price"])
+        mapping = {
+            "quotes": {
+                "quote_scalar": {
+                    "price": "price",
+                    "type": "type",
+                    "type_code": "b",
+                    "scale_factor": 0.01
+                }
+            }
+        }
+        mapping["quotes"]["quote_scalar"][column] = col_title
+        with self.assertRaises(error_type):
+            cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
+
+    @parameterized.expand(
+        [
+            ("comma", ","),
+            ("vertical bar", "|"),
+            ("percent", "%"),
+            ("ampersand", "&"),
+            ("backslash", "/"),
+            ("tilde", "~"),
+            ("asterisk", "*"),
+            ("hash", "#"),
+            ("tab", "{}".format("\t")),
+        ]
+    )
+    def test_get_delimiter(self, _, delimiter):
+        sample_string = [f"data{i}" + delimiter for i in range(10)]
+        sample_string = "".join(sample_string)
+        delimiter_detected = get_delimiter(sample_string)
+        self.assertEqual(delimiter, delimiter_detected)
+
+    def test_check_mapping_fields_exist(self):
+        required_list = ["field1", "field4", "field6"]
+        search_list = ["field1", "field2", "field3", "field4", "field5", "field6"]
+        self.assertFalse(
+            check_mapping_fields_exist(required_list, search_list, "test_file_type")
+        )
+
+    def test_check_mapping_fields_exist_fail(self):
+        required_list = ["field1", "field4", "field7", "field8"]
+        search_list = ["field1", "field2", "field3", "field4", "field5", "field6"]
+
+        with self.assertRaises(ValueError):
+            check_mapping_fields_exist(required_list, search_list, "test_file_type")
+
+    @parameterized.expand(
+        [
+            (
+                "implicit_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
+            ),
+            (
+                "explicit_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    }
+                },
+                False,
+                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
+            ),
+            (
+                "combined_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "",
+                        },
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_EXP"],
+            ),
+            (
+                "implicit_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                [],
+            ),
+            (
+                "explicit_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    }
+                },
+                False,
+                [],
+            ),
+            (
+                "combined_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                [],
+            ),
+        ]
+    )
+    def test_identify_cash_items_failed(
+        self, _, cash_flag, remove_cash_items, ground_truth
+    ):
+        data = {
+            "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
+            "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
+            "Figi": ["BBG01", None, None, None, "BBG02"],
+        }
+        identifier_mapping = {"Figi": "figi"}
+        ground_truth.append(None)
+        mappings = {"identifier_mapping": identifier_mapping, "cash_flag": cash_flag}
+        mappings_ground_truth = {
+            "identifier_mapping": {"Figi": "figi"},
+            "cash_flag": cash_flag,
+        }
+        if not remove_cash_items:
+            mappings_ground_truth["identifier_mapping"][
+                "Currency"
+            ] = "__currency_identifier_for_LUSID"
+
+        dataframe = pd.DataFrame(data)
+
+        dataframe, mappings_test = identify_cash_items(
+            dataframe, mappings, remove_cash_items
+        )
+
+        with self.assertRaises(AssertionError):
+            if remove_cash_items:
+                self.assertEqual(
+                    1, len(list(dataframe["__currency_identifier_for_LUSID"]))
+                )
+            else:
+                self.assertEqual(
+                    4, len(list(dataframe["__currency_identifier_for_LUSID"]))
+                )
+            self.assertEqual(
+                ground_truth, list(dataframe["__currency_identifier_for_LUSID"])
+            )
+            self.assertEqual(mappings_ground_truth, mappings_test)
+
+    @parameterized.expand(
+        [
+            (
+                "implicit_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
+            ),
+            (
+                "explicit_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    }
+                },
+                False,
+                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
+            ),
+            (
+                "combined_currency_code_inference",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "",
+                        },
+                    },
+                    "implicit": "internal_currency",
+                },
+                False,
+                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_IMP"],
+            ),
+            (
+                "implicit_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    },
+                    "implicit": "internal_currency",
+                },
+                True,
+                [],
+            ),
+            (
+                "explicit_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    }
+                },
+                True,
+                [],
+            ),
+            (
+                "combined_currency_code_inference_and_remove",
+                {
+                    "cash_identifiers": {
+                        "instrument_name": {
+                            "inst1": "GBP_EXP",
+                            "inst2": "GBP_EXP",
+                            "inst3": "USD_EXP",
+                            "inst4": "USD_EXP",
+                        },
+                    },
+                    "implicit": "internal_currency",
+                },
+                True,
+                [],
+            ),
+        ]
+    )
+    def test_identify_cash_items(self, _, cash_flag, remove_cash_items, ground_truth):
+        data = {
+            "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
+            "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
+            "Figi": ["BBG01", None, None, None, "BBG02"],
+        }
+        identifier_mapping = {"Figi": "figi"}
+        ground_truth.append(None)
+        mappings = {"identifier_mapping": identifier_mapping, "cash_flag": cash_flag}
+        mappings_ground_truth = {
+            "identifier_mapping": {"Figi": "figi"},
+            "cash_flag": cash_flag,
+        }
+        if not remove_cash_items:
+            mappings_ground_truth["identifier_mapping"][
+                "Currency"
+            ] = "__currency_identifier_for_LUSID"
+
+        dataframe = pd.DataFrame(data)
+
+        dataframe, mappings_test = identify_cash_items(
+            dataframe, mappings, remove_cash_items
+        )
+
+        self.assertEqual(ground_truth, list(dataframe["__currency_identifier_for_LUSID"]))
+        self.assertEqual(mappings_ground_truth, mappings_test)
