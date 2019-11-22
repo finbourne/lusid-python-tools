@@ -757,8 +757,7 @@ def scale_quote_of_type(df: pd.DataFrame, mapping: dict, file_type: str = "quote
             continue
         elif np.isnan(row[price_col]):
             continue
-            
-            # raise ValueError(f"row {index} in dataframe is missing a value for price")
+
         __adjusted_quote = row[price_col] * scale_factor if row[type_col] == type_code else row[price_col]
 
         df.at[
