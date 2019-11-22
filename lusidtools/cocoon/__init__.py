@@ -15,6 +15,7 @@ from lusidtools.cocoon.utilities import (
     identify_cash_items,
     validate_mapping_file_structure,
     get_delimiter,
+    scale_quote_of_type
 )
 
 
