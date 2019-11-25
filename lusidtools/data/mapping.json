@@ -45,8 +45,9 @@
       "ClientInternal": "client_internal"
     },
     "optional": {
-    },
-    "cash_flag": {
+    }
+  },
+  "cash_flag": {
       "cash_identifiers":   {
         "transaction_type": ["FundsIn", "StartingBalance"],
         "id": ["ab1543673", "kjk99898990z88908"],
@@ -55,5 +56,4 @@
       },
       "implicit": "trade_currency"
     }
-  }
 }

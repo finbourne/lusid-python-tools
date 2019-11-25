@@ -773,22 +773,25 @@ def scale_quote_of_type(
 
 
 def identify_cash_items(
-    dataframe, mappings, remove_cash_items: bool = False
+    dataframe, mappings,  file_type: str, remove_cash_items: bool = False
 ) -> (pd.DataFrame, dict):
     """
     This function identifies cash items in a dataframe and either creates a currency_identifier in a new
-    currency_identifier_for_LUSID column or deletes cash items from the dataframe
-    :param bool remove_cash_items: removes cash items from the dataframe instead of adding
-    :param pd.DataFrame dataframe:
-    :param dict mappings: mapping dictionary, containing "cash_flag": dict
-    :return: pd.DataFrame dataframe: dataframe amended with "currency_identifier_for_LUSID" column
-    :return: dict mapping: mapping amended with new "identifier_mapping" :"currency"
+    currency_identifier_for_LUSID column and amends the mapping dictionary accordingly or deletes cash items from the
+    dataframe.
+
+    :param pd.DataFrame dataframe: dataframe to look for cash items in
+    :param dict mappings: Full mapping structure
+    :param str file_type: type of data in dataframe ["instruments", "quotes", "transactions", "portfolios"]
+    :param bool remove_cash_items: indication to remove cash items from dataframe
+    :return: pd.DataFrame dataframe: dataframe containing
+    :return: dict mappings: mapping with currency identifier mapping included
     """
 
     cash_flag_specification = mappings["cash_flag"]
     dataframe["__currency_identifier_for_LUSID"] = None
     if not remove_cash_items:
-        mappings["identifier_mapping"]["Currency"] = "__currency_identifier_for_LUSID"
+        mappings[file_type]["identifier_mapping"]["Currency"] = "__currency_identifier_for_LUSID"
 
     rm_index = []
     for index, row in dataframe.iterrows():
@@ -871,14 +874,14 @@ def populate_currency_identifier_for_LUSID(
 def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str):
     """
     This function takes a mapping structure and checks that each of the
-    :param dict mapping: mapping containing "required", "optional", and "identifier_mapping" fields to be validated
+    :param dict mapping: mapping containing full mapping structure
     :param columns: columns from source data to search in
     :param file_type:
     :return:
     """
     # file_type
     domain_lookup = load_json_file("config/domain_settings.json")
-    file_type = (
+    file_type_check = (
         Validator(file_type, "file_type")
         .make_singular()
         .make_lower()
@@ -887,31 +890,44 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
     )
 
     # required
-    if "required" in mapping.keys():
-        for field in mapping["required"]:
-            if isinstance(mapping["required"][field], dict):
+    if "required" in mapping[file_type].keys():
+        for field in mapping[file_type]["required"]:
+            if isinstance(mapping[file_type]["required"][field], dict):
                 check_mapping_fields_exist(
-                    mapping["required"][field]["column"].values(), columns, "required"
+                    mapping[file_type]["required"][field]["column"].values(), columns, "required"
                 )
             else:
                 check_mapping_fields_exist(
-                    mapping["required"].values(), columns, "required"
+                    mapping[file_type]["required"].values(), columns, "required"
                 )
     else:
         raise ValueError(f"'required' mapping field not provided in mapping")
 
     # optional
     if "optional" in mapping.keys():
-        check_mapping_fields_exist(mapping["optional"].values(), columns, "optional")
-    else:
-        raise ValueError(f"'required' mapping field not provided in mapping")
+        check_mapping_fields_exist(mapping[file_type]["optional"].values(), columns, "optional")
 
     # identifier_mapping
-    if "identifier_mapping" in mapping.keys():
+    if "identifier_mapping" in mapping[file_type].keys():
         check_mapping_fields_exist(
-            mapping["identifier_mapping"].values(), columns, "identifier_mapping"
+            mapping[file_type]["identifier_mapping"].values(), columns, "identifier_mapping"
         )
     else:
-        raise ValueError(f"'required' mapping field not provided in mapping")
+        raise ValueError(f"'identifier_mapping' mapping field not provided in mapping")
 
-    pass
+
+def strip_whitespace(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    This function removes prefixed or postfixed white space from string values in a Pandas DataFrame
+    :param pd.Dataframe df: Dataframe containing data to remove whitespace from
+    :return: pd.Dataframe stripped_df: DataFrame with whitespace removed
+    """
+
+    stripped_df = pd.DataFrame.copy(df)
+
+    for col in list(df.columns):
+        for index, row in df.iterrows():
+            if type(row[col]) == str:
+                stripped_df.at[index, col] = df.at[index, col].strip()
+
+    return stripped_df

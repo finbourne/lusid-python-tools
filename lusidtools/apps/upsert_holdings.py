@@ -25,7 +25,7 @@ def load_holdings(args):
 
     mappings = load_mapping_file_for_file_type(args["mapping"], file_type)
     if "cash_flag" in mappings.keys():
-        holdings, mappings = identify_cash_items(holdings, mappings)
+        holdings, mappings = identify_cash_items(holdings, mappings, file_type)
 
     validate_mapping_file_structure(mappings, holdings.columns, file_type)
 
@@ -37,13 +37,13 @@ def load_holdings(args):
         api_factory=factory,
         data_frame=holdings,
         scope=args["scope"],
-        identifier_mapping=mappings["identifier_mapping"],
-        mapping_required=mappings["required"],
-        mapping_optional=mappings["optional"],
+        identifier_mapping=mappings[file_type]["identifier_mapping"],
+        mapping_required=mappings[file_type]["required"],
+        mapping_optional=mappings[file_type]["optional"],
         file_type=file_type,
         batch_size=args["batch_size"],
-        property_columns=mappings["property_columns"]
-        if "property_columns" in mappings.keys()
+        property_columns=mappings[file_type]["property_columns"]
+        if "property_columns" in mappings[file_type].keys()
         else [],
     )
 

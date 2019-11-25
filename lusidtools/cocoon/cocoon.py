@@ -1,7 +1,7 @@
 import lusid
 import pandas as pd
 from lusidtools import cocoon
-from lusidtools.cocoon.utilities import checkargs
+from lusidtools.cocoon.utilities import checkargs, strip_whitespace
 from lusidtools.cocoon.validator import Validator
 from lusidtools.cocoon.async_tools import run_in_executor
 import asyncio
@@ -492,17 +492,18 @@ async def construct_batches(
 
 @checkargs
 def load_from_data_frame(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    file_type: str,
-    identifier_mapping: dict = None,
-    property_columns: list = None,
-    properties_scope: str = None,
-    batch_size: int = None,
-    instrument_name_enrichment: bool = False,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        file_type: str,
+        identifier_mapping: dict = None,
+        property_columns: list = None,
+        properties_scope: str = None,
+        batch_size: int = None,
+        remove_white_space: bool = True,
+        instrument_name_enrichment: bool = False,
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -512,14 +513,18 @@ def load_from_data_frame(
     :param Pandas DataFrame data_frame: The DataFrame containing the data
     :param dict{str, str} mapping_required: The dictionary mapping the DataFrame columns to LUSID's required attributes
     :param dict{str, str} mapping_optional: The dictionary mapping the DataFrame columns to LUSID's optional attributes
-    :param str file_type: The type of file e.g. transctions, instruments, holdings, quotes, portfolios
+    :param str file_type: The type of file e.g. transactions, instruments, holdings, quotes, portfolios
     :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the DataFrame
     :param list[str] property_columns: The columns to create properties for
     :param str properties_scope: The scope to add the properties to
     :param int batch_size: The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
-
+    :param bool remove_white_space: remove whitespace either side of each value in the dataframe
+    :param bool instrument_name_enrichment: request additional identifier information from open-figi
     :return: dict responses: The responses from loading the data into LUSID
     """
+    # remove whitespace from dataframe
+    if remove_white_space:
+        data_frame = strip_whitespace(data_frame)
 
     # A mapping between the file type and relevant attributes e.g. domain, top_level_model etc.
     domain_lookup = cocoon.utilities.load_json_file("config/domain_settings.json")

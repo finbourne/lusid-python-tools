@@ -9,7 +9,7 @@ from lusidtools.cocoon import (
     check_mapping_fields_exist,
     parse_args,
     validate_mapping_file_structure,
-)
+    identify_cash_items)
 from lusidtools.logger import LusidLogger
 
 
@@ -22,7 +22,7 @@ def load_mapping_file_for_file_type(mapping_path, file_type) -> dict:
     if not os.path.exists(mapping_path):
         raise OSError(f"mapping file not found at {mapping_path}")
     with open(mapping_path, "r") as read_file:
-        return json.load(read_file)[file_type]
+        return json.load(read_file)
 
 
 def load_instruments(args):
@@ -47,6 +47,8 @@ def load_instruments(args):
         )
 
     validate_mapping_file_structure(mappings, instruments.columns, file_type)
+    if "cash_flag" in mappings.keys():
+        instruments, mappings = identify_cash_items(instruments, mappings, file_type, True)
 
     if args["dryrun"]:
         logging.info("--dryrun specified as True, exiting before upsert call is made")
@@ -56,13 +58,13 @@ def load_instruments(args):
         api_factory=factory,
         data_frame=instruments,
         scope=args["scope"],
-        mapping_required=mappings["required"],
-        mapping_optional=mappings["optional"],
+        mapping_required=mappings[file_type]["required"],
+        mapping_optional=mappings[file_type]["optional"],
         file_type=file_type,
-        identifier_mapping=mappings["identifier_mapping"],
+        identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
-        property_columns=mappings["property_columns"]
-        if "property_columns" in mappings.keys()
+        property_columns=mappings[file_type]["property_columns"]
+        if "property_columns" in mappings[file_type].keys()
         else [],
     )
 
