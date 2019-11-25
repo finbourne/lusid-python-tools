@@ -1,3 +1,4 @@
+import copy
 import json
 import unittest
 from datetime import datetime
@@ -9,12 +10,8 @@ import pandas as pd
 import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
-from lusidtools.cocoon.utilities import (
-    checkargs,
-    get_delimiter,
-    check_mapping_fields_exist,
-    identify_cash_items,
-)
+from lusidtools.cocoon.utilities import checkargs, get_delimiter, check_mapping_fields_exist, identify_cash_items, \
+    strip_whitespace
 from lusidtools import logger
 
 
@@ -1450,22 +1447,26 @@ class CocoonUtilitiesTests(unittest.TestCase):
             "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
             "Figi": ["BBG01", None, None, None, "BBG02"],
         }
+        file_type = "instruments"
         identifier_mapping = {"Figi": "figi"}
         ground_truth.append(None)
-        mappings = {"identifier_mapping": identifier_mapping, "cash_flag": cash_flag}
-        mappings_ground_truth = {
-            "identifier_mapping": {"Figi": "figi"},
-            "cash_flag": cash_flag,
+        mappings = {
+            file_type: {
+                "identifier_mapping": identifier_mapping
+            },
+            "cash_flag": cash_flag
         }
+        mappings_ground_truth = copy.deepcopy(mappings)
+
         if not remove_cash_items:
-            mappings_ground_truth["identifier_mapping"][
+            mappings_ground_truth[file_type]["identifier_mapping"][
                 "Currency"
             ] = "__currency_identifier_for_LUSID"
 
         dataframe = pd.DataFrame(data)
 
         dataframe, mappings_test = identify_cash_items(
-            dataframe, mappings, remove_cash_items
+            dataframe, mappings, file_type, remove_cash_items
         )
 
         with self.assertRaises(AssertionError):
@@ -1576,25 +1577,48 @@ class CocoonUtilitiesTests(unittest.TestCase):
             "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
             "Figi": ["BBG01", None, None, None, "BBG02"],
         }
+        file_type = "instruments"
         identifier_mapping = {"Figi": "figi"}
         ground_truth.append(None)
-        mappings = {"identifier_mapping": identifier_mapping, "cash_flag": cash_flag}
-        mappings_ground_truth = {
-            "identifier_mapping": {"Figi": "figi"},
-            "cash_flag": cash_flag,
+        mappings = {
+            file_type: {
+                "identifier_mapping": identifier_mapping,
+            },
+            "cash_flag": cash_flag
         }
+        mappings_ground_truth = copy.deepcopy(mappings)
+
         if not remove_cash_items:
-            mappings_ground_truth["identifier_mapping"][
+            mappings_ground_truth[file_type]["identifier_mapping"][
                 "Currency"
             ] = "__currency_identifier_for_LUSID"
 
         dataframe = pd.DataFrame(data)
 
         dataframe, mappings_test = identify_cash_items(
-            dataframe, mappings, remove_cash_items
+            dataframe, mappings, file_type, remove_cash_items
         )
 
         self.assertEqual(
             ground_truth, list(dataframe["__currency_identifier_for_LUSID"])
         )
         self.assertEqual(mappings_ground_truth, mappings_test)
+
+    @parameterized.expand([
+        ("type_string", "GBP", "USD"),
+        ("type_float", float(10.10), float(20.20)),
+        ("type_bool", True, False),
+        ("type int", int(10), int(12)),
+        ("type_date", datetime.now(), datetime(2017, 6, 22)),
+
+    ])
+    def test_strip_whitespace(self, _, val_1, val_2):
+        df_true = pd.DataFrame([["GBP", val_1, "GBP  USD"],
+                                ["GBP", "GBP", "GBP"],
+                                ["GBP", val_2, "GBP"]], columns=["a", "b", "c"])
+        df_test = pd.DataFrame([["GBP   ", val_1, "GBP  USD"],
+                                ["   GBP  ", "   GBP", "GBP"],
+                                ["GBP   ", val_2, "GBP   "]], columns=["a", "b", "c"])
+        df_test = strip_whitespace(df_test)
+
+        self.assertTrue(df_true.equals(df_test))
