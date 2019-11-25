@@ -492,18 +492,18 @@ async def construct_batches(
 
 @checkargs
 def load_from_data_frame(
-        api_factory: lusid.utilities.ApiClientFactory,
-        scope: str,
-        data_frame: pd.DataFrame,
-        mapping_required: dict,
-        mapping_optional: dict,
-        file_type: str,
-        identifier_mapping: dict = None,
-        property_columns: list = None,
-        properties_scope: str = None,
-        batch_size: int = None,
-        remove_white_space: bool = True,
-        instrument_name_enrichment: bool = False,
+    api_factory: lusid.utilities.ApiClientFactory,
+    scope: str,
+    data_frame: pd.DataFrame,
+    mapping_required: dict,
+    mapping_optional: dict,
+    file_type: str,
+    identifier_mapping: dict = None,
+    property_columns: list = None,
+    properties_scope: str = None,
+    batch_size: int = None,
+    remove_white_space: bool = True,
+    instrument_name_enrichment: bool = False,
 ):
     """
     Handles loading data from a DataFrame into LUSID

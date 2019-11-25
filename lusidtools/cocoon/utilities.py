@@ -773,7 +773,7 @@ def scale_quote_of_type(
 
 
 def identify_cash_items(
-    dataframe, mappings,  file_type: str, remove_cash_items: bool = False
+    dataframe, mappings, file_type: str, remove_cash_items: bool = False
 ) -> (pd.DataFrame, dict):
     """
     This function identifies cash items in a dataframe and either creates a currency_identifier in a new
@@ -791,7 +791,9 @@ def identify_cash_items(
     cash_flag_specification = mappings["cash_flag"]
     dataframe["__currency_identifier_for_LUSID"] = None
     if not remove_cash_items:
-        mappings[file_type]["identifier_mapping"]["Currency"] = "__currency_identifier_for_LUSID"
+        mappings[file_type]["identifier_mapping"][
+            "Currency"
+        ] = "__currency_identifier_for_LUSID"
 
     rm_index = []
     for index, row in dataframe.iterrows():
@@ -894,7 +896,9 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
         for field in mapping[file_type]["required"]:
             if isinstance(mapping[file_type]["required"][field], dict):
                 check_mapping_fields_exist(
-                    mapping[file_type]["required"][field]["column"].values(), columns, "required"
+                    mapping[file_type]["required"][field]["column"].values(),
+                    columns,
+                    "required",
                 )
             else:
                 check_mapping_fields_exist(
@@ -905,12 +909,16 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
 
     # optional
     if "optional" in mapping.keys():
-        check_mapping_fields_exist(mapping[file_type]["optional"].values(), columns, "optional")
+        check_mapping_fields_exist(
+            mapping[file_type]["optional"].values(), columns, "optional"
+        )
 
     # identifier_mapping
     if "identifier_mapping" in mapping[file_type].keys():
         check_mapping_fields_exist(
-            mapping[file_type]["identifier_mapping"].values(), columns, "identifier_mapping"
+            mapping[file_type]["identifier_mapping"].values(),
+            columns,
+            "identifier_mapping",
         )
     else:
         raise ValueError(f"'identifier_mapping' mapping field not provided in mapping")
