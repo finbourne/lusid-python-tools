@@ -10,8 +10,13 @@ import pandas as pd
 import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
-from lusidtools.cocoon.utilities import checkargs, get_delimiter, check_mapping_fields_exist, identify_cash_items, \
-    strip_whitespace
+from lusidtools.cocoon.utilities import (
+    checkargs,
+    get_delimiter,
+    check_mapping_fields_exist,
+    identify_cash_items,
+    strip_whitespace,
+)
 from lusidtools import logger
 
 
@@ -1451,10 +1456,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
         identifier_mapping = {"Figi": "figi"}
         ground_truth.append(None)
         mappings = {
-            file_type: {
-                "identifier_mapping": identifier_mapping
-            },
-            "cash_flag": cash_flag
+            file_type: {"identifier_mapping": identifier_mapping},
+            "cash_flag": cash_flag,
         }
         mappings_ground_truth = copy.deepcopy(mappings)
 
@@ -1581,10 +1584,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
         identifier_mapping = {"Figi": "figi"}
         ground_truth.append(None)
         mappings = {
-            file_type: {
-                "identifier_mapping": identifier_mapping,
-            },
-            "cash_flag": cash_flag
+            file_type: {"identifier_mapping": identifier_mapping,},
+            "cash_flag": cash_flag,
         }
         mappings_ground_truth = copy.deepcopy(mappings)
 
@@ -1604,21 +1605,28 @@ class CocoonUtilitiesTests(unittest.TestCase):
         )
         self.assertEqual(mappings_ground_truth, mappings_test)
 
-    @parameterized.expand([
-        ("type_string", "GBP", "USD"),
-        ("type_float", float(10.10), float(20.20)),
-        ("type_bool", True, False),
-        ("type int", int(10), int(12)),
-        ("type_date", datetime.now(), datetime(2017, 6, 22)),
-
-    ])
+    @parameterized.expand(
+        [
+            ("type_string", "GBP", "USD"),
+            ("type_float", float(10.10), float(20.20)),
+            ("type_bool", True, False),
+            ("type int", int(10), int(12)),
+            ("type_date", datetime.now(), datetime(2017, 6, 22)),
+        ]
+    )
     def test_strip_whitespace(self, _, val_1, val_2):
-        df_true = pd.DataFrame([["GBP", val_1, "GBP  USD"],
-                                ["GBP", "GBP", "GBP"],
-                                ["GBP", val_2, "GBP"]], columns=["a", "b", "c"])
-        df_test = pd.DataFrame([["GBP   ", val_1, "GBP  USD"],
-                                ["   GBP  ", "   GBP", "GBP"],
-                                ["GBP   ", val_2, "GBP   "]], columns=["a", "b", "c"])
+        df_true = pd.DataFrame(
+            [["GBP", val_1, "GBP  USD"], ["GBP", "GBP", "GBP"], ["GBP", val_2, "GBP"]],
+            columns=["a", "b", "c"],
+        )
+        df_test = pd.DataFrame(
+            [
+                ["GBP   ", val_1, "GBP  USD"],
+                ["   GBP  ", "   GBP", "GBP"],
+                ["GBP   ", val_2, "GBP   "],
+            ],
+            columns=["a", "b", "c"],
+        )
         df_test = strip_whitespace(df_test)
 
         self.assertTrue(df_true.equals(df_test))

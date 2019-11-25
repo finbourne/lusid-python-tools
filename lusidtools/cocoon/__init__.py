@@ -16,7 +16,7 @@ from lusidtools.cocoon.utilities import (
     validate_mapping_file_structure,
     get_delimiter,
     scale_quote_of_type,
-    strip_whitespace
+    strip_whitespace,
 )
 
 
