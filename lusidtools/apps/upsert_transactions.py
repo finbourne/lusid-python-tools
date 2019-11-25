@@ -38,13 +38,13 @@ def load_transactions(args):
         api_factory=factory,
         data_frame=transactions,
         scope=args["scope"],
-        identifier_mapping=mappings["identifier_mapping"],
-        mapping_required=mappings["required"],
-        mapping_optional=mappings["optional"],
+        identifier_mapping=mappings[file_type]["identifier_mapping"],
+        mapping_required=mappings[file_type]["required"],
+        mapping_optional=mappings[file_type]["optional"],
         file_type=file_type,
         batch_size=args["batch_size"],
-        property_columns=mappings["property_columns"]
-        if "property_columns" in mappings.keys()
+        property_columns=mappings[file_type]["property_columns"]
+        if "property_columns" in mappings[file_type].keys()
         else [],
     )
 
