@@ -924,18 +924,21 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
         raise ValueError(f"'identifier_mapping' mapping field not provided in mapping")
 
 
-def strip_whitespace(df: pd.DataFrame) -> pd.DataFrame:
+def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
     """
     This function removes prefixed or postfixed white space from string values in a Pandas DataFrame
+
     :param pd.Dataframe df: Dataframe containing data to remove whitespace from
+    :param list[dict{dict}] columns: list of nested dictionaries of any depth
     :return: pd.Dataframe stripped_df: DataFrame with whitespace removed
     """
-
     stripped_df = pd.DataFrame.copy(df)
 
-    for col in list(df.columns):
-        for index, row in df.iterrows():
-            if type(row[col]) == str:
-                stripped_df.at[index, col] = df.at[index, col].strip()
+    for col in columns:
+        stripped_df[col] = stripped_df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
 
     return stripped_df
+
+
+
+
