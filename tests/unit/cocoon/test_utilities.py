@@ -1631,4 +1631,3 @@ class CocoonUtilitiesTests(unittest.TestCase):
         df_test = strip_whitespace(df_test, cols)
 
         self.assertTrue(df_true.equals(df_test))
-
