@@ -49,5 +49,15 @@
       "full_key_format": false,
       "required_call_attributes": ["scope"],
       "unique_attributes": []
+  },
+  "instrument_property": {
+      "domain": "Instrument",
+      "batch_allowed": true,
+      "default_batch_size": 2000,
+      "top_level_model": "UpsertInstrumentPropertyRequest",
+      "portfolio_specific": false,
+      "full_key_format": false,
+      "required_call_attributes": [],
+      "unique_attributes": []
   }
 }
