@@ -783,19 +783,27 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    def test_load_instrument_properties(
-        self,
-    ):
-        data_frame = pd.DataFrame({
-            "instrument_name": ["BP_LondonStockEx_BP", "Glencore_LondonStockEx_GLEN", "TESCO_LondonStockEx_TSCO"],
-            "figi": ["BBG000C05BD1", "BBG001MM1KV4", "BBG000BF46Y8"],
-            "isin": ["BBG000C05BD1", "JE00B4T3BW64", "GB0008847096"],
-            "client_internal": ["imd_43535553", "imd_34534555", "imd_34634673"]
-        })
+    def test_load_instrument_properties(self,):
+        data_frame = pd.DataFrame(
+            {
+                "instrument_name": [
+                    "BP_LondonStockEx_BP",
+                    "Glencore_LondonStockEx_GLEN",
+                    "TESCO_LondonStockEx_TSCO",
+                ],
+                "figi": ["BBG000C05BD1", "BBG001MM1KV4", "BBG000BF46Y8"],
+                "isin": ["BBG000C05BD1", "JE00B4T3BW64", "GB0008847096"],
+                "client_internal": ["imd_43535553", "imd_34534555", "imd_34634673"],
+            }
+        )
 
         scope = "TestScope1"
         mapping_required = {"name": "instrument_name"}
-        identifier_mapping = {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"}
+        identifier_mapping = {
+            "Figi": "figi",
+            "Isin": "isin",
+            "ClientInternal": "client_internal",
+        }
 
         # set up initial instruments
         responses = cocoon.cocoon.load_from_data_frame(
@@ -805,20 +813,19 @@ class CocoonTestsInstruments(unittest.TestCase):
             mapping_required=mapping_required,
             mapping_optional={},
             file_type="instruments",
-            identifier_mapping=identifier_mapping
+            identifier_mapping=identifier_mapping,
         )
 
         self.assertGreater(len(responses["instruments"]["success"]), 0)
 
-        properties_df = pd.DataFrame({
-            "isin": ["BBG000C05BD1", "GG00B4L84979", "GB0031509804"],
-            "category": ["Oil & Gas", "Mining", "Retail"]
-        })
+        properties_df = pd.DataFrame(
+            {
+                "isin": ["BBG000C05BD1", "GG00B4L84979", "GB0031509804"],
+                "category": ["Oil & Gas", "Mining", "Retail"],
+            }
+        )
 
-        properties_required_mapping = {
-            "identifier": "isin",
-            "identifier_type": "$Isin"
-        }
+        properties_required_mapping = {"identifier": "isin", "identifier_type": "$Isin"}
 
         result = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
@@ -829,25 +836,27 @@ class CocoonTestsInstruments(unittest.TestCase):
             file_type="instrument_property",
             properties_scope=scope,
             property_columns=["category"],
-            batch_size=1
+            batch_size=1,
         )
 
-        errors = [error for batch in result["instrument_propertys"]["errors"] for error in batch]
-        successes = [success for batch in result["instrument_propertys"]["success"] for success in batch]
+        errors = [
+            error
+            for batch in result["instrument_propertys"]["errors"]
+            for error in batch
+        ]
+        successes = [
+            success
+            for batch in result["instrument_propertys"]["success"]
+            for success in batch
+        ]
 
         self.assertEqual(len(errors), 0)
         self.assertGreater(len(successes), 0)
 
     def test_load_instrument_properties_with_missing_instruments(self):
-        properties_df = pd.DataFrame({
-            "isin": ["blah"],
-            "category": ["Oil & Gas"]
-        })
+        properties_df = pd.DataFrame({"isin": ["blah"], "category": ["Oil & Gas"]})
 
-        properties_required_mapping = {
-            "identifier": "isin",
-            "identifier_type": "$Isin"
-        }
+        properties_required_mapping = {"identifier": "isin", "identifier_type": "$Isin"}
 
         scope = "TestScope1"
 
@@ -859,11 +868,19 @@ class CocoonTestsInstruments(unittest.TestCase):
             mapping_optional={},
             file_type="instrument_property",
             properties_scope=scope,
-            property_columns=["category"]
+            property_columns=["category"],
         )
 
-        errors = [error for batch in result["instrument_propertys"]["errors"] for error in batch]
-        successes = [success for batch in result["instrument_propertys"]["success"] for success in batch]
+        errors = [
+            error
+            for batch in result["instrument_propertys"]["errors"]
+            for error in batch
+        ]
+        successes = [
+            success
+            for batch in result["instrument_propertys"]["success"]
+            for success in batch
+        ]
 
         self.assertEqual(len(errors), 0)
         self.assertEqual(len(successes), 0)
