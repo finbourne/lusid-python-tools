@@ -935,10 +935,8 @@ def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
     stripped_df = pd.DataFrame.copy(df)
 
     for col in columns:
-        stripped_df[col] = stripped_df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
+        stripped_df[col] = stripped_df[col].apply(
+            lambda x: x.strip() if isinstance(x, str) else x
+        )
 
     return stripped_df
-
-
-
-
