@@ -6,8 +6,6 @@ from lusidtools.cocoon.validator import Validator
 from lusidtools.cocoon.async_tools import run_in_executor
 import asyncio
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
-import logging
-
 
 class BatchLoader:
     """
@@ -18,7 +16,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_batch(
-        api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
         Upserts a batch of instruments to LUSID
@@ -39,7 +37,7 @@ class BatchLoader:
 
         @checkargs
         def get_alphabetically_first_identifier_key(
-            instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
+                instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
             """
             Gets the alphabetically first occurring unique identifier on an instrument and use it as the correlation
@@ -71,7 +69,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_quote_batch(
-        api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
     ) -> lusid.models.UpsertQuotesResponse:
         """
         Upserts a batch of quotes into LUSID
@@ -105,7 +103,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transaction_batch(
-        api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID
@@ -137,7 +135,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_holding_batch(
-        api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
         """
         Upserts a batch of holdings into LUSID
@@ -174,7 +172,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_batch(
-        api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
     ) -> lusid.models.Portfolio:
         """
         Upserts a batch of portfolios to LUSID
@@ -211,16 +209,16 @@ class BatchLoader:
 
 
 async def load_data(
-    api_factory: lusid.utilities.ApiClientFactory,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    property_columns: list,
-    properties_scope: str,
-    instrument_identifier_mapping: dict,
-    file_type: str,
-    domain_lookup: dict,
-    **kwargs,
+        api_factory: lusid.utilities.ApiClientFactory,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        property_columns: list,
+        properties_scope: str,
+        instrument_identifier_mapping: dict,
+        file_type: str,
+        domain_lookup: dict,
+        **kwargs,
 ):
     """
     This function populates the required models from a DataFrame and loads the data into LUSID
@@ -276,7 +274,7 @@ async def load_data(
         # Create identifiers for this row if applicable
         # If no instrument identifier mapping is provided return None as no identifiers are required
         if instrument_identifier_mapping is None or not bool(
-            instrument_identifier_mapping
+                instrument_identifier_mapping
         ):
             identifiers = None
         else:
@@ -311,19 +309,18 @@ async def load_data(
 
 
 async def construct_batches(
-    api_factory: lusid.utilities.ApiClientFactory,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    property_columns: list,
-    properties_scope: str,
-    instrument_identifier_mapping: dict,
-    batch_size: int,
-    file_type: str,
-    domain_lookup: dict,
-    **kwargs,
+        api_factory: lusid.utilities.ApiClientFactory,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        property_columns: list,
+        properties_scope: str,
+        instrument_identifier_mapping: dict,
+        batch_size: int,
+        file_type: str,
+        domain_lookup: dict,
+        **kwargs,
 ):
-
     """
     This constructs the batches and asynchronously sends them to be loaded into LUSID
 
@@ -358,7 +355,7 @@ async def construct_batches(
 
         # Everything can be sent up asynchronously, prepare batches based on batch size alone
         async_batches = [
-            data_frame.iloc[i : i + batch_size]
+            data_frame.iloc[i: i + batch_size]
             for i in range(0, len(data_frame), batch_size)
         ]
 
@@ -384,7 +381,7 @@ async def construct_batches(
             effective_at_groups = [
                 data_frame.loc[
                     data_frame[mapping_required["effective_at"]] == effective_at
-                ]
+                    ]
                 for effective_at in unique_effective_dates
             ]
 
@@ -395,7 +392,7 @@ async def construct_batches(
                     "async_batches": [
                         effective_at_group.loc[
                             data_frame[mapping_required["code"]] == code
-                        ]
+                            ]
                         for code in list(
                             effective_at_group[mapping_required["code"]].unique()
                         )
@@ -404,13 +401,13 @@ async def construct_batches(
                         effective_at_group[mapping_required["code"]].unique()
                     ),
                     "effective_at": [
-                        list(
-                            effective_at_group[
-                                mapping_required["effective_at"]
-                            ].unique()
-                        )[0]
-                    ]
-                    * len(list(effective_at_group[mapping_required["code"]].unique())),
+                                        list(
+                                            effective_at_group[
+                                                mapping_required["effective_at"]
+                                            ].unique()
+                                        )[0]
+                                    ]
+                                    * len(list(effective_at_group[mapping_required["code"]].unique())),
                 }
                 for effective_at_group in effective_at_groups
             ]
@@ -429,7 +426,7 @@ async def construct_batches(
             sync_batches = [
                 {
                     "async_batches": [
-                        async_batch.iloc[i : i + batch_size]
+                        async_batch.iloc[i: i + batch_size]
                         for async_batch in async_batches
                     ],
                     "codes": [str(code) for code in unique_portfolios],
@@ -479,7 +476,7 @@ async def construct_batches(
     # Raise any internal exceptions rather than propagating them to the response
     for response in responses_flattened:
         if isinstance(response, Exception) and not isinstance(
-            response, lusid.exceptions.ApiException
+                response, lusid.exceptions.ApiException
         ):
             raise response
 
@@ -522,9 +519,6 @@ def load_from_data_frame(
     :param bool instrument_name_enrichment: request additional identifier information from open-figi
     :return: dict responses: The responses from loading the data into LUSID
     """
-    # remove whitespace from dataframe
-    if remove_white_space:
-        data_frame = strip_whitespace(data_frame)
 
     # A mapping between the file type and relevant attributes e.g. domain, top_level_model etc.
     domain_lookup = cocoon.utilities.load_json_file("config/domain_settings.json")
@@ -532,53 +526,53 @@ def load_from_data_frame(
     # Convert the file type to lower case & singular as well as checking it is of the allowed value
     file_type = (
         Validator(file_type, "file_type")
-        .make_singular()
-        .make_lower()
-        .check_allowed_value(list(domain_lookup.keys()))
-        .value
+            .make_singular()
+            .make_lower()
+            .check_allowed_value(list(domain_lookup.keys()))
+            .value
     )
 
     # Set defaults aligned with the data type of each argument, this allows for users to provide None
     identifier_mapping = (
         Validator(identifier_mapping, "identifier_mapping")
-        .set_default_value_if_none(default={})
-        .discard_dict_keys_none_value()
-        .value
+            .set_default_value_if_none(default={})
+            .discard_dict_keys_none_value()
+            .value
     )
 
     properties_scope = (
         Validator(properties_scope, "properties_scope")
-        .set_default_value_if_none(default=scope)
-        .value
+            .set_default_value_if_none(default=scope)
+            .value
     )
 
     property_columns = (
         Validator(property_columns, "property_columns")
-        .set_default_value_if_none(default=[])
-        .value
+            .set_default_value_if_none(default=[])
+            .value
     )
 
     batch_size = (
         Validator(batch_size, "batch_size")
-        .set_default_value_if_none(domain_lookup[file_type]["default_batch_size"])
-        .override_value(
+            .set_default_value_if_none(domain_lookup[file_type]["default_batch_size"])
+            .override_value(
             not domain_lookup[file_type]["batch_allowed"],
             domain_lookup[file_type]["default_batch_size"],
         )
-        .value
+            .value
     )
 
     # Discard mappings where the provided value is None
     mapping_required = (
         Validator(mapping_required, "mapping_required")
-        .discard_dict_keys_none_value()
-        .value
+            .discard_dict_keys_none_value()
+            .value
     )
 
     mapping_optional = (
         Validator(mapping_optional, "mapping_optional")
-        .discard_dict_keys_none_value()
-        .value
+            .discard_dict_keys_none_value()
+            .value
     )
 
     required_call_attributes = domain_lookup[file_type]["required_call_attributes"]
@@ -591,7 +585,6 @@ def load_from_data_frame(
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
     if instrument_name_enrichment:
-
         loop = cocoon.async_tools.start_event_loop_new_thread()
 
         data_frame, mapping_required = asyncio.run_coroutine_threadsafe(
@@ -667,6 +660,14 @@ def load_from_data_frame(
 
     # Converts higher level data types such as dictionaries and lists to strings
     data_frame = data_frame.applymap(cocoon.utilities.convert_cell_value_to_string)
+
+    if remove_white_space:
+        column_list=[property_columns]
+        for col in [mapping_optional, mapping_required, identifier_mapping]:
+            column_list.append(col.values())
+
+        column_list = list(set([item for sublist in column_list for item in sublist]))
+        data_frame = strip_whitespace(data_frame, column_list)
 
     # Check for and create missing property defintions
     data_frame = cocoon.properties.create_missing_property_definitions_from_file(
