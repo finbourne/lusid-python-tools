@@ -623,7 +623,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(expected_exception):
             cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
 
-
     @parameterized.expand(
         [
             [
