@@ -623,43 +623,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(expected_exception):
             cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
 
-    @parameterized.expand(
-        [
-            ["05/10/19", datetime(year=2019, month=10, day=5, tzinfo=pytz.UTC)],
-            [
-                datetime(year=2019, month=8, day=5, tzinfo=None),
-                datetime(year=2019, month=8, day=5, tzinfo=pytz.UTC),
-            ],
-            [
-                pytz.timezone("America/New_York").localize(
-                    datetime(year=2019, month=8, day=5, hour=10, minute=30)
-                ),
-                datetime(
-                    year=2019, month=8, day=5, hour=14, minute=30, tzinfo=pytz.UTC
-                ),
-            ],
-        ]
-    )
-    def test_convert_datetime_utc(
-        self, original_date_value, expected_date_value
-    ) -> None:
-        """
-        This test ensures that the datetime converter works as expected
-
-        :param any original_date_value: The input date value which could be in any format
-        :param datetime expected_date_value: The expected timezone aware datetime in the UTC timezone
-        :return: None
-        """
-
-        correct_date_value = cocoon.utilities.convert_datetime_utc(
-            datetime_value=original_date_value
-        )
-
-        self.assertEqual(
-            first=correct_date_value,
-            second=expected_date_value,
-            msg=f"The output datetime {correct_date_value} does not match the expected date {expected_date_value}",
-        )
 
     @parameterized.expand(
         [
