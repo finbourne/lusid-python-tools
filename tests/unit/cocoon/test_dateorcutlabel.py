@@ -59,8 +59,6 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-09-01T09:31:22.664000Z",
                 "2019-09-01T09:31:22.664000Z",
             ],
-
-
         ]
     )
     def test_dateorcutlabel(self, test_name, datetime_value, expected_outcome):
