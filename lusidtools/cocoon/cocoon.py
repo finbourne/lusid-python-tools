@@ -1,11 +1,13 @@
+import asyncio
+
 import lusid
 import pandas as pd
+
 from lusidtools import cocoon
+from lusidtools.cocoon.async_tools import run_in_executor
+from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
 from lusidtools.cocoon.utilities import checkargs, strip_whitespace
 from lusidtools.cocoon.validator import Validator
-from lusidtools.cocoon.async_tools import run_in_executor
-import asyncio
-from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
 
 
 class BatchLoader:
@@ -207,6 +209,69 @@ class BatchLoader:
                     scope=kwargs["scope"], transaction_portfolio=portfolio_batch[0]
                 )
             # Add in here upsert portfolio properties if it does exist
+
+    @staticmethod
+    @run_in_executor
+    def load_instrument_property_batch(
+        api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
+    ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
+
+        """
+        Add properties to the set instruments
+
+        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
+        :param list[lusid.models.UpsertInstrumentPropertyRequest] property_batch: Properties to add,
+         identifiers will be resolved to a LusidInstrumentId, where an identifier resolves to more
+         than one LusidInstrumentId the property will be added to all matching instruments
+        :return:
+        """
+
+        results = []
+        for request in property_batch:
+            search_request = lusid.models.InstrumentSearchProperty(
+                key=f"instrument/default/{request.identifier_type}",
+                value=request.identifier,
+            )
+
+            # find the matching instruments
+            mastered_instruments = api_factory.build(
+                lusid.api.SearchApi
+            ).instruments_search(symbols=[search_request], mastered_only=True)
+
+            # flat map the results to a list of luids
+            luids = [
+                luid
+                for luids in [
+                    list(
+                        map(
+                            lambda m: m.identifiers["LusidInstrumentId"].value,
+                            mastered.mastered_instruments,
+                        )
+                    )
+                    for mastered in [matches for matches in mastered_instruments]
+                ]
+                for luid in luids
+            ]
+
+            if len(luids) == 0:
+                continue
+
+            properties_request = [
+                lusid.models.UpsertInstrumentPropertyRequest(
+                    identifier_type="LusidInstrumentId",
+                    identifier=luid,
+                    properties=request.properties,
+                )
+                for luid in luids
+            ]
+
+            results.append(
+                api_factory.build(
+                    lusid.api.InstrumentsApi
+                ).upsert_instruments_properties(properties_request)
+            )
+
+        return results
 
 
 async def load_data(
