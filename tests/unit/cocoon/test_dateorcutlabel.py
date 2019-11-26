@@ -45,6 +45,11 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-04-11T00:00:00+00:00",
             ],
             [
+                "ISO format with no timezone info and has milliseconds specified",
+                "2019-11-20T00:00:00.000000000",
+                "2019-11-20T00:00:00.000000000+00:00",
+            ],
+            [
                 "Already in ISO format with mircoseconds",
                 "2019-09-01T09:31:22.664000+00:00",
                 "2019-09-01T09:31:22.664000+00:00",
@@ -54,6 +59,8 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-09-01T09:31:22.664000Z",
                 "2019-09-01T09:31:22.664000Z",
             ],
+
+
         ]
     )
     def test_dateorcutlabel(self, test_name, datetime_value, expected_outcome):
@@ -61,8 +68,5 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
         if test_name in ignore:
             self.skipTest("Test not implemented ")
         date_or_cut_label = DateOrCutLabel(datetime_value)
-
-        print(date_or_cut_label)
-        print(expected_outcome)
 
         self.assertEqual(first=date_or_cut_label, second=expected_outcome)
