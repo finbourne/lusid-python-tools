@@ -1,6 +1,8 @@
 language: python
 services:
 - docker
+install:
+- pip install twine wheel pyOpenSSL
 script:
 - |
 
