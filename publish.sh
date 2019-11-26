@@ -20,7 +20,7 @@ pypi_password=$2
 api_version=$(cat __version__.py | grep __version__ |  awk '{split($0, a, "="); print a[2]}' | tr -d ' "')
 
 # packages to install
-pip install twine wheel pyOpenSSL
+pip install twine wheel pyOpenSSL --user
 python setup.py sdist bdist_wheel
 
 # upload
