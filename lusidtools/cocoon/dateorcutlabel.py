@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 from dateutil import parser
 from datetime import datetime
 import pytz
@@ -14,7 +16,8 @@ class DateOrCutLabel(UserString):
             :param any datetime_value:
             :return: datetime datetime_value: The converted timezone aware datetime in the UTC timezone
             """
-
+            if isinstance(datetime_value, pd.Timestamp):
+                datetime_value = pd.to_datetime(datetime_value, utc=True, unit="us").isoformat()
             # If the datetime is a string try and parse it
             if isinstance(datetime_value, str):
                 # Cut label regular expression, no modification required
@@ -58,6 +61,8 @@ class DateOrCutLabel(UserString):
                 else:
                     return datetime_value.astimezone(pytz.UTC).isoformat()
 
+            if isinstance(datetime_value, np.ndarray):
+                datetime_value = str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us")[0])
             return datetime_value
 
         self.data = convert_datetime_utc(datetime_value)
