@@ -1,4 +1,8 @@
 import unittest
+
+import numpy as np
+import pandas as pd
+
 from lusidtools import logger
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
 from parameterized import parameterized
@@ -58,6 +62,15 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "Already in ISO format with mircoseconds Z timezone",
                 "2019-09-01T09:31:22.664000Z",
                 "2019-09-01T09:31:22.664000Z",
+            ],
+            [
+                "numpy datetime with nanoseconds",
+                np.array(['2019-09-01T09:31:22.664'], dtype='datetime64[ns]'),
+                "2019-09-01T09:31:22.664000Z",
+            ],            [
+                "pandas datetime with nanoseconds",
+                pd.Timestamp('2019-09-01T09:31:22.664'),
+                "2019-09-01T09:31:22.664000+00:00",
             ],
         ]
     )
