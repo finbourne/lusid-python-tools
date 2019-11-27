@@ -176,7 +176,7 @@ def set_attributes(
         if not isinstance(mapping[key], dict):
             if mapping[key] is not None and not pd.isna(row[mapping[key]]):
                 # Need an explicit datetime or cutlabel type in place of this
-                if "date" in key or "created" in key:
+                if "date" in key or "created" in key or "effective_at" in key:
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
