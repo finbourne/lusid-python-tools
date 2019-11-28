@@ -60,26 +60,24 @@ class CocoonTestsQuotes(unittest.TestCase):
                 None,
             ),
             (
-                    "Load dates as pandas datetime nanoseconds",
-                    "TestQuotes007",
-                    "data/multiplesystems-prices.csv",
-                    {
-                        "quote_id.effective_at": {
-                            "default": pd.Timestamp('2019-10-28')
-                        },
-                        "quote_id.quote_series_id.provider": {"default": "client"},
-                        "quote_id.quote_series_id.instrument_id": "figi",
-                        "quote_id.quote_series_id.instrument_id_type": {"default": "Figi"},
-                        "quote_id.quote_series_id.quote_type": "$Price",
-                        "quote_id.quote_series_id.field": "$Mid",
-                    },
-                    {
-                        "quote_id.quote_series_id.price_source": None,
-                        "metric_value.value": "$30",
-                        "metric_value.unit": "currency",
-                        "lineage": "$CocoonTestInitial",
-                    },
-                    None,
+                "Load dates as pandas datetime nanoseconds",
+                "TestQuotes007",
+                "data/multiplesystems-prices.csv",
+                {
+                    "quote_id.effective_at": {"default": pd.Timestamp("2019-10-28")},
+                    "quote_id.quote_series_id.provider": {"default": "client"},
+                    "quote_id.quote_series_id.instrument_id": "figi",
+                    "quote_id.quote_series_id.instrument_id_type": {"default": "Figi"},
+                    "quote_id.quote_series_id.quote_type": "$Price",
+                    "quote_id.quote_series_id.field": "$Mid",
+                },
+                {
+                    "quote_id.quote_series_id.price_source": None,
+                    "metric_value.value": "$30",
+                    "metric_value.unit": "currency",
+                    "lineage": "$CocoonTestInitial",
+                },
+                None,
             ),
         ]
     )
@@ -117,8 +115,9 @@ class CocoonTestsQuotes(unittest.TestCase):
             second=0,
         )
 
-    @parameterized.expand([
-        (
+    @parameterized.expand(
+        [
+            (
                 "Load dates with nanoseconds",
                 "TestQuotes007",
                 "data/multiplesystems-prices.csv",
@@ -137,8 +136,9 @@ class CocoonTestsQuotes(unittest.TestCase):
                     "lineage": "$CocoonTestInitial",
                 },
                 None,
-        ),
-    ])
+            ),
+        ]
+    )
     def test_load_from_data_frame_quotes_success_from_column_with_numpy_datetime(
         self,
         _,
@@ -152,8 +152,10 @@ class CocoonTestsQuotes(unittest.TestCase):
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         # replace Valuation date values with numpy DateTime values
-        data_frame[quotes_mapping_required["quote_id.effective_at"]["column"]] = \
-            [np.array(['2019-09-01T09:31:22.664'], dtype='datetime64[ns]') for _ in range(len(data_frame))]
+        data_frame[quotes_mapping_required["quote_id.effective_at"]["column"]] = [
+            np.array(["2019-09-01T09:31:22.664"], dtype="datetime64[ns]")
+            for _ in range(len(data_frame))
+        ]
 
         responses = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,

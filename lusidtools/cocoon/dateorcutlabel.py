@@ -19,7 +19,9 @@ class DateOrCutLabel(UserString):
 
             # If the datetime is a pandas timestamp convert it to ISO format and parse to string
             if isinstance(datetime_value, pd.Timestamp):
-                datetime_value = pd.to_datetime(datetime_value, utc=True, unit="us").isoformat()
+                datetime_value = pd.to_datetime(
+                    datetime_value, utc=True, unit="us"
+                ).isoformat()
 
             # If the datetime is a string try and parse it
             if isinstance(datetime_value, str):
@@ -66,7 +68,11 @@ class DateOrCutLabel(UserString):
 
             # If datetime is numpy datetime convert to ISO format and parse to string
             if isinstance(datetime_value, np.ndarray):
-                datetime_value = str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us")[0])
+                datetime_value = str(
+                    np.datetime_as_string(
+                        arr=datetime_value, timezone="UTC", unit="us"
+                    )[0]
+                )
             return datetime_value
 
         self.data = convert_datetime_utc(datetime_value)

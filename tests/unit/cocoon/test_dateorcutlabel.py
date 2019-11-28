@@ -65,11 +65,12 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
             ],
             [
                 "numpy datetime with nanoseconds",
-                np.array(['2019-09-01T09:31:22.664'], dtype='datetime64[ns]'),
+                np.array(["2019-09-01T09:31:22.664"], dtype="datetime64[ns]"),
                 "2019-09-01T09:31:22.664000Z",
-            ],            [
+            ],
+            [
                 "pandas datetime with nanoseconds",
-                pd.Timestamp('2019-09-01T09:31:22.664'),
+                pd.Timestamp("2019-09-01T09:31:22.664"),
                 "2019-09-01T09:31:22.664000+00:00",
             ],
         ]
