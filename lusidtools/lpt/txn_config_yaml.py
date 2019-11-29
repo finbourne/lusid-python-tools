@@ -40,6 +40,12 @@ class CustomDumper(yaml.Dumper):
     pass
 
 
+# Loader class with the custom constructor for querying
+# This is required because the input message uses different classes
+class QueryLoader(yaml.Loader):
+    pass
+
+
 # Loader class with the custom constructor for updates
 # This is required because the input message uses different classes
 class UpdateLoader(yaml.Loader):
@@ -184,6 +190,7 @@ class TxnConfigYaml:
                     data.transaction_class,
                     abbrev(data.transaction_roles),
                 ],
+                flow_style=True
             )
 
         yaml.add_representer(
@@ -224,7 +231,7 @@ class TxnConfigYaml:
                 a, m, p
             )
 
-        yaml.add_constructor("!Txn", config_con)
+        yaml.add_constructor("!Txn", config_con, Loader=QueryLoader)
 
         # Constructor for the update message
         def upd_config_con(loader, node):
@@ -252,7 +259,7 @@ class TxnConfigYaml:
         else:
             orig = yaml.dump(obj, width=500)
             cust = yaml.dump(obj, Dumper=CustomDumper, width=500)
-            copy = yaml.dump(yaml.load(cust, Loader=UpdateLoader), width=500)
+            copy = yaml.dump(yaml.load(cust, Loader=QueryLoader), width=500)
 
             if orig != copy:
                 print("DIFFS - writing to orig/copy")
@@ -270,7 +277,7 @@ class TxnConfigYaml:
     # Read a YAML file
     def load(self, filename):
         with open(filename, "r") as stream:
-            return yaml.load(stream)
+            return yaml.load(stream, Loader=QueryLoader)
 
     # Read a YAML file and convert to the UPDATE request message format
     def load_update(self, filename):
