@@ -33,9 +33,19 @@ class CommandsTests(unittest.TestCase):
     test_portfolio = "test_port"
     test_date = "2019-10-10"
 
+    work_dir = None
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
+
+        cls.work_dir = os.getcwd()
+        cls.test_data_path = Path(__file__).parent
+        os.chdir(cls.test_data_path)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.work_dir)
 
     def display_df(self, df, decimals=2):
         fmt = "{:,." + str(decimals) + "f}"
@@ -314,10 +324,20 @@ class CommandsTests(unittest.TestCase):
         :return:
         """
 
-        file_path = "./data/transaction_types.yml"
+        data_dir = f"{self.test_data_path.joinpath('.data')}"
+        os.makedirs(data_dir, exist_ok=True)
+        file_path = f"{self.test_data_path.joinpath('.data').joinpath('transaction_types.yml')}"
+
+        os.chdir(data_dir)
+
+        # these files get created if something goes wrong in the round trip from change > write > load
+        orig_yaml = f"{self.test_data_path.joinpath('orig')}"
+        copy_yaml = f"{self.test_data_path.joinpath('copy')}"
 
         # Ensure that file does not exist
-        self.assertFalse(expr=os.path.exists(file_path))
+        self.assertFalse(os.path.exists(file_path), msg=f"{file_path} already exists")
+        self.assertFalse(os.path.exists(orig_yaml), msg=f"{orig_yaml} created, implied problem generating yaml")
+        self.assertFalse(os.path.exists(copy_yaml), msg=f"{copy_yaml} created, implied problem generating yaml")
 
         # Get the transaction types
         txn.main(
