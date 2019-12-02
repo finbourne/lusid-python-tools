@@ -190,7 +190,7 @@ class TxnConfigYaml:
                     data.transaction_class,
                     abbrev(data.transaction_roles),
                 ],
-                flow_style=True
+                flow_style=True,
             )
 
         yaml.add_representer(
