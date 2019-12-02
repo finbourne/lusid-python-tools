@@ -274,48 +274,58 @@ class BatchLoader:
         return results
 
 
-async def load_data(
+async def _load_data(
     api_factory: lusid.utilities.ApiClientFactory,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    property_columns: list,
-    properties_scope: str,
-    instrument_identifier_mapping: dict,
+    single_requests: list,
     file_type: str,
-    domain_lookup: dict,
     **kwargs,
+):
+    """
+    This function calls the appropriate batch loader
+
+    :param api_factory: The api factory to use
+    :param single_requests: The list of single requests for LUSID
+    :param file_type: The file type e.g. instruments, portfolios etc.
+    :param kwargs: Arguments specific to each call e.g. effective_at for holdings
+
+    :return: BatchLoader StaticMethod: A static method on BatchLoader
+    """
+
+    # Dynamically call the correct async function to use based on the file type
+    return await getattr(BatchLoader, f"load_{file_type}_batch")(
+        api_factory,
+        single_requests,
+        # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
+        **kwargs
+    )
+
+
+def _convert_batch_to_models(
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        property_columns: list,
+        properties_scope: str,
+        instrument_identifier_mapping: dict,
+        file_type: str,
+        domain_lookup: dict,
+        **kwargs,
 ):
     """
     This function populates the required models from a DataFrame and loads the data into LUSID
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
     :param pd.DataFrame data_frame: The DataFrame containing the data to load
     :param dict mapping_required: The required mapping
     :param dict mapping_optional: The optional mapping
     :param list property_columns: The property columns to add as property values
     :param str properties_scope: The scope to add the property values in
     :param dict instrument_identifier_mapping: The mapping for the identifiers
-    :param int batch_size: The batch size to use
     :param str file_type: The file type to load
     :param dict domain_lookup: The domain lookup
     :param kwargs: Arguments specific to each call e.g. effective_at for holdings
 
-    :return: BatchLoader StaticMethod: A static method on BatchLoader
+    :returns list single_requests: A list of populated LUSID request models
     """
-
-    # Get the top level model used for this request e.g. lusid.models.InstrumentDefintion for upsert instruments
-    top_level_model = getattr(lusid.models, domain_lookup[file_type]["top_level_model"])
-
-    # Verify that all the required attributes for this top level model exist in the provided required mapping
-    cocoon.utilities.verify_all_required_attributes_mapped(
-        swagger_dict=cocoon.utilities.get_swagger_dict(
-            api_url=api_factory.api_client.configuration.host
-        ),
-        mapping=mapping_required,
-        model_object=top_level_model,
-        exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
-    )
 
     # Get the data types of the columns to be added as properties
     property_dtypes = data_frame.loc[:, property_columns].dtypes
@@ -340,7 +350,7 @@ async def load_data(
         # Create identifiers for this row if applicable
         # If no instrument identifier mapping is provided return None as no identifiers are required
         if instrument_identifier_mapping is None or not bool(
-            instrument_identifier_mapping
+                instrument_identifier_mapping
         ):
             identifiers = None
         else:
@@ -356,7 +366,7 @@ async def load_data(
         # Construct the from the mapping, properties and identifiers the single request object and add it to the list
         single_requests.append(
             cocoon.utilities.populate_model(
-                model_object=top_level_model,
+                model_object=getattr(lusid.models, domain_lookup[file_type]["top_level_model"]),
                 required_mapping=mapping_required,
                 optional_mapping=mapping_optional,
                 row=row,
@@ -365,16 +375,10 @@ async def load_data(
             )
         )
 
-    # Dynamically call the correct async function to use based on the file type
-    return await getattr(BatchLoader, f"load_{file_type}_batch")(
-        api_factory,
-        single_requests,
-        # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
-        **kwargs,
-    )
+    return single_requests
 
 
-async def construct_batches(
+async def _construct_batches(
     api_factory: lusid.utilities.ApiClientFactory,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -509,21 +513,24 @@ async def construct_batches(
     responses = [
         await asyncio.gather(
             *[
-                load_data(
+                _load_data(
                     api_factory=api_factory,
-                    data_frame=async_batch,
-                    mapping_required=mapping_required,
-                    mapping_optional=mapping_optional,
-                    property_columns=property_columns,
-                    properties_scope=properties_scope,
-                    instrument_identifier_mapping=instrument_identifier_mapping,
+                    single_requests=_convert_batch_to_models(
+                        data_frame=async_batch,
+                        mapping_required=mapping_required,
+                        mapping_optional=mapping_optional,
+                        property_columns=property_columns,
+                        properties_scope=properties_scope,
+                        instrument_identifier_mapping=instrument_identifier_mapping,
+                        file_type=file_type,
+                        domain_lookup=domain_lookup,
+                        **kwargs
+                    ),
                     file_type=file_type,
-                    domain_lookup=domain_lookup,
                     code=code,
                     effective_at=effective_at,
-                    **kwargs,
-                )
-                for async_batch, code, effective_at in zip(
+                    **kwargs
+                ) for async_batch, code, effective_at in zip(
                     sync_batch["async_batches"],
                     sync_batch["codes"],
                     sync_batch["effective_at"],
@@ -583,6 +590,7 @@ def load_from_data_frame(
     :param int batch_size: The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
     :param bool remove_white_space: remove whitespace either side of each value in the dataframe
     :param bool instrument_name_enrichment: request additional identifier information from open-figi
+
     :return: dict responses: The responses from loading the data into LUSID
     """
 
@@ -649,6 +657,19 @@ def load_from_data_frame(
     Validator(
         required_call_attributes, "required_attributes_for_call"
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
+
+    # Get the top level model used for this request e.g. lusid.models.InstrumentDefintion for upsert instruments
+    top_level_model = getattr(lusid.models, domain_lookup[file_type]["top_level_model"])
+
+    # Verify that all the required attributes for this top level model exist in the provided required mapping
+    cocoon.utilities.verify_all_required_attributes_mapped(
+        swagger_dict=cocoon.utilities.get_swagger_dict(
+            api_url=api_factory.api_client.configuration.host
+        ),
+        mapping=mapping_required,
+        model_object=top_level_model,
+        exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
+    )
 
     if instrument_name_enrichment:
         loop = cocoon.async_tools.start_event_loop_new_thread()
@@ -762,7 +783,7 @@ def load_from_data_frame(
 
     # Get the responses from LUSID
     responses = asyncio.run_coroutine_threadsafe(
-        construct_batches(
+        _construct_batches(
             api_factory=api_factory,
             data_frame=data_frame,
             mapping_required=mapping_required,
