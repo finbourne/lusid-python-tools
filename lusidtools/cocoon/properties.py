@@ -188,7 +188,7 @@ def create_property_definitions_from_file(
             value_required=False,
             display_name=column_name,
             data_type_id=lusid.models.ResourceId(
-                scope="default",
+                scope="system",
                 code=global_constants["data_type_mapping"][str(data_type)],
             ),
         )
