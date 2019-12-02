@@ -11,6 +11,7 @@ from lusidtools.cocoon.utilities import create_scope_id
 
 unique_properties_scope = create_scope_id()
 
+
 class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -19,7 +20,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             api_secrets_filename=secrets_file
         )
         cls.logger = logger.LusidLogger("debug")
-
 
     @parameterized.expand(
         [
