@@ -23,6 +23,11 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-11-04T13:25:34+00:00",
             ],
             [
+                "Already in ISO format with microseconds",
+                "2012-05-21T00:00:00.0000000+00:00",
+                "2012-05-21T00:00:00.0000000+00:00"
+            ],
+            [
                 "Already in ISO format UTC",
                 "2019-11-04T13:25:34Z",
                 "2019-11-04T13:25:34Z",
