@@ -5,6 +5,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 from lusidtools import logger
+from lusidtools.cocoon.utilities import create_scope_id
 
 
 class CocoonTestsTransactions(unittest.TestCase):
@@ -155,6 +156,34 @@ class CocoonTestsTransactions(unittest.TestCase):
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
                 None,
+                2,
+                lusid.models.Version,
+            ],
+            [
+                "Try with a small batch & random scope to ensure property cretaion",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "$GlobalCreditFund",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency", "source": "$default"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                f"prime_broker_test_{create_scope_id()}",
                 2,
                 lusid.models.Version,
             ],

@@ -7,7 +7,9 @@ import lusid
 from lusidtools import logger
 from datetime import datetime
 import pytz
+from lusidtools.cocoon.utilities import create_scope_id
 
+unique_properties_scope = create_scope_id()
 
 class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
@@ -17,6 +19,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             api_secrets_filename=secrets_file
         )
         cls.logger = logger.LusidLogger("debug")
+
 
     @parameterized.expand(
         [
@@ -70,6 +73,67 @@ class CocoonTestsInstruments(unittest.TestCase):
                                             tzinfo=pytz.UTC,
                                         ),
                                         key="Instrument/TestPropertiesScope1/moodys_rating",
+                                        value=lusid.models.PropertyValue(
+                                            label_value="Aa2"
+                                        ),
+                                    ),
+                                ],
+                            )
+                        },
+                        failed={},
+                    )
+                },
+            ],
+            [
+                "A standard successful load of instruments with unique properties scope",
+                "TestScope1",
+                "data/global-fund-combined-instrument-master.csv",
+                {"name": "instrument_name"},
+                {},
+                {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
+                ["s&p rating", "moodys_rating", "currency"],
+                f"TestPropertiesScope1_{unique_properties_scope}",
+                {
+                    "instruments": lusid.models.UpsertInstrumentsResponse(
+                        values={
+                            "ClientInternal: imd_34534539": lusid.models.Instrument(
+                                lusid_instrument_id="LUIDUnknown",
+                                version=lusid.models.Version(
+                                    as_at_date=datetime.now(pytz.UTC),
+                                    effective_from=datetime.now(pytz.UTC),
+                                ),
+                                name="USTreasury_6.875_2025",
+                                identifiers={
+                                    "ClientInternal": "imd_34534539",
+                                    "Figi": "BBG000DQQNJ8",
+                                    "Isin": "US912810EV62",
+                                },
+                                state="Active",
+                                properties=[
+                                    lusid.models.ModelProperty(
+                                        effective_from=datetime(
+                                            year=1,
+                                            month=1,
+                                            day=1,
+                                            hour=0,
+                                            minute=0,
+                                            tzinfo=pytz.UTC,
+                                        ),
+                                        key=f"Instrument/TestPropertiesScope1_{unique_properties_scope}/currency",
+                                        value=lusid.models.PropertyValue(
+                                            label_value="USD"
+                                        ),
+                                    ),
+                                    lusid.models.ModelProperty(
+                                        effective_from=datetime(
+                                            year=1,
+                                            month=1,
+                                            day=1,
+                                            hour=0,
+                                            minute=0,
+                                            tzinfo=pytz.UTC,
+                                        ),
+                                        key=f"Instrument/TestPropertiesScope1_{unique_properties_scope}/moodys_rating",
                                         value=lusid.models.PropertyValue(
                                             label_value="Aa2"
                                         ),
