@@ -16,9 +16,9 @@ from lusidtools.cocoon.utilities import (
     check_mapping_fields_exist,
     identify_cash_items,
     strip_whitespace,
+    create_scope_id
 )
 from lusidtools import logger
-
 
 @checkargs
 def checkargs_list(a_list: list):
@@ -38,6 +38,55 @@ def checkargs_tuple(a_tuple: tuple):
 @checkargs
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
+
+class MockTimeGenerator():
+    """
+    This class mocks the in-built Python 'time' module and allows you to return a time that you specify
+    upon creation of the instance of the class.
+    """
+    def __init__(self, current_datetime):
+        """
+        :param int current_datetime: The current datetime in seconds since 1970
+        """
+        self.current_datetime = current_datetime
+
+    def time(self):
+        """
+
+        :return: int datetime current_datetime: The current datetime in seconds since 1970
+        """
+        return self.current_datetime
+
+
+class MockTimeGeneratorWrongReturnType():
+    """
+    This class mocks the in-built Python 'time' module and allows you to return a time that you specify
+    upon creation of the instance of the class.
+    """
+    def __init__(self, current_datetime):
+        """
+        :param int current_datetime: The current datetime in seconds since 1970
+        """
+        self.current_datetime = current_datetime
+
+    def time(self):
+        """
+
+        :return: int datetime current_datetime: The current datetime in seconds since 1970
+        """
+        return str(self.current_datetime)
+
+
+class MockTimeGeneratorNoTimeMethod():
+    """
+    This class mocks the in-built Python 'time' module and allows you to return a time that you specify
+    upon creation of the instance of the class.
+    """
+    def __init__(self, current_datetime):
+        """
+        :param int current_datetime: The current datetime in seconds since 1970
+        """
+        self.time = current_datetime
 
 
 class CocoonUtilitiesTests(unittest.TestCase):
@@ -1593,3 +1642,31 @@ class CocoonUtilitiesTests(unittest.TestCase):
         df_test = strip_whitespace(df_test, cols)
 
         self.assertTrue(df_true.equals(df_test))
+
+    @parameterized.expand([
+        [
+            "2019-11-27T11:08:38Z", MockTimeGenerator(current_datetime=1574852918), "37f3-342f-823f-00"
+        ]
+    ])
+    def test_create_scope_id_success(self, _, time_generator, expected_outcome):
+
+        scope_id = create_scope_id(time_generator)
+
+        self.assertEqual(
+            first=expected_outcome,
+            second=scope_id
+        )
+
+    @parameterized.expand([
+        [
+            "No Time Method", MockTimeGeneratorNoTimeMethod(current_datetime=1574852918), AttributeError
+        ],
+        [
+            "Wrong return type", MockTimeGeneratorWrongReturnType(current_datetime=1574852918), ValueError
+        ]
+    ])
+    def test_create_scope_id_failure(self, _, time_generator, expected_exception):
+
+        with self.assertRaises(expected_exception):
+            create_scope_id(time_generator)
+

@@ -5,6 +5,7 @@ import lusid
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
+from lusidtools.cocoon.utilities import create_scope_id
 
 
 class CocoonTestsPortfolios(unittest.TestCase):
@@ -50,6 +51,22 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 "operations001",
+                [],
+            ],
+            [
+                "Standard load with unique properties scope to ensure property creation",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                f"operations001_{create_scope_id()}",
                 [],
             ],
         ]

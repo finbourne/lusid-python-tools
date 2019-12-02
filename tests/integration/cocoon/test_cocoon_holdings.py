@@ -5,7 +5,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 from lusidtools import logger
-
+from lusidtools.cocoon.utilities import create_scope_id
 
 class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
@@ -20,6 +20,32 @@ class CocoonTestsHoldings(unittest.TestCase):
         [
             [
                 "Standard successful load",
+                "prime_broker_test",
+                "data/holdings-example-unique-date.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                lusid.models.Version,
+            ],
+            [
+                "Standard successful load with unique properties scope",
                 "prime_broker_test",
                 "data/holdings-example-unique-date.csv",
                 {
@@ -67,7 +93,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "Currency": "is_cash_with_currency",
                 },
                 ["Prime Broker"],
-                "operations001",
+                f"operations001_{create_scope_id()}",
                 lusid.models.Version,
             ],
             [
