@@ -296,20 +296,20 @@ async def _load_data(
         api_factory,
         single_requests,
         # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
-        **kwargs
+        **kwargs,
     )
 
 
 def _convert_batch_to_models(
-        data_frame: pd.DataFrame,
-        mapping_required: dict,
-        mapping_optional: dict,
-        property_columns: list,
-        properties_scope: str,
-        instrument_identifier_mapping: dict,
-        file_type: str,
-        domain_lookup: dict,
-        **kwargs,
+    data_frame: pd.DataFrame,
+    mapping_required: dict,
+    mapping_optional: dict,
+    property_columns: list,
+    properties_scope: str,
+    instrument_identifier_mapping: dict,
+    file_type: str,
+    domain_lookup: dict,
+    **kwargs,
 ):
     """
     This function populates the required models from a DataFrame and loads the data into LUSID
@@ -350,7 +350,7 @@ def _convert_batch_to_models(
         # Create identifiers for this row if applicable
         # If no instrument identifier mapping is provided return None as no identifiers are required
         if instrument_identifier_mapping is None or not bool(
-                instrument_identifier_mapping
+            instrument_identifier_mapping
         ):
             identifiers = None
         else:
@@ -366,7 +366,9 @@ def _convert_batch_to_models(
         # Construct the from the mapping, properties and identifiers the single request object and add it to the list
         single_requests.append(
             cocoon.utilities.populate_model(
-                model_object=getattr(lusid.models, domain_lookup[file_type]["top_level_model"]),
+                model_object=getattr(
+                    lusid.models, domain_lookup[file_type]["top_level_model"]
+                ),
                 required_mapping=mapping_required,
                 optional_mapping=mapping_optional,
                 row=row,
@@ -524,13 +526,14 @@ async def _construct_batches(
                         instrument_identifier_mapping=instrument_identifier_mapping,
                         file_type=file_type,
                         domain_lookup=domain_lookup,
-                        **kwargs
+                        **kwargs,
                     ),
                     file_type=file_type,
                     code=code,
                     effective_at=effective_at,
-                    **kwargs
-                ) for async_batch, code, effective_at in zip(
+                    **kwargs,
+                )
+                for async_batch, code, effective_at in zip(
                     sync_batch["async_batches"],
                     sync_batch["codes"],
                     sync_batch["effective_at"],
