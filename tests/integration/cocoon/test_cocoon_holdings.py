@@ -7,6 +7,7 @@ import lusid
 from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 
+
 class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

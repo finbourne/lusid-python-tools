@@ -16,9 +16,10 @@ from lusidtools.cocoon.utilities import (
     check_mapping_fields_exist,
     identify_cash_items,
     strip_whitespace,
-    create_scope_id
+    create_scope_id,
 )
 from lusidtools import logger
+
 
 @checkargs
 def checkargs_list(a_list: list):
@@ -39,11 +40,13 @@ def checkargs_tuple(a_tuple: tuple):
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
-class MockTimeGenerator():
+
+class MockTimeGenerator:
     """
     This class mocks the in-built Python 'time' module and allows you to return a time that you specify
     upon creation of the instance of the class.
     """
+
     def __init__(self, current_datetime):
         """
         :param int current_datetime: The current datetime in seconds since 1970
@@ -58,11 +61,12 @@ class MockTimeGenerator():
         return self.current_datetime
 
 
-class MockTimeGeneratorWrongReturnType():
+class MockTimeGeneratorWrongReturnType:
     """
     This class mocks the in-built Python 'time' module and allows you to return a time that you specify
     upon creation of the instance of the class.
     """
+
     def __init__(self, current_datetime):
         """
         :param int current_datetime: The current datetime in seconds since 1970
@@ -77,11 +81,12 @@ class MockTimeGeneratorWrongReturnType():
         return str(self.current_datetime)
 
 
-class MockTimeGeneratorNoTimeMethod():
+class MockTimeGeneratorNoTimeMethod:
     """
     This class mocks the in-built Python 'time' module and allows you to return a time that you specify
     upon creation of the instance of the class.
     """
+
     def __init__(self, current_datetime):
         """
         :param int current_datetime: The current datetime in seconds since 1970
@@ -1643,30 +1648,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         self.assertTrue(df_true.equals(df_test))
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "2019-11-27T11:08:38Z", MockTimeGenerator(current_datetime=1574852918), "37f3-342f-823f-00"
+            [
+                "2019-11-27T11:08:38Z",
+                MockTimeGenerator(current_datetime=1574852918),
+                "37f3-342f-823f-00",
+            ]
         ]
-    ])
+    )
     def test_create_scope_id_success(self, _, time_generator, expected_outcome):
 
         scope_id = create_scope_id(time_generator)
 
-        self.assertEqual(
-            first=expected_outcome,
-            second=scope_id
-        )
+        self.assertEqual(first=expected_outcome, second=scope_id)
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "No Time Method", MockTimeGeneratorNoTimeMethod(current_datetime=1574852918), AttributeError
-        ],
-        [
-            "Wrong return type", MockTimeGeneratorWrongReturnType(current_datetime=1574852918), ValueError
+            [
+                "No Time Method",
+                MockTimeGeneratorNoTimeMethod(current_datetime=1574852918),
+                AttributeError,
+            ],
+            [
+                "Wrong return type",
+                MockTimeGeneratorWrongReturnType(current_datetime=1574852918),
+                ValueError,
+            ],
         ]
-    ])
+    )
     def test_create_scope_id_failure(self, _, time_generator, expected_exception):
 
         with self.assertRaises(expected_exception):
             create_scope_id(time_generator)
-
