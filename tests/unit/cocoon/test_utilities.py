@@ -739,7 +739,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         self, swagger_dict, model_object, expected_outcome
     ):
         required_attributes = cocoon.utilities.get_required_attributes_model_recursive(
-            swagger_dict=swagger_dict, model_object=model_object
+            model_object=model_object
         )
 
         required_attributes.sort()
@@ -752,39 +752,30 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            # Test where $ref is at the top level
             [
-                {
-                    "$ref": "#/definitions/ResourceId",
-                    "description": "The identifier of the portfolio that has been securitised to create this instrument.",
-                },
+                "Test on ResourceId where the model does exist",
                 "ResourceId",
+                "ResourceId"
             ],
-            # Test where $ref does not exist at all
-            [{"description": "The name of the instrument.", "type": "string"}, None],
-            # Test where $ref is nested under additionalProperties
             [
-                {
-                    "description": "A set of identifiers that can be used to identify the instrument. At least one of these must be configured to be a unique identifier.",
-                    "type": "object",
-                    "additionalProperties": {"$ref": "#/definitions/InstrumentIdValue"},
-                },
-                "InstrumentIdValue",
+                "Test where it is a string does not exist at all",
+                "str",
+                None
             ],
-            # Test where $ref is nested under items
             [
-                {
-                    "description": "Set of unique instrument properties and associated values to store with the instrument. Each property must be from the 'Instrument' domain.",
-                    "uniqueItems": "false",
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/Property"},
-                },
-                "Property",
+                "Test where it is inside a dictionary",
+                "dict(str, InstrumentIdValue)",
+                "InstrumentIdValue"
+            ],
+            [
+                "Test where it is inside a list",
+                "list[ModelProperty]",
+                "ModelProperty",
             ],
         ]
     )
     def test_return_nested_model(
-        self, required_attribute_properties, expected_outcome
+        self, _, required_attribute_properties, expected_outcome
     ) -> None:
         """
         Tests that the name of a nested model is successfully returned from the properties of a required attribute
@@ -833,11 +824,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        with open(Path(__file__).parent.joinpath("data/lusid.json")) as file:
-            swagger_dict = json.loads(file.read())
 
         cocoon.utilities.verify_all_required_attributes_mapped(
-            swagger_dict=swagger_dict,
             mapping=mapping,
             model_object=model_object,
             exempt_attributes=[
@@ -883,12 +871,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        with open(Path(__file__).parent.joinpath("data/lusid.json")) as file:
-            swagger_dict = json.loads(file.read())
 
         with self.assertRaises(expected_exception):
             cocoon.utilities.verify_all_required_attributes_mapped(
-                swagger_dict=swagger_dict,
                 mapping=mapping,
                 model_object=model_object,
                 exempt_attributes=[
