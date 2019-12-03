@@ -309,7 +309,9 @@ def verify_all_required_attributes_mapped(
 
     :return: None
     """
-    required_attributes = get_required_attributes_model_recursive(model_object=model_object)
+    required_attributes = get_required_attributes_model_recursive(
+        model_object=model_object
+    )
 
     for attribute in required_attributes:
         if attribute.split(".")[0] in exempt_attributes:
@@ -352,11 +354,16 @@ def get_required_attributes_from_model(model_object) -> list:
     # Set the status (required or optional) for each attrbiute based on whether "is None:" exists in the setter function
     # This is part of the if condition that doesn't allow a None value
     attribute_status = {
-        re.search(r"(?<=def ).+?(?=\(self)", setter).group(0): "Required" if "is None:" in setter else "Optional" for
-     setter in setters}
+        re.search(r"(?<=def ).+?(?=\(self)", setter).group(0): "Required"
+        if "is None:" in setter
+        else "Optional"
+        for setter in setters
+    }
 
     # If there are required attributes collect them as a list
-    required_attributes = [key for key, value in attribute_status.items() if value=="Required"]
+    required_attributes = [
+        key for key, value in attribute_status.items() if value == "Required"
+    ]
 
     # If there are no required attributes on a model, assume that all attributes are required
     # This is for cases such as lusid.models.TransactionRequest.transaction_price
