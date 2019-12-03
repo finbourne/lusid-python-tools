@@ -1,8 +1,6 @@
 import asyncio
-
 import lusid
 import pandas as pd
-
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
@@ -666,9 +664,6 @@ def load_from_data_frame(
 
     # Verify that all the required attributes for this top level model exist in the provided required mapping
     cocoon.utilities.verify_all_required_attributes_mapped(
-        swagger_dict=cocoon.utilities.get_swagger_dict(
-            api_url=api_factory.api_client.configuration.host
-        ),
         mapping=mapping_required,
         model_object=top_level_model,
         exempt_attributes=["identifiers", "properties", "instrument_identifiers"],

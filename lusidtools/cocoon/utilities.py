@@ -297,22 +297,19 @@ def get_swagger_dict(api_url) -> dict:
 
 
 def verify_all_required_attributes_mapped(
-    swagger_dict, mapping, model_object, exempt_attributes=[]
+    mapping, model_object, exempt_attributes=[]
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
     otherwise
 
-    :param dict swagger_dict: The full LUSID swagger dictionary
     :param dict mapping: The required mapping
     :param lusid.model model_object: The LUSID model that the mapping applies to
     :param list[str] exempt_attributes: The attributes that are exempt from needing to be in the required mapping
 
     :return: None
     """
-    required_attributes = get_required_attributes_model_recursive(
-        swagger_dict=swagger_dict, model_object=model_object
-    )
+    required_attributes = get_required_attributes_model_recursive(model_object=model_object)
 
     for attribute in required_attributes:
         if attribute.split(".")[0] in exempt_attributes:
@@ -337,45 +334,67 @@ def generate_required_attributes_list():
     pass
 
 
-def get_required_attributes_model_recursive(swagger_dict, model_object):
+def get_required_attributes_from_model(model_object) -> list:
+    """
+    Gets the required attributes for a LUSID model using reflection
+
+    :param model_object: A LUSID model object
+
+    :return: list [str]: The required attributes
+    """
+
+    # Get the source code for the model
+    model_details = inspect.getsource(model_object)
+
+    # Get all the setter function definitions
+    setters = re.findall(r"(?<=.setter).+?(?:@|to_dict)", model_details, re.DOTALL)
+
+    # Set the status (required or optional) for each attrbiute based on whether "is None:" exists in the setter function
+    # This is part of the if condition that doesn't allow a None value
+    attribute_status = {
+        re.search(r"(?<=def ).+?(?=\(self)", setter).group(0): "Required" if "is None:" in setter else "Optional" for
+     setter in setters}
+
+    # If there are required attributes collect them as a list
+    required_attributes = [key for key, value in attribute_status.items() if value=="Required"]
+
+    # If there are no required attributes on a model, assume that all attributes are required
+    # This is for cases such as lusid.models.TransactionRequest.transaction_price
+    if len(required_attributes) == 0:
+        required_attributes = list(attribute_status.keys())
+
+    return required_attributes
+
+
+def get_required_attributes_model_recursive(model_object):
     """
     This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
     then it separates the attributes by a '.' until the bottom level where no more models are required and a primitive
     type is supplied e.g. string, int etc.
 
-    :param dict swagger_dict: The LUSID swagger.json as a dictionary
     :param lusid.model model_object: The model to get required attributes for
 
     :return: list[str]: The required attributes of the model
     """
     attributes = []
 
-    # If there are required attributes collect them as a list
-    if "required" in list(swagger_dict["definitions"][model_object.__name__].keys()):
-        required_attributes = swagger_dict["definitions"][model_object.__name__][
-            "required"
-        ]
-    # If there are no required attributes on a model, assume that all attributes are required
-    # This is for cases such as lusid.models.TransactionRequest.transaction_price
-    else:
-        required_attributes = list(
-            swagger_dict["definitions"][model_object.__name__]["properties"].keys()
-        )
+    # Get the required attributes for the current model
+    required_attributes = get_required_attributes_from_model(model_object)
 
-    # Get the properties of all the attributes on the model
-    attribute_properties = swagger_dict["definitions"][model_object.__name__][
-        "properties"
-    ]
+    # Get the types of the attributes
+    open_api_types = model_object.openapi_types
 
     for required_attribute in required_attributes:
-        nested_model = return_nested_model(attribute_properties[required_attribute])
+
+        # Check to see if there is a LUSID model for this required attribute
+        nested_model = return_nested_model(open_api_types[required_attribute])
 
         if nested_model is None:
             attributes.append(camel_case_to_pep_8(required_attribute))
 
         else:
+            # Call the function recursively
             nested_required_attributes = get_required_attributes_model_recursive(
-                swagger_dict=swagger_dict,
                 model_object=getattr(lusid.models, nested_model),
             )
 
@@ -392,23 +411,29 @@ def get_required_attributes_model_recursive(swagger_dict, model_object):
     return attributes
 
 
-def return_nested_model(required_attribute_properties):
+def return_nested_model(required_attribute_type):
     """
     Takes the properties of a required attribute on a model and searches as to whether or not this attribute
     requires a model of its own
 
-    :param dict required_attribute_properties: The properties of the required attribute
+    :param str required_attribute_type: The type of the required attribute
 
     :return: str: The name of the LUSID model
     """
-    possible_nested_models = list(
-        gen_dict_extract("$ref", required_attribute_properties)
-    )
 
-    if len(possible_nested_models) > 0:
-        return possible_nested_models[0].split("/")[2]
-    else:
+    # If the attribute type is a dictionary e.g. dict(str, InstrumentIdValue), extract the type
+    if "dict" in required_attribute_type:
+        required_attribute_type = required_attribute_type.split(", ")[1].rstrip(")")
+    # If it is a list e.g. list[ModelProperty] extract the type
+    if "list" in required_attribute_type:
+        required_attribute_type = required_attribute_type.split("list[")[1].rstrip("]")
+
+    top_level_model = getattr(lusid.models, required_attribute_type, None)
+
+    if top_level_model is None:
         return None
+
+    return top_level_model.__name__
 
 
 def gen_dict_extract(key, var):

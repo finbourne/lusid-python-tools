@@ -68,7 +68,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "Currency": "is_cash_with_currency",
                 },
                 ["Prime Broker"],
-                "operations001",
+                f"operations001_{create_scope_id()}",
                 lusid.models.Version,
             ],
             [
@@ -94,7 +94,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "Currency": "is_cash_with_currency",
                 },
                 ["Prime Broker"],
-                f"operations001_{create_scope_id()}",
+                "operations001",
                 lusid.models.Version,
             ],
             [
