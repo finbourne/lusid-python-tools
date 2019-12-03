@@ -755,23 +755,15 @@ class CocoonUtilitiesTests(unittest.TestCase):
             [
                 "Test on ResourceId where the model does exist",
                 "ResourceId",
-                "ResourceId"
+                "ResourceId",
             ],
-            [
-                "Test where it is a string does not exist at all",
-                "str",
-                None
-            ],
+            ["Test where it is a string does not exist at all", "str", None],
             [
                 "Test where it is inside a dictionary",
                 "dict(str, InstrumentIdValue)",
-                "InstrumentIdValue"
+                "InstrumentIdValue",
             ],
-            [
-                "Test where it is inside a list",
-                "list[ModelProperty]",
-                "ModelProperty",
-            ],
+            ["Test where it is inside a list", "list[ModelProperty]", "ModelProperty",],
         ]
     )
     def test_return_nested_model(
