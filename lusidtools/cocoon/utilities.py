@@ -478,7 +478,7 @@ def get_required_attributes_from_model(model_object) -> list:
     """
     Gets the required attributes for a LUSID model using reflection
 
-    :param model_object: A LUSID model object
+    :param lusid.models model_object: A LUSID model object
 
     :return: list [str]: The required attributes
     """
