@@ -5,7 +5,7 @@ import lusidtools.cocoon.systemConfiguration
 import lusidtools.cocoon.utilities
 from lusidtools.cocoon.instruments import resolve_instruments
 from lusidtools.cocoon.properties import create_property_values
-from lusidtools.cocoon.utilities import set_attributes
+from lusidtools.cocoon.utilities import set_attributes_recursive
 from lusidtools.cocoon.cocoon import load_from_data_frame
 from lusidtools.cocoon.utilities import (
     checkargs,

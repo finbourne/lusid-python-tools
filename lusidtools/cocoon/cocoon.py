@@ -364,9 +364,7 @@ def _convert_batch_to_models(
         # Construct the from the mapping, properties and identifiers the single request object and add it to the list
         single_requests.append(
             cocoon.utilities.populate_model(
-                model_object=getattr(
-                    lusid.models, domain_lookup[file_type]["top_level_model"]
-                ),
+                model_object_name=domain_lookup[file_type]["top_level_model"],
                 required_mapping=mapping_required,
                 optional_mapping=mapping_optional,
                 row=row,
@@ -659,13 +657,10 @@ def load_from_data_frame(
         required_call_attributes, "required_attributes_for_call"
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
-    # Get the top level model used for this request e.g. lusid.models.InstrumentDefintion for upsert instruments
-    top_level_model = getattr(lusid.models, domain_lookup[file_type]["top_level_model"])
-
     # Verify that all the required attributes for this top level model exist in the provided required mapping
     cocoon.utilities.verify_all_required_attributes_mapped(
         mapping=mapping_required,
-        model_object=top_level_model,
+        model_object_name=domain_lookup[file_type]["top_level_model"],
         exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
     )
 

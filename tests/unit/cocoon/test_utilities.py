@@ -1,5 +1,5 @@
 import copy
-import json
+import numpy
 import unittest
 from datetime import datetime
 from pathlib import Path
@@ -40,6 +40,13 @@ def checkargs_tuple(a_tuple: tuple):
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
+
+class ReturnBytes:
+    """
+    This class returns a bytes objects rather than a string when str() is called on it
+    """
+    def __str__(self):
+        return b''
 
 class MockTimeGenerator:
     """
@@ -608,7 +615,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        populated_model = cocoon.utilities.set_attributes(
+        populated_model = cocoon.utilities.set_attributes_recursive(
             model_object=model_object,
             mapping=mapping,
             row=row,
@@ -631,18 +638,23 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["S&PCreditRating(UK)", "SandPCreditRatingUK"],
-            ["Return%", "ReturnPercentage"],
-            ["Buy/Sell Indicator", "BuySellIndicator"],
-            ["balances.available", "balances_available"],
+            ["Explicitly known invalid character '&'", "S&PCreditRating(UK)", "SandPCreditRatingUK"],
+            ["Explicitly known invalid character '%'", "Return%", "ReturnPercentage"],
+            ["Explicitly known invalid character '.'", "balances.available", "balances_available"],
+            ["Invalid character not meeting regex #1", "Buy/Sell Indicator", "BuySellIndicator"],
+            ["Invalid character not meeting regex #2", "£DollarDollarBills$", "DollarDollarBills"],
+            ["Integer", 1, "1"],
+            ["Decimal", 1.8596, "1_8596"],
+            ["List", ["My", "List", "Code"], "MyListCode"]
         ]
     )
-    def test_make_code_lusid_friendly_success(self, enemy_code, expected_code) -> None:
+    def test_make_code_lusid_friendly_success(self, _, enemy_code, expected_code) -> None:
         """
         This tests that the utility to make codes LUSID friendly works as expected
 
         :param str enemy_code: The unfriendly (enemy) code to convert to a LUSID friendly code
         :param str expected_code: The expected LUSID friendly code after conversion
+
         :return: None
         """
 
@@ -657,13 +669,19 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             [
+                "Code exceeds character limit",
                 "S&PCreditRating(UK)ThisIsAReallyLongCodeThatExceedsTheCharacterLimit",
                 ValueError,
+            ],
+            [
+                "Code cannot be converted to a string",
+                ReturnBytes(),
+                Exception,
             ],
         ]
     )
     def test_make_code_lusid_friendly_failure(
-        self, enemy_code, expected_exception
+        self, _, enemy_code, expected_exception
     ) -> None:
         """
         This tests that the utility to make codes LUSID friendly works as expected
@@ -755,18 +773,18 @@ class CocoonUtilitiesTests(unittest.TestCase):
             [
                 "Test on ResourceId where the model does exist",
                 "ResourceId",
-                "ResourceId",
+                True,
             ],
-            ["Test where it is a string does not exist at all", "str", None],
+            ["Test where it is a string does not exist at all", "str", False],
             [
                 "Test where it is inside a dictionary",
                 "dict(str, InstrumentIdValue)",
-                "InstrumentIdValue",
+                True,
             ],
-            ["Test where it is inside a list", "list[ModelProperty]", "ModelProperty",],
+            ["Test where it is inside a list", "list[ModelProperty]", True],
         ]
     )
-    def test_return_nested_model(
+    def test_check_nested_model(
         self, _, required_attribute_properties, expected_outcome
     ) -> None:
         """
@@ -777,11 +795,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        nested_model = cocoon.utilities.return_nested_model(
+        nested_model = cocoon.utilities.check_nested_model(
             required_attribute_properties
         )
 
-        self.assertEqual(first=nested_model, second=expected_outcome)
+        self.assertTrue(expr=nested_model is expected_outcome)
 
     @parameterized.expand(
         [
