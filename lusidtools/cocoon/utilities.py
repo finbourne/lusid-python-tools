@@ -133,7 +133,7 @@ def populate_model(
     row: pd.Series,
     properties,
     identifiers: dict = None,
-    sub_holding_keys: list = None
+    sub_holding_keys = None
 ) -> typing.Callable:
     """
     This function populates the provided LUSID model object in lusid.models with values from a Pandas Series
@@ -142,7 +142,7 @@ def populate_model(
     :param dict required_mapping: The required mapping between the row columns and the model attributes
     :param dict optional_mapping: The optional mapping between the row columns and the model attributes
     :param pd.Series row: The row from the provided pd.DataFrame to use to populate the model
-    :param dict properties: The properties for this model
+    :param properties: The properties for this model
     :param dict identifiers: The identifiers for this model
     :param list sub_holding_keys: The list of sub holding keys to use
 
@@ -178,9 +178,9 @@ def set_attributes_recursive(
     model_object,
     mapping: dict,
     row: pd.Series,
-    properties: dict = None,
+    properties=None,
     identifiers: dict = None,
-    sub_holding_keys: list = None
+    sub_holding_keys=None
 ):
     """
     This function takes a lusid.model object name and an expanded mapping between its attributes and the provided
@@ -247,16 +247,20 @@ def set_attributes_recursive(
         # if there is more nesting call the function recursively
         else:
             # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
-            attribute_type = extract_lusid_model_from_attribute_type(attribute_type)
+            attribute_type, nested_type = extract_lusid_model_from_attribute_type(attribute_type)
 
             # Call the function recursively
-            obj_init_values[key] = [
-                set_attributes_recursive(
-                    model_object=getattr(lusid.models, attribute_type),
-                    mapping=mapping[key],
-                    row=row,
-                )
-            ]
+            value = set_attributes_recursive(
+                model_object=getattr(lusid.models, attribute_type),
+                mapping=mapping[key],
+                row=row
+            )
+
+            if nested_type == "list":
+                obj_init_values[key] = [value]
+            else:
+                obj_init_values[key] = value
+
 
     """
     If all attributes are None propagate None rather than a model filled with Nones. For example if a CorporateActionSourceId
@@ -294,6 +298,8 @@ def update_dict(orig_dict: dict, new_dict) -> None:
         # Do the same for any other type
         else:
             orig_dict[key] = new_dict[key]
+
+    return orig_dict
 
 
 @checkargs
@@ -381,7 +387,7 @@ def verify_all_required_attributes_mapped(
     otherwise
 
     :param dict mapping: The required mapping
-    :param lusid.model model_object: The LUSID model that the mapping applies to
+    :param str model_object_name: The name of the lusid.models object that the mapping is for
     :param list[str] exempt_attributes: The attributes that are exempt from needing to be in the required mapping
 
     :return: None
@@ -449,7 +455,7 @@ def get_required_attributes_model_recursive(model_object, separator: str = "."):
         # Otherwise call the function recursively
         else:
             # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
-            required_attribute_type = extract_lusid_model_from_attribute_type(required_attribute_type)
+            required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(required_attribute_type)
 
             nested_required_attributes = get_required_attributes_model_recursive(
                 model_object=getattr(lusid.models, required_attribute_type),
@@ -541,16 +547,21 @@ def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
     :param str attribute_type: The attribute type to extract the model from
 
     :return: str attribute_type: The returned attribute type with the LUSID model extracted if possible
+    :return: str nested_type: The type of nesting used e.g. List or Dict
     """
+
+    nested_type = None
 
     # If the attribute type is a dictionary e.g. dict(str, InstrumentIdValue), extract the type
     if "dict" in attribute_type:
         attribute_type = attribute_type.split(", ")[1].rstrip(")")
+        nested_type = "dict"
     # If it is a list e.g. list[ModelProperty] extract the type
     if "list" in attribute_type:
         attribute_type = attribute_type.split("list[")[1].rstrip("]")
+        nested_type = "list"
 
-    return attribute_type
+    return attribute_type, nested_type
 
 @checkargs
 def check_nested_model(required_attribute_type: str) -> bool:
@@ -563,7 +574,7 @@ def check_nested_model(required_attribute_type: str) -> bool:
     :return: str: The name of the LUSID model
     """
 
-    required_attribute_type = extract_lusid_model_from_attribute_type(required_attribute_type)
+    required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(required_attribute_type)
 
     top_level_model = getattr(lusid.models, required_attribute_type, None)
 
