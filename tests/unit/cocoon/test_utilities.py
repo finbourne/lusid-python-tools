@@ -235,13 +235,18 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        updated_dict = cocoon.utilities.update_dict(
+        print(nested_dictionary_1)
+        print(nested_dictionary_2)
+        cocoon.utilities.update_dict(
             orig_dict=nested_dictionary_1, new_dict=nested_dictionary_2
         )
 
+        print (nested_dictionary_1)
+        print (expected_outcome)
+
         self.assertTrue(
             expr=all(
-                value == updated_dict[key] for key, value in expected_outcome.items()
+                value == nested_dictionary_1[key] for key, value in expected_outcome.items()
             ),
             msg="The updated of a nested dictionary does not match the expected outcome",
         )
@@ -624,6 +629,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
             sub_holding_keys=sub_holding_keys,
         )
 
+        print (populated_model)
+        print (expected_outcome)
+
         self.assertEqual(
             first=populated_model,
             second=expected_outcome,
@@ -804,7 +812,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             # Test all required attributes exist
-            [{"name": "instrument_name"}, lusid.models.InstrumentDefinition],
+            [{"name": "instrument_name"}, lusid.models.InstrumentDefinition.__name__],
             # Test all required attributes exist as well as an extra attribute
             [
                 {
@@ -814,12 +822,12 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "base_currency": "base_currency",
                     "portfolio_type": "account_type",
                 },
-                lusid.models.CreateTransactionPortfolioRequest,
+                lusid.models.CreateTransactionPortfolioRequest.__name__,
             ],
             # Test all required attributes exist, plus an exempt attribute
             [
                 {"name": "instrument_name", "identifiers": "instrument_internal"},
-                lusid.models.InstrumentDefinition,
+                lusid.models.InstrumentDefinition.__name__,
             ],
         ]
     )
@@ -837,7 +845,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         cocoon.utilities.verify_all_required_attributes_mapped(
             mapping=mapping,
-            model_object=model_object,
+            model_object_name=model_object,
             exempt_attributes=[
                 "identifiers",
                 "properties",
@@ -851,7 +859,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             # Test no required attributes provided via an empty dictionary
             [{}, lusid.models.InstrumentDefinition, ValueError],
             # Test no required attributes required via None provided
-            [None, lusid.models.InstrumentDefinition, ValueError],
+            [None, lusid.models.InstrumentDefinition, TypeError],
             # Test a missing required attribute
             [
                 {
