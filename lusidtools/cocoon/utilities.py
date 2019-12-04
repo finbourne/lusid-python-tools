@@ -1,18 +1,13 @@
 import argparse
 import csv
-import logging
 import os
 import numpy as np
 import lusid
 from collections.abc import Mapping
 import pandas as pd
-from dateutil import parser
-from datetime import datetime
 from detect_delimiter import detect
 import requests
 import json
-import pytz
-import re
 import inspect
 import functools
 from pathlib import Path
@@ -22,45 +17,92 @@ import logging
 import time as default_time
 from lusidtools.cocoon.validator import Validator
 import types
-from lusidtools.logger import LusidLogger
+import typing
 
 
-def convert_datetime_utc(datetime_value) -> datetime:
+def checkargs(function: typing.Callable) -> typing.Callable:
     """
-    This function ensures that a variable is a timezone aware UTC datetime
+    This can be used as a decorator to test the type of arguments are correct. It checks that the provided arguments
+    match any type annotations and/or the default value for the parameter.
 
-    :param any datetime_value:
-    :return: datetime datetime_value: The converted timezone aware datetime in the UTC timezone
+    :param typing.Callable function: The function to wrap with annotated types, all parameters must be annotated with a
+    type
+
+    :return: typing.Callable _f: The wrapped function
     """
 
-    # Add regular expression check for ISO format
+    @functools.wraps(function)
+    def _f(*args, **kwargs):
 
-    # If the datetime is a string try and parse it
-    if isinstance(datetime_value, str):
-        datetime_value = parser.parse(timestr=datetime_value, dayfirst=True)
+        # Get all the function arguments in order
+        function_arguments = inspect.signature(function).parameters
 
-    # if the datetime has been parsed from a string or is already a datetime
-    if isinstance(datetime_value, datetime):
-        # If there is no timezone assume that it is in UTC
-        if (
-            datetime_value.tzinfo is None
-            or datetime_value.tzinfo.utcoffset(datetime_value) is None
-        ):
-            return datetime_value.replace(tzinfo=pytz.UTC)
-        # If there is a timezone convert to UTC
-        else:
-            return datetime_value.astimezone(pytz.UTC)
+        # Collect each non keyword argument value and key it by the argument name
+        keyed_arguments = {
+            list(function_arguments.keys())[i]: args[i] for i in range(0, len(args))
+        }
 
-    return datetime_value
+        # Update this with the keyword argument values
+        keyed_arguments.update(kwargs)
+
+        # For each argument raise an error if it is of the incorrect type and if it has an invalid default value
+        for argument_name, argument_value in keyed_arguments.items():
+
+            if argument_name not in list(function_arguments.keys()):
+                raise ValueError(
+                    f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments" +
+                    f" are {str(list(function_arguments.keys()))}"
+                )
+
+            # Get the arguments details
+            argument_details = function_arguments[argument_name]
+            # Assume that there is no default value for this parameter
+            is_default_value = False
+
+            # If there is a default value
+            if argument_details.default is not argument_details.empty:
+                # Check to see if the argument value matches the default
+                if argument_details.default is None:
+                    is_default_value = argument_value is argument_details.default
+                else:
+                    is_default_value = argument_value == argument_details.default
+
+            # If the argument value is of the wrong type e.g. list instead of dict then throw an error
+            if not isinstance(argument_value, argument_details.annotation) and argument_details.annotation is not argument_details.empty:
+                # Only exception to this is if it matches the default value which may be of a different type e.g. None
+                if not is_default_value:
+                    raise TypeError(
+                        f"""The value provided for {argument_name} is of type {type(argument_value)} not of 
+                    type {argument_details.annotation}. Please update the provided value to be of type 
+                    {argument_details.annotation}"""
+                    )
+
+        return function(*args, **kwargs)
+
+    return _f
 
 
-def make_code_lusid_friendly(raw_code):
+def make_code_lusid_friendly(raw_code) -> str:
     """
-    This function takes a column name and converts it to a LUSID friendly code for us in creating LUSID objects
+    This function takes a column name and converts it to a LUSID friendly code creating LUSID objects. LUSID allows
+    for up to 64 characters which can be lowercase and uppercase letters, numbers, a dash ("-") or an underscore ("_").
+    The complete restrictions are here: https://support.lusid.com/what-is-a-code
 
-    :param str raw_code: A raw column header which needs special characters stripped out
+    :param any raw_code: A raw column header which needs special characters stripped out
+
     :return: str friendly_code: A LUSID friendly code with special characters removed
     """
+
+    # Convert any type to a string
+    try:
+        raw_code = str(raw_code)
+    except Exception as exception:
+        raise ValueError(
+            f"Could not convert value of {raw_code} with type {type(raw_code)} to a string. " +
+            "Please convert to a format which can be cast to a string and try again"
+        ) from exception
+
+    # Check that it does not exceed the max length
     max_length = 64
 
     if len(raw_code) > max_length:
@@ -69,49 +111,59 @@ def make_code_lusid_friendly(raw_code):
                              for a code. Please shorten it by {len(raw_code) - 64} characters."""
         )
 
+    # Specifically convert known unfriendly characters with a specific string and remove the rest completely
     friendly_code = (
-        str(raw_code)
-        .replace(" ", "")
-        .replace("(", "")
-        .replace(")", "")
-        .replace("/", "")
-        .replace("%", "Percentage")
-        .replace("&", "and")
-        .replace(".", "_")
-        .strip()
+        re.sub(r'[^\w]', '', raw_code
+            .replace("%", "Percentage")
+            .replace("&", "and")
+            .replace(".", "_")
+            .replace("-", "_")
+            .strip()
+        )
     )
 
     return friendly_code
 
 
+@checkargs
 def populate_model(
-    model_object,
-    required_mapping,
-    optional_mapping,
-    row,
-    properties=None,
-    identifiers=None,
-):
+    model_object_name: str,
+    required_mapping: dict,
+    optional_mapping: dict,
+    row: pd.Series,
+    properties,
+    identifiers: dict = None,
+    sub_holding_keys: list = None
+) -> typing.Callable:
     """
-    This function populates
+    This function populates the provided LUSID model object in lusid.models with values from a Pandas Series
 
-    :param lusid.models model_object: The class of the model object to populate
-    :param required_mapping:
-    :param optional_mapping:
-    :param row:
-    :param properties:
-    :param identifiers:
-    :return:
+    :param str model_object_name: The name of the model object to populate
+    :param dict required_mapping: The required mapping between the row columns and the model attributes
+    :param dict optional_mapping: The optional mapping between the row columns and the model attributes
+    :param pd.Series row: The row from the provided pd.DataFrame to use to populate the model
+    :param dict properties: The properties for this model
+    :param dict identifiers: The identifiers for this model
+    :param list sub_holding_keys: The list of sub holding keys to use
+
+    :return: typiing.Callable set_attributes: The function to set the attributes for the model
     """
 
-    if getattr(lusid.models, model_object.__name__) is None:
+    # Check that the provided model name actually exists
+    model_object = getattr(lusid.models, model_object_name, None)
+
+    if model_object is None:
         raise TypeError("The provided model_object is not a lusid.model object")
 
+    # Expand the mapping out from being a dot separated flat dictionary e.g. transaction_price.price to being nested
+    update_dict(required_mapping, optional_mapping)
+
     mapping_expanded = expand_dictionary(
-        update_dict(required_mapping, optional_mapping)
+        required_mapping
     )
 
-    return set_attributes(
+    # Set the attributes on the model
+    return set_attributes_recursive(
         model_object=model_object,
         mapping=mapping_expanded,
         row=row,
@@ -121,18 +173,26 @@ def populate_model(
     )
 
 
-def set_attributes(
-    model_object, mapping, row, properties=None, identifiers=None, sub_holding_keys=None
+@checkargs
+def set_attributes_recursive(
+    model_object,
+    mapping: dict,
+    row: pd.Series,
+    properties: dict = None,
+    identifiers: dict = None,
+    sub_holding_keys: list = None
 ):
     """
-    This function takes a lusid.model object and an expanded mapping between its attributes and
+    This function takes a lusid.model object name and an expanded mapping between its attributes and the provided
+    row of data and constructs a populated model
 
-    :param lusid.models model_object: The class of the model object to populate
+    :param str model_object: The object from lusid.models to populate
     :param dict mapping: The expanded dictionary mapping the Series columns to the LUSID model attributes
     :param pd.Series row: The current row of the DataFrame being worked on
     :param any properties: The properties to use on this model
     :param any identifiers: The instrument identifiers to use on this model
     :param list[str] sub_holding_keys: The sub holding keys to use on this model
+
     :return: lusid.models new model_object: An instance of the model object with populated attributes
     """
 
@@ -164,7 +224,8 @@ def set_attributes(
         if key in list(additional_attributes.keys()):
             obj_init_values[key] = additional_attributes[key]
             continue
-        # This block keeps track of the number of missing (non-additional) attributes, if they are all none it will return None
+
+        # This block keeps track of the number of missing (non-additional) attributes
         else:
             total_count += 1
             if mapping[key] is None:
@@ -175,8 +236,9 @@ def set_attributes(
 
         # If this is the last object and there is no more nesting set the value from the row
         if not isinstance(mapping[key], dict):
+            # If this exists in the mapping with a value and there is a value in the row for it
             if mapping[key] is not None and not pd.isna(row[mapping[key]]):
-                # Need an explicit datetime or cutlabel type in place of this
+                # Converts to a date if it is a date field
                 if "date" in key or "created" in key or "effective_at" in key:
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
@@ -184,24 +246,17 @@ def set_attributes(
 
         # if there is more nesting call the function recursively
         else:
-            # Temporary workaround, need to add a more robust solution here
-            if "list[" in attribute_type:
-                attribute_type = attribute_type.split("[")[1].replace("]", "")
+            # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
+            attribute_type = extract_lusid_model_from_attribute_type(attribute_type)
 
-                obj_init_values[key] = [
-                    set_attributes(
-                        model_object=getattr(lusid.models, attribute_type),
-                        mapping=mapping[key],
-                        row=row,
-                    )
-                ]
-
-            else:
-                obj_init_values[key] = set_attributes(
+            # Call the function recursively
+            obj_init_values[key] = [
+                set_attributes_recursive(
                     model_object=getattr(lusid.models, attribute_type),
                     mapping=mapping[key],
                     row=row,
                 )
+            ]
 
     """
     If all attributes are None propagate None rather than a model filled with Nones. For example if a CorporateActionSourceId
@@ -215,33 +270,41 @@ def set_attributes(
     return model_object(**obj_init_values)
 
 
-def update_dict(orig_dict, new_dict) -> dict:
+@checkargs
+def update_dict(orig_dict: dict, new_dict) -> None:
     """
     This is used to update a dictionary with another dictionary. Using the default Python update method does not merge
-    nested dictionaries. This method allows for this.
+    nested dictionaries. This method allows for this. This modifies the original dictionary in place.
 
     :param dict orig_dict: The original dictionary to update
     :param dict new_dict: The new dictionary to merge with the original
-    :return: dict orig_dict: The updated original dictionary
+
+    :return: None
     """
 
+    # Iterate over key value pairs in the new dictionary to merge into the original
     for key, val in new_dict.items():
+        # If a mapping object (e.g. dictionary) call the function recursively
         if isinstance(val, Mapping):
             tmp = update_dict(orig_dict.get(key, {}), val)
             orig_dict[key] = tmp
+        # If a list then merge it into the original dictionary
         elif isinstance(val, list):
             orig_dict[key] = orig_dict.get(key, []) + val
+        # Do the same for any other type
         else:
             orig_dict[key] = new_dict[key]
-    return orig_dict
 
 
-def expand_dictionary(dictionary) -> dict:
+@checkargs
+def expand_dictionary(dictionary: dict, separator: str = ".") -> dict:
     """
-    Takes a flat dictionary (no nesting) with keys separated by a separator "." and converts it into a nested
+    Takes a flat dictionary (no nesting) with keys separated by a separator and converts it into a nested
     dictionary
 
     :param dict dictionary: The input dictionary with separated keys
+    :param str separator: The seprator to use
+
     :return: dict dict_expanded: The expanded nested dictionary
     """
 
@@ -250,7 +313,7 @@ def expand_dictionary(dictionary) -> dict:
     # Loop over each composite key and final value
     for key, value in dictionary.items():
         # Split the key on the separator
-        components = key.split(".")
+        components = key.split(separator)
         # Get the expanded dictionary for this key and update the master dictionary
         update_dict(
             dict_expanded, expand_dictionary_single_recursive(0, components, value)
@@ -259,30 +322,39 @@ def expand_dictionary(dictionary) -> dict:
     return dict_expanded
 
 
-def expand_dictionary_single_recursive(index, key_list, value) -> dict:
+@checkargs
+def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dict:
     """
     Takes a list of keys and a value and turns it into a nested dictionary. This is a recursive function.
 
     :param int index: The current index of the key in the list of keys
     :param list[str] key_list: The list of keys to turn into a nested dictionary
     :param any value: The final value to match against the last (deepest) key
+
     :return: dict: The nested dictionary for the current key in the list
     """
 
+    # Gets the current key in the list
     key = key_list[index]
+
+    # If it is the last key in the list return a dictionary with it keyed against the value
     if key == key_list[-1]:
         return {key: value}
 
+    # Otherwise if it is not the last key, key it against calling this function recursively with the next key
     return {key: expand_dictionary_single_recursive(index + 1, key_list, value)}
 
 
-def get_swagger_dict(api_url) -> dict:
+@checkargs
+def get_swagger_dict(api_url: str) -> dict:
     """
     Gets the lusid.json swagger file
 
     :param str api_url: The base api url for the LUSID instance
+
     :return: dict: The swagger file as a dictionary
     """
+
     swagger_path = "/swagger/v0/swagger.json"
     swagger_url = api_url + swagger_path
     swagger_file = requests.get(swagger_url)
@@ -296,8 +368,13 @@ def get_swagger_dict(api_url) -> dict:
         )
 
 
+def generate_required_attributes_list():
+    pass
+
+
+@checkargs
 def verify_all_required_attributes_mapped(
-    mapping, model_object, exempt_attributes=[]
+    mapping: dict, model_object_name: str, exempt_attributes: list = None
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
@@ -309,19 +386,26 @@ def verify_all_required_attributes_mapped(
 
     :return: None
     """
+
+    # Check that the provided model name actually exists
+    model_object = getattr(lusid.models, model_object_name, None)
+
+    if model_object is None:
+        raise TypeError("The provided model_object is not a lusid.model object")
+
+    # Convert a None to an empty list
+    exempt_attributes = Validator(exempt_attributes, "exempt_attributes").set_default_value_if_none([]).value
+
+    # Gets the required attributes for this model
     required_attributes = get_required_attributes_model_recursive(
         model_object=model_object
     )
 
+    # Removes the exempt attributes
     for attribute in required_attributes:
+        # Removes all nested attributes for example if "identifiers" is exempt "identifiers.value" will be removed
         if attribute.split(".")[0] in exempt_attributes:
             required_attributes.remove(attribute)
-
-    if mapping is None:
-        raise ValueError(
-            f"""No required mapping has been provided. The required attributes {str(required_attributes)} 
-                             are missing from the mapping. Please add them to a mapping and provide it."""
-        )
 
     missing_attributes = set(required_attributes) - set(list(mapping.keys()))
 
@@ -332,8 +416,56 @@ def verify_all_required_attributes_mapped(
         )
 
 
-def generate_required_attributes_list():
-    pass
+@checkargs
+def get_required_attributes_model_recursive(model_object, separator: str = "."):
+    """
+    This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
+    then it separates the attributes by a '.' until the bottom level where no more models are required and a primitive
+    type is supplied e.g. string, int etc.
+
+    :param lusid.model model_object: The model to get required attributes for
+    :param str separator: The separator to use to join the required attributes together
+
+    :return: list[str]: The required attributes of the model
+    """
+
+    attributes = []
+
+    # Get the required attributes for the current model
+    required_attributes = get_required_attributes_from_model(model_object)
+
+    # Get the types of the attributes for the current model
+    open_api_types = model_object.openapi_types
+
+    for required_attribute in required_attributes:
+
+
+        required_attribute_type = open_api_types[required_attribute]
+
+        # Check to see if there is a LUSID model for this required attribute, if no further nesting then add this attribute
+        if not check_nested_model(required_attribute_type):
+            attributes.append(camel_case_to_pep_8(required_attribute))
+
+        # Otherwise call the function recursively
+        else:
+            # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
+            required_attribute_type = extract_lusid_model_from_attribute_type(required_attribute_type)
+
+            nested_required_attributes = get_required_attributes_model_recursive(
+                model_object=getattr(lusid.models, required_attribute_type),
+            )
+
+            for nested_required_attribute in nested_required_attributes:
+                attributes.append(
+                    separator.join(
+                        [
+                            camel_case_to_pep_8(required_attribute),
+                            nested_required_attribute,
+                        ]
+                    )
+                )
+
+    return attributes
 
 
 def get_required_attributes_from_model(model_object) -> list:
@@ -351,8 +483,36 @@ def get_required_attributes_from_model(model_object) -> list:
     # Get all the setter function definitions
     setters = re.findall(r"(?<=.setter).+?(?:@|to_dict)", model_details, re.DOTALL)
 
-    # Set the status (required or optional) for each attrbiute based on whether "is None:" exists in the setter function
-    # This is part of the if condition that doesn't allow a None value
+    # Set the status (required or optional) for each attribute based on whether "is None:" exists in the setter function
+    '''
+    Here are two examples
+    
+    A) A None value is not allowed and hence this is required. Notice the "if identifiers is None:" condition. 
+    
+    @identifiers.setter
+    def identifiers(self, identifiers):
+        """Sets the identifiers of this InstrumentDefinition.
+        A set of identifiers that can be used to identify the instrument. At least one of these must be configured to be a unique identifier.  # noqa: E501
+        :param identifiers: The identifiers of this InstrumentDefinition.  # noqa: E501
+        :type: dict(str, InstrumentIdValue)
+        """
+        if identifiers is None:
+            raise ValueError("Invalid value for `identifiers`, must not be `None`")  # noqa: E501
+
+        self._identifiers = identifiers
+        
+    B) A None value is allowed and hence this is optional
+    
+    @look_through_portfolio_id.setter
+    def look_through_portfolio_id(self, look_through_portfolio_id):
+        """Sets the look_through_portfolio_id of this InstrumentDefinition.
+        :param look_through_portfolio_id: The look_through_portfolio_id of this InstrumentDefinition.  # noqa: E501
+        :type: ResourceId
+        """
+
+        self._look_through_portfolio_id = look_through_portfolio_id
+
+    '''
     attribute_status = {
         re.search(r"(?<=def ).+?(?=\(self)", setter).group(0): "Required"
         if "is None:" in setter
@@ -373,52 +533,27 @@ def get_required_attributes_from_model(model_object) -> list:
     return required_attributes
 
 
-def get_required_attributes_model_recursive(model_object):
+def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
     """
-    This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
-    then it separates the attributes by a '.' until the bottom level where no more models are required and a primitive
-    type is supplied e.g. string, int etc.
+    Extracts a LUSID model from a complex attribute type e.g. dict(str, InstrumentIdValue) if it exists. If there
+    is no LUSID model the attribute type is still returned
 
-    :param lusid.model model_object: The model to get required attributes for
+    :param str attribute_type: The attribute type to extract the model from
 
-    :return: list[str]: The required attributes of the model
+    :return: str attribute_type: The returned attribute type with the LUSID model extracted if possible
     """
-    attributes = []
 
-    # Get the required attributes for the current model
-    required_attributes = get_required_attributes_from_model(model_object)
+    # If the attribute type is a dictionary e.g. dict(str, InstrumentIdValue), extract the type
+    if "dict" in attribute_type:
+        attribute_type = attribute_type.split(", ")[1].rstrip(")")
+    # If it is a list e.g. list[ModelProperty] extract the type
+    if "list" in attribute_type:
+        attribute_type = attribute_type.split("list[")[1].rstrip("]")
 
-    # Get the types of the attributes
-    open_api_types = model_object.openapi_types
+    return attribute_type
 
-    for required_attribute in required_attributes:
-
-        # Check to see if there is a LUSID model for this required attribute
-        nested_model = return_nested_model(open_api_types[required_attribute])
-
-        if nested_model is None:
-            attributes.append(camel_case_to_pep_8(required_attribute))
-
-        else:
-            # Call the function recursively
-            nested_required_attributes = get_required_attributes_model_recursive(
-                model_object=getattr(lusid.models, nested_model),
-            )
-
-            for nested_required_attribute in nested_required_attributes:
-                attributes.append(
-                    ".".join(
-                        [
-                            camel_case_to_pep_8(required_attribute),
-                            nested_required_attribute,
-                        ]
-                    )
-                )
-
-    return attributes
-
-
-def return_nested_model(required_attribute_type):
+@checkargs
+def check_nested_model(required_attribute_type: str) -> bool:
     """
     Takes the properties of a required attribute on a model and searches as to whether or not this attribute
     requires a model of its own
@@ -428,22 +563,18 @@ def return_nested_model(required_attribute_type):
     :return: str: The name of the LUSID model
     """
 
-    # If the attribute type is a dictionary e.g. dict(str, InstrumentIdValue), extract the type
-    if "dict" in required_attribute_type:
-        required_attribute_type = required_attribute_type.split(", ")[1].rstrip(")")
-    # If it is a list e.g. list[ModelProperty] extract the type
-    if "list" in required_attribute_type:
-        required_attribute_type = required_attribute_type.split("list[")[1].rstrip("]")
+    required_attribute_type = extract_lusid_model_from_attribute_type(required_attribute_type)
 
     top_level_model = getattr(lusid.models, required_attribute_type, None)
 
     if top_level_model is None:
-        return None
+        return False
 
-    return top_level_model.__name__
+    return True
 
 
-def gen_dict_extract(key, var):
+@checkargs
+def gen_dict_extract(key, var: dict):
     """
     Searches a nested dictionary for a key, yielding any values it finds against that key
 
@@ -465,7 +596,8 @@ def gen_dict_extract(key, var):
                         yield result
 
 
-def camel_case_to_pep_8(attribute_name) -> str:
+@checkargs
+def camel_case_to_pep_8(attribute_name: str) -> str:
     """
     Converts a camel case name to PEP 8 standard
 
@@ -562,60 +694,6 @@ def handle_nested_default_and_column_mapping(
             )
 
     return data_frame, mapping_updated
-
-
-def checkargs(function):
-    """
-    This can be used as a decorator to test the type of arguments are correct
-
-    :param function: The function to wrap with annotated types, all parameters must be annotated with a type
-
-    :return:
-    """
-
-    @functools.wraps(function)
-    def _f(*args, **kwargs):
-
-        # Get all the function arguments in order
-        function_arguments = inspect.signature(function).parameters
-
-        # For each non keyword argument provided key it by the argument name
-        keyed_arguments = {
-            list(function_arguments.keys())[i]: args[i] for i in range(0, len(args))
-        }
-
-        # Update this with the keyword arguments
-        keyed_arguments.update(kwargs)
-
-        # For each argument raise an error if it is of the incorrect type and if it has a default it is not the
-        # default value
-        for argument_name, argument_value in keyed_arguments.items():
-
-            if argument_name not in list(function_arguments.keys()):
-                raise ValueError(
-                    f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments are {str(list(function_arguments.keys()))}"
-                )
-
-            argument = function_arguments[argument_name]
-            is_default_value = False
-
-            if argument.default is not argument.empty:
-                if argument.default is None:
-                    is_default_value = argument_value is argument.default
-                else:
-                    is_default_value = argument_value == argument.default
-
-            if not isinstance(argument_value, argument.annotation):
-                if not is_default_value:
-                    raise TypeError(
-                        f"""The value provided for {argument_name} is of type {type(argument_value)} not of 
-                    type {argument.annotation}. Please update the provided value to be of type 
-                    {argument.annotation}"""
-                    )
-
-        return function(*args, **kwargs)
-
-    return _f
 
 
 def load_json_file(relative_file_path: str) -> dict:
