@@ -45,7 +45,7 @@ def create_identifiers(
     unique_identifiers: list = None,
     full_key_format: bool = True,
     prepare_key: Callable = prepare_key,
-):
+) -> dict:
     """
     This function creates identifiers to be added to a LUSID model object
 
