@@ -1684,3 +1684,80 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         with self.assertRaises(expected_exception):
             create_scope_id(time_generator)
+
+    @parameterized.expand([
+        [
+            "InstrumentDefinition Model",
+            lusid.models.InstrumentDefinition,
+            ["name", "identifiers"]
+        ],
+        [
+            "Transaction Request Model",
+            lusid.models.TransactionRequest,
+            [
+                "transaction_id",
+                "type",
+                "instrument_identifiers",
+                "transaction_date",
+                "settlement_date",
+                "units",
+                "transaction_price",
+                "total_consideration"]
+        ]
+
+    ])
+    def test_get_required_attributes_from_model(self, _, model_object, expected_outcome):
+
+        required_attributes = cocoon.utilities.get_required_attributes_from_model(model_object)
+
+        self.assertEqual(
+            first=expected_outcome,
+            second=required_attributes
+        )
+
+    @parameterized.expand([
+        [
+            "Not a complex type",
+            "InstrumentDefinition",
+            "InstrumentDefinition",
+            None
+        ],
+        [
+            "A dict type with a LUSID model",
+            "dict(str, ModelProperty)",
+            "ModelProperty",
+            "dict"
+        ],
+        [
+            "A dict type with a primitive value",
+            "dict(str, str)",
+            "str",
+            "dict"
+        ],
+        [
+            "A list type with a LUSID model",
+            "list[TaxLot]",
+            "TaxLot",
+            "list"
+        ],
+        [
+            "A list type with a primitive value",
+            "list[str]",
+            "str",
+            "list"
+        ]
+
+    ])
+    def test_extract_lusid_model_from_attribute_type(self, _, attribute_type, expected_attribute, expected_nested):
+
+        attribute_type, nested_type = cocoon.utilities.extract_lusid_model_from_attribute_type(attribute_type)
+
+        self.assertEqual(
+            first=expected_attribute,
+            second=attribute_type
+        )
+
+        self.assertEqual(
+            first=expected_nested,
+            second=nested_type
+        )
