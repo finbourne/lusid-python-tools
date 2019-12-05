@@ -158,11 +158,6 @@ def format_quotes_response(response: dict) -> (pd.DataFrame, pd.DataFrame, pd.Da
 
     check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
     items_success, items_failed = get_non_href_response(response, file_type)
-    # items_success = [batch.values[key] for batch in
-    #                  response[file_type]["success"] for key in batch.values.keys()]
-    #
-    # items_failed = [batch.failed[key] for batch in
-    #                 response[file_type]["success"] for key in batch.failed.keys()]
 
     return (pd.DataFrame(items_success, columns=["successful items"]),
             get_errors_from_response(response[file_type]["errors"]),
