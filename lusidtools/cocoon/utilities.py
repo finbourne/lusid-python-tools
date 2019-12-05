@@ -186,7 +186,7 @@ def set_attributes_recursive(
     This function takes a lusid.model object name and an expanded mapping between its attributes and the provided
     row of data and constructs a populated model
 
-    :param str model_object: The object from lusid.models to populate
+    :param lusid.models model_object: The object from lusid.models to populate
     :param dict mapping: The expanded dictionary mapping the Series columns to the LUSID model attributes
     :param pd.Series row: The current row of the DataFrame being worked on
     :param any properties: The properties to use on this model
@@ -256,10 +256,7 @@ def set_attributes_recursive(
                 row=row
             )
 
-            if nested_type == "list":
-                obj_init_values[key] = [value]
-            else:
-                obj_init_values[key] = value
+            obj_init_values[key] = [value] if nested_type == "list" else value
 
 
     """
@@ -303,13 +300,13 @@ def update_dict(orig_dict: dict, new_dict) -> None:
 
 
 @checkargs
-def expand_dictionary(dictionary: dict, separator: str = ".") -> dict:
+def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
     """
     Takes a flat dictionary (no nesting) with keys separated by a separator and converts it into a nested
     dictionary
 
     :param dict dictionary: The input dictionary with separated keys
-    :param str separator: The seprator to use
+    :param str key_separator: The seprator to use
 
     :return: dict dict_expanded: The expanded nested dictionary
     """
@@ -319,7 +316,7 @@ def expand_dictionary(dictionary: dict, separator: str = ".") -> dict:
     # Loop over each composite key and final value
     for key, value in dictionary.items():
         # Split the key on the separator
-        components = key.split(separator)
+        components = key.split(key_separator)
         # Get the expanded dictionary for this key and update the master dictionary
         update_dict(
             dict_expanded, expand_dictionary_single_recursive(0, components, value)
@@ -380,7 +377,7 @@ def generate_required_attributes_list():
 
 @checkargs
 def verify_all_required_attributes_mapped(
-    mapping: dict, model_object_name: str, exempt_attributes: list = None
+    mapping: dict, model_object_name: str, exempt_attributes: list = None, key_separator: str = "."
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
@@ -389,6 +386,7 @@ def verify_all_required_attributes_mapped(
     :param dict mapping: The required mapping
     :param str model_object_name: The name of the lusid.models object that the mapping is for
     :param list[str] exempt_attributes: The attributes that are exempt from needing to be in the required mapping
+    :param str key_separator: The separator to use to join the required attributes together
 
     :return: None
     """
@@ -404,13 +402,14 @@ def verify_all_required_attributes_mapped(
 
     # Gets the required attributes for this model
     required_attributes = get_required_attributes_model_recursive(
-        model_object=model_object
+        model_object=model_object,
+        key_separator=key_separator
     )
 
     # Removes the exempt attributes
     for attribute in required_attributes:
         # Removes all nested attributes for example if "identifiers" is exempt "identifiers.value" will be removed
-        if attribute.split(".")[0] in exempt_attributes:
+        if attribute.split(key_separator)[0] in exempt_attributes:
             required_attributes.remove(attribute)
 
     missing_attributes = set(required_attributes) - set(list(mapping.keys()))
@@ -423,14 +422,14 @@ def verify_all_required_attributes_mapped(
 
 
 @checkargs
-def get_required_attributes_model_recursive(model_object, separator: str = "."):
+def get_required_attributes_model_recursive(model_object, key_separator: str = "."):
     """
     This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
     then it separates the attributes by a '.' until the bottom level where no more models are required and a primitive
     type is supplied e.g. string, int etc.
 
     :param lusid.model model_object: The model to get required attributes for
-    :param str separator: The separator to use to join the required attributes together
+    :param str key_separator: The separator to use to join the required attributes together
 
     :return: list[str]: The required attributes of the model
     """
@@ -463,7 +462,7 @@ def get_required_attributes_model_recursive(model_object, separator: str = "."):
 
             for nested_required_attribute in nested_required_attributes:
                 attributes.append(
-                    separator.join(
+                    key_separator.join(
                         [
                             camel_case_to_pep_8(required_attribute),
                             nested_required_attribute,
