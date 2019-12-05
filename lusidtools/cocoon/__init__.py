@@ -23,7 +23,7 @@ from lusidtools.cocoon.cocoon_printer import (
     format_instruments_response,
     format_portfolios_response,
     format_quotes_response,
-    format_transactions_response
+    format_transactions_response,
 )
 
 import lusidtools.cocoon.async_tools

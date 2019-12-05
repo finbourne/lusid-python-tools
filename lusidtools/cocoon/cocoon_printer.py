@@ -5,7 +5,9 @@ from lusid.exceptions import ApiException
 
 
 @checkargs
-def check_dict_for_required_keys(target_dict: dict, target_name: str, required_keys: list):
+def check_dict_for_required_keys(
+    target_dict: dict, target_name: str, required_keys: list
+):
     """
     This function checks that a named dictionary contains a list of required keys
     :param dict target_dict: Dictionary to check for keys in
@@ -15,8 +17,10 @@ def check_dict_for_required_keys(target_dict: dict, target_name: str, required_k
     """
     for key in required_keys:
         if key not in target_dict.keys():
-            raise ValueError(f"'{key}' missing from {target_name}. {target_name} must include {required_keys}"
-                             f"as keys")
+            raise ValueError(
+                f"'{key}' missing from {target_name}. {target_name} must include {required_keys}"
+                f"as keys"
+            )
 
 
 def get_errors_from_response(list_of_API_exceptions: list):
@@ -28,7 +32,9 @@ def get_errors_from_response(list_of_API_exceptions: list):
     # check all items are ApiExceptions
     for i in list_of_API_exceptions:
         if not isinstance(i, ApiException):
-            raise TypeError(f" Unexpected Error in response. Expected instance of ApiException, but got: {repr(i)}")
+            raise TypeError(
+                f" Unexpected Error in response. Expected instance of ApiException, but got: {repr(i)}"
+            )
 
     # get status and reason for each batch
     status = [item.status for item in list_of_API_exceptions]
@@ -49,21 +55,26 @@ def get_portfolio_from_href(href: list, file_type: str):
     """
 
     # get portfolio codes from each href
-    codes = [j[-2] for j in [i.split('/') for i in href]]
+    codes = [j[-2] for j in [i.split("/") for i in href]]
 
     return codes
 
 
 @checkargs
 def get_non_href_response(response: dict, file_type: str):
-    items_success = [key for batch in response[file_type]["success"] for key in batch.values.keys()]
+    items_success = [
+        key for batch in response[file_type]["success"] for key in batch.values.keys()
+    ]
 
-    items_failed = [key for batch in response[file_type]["success"] for key in
-                    batch.failed.keys()]
+    items_failed = [
+        key for batch in response[file_type]["success"] for key in batch.failed.keys()
+    ]
     return items_success, items_failed
 
-def format_instruments_response(response: dict) -> (
-        pd.DataFrame, pd.DataFrame, pd.DataFrame):
+
+def format_instruments_response(
+    response: dict,
+) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
     request constituents.
@@ -73,14 +84,18 @@ def format_instruments_response(response: dict) -> (
     :return: pd.DataFrame: Failed responses that LUSID rejected
     """
     file_type = "instruments"
-    check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
 
     # get success and failures
     items_success, items_failed = get_non_href_response(response, file_type)
 
-    return (pd.DataFrame(items_success, columns=["successful items"]),
-            get_errors_from_response(response[file_type]["errors"]),
-            pd.DataFrame(items_failed, columns=["failed_items"]))
+    return (
+        pd.DataFrame(items_success, columns=["successful items"]),
+        get_errors_from_response(response[file_type]["errors"]),
+        pd.DataFrame(items_failed, columns=["failed_items"]),
+    )
 
 
 def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
@@ -92,15 +107,16 @@ def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
     """
     file_type = "portfolios"
-    check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
 
     # get success
     items_success = [batch.id.code for batch in response[file_type]["success"]]
 
     errors = get_errors_from_response(response[file_type]["errors"])
 
-    return (pd.DataFrame(items_success, columns=["successful items"]),
-            errors)
+    return (pd.DataFrame(items_success, columns=["successful items"]), errors)
 
 
 def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
@@ -114,15 +130,22 @@ def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame)
     """
     file_type = "transactions"
 
-    check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
 
     # get success
     items_success = [batch.href for batch in response[file_type]["success"]]
 
     errors = get_errors_from_response(response[file_type]["errors"])
 
-    return (pd.DataFrame(get_portfolio_from_href(items_success, file_type), columns=["successful items"]),
-            errors)
+    return (
+        pd.DataFrame(
+            get_portfolio_from_href(items_success, file_type),
+            columns=["successful items"],
+        ),
+        errors,
+    )
 
 
 def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
@@ -134,18 +157,27 @@ def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
     """
     file_type = "holdings"
-    check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
 
     # get success
     items_success = [batch.href for batch in response[file_type]["success"]]
 
     errors = get_errors_from_response(response[file_type]["errors"])
 
-    return (pd.DataFrame(get_portfolio_from_href(items_success, file_type), columns=["successful items"]),
-            errors)
+    return (
+        pd.DataFrame(
+            get_portfolio_from_href(items_success, file_type),
+            columns=["successful items"],
+        ),
+        errors,
+    )
 
 
-def format_quotes_response(response: dict) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
+def format_quotes_response(
+    response: dict,
+) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from quotes requests and returns successful, failed and errored statuses for
     request constituents.
@@ -156,9 +188,13 @@ def format_quotes_response(response: dict) -> (pd.DataFrame, pd.DataFrame, pd.Da
     """
     file_type = "quotes"
 
-    check_dict_for_required_keys(response[file_type], f"Response from {file_type} request", ["errors", "success"])
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
     items_success, items_failed = get_non_href_response(response, file_type)
 
-    return (pd.DataFrame(items_success, columns=["successful items"]),
-            get_errors_from_response(response[file_type]["errors"]),
-            pd.DataFrame(items_failed, columns=["failed_items"]))
+    return (
+        pd.DataFrame(items_success, columns=["successful items"]),
+        get_errors_from_response(response[file_type]["errors"]),
+        pd.DataFrame(items_failed, columns=["failed_items"]),
+    )
