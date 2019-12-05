@@ -52,7 +52,7 @@
         "transaction_type": ["FundsIn", "StartingBalance"],
         "id": ["ab1543673", "kjk99898990z88908"],
         "instrument_name": ["USD"],
-        "settlement_date": ["2019-09-01T09:31:22.664000+00:00", "2019-09-01T09:31:22.664000+00:00"],
+        "settlement_date": ["2019-09-01T09:31:22.664000+00:00", "2019-09-01T09:31:22.664000+00:00"]
       },
       "implicit": "trade_currency"
     }

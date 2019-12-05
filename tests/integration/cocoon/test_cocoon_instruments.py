@@ -812,6 +812,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             identifier_mapping=identifier_mapping,
             property_columns=property_columns,
             properties_scope=properties_scope,
+            remove_white_space=True
         )
 
         self.assertEqual(

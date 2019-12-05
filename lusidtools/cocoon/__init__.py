@@ -18,7 +18,13 @@ from lusidtools.cocoon.utilities import (
     scale_quote_of_type,
     strip_whitespace,
 )
-
+from lusidtools.cocoon.cocoon_printer import (
+    format_holdings_response,
+    format_instruments_response,
+    format_portfolios_response,
+    format_quotes_response,
+    format_transactions_response
+)
 
 import lusidtools.cocoon.async_tools
 import lusidtools.cocoon.validator
