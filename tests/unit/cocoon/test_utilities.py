@@ -235,21 +235,16 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        print(nested_dictionary_1)
-        print(nested_dictionary_2)
         cocoon.utilities.update_dict(
             orig_dict=nested_dictionary_1, new_dict=nested_dictionary_2
         )
 
-        print (nested_dictionary_1)
-        print (expected_outcome)
-
-        self.assertTrue(
-            expr=all(
-                value == nested_dictionary_1[key] for key, value in expected_outcome.items()
-            ),
-            msg="The updated of a nested dictionary does not match the expected outcome",
-        )
+        for key, value in expected_outcome.items():
+            self.assertEqual(
+                first=value,
+                second=nested_dictionary_1[key],
+                msg="The key of a nested dictionary does not match the expected outcome",
+            )
 
     @parameterized.expand(
         [
@@ -629,9 +624,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
             sub_holding_keys=sub_holding_keys,
         )
 
-        print (populated_model)
-        print (expected_outcome)
-
         self.assertEqual(
             first=populated_model,
             second=expected_outcome,
@@ -649,11 +641,12 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Explicitly known invalid character '&'", "S&PCreditRating(UK)", "SandPCreditRatingUK"],
             ["Explicitly known invalid character '%'", "Return%", "ReturnPercentage"],
             ["Explicitly known invalid character '.'", "balances.available", "balances_available"],
-            ["Invalid character not meeting regex #1", "Buy/Sell Indicator", "BuySellIndicator"],
-            ["Invalid character not meeting regex #2", "£DollarDollarBills$", "DollarDollarBills"],
+            ["Invalid character not meeting regex #1 - /", "Buy/Sell Indicator", "BuySellIndicator"],
+            ["Invalid character not meeting regex #2 - £$", "£DollarDollarBills$", "DollarDollarBills"],
+            ["Invalid character not meeting regex #3 - Space", "Dollar Dollar Bills", "DollarDollarBills"],
             ["Integer", 1, "1"],
             ["Decimal", 1.8596, "1_8596"],
-            ["List", ["My", "List", "Code"], "MyListCode"]
+            ["List", ["My", "List", "Code"], "MyListCode"],
         ]
     )
     def test_make_code_lusid_friendly_success(self, _, enemy_code, expected_code) -> None:
@@ -803,11 +796,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        nested_model = cocoon.utilities.check_nested_model(
+        nested_model_check = cocoon.utilities.check_nested_model(
             required_attribute_properties
         )
 
-        self.assertTrue(expr=nested_model is expected_outcome)
+        self.assertEqual(
+            first=expected_outcome,
+            second=nested_model_check
+        )
 
     @parameterized.expand(
         [
