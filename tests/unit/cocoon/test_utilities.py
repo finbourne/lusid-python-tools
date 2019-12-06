@@ -45,8 +45,10 @@ class ReturnBytes:
     """
     This class returns a bytes objects rather than a string when str() is called on it
     """
+
     def __str__(self):
-        return b''
+        return b""
+
 
 class MockTimeGenerator:
     """
@@ -638,18 +640,40 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["Explicitly known invalid character '&'", "S&PCreditRating(UK)", "SandPCreditRatingUK"],
+            [
+                "Explicitly known invalid character '&'",
+                "S&PCreditRating(UK)",
+                "SandPCreditRatingUK",
+            ],
             ["Explicitly known invalid character '%'", "Return%", "ReturnPercentage"],
-            ["Explicitly known invalid character '.'", "balances.available", "balances_available"],
-            ["Invalid character not meeting regex #1 - /", "Buy/Sell Indicator", "BuySellIndicator"],
-            ["Invalid character not meeting regex #2 - £$", "£DollarDollarBills$", "DollarDollarBills"],
-            ["Invalid character not meeting regex #3 - Space", "Dollar Dollar Bills", "DollarDollarBills"],
+            [
+                "Explicitly known invalid character '.'",
+                "balances.available",
+                "balances_available",
+            ],
+            [
+                "Invalid character not meeting regex #1 - /",
+                "Buy/Sell Indicator",
+                "BuySellIndicator",
+            ],
+            [
+                "Invalid character not meeting regex #2 - £$",
+                "£DollarDollarBills$",
+                "DollarDollarBills",
+            ],
+            [
+                "Invalid character not meeting regex #3 - Space",
+                "Dollar Dollar Bills",
+                "DollarDollarBills",
+            ],
             ["Integer", 1, "1"],
             ["Decimal", 1.8596, "1_8596"],
             ["List", ["My", "List", "Code"], "MyListCode"],
         ]
     )
-    def test_make_code_lusid_friendly_success(self, _, enemy_code, expected_code) -> None:
+    def test_make_code_lusid_friendly_success(
+        self, _, enemy_code, expected_code
+    ) -> None:
         """
         This tests that the utility to make codes LUSID friendly works as expected
 
@@ -674,11 +698,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "S&PCreditRating(UK)ThisIsAReallyLongCodeThatExceedsTheCharacterLimit",
                 ValueError,
             ],
-            [
-                "Code cannot be converted to a string",
-                ReturnBytes(),
-                Exception,
-            ],
+            ["Code cannot be converted to a string", ReturnBytes(), Exception,],
         ]
     )
     def test_make_code_lusid_friendly_failure(
@@ -771,11 +791,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            [
-                "Test on ResourceId where the model does exist",
-                "ResourceId",
-                True,
-            ],
+            ["Test on ResourceId where the model does exist", "ResourceId", True,],
             ["Test where it is a string does not exist at all", "str", False],
             [
                 "Test where it is inside a dictionary",
@@ -800,10 +816,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             required_attribute_properties
         )
 
-        self.assertEqual(
-            first=expected_outcome,
-            second=nested_model_check
-        )
+        self.assertEqual(first=expected_outcome, second=nested_model_check)
 
     @parameterized.expand(
         [
@@ -1681,79 +1694,67 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(expected_exception):
             create_scope_id(time_generator)
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "InstrumentDefinition Model",
-            lusid.models.InstrumentDefinition,
-            ["name", "identifiers"]
-        ],
-        [
-            "Transaction Request Model",
-            lusid.models.TransactionRequest,
             [
-                "transaction_id",
-                "type",
-                "instrument_identifiers",
-                "transaction_date",
-                "settlement_date",
-                "units",
-                "transaction_price",
-                "total_consideration"]
+                "InstrumentDefinition Model",
+                lusid.models.InstrumentDefinition,
+                ["name", "identifiers"],
+            ],
+            [
+                "Transaction Request Model",
+                lusid.models.TransactionRequest,
+                [
+                    "transaction_id",
+                    "type",
+                    "instrument_identifiers",
+                    "transaction_date",
+                    "settlement_date",
+                    "units",
+                    "transaction_price",
+                    "total_consideration",
+                ],
+            ],
         ]
+    )
+    def test_get_required_attributes_from_model(
+        self, _, model_object, expected_outcome
+    ):
 
-    ])
-    def test_get_required_attributes_from_model(self, _, model_object, expected_outcome):
-
-        required_attributes = cocoon.utilities.get_required_attributes_from_model(model_object)
-
-        self.assertEqual(
-            first=expected_outcome,
-            second=required_attributes
+        required_attributes = cocoon.utilities.get_required_attributes_from_model(
+            model_object
         )
 
-    @parameterized.expand([
+        self.assertEqual(first=expected_outcome, second=required_attributes)
+
+    @parameterized.expand(
         [
-            "Not a complex type",
-            "InstrumentDefinition",
-            "InstrumentDefinition",
-            None
-        ],
-        [
-            "A dict type with a LUSID model",
-            "dict(str, ModelProperty)",
-            "ModelProperty",
-            "dict"
-        ],
-        [
-            "A dict type with a primitive value",
-            "dict(str, str)",
-            "str",
-            "dict"
-        ],
-        [
-            "A list type with a LUSID model",
-            "list[TaxLot]",
-            "TaxLot",
-            "list"
-        ],
-        [
-            "A list type with a primitive value",
-            "list[str]",
-            "str",
-            "list"
+            [
+                "Not a complex type",
+                "InstrumentDefinition",
+                "InstrumentDefinition",
+                None,
+            ],
+            [
+                "A dict type with a LUSID model",
+                "dict(str, ModelProperty)",
+                "ModelProperty",
+                "dict",
+            ],
+            ["A dict type with a primitive value", "dict(str, str)", "str", "dict"],
+            ["A list type with a LUSID model", "list[TaxLot]", "TaxLot", "list"],
+            ["A list type with a primitive value", "list[str]", "str", "list"],
         ]
+    )
+    def test_extract_lusid_model_from_attribute_type(
+        self, _, attribute_type, expected_attribute, expected_nested
+    ):
 
-    ])
-    def test_extract_lusid_model_from_attribute_type(self, _, attribute_type, expected_attribute, expected_nested):
+        (
+            attribute_type,
+            nested_type,
+        ) = cocoon.utilities.extract_lusid_model_from_attribute_type(attribute_type)
 
-        attribute_type, nested_type = cocoon.utilities.extract_lusid_model_from_attribute_type(attribute_type)
+        self.assertEqual(first=expected_attribute, second=attribute_type)
 
-        self.assertEqual(
-            first=expected_attribute,
-            second=attribute_type
-        )
-
-        self.assertEqual(
-            first=expected_nested,
-            second=nested_type
-        )
+        self.assertEqual(first=expected_nested, second=nested_type)
