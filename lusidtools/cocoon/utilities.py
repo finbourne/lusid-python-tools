@@ -50,8 +50,8 @@ def checkargs(function: typing.Callable) -> typing.Callable:
 
             if argument_name not in list(function_arguments.keys()):
                 raise ValueError(
-                    f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments" +
-                    f" are {str(list(function_arguments.keys()))}"
+                    f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments"
+                    + f" are {str(list(function_arguments.keys()))}"
                 )
 
             # Get the arguments details
@@ -68,7 +68,10 @@ def checkargs(function: typing.Callable) -> typing.Callable:
                     is_default_value = argument_value == argument_details.default
 
             # If the argument value is of the wrong type e.g. list instead of dict then throw an error
-            if not isinstance(argument_value, argument_details.annotation) and argument_details.annotation is not argument_details.empty:
+            if (
+                not isinstance(argument_value, argument_details.annotation)
+                and argument_details.annotation is not argument_details.empty
+            ):
                 # Only exception to this is if it matches the default value which may be of a different type e.g. None
                 if not is_default_value:
                     raise TypeError(
@@ -98,8 +101,8 @@ def make_code_lusid_friendly(raw_code) -> str:
         raw_code = str(raw_code)
     except Exception as exception:
         raise ValueError(
-            f"Could not convert value of {raw_code} with type {type(raw_code)} to a string. " +
-            "Please convert to a format which can be cast to a string and try again"
+            f"Could not convert value of {raw_code} with type {type(raw_code)} to a string. "
+            + "Please convert to a format which can be cast to a string and try again"
         ) from exception
 
     # Check that it does not exceed the max length
@@ -112,14 +115,14 @@ def make_code_lusid_friendly(raw_code) -> str:
         )
 
     # Specifically convert known unfriendly characters with a specific string and remove the rest completely
-    friendly_code = (
-        re.sub(r'[^\w]', '', raw_code
-            .replace("%", "Percentage")
-            .replace("&", "and")
-            .replace(".", "_")
-            .replace("-", "_")
-            .strip()
-        )
+    friendly_code = re.sub(
+        r"[^\w]",
+        "",
+        raw_code.replace("%", "Percentage")
+        .replace("&", "and")
+        .replace(".", "_")
+        .replace("-", "_")
+        .strip(),
     )
 
     return friendly_code
@@ -133,7 +136,7 @@ def populate_model(
     row: pd.Series,
     properties,
     identifiers: dict = None,
-    sub_holding_keys = None
+    sub_holding_keys=None,
 ) -> typing.Callable:
     """
     This function populates the provided LUSID model object in lusid.models with values from a Pandas Series
@@ -158,9 +161,7 @@ def populate_model(
     # Expand the mapping out from being a dot separated flat dictionary e.g. transaction_price.price to being nested
     update_dict(required_mapping, optional_mapping)
 
-    mapping_expanded = expand_dictionary(
-        required_mapping
-    )
+    mapping_expanded = expand_dictionary(required_mapping)
 
     # Set the attributes on the model
     return set_attributes_recursive(
@@ -180,7 +181,7 @@ def set_attributes_recursive(
     row: pd.Series,
     properties=None,
     identifiers: dict = None,
-    sub_holding_keys=None
+    sub_holding_keys=None,
 ):
     """
     This function takes a lusid.model object name and an expanded mapping between its attributes and the provided
@@ -247,17 +248,18 @@ def set_attributes_recursive(
         # if there is more nesting call the function recursively
         else:
             # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
-            attribute_type, nested_type = extract_lusid_model_from_attribute_type(attribute_type)
+            attribute_type, nested_type = extract_lusid_model_from_attribute_type(
+                attribute_type
+            )
 
             # Call the function recursively
             value = set_attributes_recursive(
                 model_object=getattr(lusid.models, attribute_type),
                 mapping=mapping[key],
-                row=row
+                row=row,
             )
 
             obj_init_values[key] = [value] if nested_type == "list" else value
-
 
     """
     If all attributes are None propagate None rather than a model filled with Nones. For example if a CorporateActionSourceId
@@ -377,7 +379,10 @@ def generate_required_attributes_list():
 
 @checkargs
 def verify_all_required_attributes_mapped(
-    mapping: dict, model_object_name: str, exempt_attributes: list = None, key_separator: str = "."
+    mapping: dict,
+    model_object_name: str,
+    exempt_attributes: list = None,
+    key_separator: str = ".",
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
@@ -398,12 +403,15 @@ def verify_all_required_attributes_mapped(
         raise TypeError("The provided model_object is not a lusid.model object")
 
     # Convert a None to an empty list
-    exempt_attributes = Validator(exempt_attributes, "exempt_attributes").set_default_value_if_none([]).value
+    exempt_attributes = (
+        Validator(exempt_attributes, "exempt_attributes")
+        .set_default_value_if_none([])
+        .value
+    )
 
     # Gets the required attributes for this model
     required_attributes = get_required_attributes_model_recursive(
-        model_object=model_object,
-        key_separator=key_separator
+        model_object=model_object, key_separator=key_separator
     )
 
     # Removes the exempt attributes
@@ -444,7 +452,6 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
 
     for required_attribute in required_attributes:
 
-
         required_attribute_type = open_api_types[required_attribute]
 
         # Check to see if there is a LUSID model for this required attribute, if no further nesting then add this attribute
@@ -454,7 +461,10 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
         # Otherwise call the function recursively
         else:
             # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
-            required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(required_attribute_type)
+            (
+                required_attribute_type,
+                nested_type,
+            ) = extract_lusid_model_from_attribute_type(required_attribute_type)
 
             nested_required_attributes = get_required_attributes_model_recursive(
                 model_object=getattr(lusid.models, required_attribute_type),
@@ -562,6 +572,7 @@ def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
 
     return attribute_type, nested_type
 
+
 @checkargs
 def check_nested_model(required_attribute_type: str) -> bool:
     """
@@ -573,7 +584,9 @@ def check_nested_model(required_attribute_type: str) -> bool:
     :return: str: The name of the LUSID model
     """
 
-    required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(required_attribute_type)
+    required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(
+        required_attribute_type
+    )
 
     top_level_model = getattr(lusid.models, required_attribute_type, None)
 
