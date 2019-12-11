@@ -30,6 +30,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -42,6 +43,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -54,6 +56,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -66,6 +69,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -78,6 +82,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 TypeError,
             ],
             [
@@ -90,6 +95,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -102,6 +108,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["s&p rating", "moodys_rating", "currency", "transaction_currency"],
                 "TestPropertiesScope1",
                 "instruments",
+                None,
                 ValueError,
             ],
             [
@@ -119,6 +126,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["base_currency"],
                 "operations001",
                 "portfolios",
+                None,
                 ValueError,
             ],
             [
@@ -146,6 +154,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 "holdings",
+                None,
                 ValueError,
             ],
             [
@@ -174,6 +183,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["exposure_counterparty", "compls", "val", "location_region"],
                 "operations001",
                 "transaction",
+                None,
                 ValueError,
             ],
             [
@@ -197,6 +207,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 "holdings",
+                None,
                 ValueError,
             ],
             [
@@ -224,6 +235,63 @@ class CocoonTestsFailures(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 "reference",
+                None,
+                ValueError,
+            ],
+            [
+                "Load with sub-holding-keys based on a column that does not exist in the file",
+                "prime_broker_test",
+                "data/holdings-example-unique-date.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                "holdings",
+                ["Strategy Tag"],
+                ValueError,
+            ],
+            [
+                "Duplicate column in the source file with first column empty",
+                "prime_broker_test",
+                "data/holdings-example-unique-date-duplicate-column-empty.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                "holdings",
+                None,
                 ValueError,
             ],
         ]
@@ -239,6 +307,7 @@ class CocoonTestsFailures(unittest.TestCase):
         property_columns,
         properties_scope,
         file_type,
+        sub_holding_keys,
         expected_exception,
     ) -> None:
         """
@@ -276,4 +345,5 @@ class CocoonTestsFailures(unittest.TestCase):
                 identifier_mapping=identifier_mapping,
                 property_columns=property_columns,
                 properties_scope=properties_scope,
+                sub_holding_keys=sub_holding_keys
             )

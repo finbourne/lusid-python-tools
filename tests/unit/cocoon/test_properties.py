@@ -373,3 +373,49 @@ class CocoonPropertiesTests(unittest.TestCase):
         )
 
         self.assertEqual(first=property_values, second=expected_outcome)
+
+    @parameterized.expand([
+        [
+            "Just a code",
+            ["Strategy"],
+            "Traders",
+            "Transaction",
+            ["Transaction/Traders/Strategy"]
+        ],
+        [
+            "A scope and code",
+            ["Signal/Strategy"],
+            "Traders",
+            "Transaction",
+            ["Transaction/Signal/Strategy"]
+        ],
+        [
+            "A full key",
+            ["Portfolio/Signal/Strategy"],
+            "Traders",
+            "Transaction",
+            ["Portfolio/Signal/Strategy"]
+        ],
+        [
+            "A scope which is the same as the domain",
+            ["Transaction/Strategy"],
+            "Traders",
+            "Transaction",
+            ["Transaction/Transaction/Strategy"]
+        ],
+
+    ])
+    def test_infer_full_property_keys(self, _, partial_keys, properties_scope, domain, expected_outcome):
+
+        full_keys = cocoon.properties._infer_full_property_keys(
+            partial_keys=partial_keys,
+            properties_scope=properties_scope,
+            domain=domain
+        )
+
+        self.assertEqual(
+            first=expected_outcome,
+            second=full_keys,
+            msg="The full keys don't matched the expected outcome"
+        )
+

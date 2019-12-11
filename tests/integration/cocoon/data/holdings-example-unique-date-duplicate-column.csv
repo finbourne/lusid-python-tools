@@ -1,4 +1,4 @@
-,FundCode,Effective Date,Prime Broker,Local Currency Code,Quantity,Local Price,Local Market Value,Base Market Value,Security Description,ISIN Security Identifier,SEDOL Security Identifier,Buy_Currency,swap,is_cash_with_currency
+,FundCode,Effective Date,Prime Broker,Local Currency Code,Quantity,Local Price,Local Market Value,Base Market Value,Security Description,ISIN Security Identifier,SEDOL Security Identifier,Buy_Currency,swap,is_cash_with_currency,FundCode,Prime Broker
 0,Portfolio-Z,02/07/2019,UBS,GBP,2500,56.76,141900,141900,Lloyds Banking Group PLC,GB0008706128,870612,GBP,True
 1,Portfolio-Z,02/07/2019,CITI,USD,10000,208.4,2084000,2084000,Apple Inc,US0378331005,0865985 ,USD,NaN
 2,Portfolio-Z,02/07/2019,UBS,USD,26598,1989.5,52916721,52916721,Amazon,US0231351067,906866,USD,False
