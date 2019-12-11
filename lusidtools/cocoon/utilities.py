@@ -147,9 +147,9 @@ def populate_model(
     :param pd.Series row: The row from the provided pd.DataFrame to use to populate the model
     :param properties: The properties for this model
     :param dict identifiers: The identifiers for this model
-    :param list sub_holding_keys: The list of sub holding keys to use
+    :param sub_holding_keys: The sub holding keys to use
 
-    :return: typiing.Callable set_attributes: The function to set the attributes for the model
+    :return: typing.Callable set_attributes: The function to set the attributes for the model
     """
 
     # Check that the provided model name actually exists
@@ -170,7 +170,7 @@ def populate_model(
         row=row,
         properties=properties,
         identifiers=identifiers,
-        sub_holding_keys=None,
+        sub_holding_keys=sub_holding_keys,
     )
 
 
@@ -192,7 +192,7 @@ def set_attributes_recursive(
     :param pd.Series row: The current row of the DataFrame being worked on
     :param any properties: The properties to use on this model
     :param any identifiers: The instrument identifiers to use on this model
-    :param list[str] sub_holding_keys: The sub holding keys to use on this model
+    :param sub_holding_keys: The sub holding keys to use on this model
 
     :return: lusid.models new model_object: An instance of the model object with populated attributes
     """
