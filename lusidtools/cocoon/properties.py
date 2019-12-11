@@ -322,7 +322,9 @@ def create_property_values(
     return properties
 
 
-def _infer_full_property_keys(partial_keys: list, properties_scope: str, domain: str) -> list:
+def _infer_full_property_keys(
+    partial_keys: list, properties_scope: str, domain: str
+) -> list:
     """
     Infers from a list of partially completed property keys the entire property key
 
@@ -352,7 +354,10 @@ def _infer_full_property_keys(partial_keys: list, properties_scope: str, domain:
     # Ensure that the returned keys are LUSID friendly
     return [
         "/".join(
-            [cocoon.utilities.make_code_lusid_friendly(partial) for partial in key.split("/")]
-        ) for key in full_keys
+            [
+                cocoon.utilities.make_code_lusid_friendly(partial)
+                for partial in key.split("/")
+            ]
+        )
+        for key in full_keys
     ]
-
