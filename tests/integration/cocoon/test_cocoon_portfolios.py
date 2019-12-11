@@ -35,6 +35,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 "operations001",
+                None,
                 [],
             ],
             [
@@ -51,6 +52,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 "operations001",
+                None,
                 [],
             ],
             [
@@ -67,6 +69,75 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 f"operations001_{create_scope_id()}",
+                None,
+                [],
+            ],
+            [
+                "Standard load with a single sub-holding-key",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                "operations001",
+                ["Strategy"],
+                [],
+            ],
+            [
+                "Standard load with a multiple sub-holding-keys in a unique scope",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                f"operations001_{create_scope_id()}",
+                ["Strategy", "Broker"],
+                [],
+            ],
+            [
+                "Standard load with a sub-holding-key with scope specified",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                f"operations001_{create_scope_id()}",
+                ["Trader/Strategy"],
+                [],
+            ],
+            [
+                "Standard load with a sub-holding-key with domain and scope specified",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                f"operations001_{create_scope_id()}",
+                ["Transaction/Trader/Strategy"],
                 [],
             ],
         ]
@@ -81,6 +152,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         identifier_mapping,
         property_columns,
         properties_scope,
+        sub_holding_keys,
         expected_outcome,
     ) -> None:
         """
@@ -109,6 +181,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
             identifier_mapping=identifier_mapping,
             property_columns=property_columns,
             properties_scope=properties_scope,
+            sub_holding_keys=sub_holding_keys
         )
 
         self.assertEqual(

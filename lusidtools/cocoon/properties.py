@@ -212,13 +212,12 @@ def create_property_definitions_from_file(
 def create_missing_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
     properties_scope: str,
-    file_type: str,
     data_frame: pd.DataFrame,
     property_columns: list,
-    domain_lookup: dict,
+    domain: str,
 ):
     # If there are property columns
-    if len(property_columns) > 0 and domain_lookup[file_type]["domain"] is not None:
+    if len(property_columns) > 0 and domain is not None:
 
         # Identify which property definitions are missing
         (
@@ -227,19 +226,19 @@ def create_missing_property_definitions_from_file(
         ) = cocoon.properties.check_property_definitions_exist_in_scope(
             api_factory=api_factory,
             scope=properties_scope,
-            domain=domain_lookup[file_type]["domain"],
+            domain=domain,
             data_frame=data_frame,
             property_columns=property_columns,
         )
 
         logging.info(
-            f"Check for missing {file_type} properties complete. {len(missing_property_columns)} missing properties found"
+            f"Check for missing {domain} properties complete. {len(missing_property_columns)} missing properties found"
         )
 
         # If there are missing property definitions
         if len(missing_property_columns) > 0:
             logging.info(
-                f"The {file_type} properties {str(missing_property_columns)} will be added"
+                f"The {domain} properties {str(missing_property_columns)} will be added"
             )
 
             # Create property definitions for all of the columns in the file that have missing definitions
@@ -249,7 +248,7 @@ def create_missing_property_definitions_from_file(
             ) = cocoon.properties.create_property_definitions_from_file(
                 api_factory=api_factory,
                 scope=properties_scope,
-                domain=domain_lookup[file_type]["domain"],
+                domain=domain,
                 data_frame=data_frame,
                 missing_property_columns=missing_property_columns,
             )
@@ -321,3 +320,39 @@ def create_property_values(
         properties = list(properties.values())
 
     return properties
+
+
+def _infer_full_property_keys(partial_keys: list, properties_scope: str, domain: str) -> list:
+    """
+    Infers from a list of partially completed property keys the entire property key
+
+    :param list[str] partial_keys: The partial keys
+    :param str properties_scope: The scope of the properties
+    :param str domain: The domain of the properties
+
+    :return: list[str]: A list of full property keys
+    """
+
+    full_keys = []
+
+    for key in partial_keys:
+
+        split_key = key.split("/")
+        number_components = len(split_key)
+        # The entire key is already specified
+        if number_components == 3:
+            full_keys.append(key)
+        # The domain is missing with the scope and code specified
+        elif number_components == 2:
+            full_keys.append(f"{domain}/{split_key[0]}/{split_key[1]}")
+        # The domain and scope are missing with only the code specified
+        elif number_components == 1:
+            full_keys.append(f"{domain}/{properties_scope}/{key}")
+
+    # Ensure that the returned keys are LUSID friendly
+    return [
+        "/".join(
+            [cocoon.utilities.make_code_lusid_friendly(partial) for partial in key.split("/")]
+        ) for key in full_keys
+    ]
+

@@ -307,6 +307,7 @@ def _convert_batch_to_models(
     instrument_identifier_mapping: dict,
     file_type: str,
     domain_lookup: dict,
+    sub_holding_keys: list,
     **kwargs,
 ):
     """
@@ -320,6 +321,7 @@ def _convert_batch_to_models(
     :param dict instrument_identifier_mapping: The mapping for the identifiers
     :param str file_type: The file type to load
     :param dict domain_lookup: The domain lookup
+    :param list sub_holding_keys: The sub holding keys to use
     :param kwargs: Arguments specific to each call e.g. effective_at for holdings
 
     :returns list single_requests: A list of populated LUSID request models
@@ -327,6 +329,24 @@ def _convert_batch_to_models(
 
     # Get the data types of the columns to be added as properties
     property_dtypes = data_frame.loc[:, property_columns].dtypes
+
+    # Get the types of the attributes on the top level model for this request
+    open_api_types = getattr(lusid.models, domain_lookup[file_type]["top_level_model"]).openapi_types
+
+    # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
+    # need to be populated with property values
+    if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+        sub_holding_key_dtypes = data_frame.loc[:, sub_holding_keys].dtypes
+    # If not and they are provided as full keys
+    elif len(sub_holding_keys) > 0:
+        sub_holding_keys_row = cocoon.properties._infer_full_property_keys(
+            partial_keys=sub_holding_keys,
+            properties_scope=properties_scope,
+            domain='Transaction'
+        )
+    # If no keys
+    else:
+        sub_holding_keys_row = None
 
     unique_identifiers = kwargs["unique_identifiers"]
 
@@ -345,8 +365,16 @@ def _convert_batch_to_models(
                 dtypes=property_dtypes,
             )
 
+        # Create the sub-holding-keys for this row
+        if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+            sub_holding_keys_row = cocoon.properties.create_property_values(
+                row=row,
+                scope=properties_scope,
+                domain='Transaction',
+                dtypes=sub_holding_key_dtypes,
+            )
+
         # Create identifiers for this row if applicable
-        # If no instrument identifier mapping is provided return None as no identifiers are required
         if instrument_identifier_mapping is None or not bool(
             instrument_identifier_mapping
         ):
@@ -370,6 +398,7 @@ def _convert_batch_to_models(
                 row=row,
                 properties=properties,
                 identifiers=identifiers,
+                sub_holding_keys=sub_holding_keys_row
             )
         )
 
@@ -387,6 +416,7 @@ async def _construct_batches(
     batch_size: int,
     file_type: str,
     domain_lookup: dict,
+    sub_holding_keys: list,
     **kwargs,
 ):
     """
@@ -402,6 +432,7 @@ async def _construct_batches(
     :param int batch_size: The batch size to use
     :param str file_type: The file type to load
     :param dict domain_lookup: The domain lookup
+    :param sub_holding_keys: The sub holding keys to use
     :param kwargs: Arguments specific to each call e.g. effective_at for holdings
 
     :return: dict: Contains the success responses and the errors (where an API exception has been raised)
@@ -522,6 +553,7 @@ async def _construct_batches(
                         instrument_identifier_mapping=instrument_identifier_mapping,
                         file_type=file_type,
                         domain_lookup=domain_lookup,
+                        sub_holding_keys=sub_holding_keys,
                         **kwargs,
                     ),
                     file_type=file_type,
@@ -573,6 +605,7 @@ def load_from_data_frame(
     batch_size: int = None,
     remove_white_space: bool = True,
     instrument_name_enrichment: bool = False,
+    sub_holding_keys: list = None
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -589,6 +622,8 @@ def load_from_data_frame(
     :param int batch_size: The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
     :param bool remove_white_space: remove whitespace either side of each value in the dataframe
     :param bool instrument_name_enrichment: request additional identifier information from open-figi
+    :param list sub_holding_keys: The sub holding keys to use for this request. Can be a list of property keys or a list of
+    columns in the dataframe to use to create sub holdings
 
     :return: dict responses: The responses from loading the data into LUSID
     """
@@ -621,6 +656,12 @@ def load_from_data_frame(
 
     property_columns = (
         Validator(property_columns, "property_columns")
+        .set_default_value_if_none(default=[])
+        .value
+    )
+
+    sub_holding_keys = (
+        Validator(sub_holding_keys, "sub_holding_keys")
         .set_default_value_if_none(default=[])
         .value
     )
@@ -749,15 +790,35 @@ def load_from_data_frame(
         column_list = list(set([item for sublist in column_list for item in sublist]))
         data_frame = strip_whitespace(data_frame, column_list)
 
-    # Check for and create missing property defintions
-    data_frame = cocoon.properties.create_missing_property_definitions_from_file(
-        api_factory=api_factory,
-        properties_scope=properties_scope,
-        file_type=file_type,
-        data_frame=data_frame,
-        property_columns=property_columns,
-        domain_lookup=domain_lookup,
-    )
+    # Get the types of the attributes on the top level model for this request
+    open_api_types = getattr(lusid.models, domain_lookup[file_type]["top_level_model"]).openapi_types
+
+    # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
+    # need to have a property definition and be populated with values from the provided dataframe columns
+    if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+
+        Validator(sub_holding_keys, "sub_holding_key_columns").check_subset_of_list(
+            data_frame_columns, "DataFrame Columns"
+        )
+
+        # Check for and create missing property definitions for the sub-holding-keys
+        data_frame = cocoon.properties.create_missing_property_definitions_from_file(
+            api_factory=api_factory,
+            properties_scope=properties_scope,
+            domain="Transaction",
+            data_frame=data_frame,
+            property_columns=sub_holding_keys,
+        )
+
+    # Check for and create missing property definitions for the properties
+    if domain_lookup[file_type]["domain"] is not None:
+        data_frame = cocoon.properties.create_missing_property_definitions_from_file(
+            api_factory=api_factory,
+            properties_scope=properties_scope,
+            domain=domain_lookup[file_type]["domain"],
+            data_frame=data_frame,
+            property_columns=property_columns,
+        )
 
     # Start a new event loop in a new thread, this is required to run inside a Jupyter notebook
     loop = cocoon.async_tools.start_event_loop_new_thread()
@@ -771,7 +832,7 @@ def load_from_data_frame(
         # Gets the allowed unique identifiers
         "unique_identifiers": cocoon.instruments.get_unique_identifiers(
             api_factory=api_factory
-        ),
+        )
     }
 
     # Get the responses from LUSID
@@ -787,6 +848,7 @@ def load_from_data_frame(
             batch_size=batch_size,
             file_type=file_type,
             domain_lookup=domain_lookup,
+            sub_holding_keys=sub_holding_keys,
             **keyword_arguments,
         ),
         loop,
