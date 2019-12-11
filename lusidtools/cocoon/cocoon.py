@@ -331,18 +331,23 @@ def _convert_batch_to_models(
     property_dtypes = data_frame.loc[:, property_columns].dtypes
 
     # Get the types of the attributes on the top level model for this request
-    open_api_types = getattr(lusid.models, domain_lookup[file_type]["top_level_model"]).openapi_types
+    open_api_types = getattr(
+        lusid.models, domain_lookup[file_type]["top_level_model"]
+    ).openapi_types
 
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to be populated with property values
-    if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+    if (
+        "sub_holding_keys" in open_api_types.keys()
+        and "dict" in open_api_types["sub_holding_keys"]
+    ):
         sub_holding_key_dtypes = data_frame.loc[:, sub_holding_keys].dtypes
     # If not and they are provided as full keys
     elif len(sub_holding_keys) > 0:
         sub_holding_keys_row = cocoon.properties._infer_full_property_keys(
             partial_keys=sub_holding_keys,
             properties_scope=properties_scope,
-            domain='Transaction'
+            domain="Transaction",
         )
     # If no keys
     else:
@@ -366,11 +371,14 @@ def _convert_batch_to_models(
             )
 
         # Create the sub-holding-keys for this row
-        if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+        if (
+            "sub_holding_keys" in open_api_types.keys()
+            and "dict" in open_api_types["sub_holding_keys"]
+        ):
             sub_holding_keys_row = cocoon.properties.create_property_values(
                 row=row,
                 scope=properties_scope,
-                domain='Transaction',
+                domain="Transaction",
                 dtypes=sub_holding_key_dtypes,
             )
 
@@ -398,7 +406,7 @@ def _convert_batch_to_models(
                 row=row,
                 properties=properties,
                 identifiers=identifiers,
-                sub_holding_keys=sub_holding_keys_row
+                sub_holding_keys=sub_holding_keys_row,
             )
         )
 
@@ -605,7 +613,7 @@ def load_from_data_frame(
     batch_size: int = None,
     remove_white_space: bool = True,
     instrument_name_enrichment: bool = False,
-    sub_holding_keys: list = None
+    sub_holding_keys: list = None,
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -791,11 +799,16 @@ def load_from_data_frame(
         data_frame = strip_whitespace(data_frame, column_list)
 
     # Get the types of the attributes on the top level model for this request
-    open_api_types = getattr(lusid.models, domain_lookup[file_type]["top_level_model"]).openapi_types
+    open_api_types = getattr(
+        lusid.models, domain_lookup[file_type]["top_level_model"]
+    ).openapi_types
 
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to have a property definition and be populated with values from the provided dataframe columns
-    if "sub_holding_keys" in open_api_types.keys() and "dict" in open_api_types["sub_holding_keys"]:
+    if (
+        "sub_holding_keys" in open_api_types.keys()
+        and "dict" in open_api_types["sub_holding_keys"]
+    ):
 
         Validator(sub_holding_keys, "sub_holding_key_columns").check_subset_of_list(
             data_frame_columns, "DataFrame Columns"
@@ -832,7 +845,7 @@ def load_from_data_frame(
         # Gets the allowed unique identifiers
         "unique_identifiers": cocoon.instruments.get_unique_identifiers(
             api_factory=api_factory
-        )
+        ),
     }
 
     # Get the responses from LUSID

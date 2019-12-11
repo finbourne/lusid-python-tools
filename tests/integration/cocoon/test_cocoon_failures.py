@@ -345,5 +345,5 @@ class CocoonTestsFailures(unittest.TestCase):
                 identifier_mapping=identifier_mapping,
                 property_columns=property_columns,
                 properties_scope=properties_scope,
-                sub_holding_keys=sub_holding_keys
+                sub_holding_keys=sub_holding_keys,
             )

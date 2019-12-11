@@ -372,7 +372,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "operations001",
                 None,
                 lusid.models.Version,
-            ]
+            ],
         ]
     )
     def test_load_from_data_frame_holdings_success(
@@ -415,7 +415,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             identifier_mapping=identifier_mapping,
             property_columns=property_columns,
             properties_scope=properties_scope,
-            sub_holding_keys=sub_holding_keys
+            sub_holding_keys=sub_holding_keys,
         )
 
         self.assertGreater(len(responses["holdings"]["success"]), 0)
