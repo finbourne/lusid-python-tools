@@ -648,6 +648,9 @@ def load_from_data_frame(
         .value
     )
 
+    # Ensures that it is a single index dataframe
+    Validator(data_frame.index, "data_frame_index").check_is_not_instance(pd.MultiIndex)
+
     # Set defaults aligned with the data type of each argument, this allows for users to provide None
     identifier_mapping = (
         Validator(identifier_mapping, "identifier_mapping")

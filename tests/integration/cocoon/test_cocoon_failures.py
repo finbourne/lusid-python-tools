@@ -347,3 +347,71 @@ class CocoonTestsFailures(unittest.TestCase):
                 properties_scope=properties_scope,
                 sub_holding_keys=sub_holding_keys,
             )
+
+    @parameterized.expand([
+        [
+            "Multi-index DataFrame",
+            "TestScope1",
+            "data/global-fund-combined-instrument-master-missing-identifiers.csv",
+            {"name": "instrument_name"},
+            {},
+            {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
+            ["s&p rating", "moodys_rating", "currency"],
+            "TestPropertiesScope1",
+            "instruments",
+            None,
+            TypeError,
+        ]
+    ])
+    def test_load_from_data_frame_failure(
+        self,
+        test_name,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        file_type,
+        sub_holding_keys,
+        expected_exception,
+    ) -> None:
+        """
+        Test for failure cases
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+        :param str file_type: The file type to load
+        :param any expected_exception: The expected exception
+
+        :return: None
+        """
+
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+        columns = data_frame.columns
+
+        # Make this a multi-index dataframe by grouping on the first two columns
+        data_frame = data_frame.groupby([columns[0], columns[1]]).agg({
+            column: "first" for column in columns
+        })
+
+        with self.assertRaises(expected_exception):
+
+            cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                file_type=file_type,
+                identifier_mapping=identifier_mapping,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+                sub_holding_keys=sub_holding_keys,
+            )
