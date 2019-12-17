@@ -81,7 +81,7 @@ class AppTests(unittest.TestCase):
 
     def test_upsert_instruments_with_valid_mapping(self):
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("instruments.csv")
+        self.valid_args["file_path"] = str(test_data_root.joinpath("instruments.csv"))
         responses = load_instruments(self.valid_args)
 
         self.assertEqual(0, len(responses["instruments"]["errors"]))
@@ -106,7 +106,7 @@ class AppTests(unittest.TestCase):
 
     def test_upsert_instruments_with_invalid_mapping(self):
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("instruments.csv")
+        self.invalid_args["file_path"] = str(test_data_root.joinpath("instruments.csv"))
         LusidLogger(self.invalid_args["debug"])
         responses = load_instruments(self.invalid_args)
 
@@ -134,7 +134,7 @@ class AppTests(unittest.TestCase):
 
     def test_upsert_holdings_with_valid_mapping(self):
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("holdings.csv")
+        self.valid_args["file_path"] = str(test_data_root.joinpath("holdings.csv"))
         responses = load_holdings(self.valid_args)
 
         self.assertEqual(0, len(responses["holdings"]["errors"]))
@@ -143,7 +143,7 @@ class AppTests(unittest.TestCase):
     def test_upsert_holdings_with_invalid_mapping(self):
         file_type = "holdings"
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("holdings.csv")
+        self.invalid_args["file_path"] = str(test_data_root.joinpath("holdings.csv"))
         responses = load_holdings(self.invalid_args)
 
         self.assertEqual(1, len(responses["holdings"]["errors"]))
@@ -151,7 +151,7 @@ class AppTests(unittest.TestCase):
 
     def test_upsert_transactions_with_valid_mapping(self):
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("transactions.csv")
+        self.valid_args["file_path"] = str(test_data_root.joinpath("transactions.csv"))
         responses = load_transactions(self.valid_args)
 
         self.assertEqual(0, len(responses["transactions"]["errors"]))
@@ -159,7 +159,7 @@ class AppTests(unittest.TestCase):
 
     def test_upsert_transactions_with_invalid_mapping(self):
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("transactions.csv")
+        self.invalid_args["file_path"] = str(test_data_root.joinpath("transactions.csv"))
         responses = load_transactions(self.invalid_args)
 
         self.assertEqual(1, len(responses["transactions"]["errors"]))

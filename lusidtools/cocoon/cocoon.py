@@ -8,7 +8,7 @@ from lusidtools.cocoon.utilities import checkargs, strip_whitespace
 from lusidtools.cocoon.validator import Validator
 
 
-class BatchLoader:
+class _BatchLoader:
     """
     This class contains all the methods used for loading data in batches. The @run_in_executor decorator makes the
     synchronous functions awaitable
@@ -16,16 +16,22 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_instrument_batch(
+    def _load_instrument_batch(
         api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
-        Upserts a batch of instruments to LUSID
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param list[lusid.models.InstrumentDefinition] instrument_batch: The batch of instruments to upsert
+        Parameters
+        ----------
+        api_factory:        lusid.utilities.ApiClientFactory
+                            The api factory to use
+        instrument_batch:   list[lusid.models.InstrumentDefinition]
+                            The batch of instruments to upsert
 
-        :return: UpsertInstrumentsResponse: The response from LUSID
+        Returns
+        -------
+        UpsertInstrumentsResponse:  UpsertInstrumentsResponse
+                                    The response from LUSID
         """
 
         # Ensure that the list of allowed unique identifiers exists
@@ -37,18 +43,26 @@ class BatchLoader:
             unique_identifiers = kwargs["unique_identifiers"]
 
         @checkargs
-        def get_alphabetically_first_identifier_key(
+        def _get_alphabetically_first_identifier_key(
             instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
             """
             Gets the alphabetically first occurring unique identifier on an instrument and use it as the correlation
             id on the request
 
-            :param lusid.models.InstrumentDefinition instrument: The instrument to create a correlation id for
-            :param list[str] unique_identifiers: The list of allowed unique identifiers
+            Parameters
+            ----------
+            instrument:             lusid.models.InstrumentDefinition
+                                    The instrument to create a correlation id for
+            unique_identifiers:     list[str]
+                                    The list of allowed unique identifiers
 
-            :return: str: The correlation id to use on the request
+            Returns
+            -------
+            correlation_id:         str
+                                    The correlation id to use on the request
             """
+
             unique_identifiers_populated = list(
                 set(unique_identifiers).intersection(
                     set(list(instrument.identifiers.keys()))
@@ -60,7 +74,7 @@ class BatchLoader:
 
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
             instruments={
-                get_alphabetically_first_identifier_key(
+                _get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
                 ): instrument
                 for instrument in instrument_batch
@@ -69,17 +83,26 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_quote_batch(
+    def _load_quote_batch(
         api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
     ) -> lusid.models.UpsertQuotesResponse:
         """
         Upserts a batch of quotes into LUSID
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param list[lusid.models.UpsertQuoteRequest] quote_batch: The batch of quotes to upsert
-        :param str scope: The scope to upsert the quotes into
+        Parameters
+        ----------
+        api_factory:    lusid.utilities.ApiClientFactory
+                        The api factory to use
+        quote_batch:    list[lusid.models.UpsertQuoteRequest]
+                        The batch of quotes to upsert
+        scope:          str
+                        The scope to upsert the quotes into
 
-        :return: lusid.models.UpsertQuotesResponse: The response from LUSID
+        Returns
+        -------
+        response:       lusid.models.UpsertQuotesResponse
+                        The response from LUSID
+
         """
 
         if "scope" not in list(kwargs.keys()):
@@ -103,18 +126,31 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_transaction_batch(
+    def _load_transaction_batch(
         api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param str scope: The scope of the Transaction Portfolio to upsert the transactions into
-        :param str code: The code of the Transaction Portfolio, together with the scope this uniquely identifies the portfolio
-        :param list[lusid.models.TransactionRequest] transaction_batch: The batch of transactions to upsert
+        Parameters
+        ----------
+        api_factory:        lusid.utilities.ApiClientFactory api_factory
+                            The api factory to use
+        transaction_batch:  list[lusid.models.TransactionRequest]
+                            The batch of transactions to upsert
 
-        :return: lusid.models.UpsertPortfolioTransactionsResponse: The response from LUSID
+        Other Parameters
+        ----------------
+        scope:  str
+                The scope of the Transaction Portfolio to upsert the transactions into
+        code:   str
+                The code of the Transaction Portfolio, together with the scope this uniquely identifies the portfolio
+
+        Returns
+        -------
+        Transactions_response:  lusid.models.UpsertPortfolioTransactionsResponse
+                                The response from LUSID
+
         """
 
         if "scope" not in list(kwargs.keys()):
@@ -135,17 +171,30 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_holding_batch(
+    def _load_holding_batch(
         api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
         """
-        Upserts a batch of holdings into LUSID
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param list[lusid.models.AdjustHoldingRequest] holding_batch: The batch of holdings
-        :param kwargs: 'scope', 'code', 'effective_at' The parameters required for the API call
+        Parameters
+        ----------
+        api_factory:        lusid.utilities.ApiClientFactory api_factory
+                            The api factory to use
+        holding_batch:      list[lusid.models.AdjustHoldingRequest]
+                            The batch of holdings
+        Other Parameters
+        ----------------
+        scope:          str
+                        scope to upsert holdings to
+        code:           str
+                        code of portfolio to upload to
+        effective_at:   str
+                        effective at date for holdings batch
 
-        :return: lusid.models.HoldingsAdjustment: The response from LUSID
+        Returns
+        -------
+        Holdings_adjustment:    lusid.models.HoldingsAdjustment
+                                The response from LUSID
         """
 
         if "scope" not in list(kwargs.keys()):
@@ -172,17 +221,29 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_portfolio_batch(
+    def _load_portfolio_batch(
         api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
     ) -> lusid.models.Portfolio:
         """
-        Upserts a batch of portfolios to LUSID
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param list[lusid.models.CreateTransactionPortfolioRequest] portfolio_batch: The batch of portfolios to create
-        :param kwargs: 'scope', 'code' arguments required for the API call
+        Parameters
+        ----------
+        api_factory:        lusid.utilities.ApiClientFactory
+                            The api factory to use
+        portfolio_batch:    list[lusid.models.CreateTransactionPortfolioRequest]
+                            The batch of portfolios to create
 
-        :return: lusid.models.Portfolio: The response from LUSID
+        Other Parameters
+        ----------------
+        scope:          str
+                        scope to upsert holdings to
+        code:           str
+                        code of portfolio to upload to
+
+        Returns
+        -------
+        response:       lusid.models.Portfolio
+                        The response from LUSID
         """
 
         if "scope" not in list(kwargs.keys()):
@@ -210,18 +271,29 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
-    def load_instrument_property_batch(
+    def _load_instrument_property_batch(
         api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
     ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
-
         """
         Add properties to the set instruments
 
-        :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-        :param list[lusid.models.UpsertInstrumentPropertyRequest] property_batch: Properties to add,
-         identifiers will be resolved to a LusidInstrumentId, where an identifier resolves to more
-         than one LusidInstrumentId the property will be added to all matching instruments
-        :return:
+        identifiers will be resolved to a LusidInstrumentId, where an identifier resolves to more than one LusidInstrumentId the property will be added to all matching instruments kwargs
+
+        Parameters
+        ----------
+        api_factory:        lusid.utilities.ApiClientFactory
+                            The api factory to use
+        property_batch:     list[lusid.models.UpsertInstrumentPropertyRequest]
+                            Properties to add
+
+        Other Parameters
+        ----------------
+        TODO
+
+        Returns
+        -------
+        response:   [lusid.models.UpsertInstrumentPropertiesResponse]
+                    The response from LUSID
         """
 
         results = []
@@ -281,16 +353,31 @@ async def _load_data(
     """
     This function calls the appropriate batch loader
 
-    :param api_factory: The api factory to use
-    :param single_requests: The list of single requests for LUSID
-    :param file_type: The file type e.g. instruments, portfolios etc.
-    :param kwargs: Arguments specific to each call e.g. effective_at for holdings
+    Parameters
+    ----------
+    api_factory:        lusid.utilities.ApiClientFactory
+                        The api factory to use
+    single_requests:    single_requests
+                        The list of single requests for LUSID
+    file_type:          str
+                        The file type e.g. instruments, portfolios etc.
+    Other Parameters
+    ----------------
+    effective_at:   str
+                    date at which the request is effective for
+    code:           str
+                    code of portfolio to upsert to
+    scope:          str
+                    scope to upsert data to
 
-    :return: BatchLoader StaticMethod: A static method on BatchLoader
+    Returns
+    -------
+    StaticMethod:   BatchLoader
+                    A static method on BatchLoader
     """
 
     # Dynamically call the correct async function to use based on the file type
-    return await getattr(BatchLoader, f"load_{file_type}_batch")(
+    return await getattr(_BatchLoader, f"_load_{file_type}_batch")(
         api_factory,
         single_requests,
         # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
@@ -313,18 +400,32 @@ def _convert_batch_to_models(
     """
     This function populates the required models from a DataFrame and loads the data into LUSID
 
-    :param pd.DataFrame data_frame: The DataFrame containing the data to load
-    :param dict mapping_required: The required mapping
-    :param dict mapping_optional: The optional mapping
-    :param list property_columns: The property columns to add as property values
-    :param str properties_scope: The scope to add the property values in
-    :param dict instrument_identifier_mapping: The mapping for the identifiers
-    :param str file_type: The file type to load
-    :param dict domain_lookup: The domain lookup
-    :param list sub_holding_keys: The sub holding keys to use
-    :param kwargs: Arguments specific to each call e.g. effective_at for holdings
+    Parameters
+    ----------
+    data_frame:                     pd.DataFrame
+                                    The DataFrame containing the data to load
+    mapping_required:               dict
+                                    the required mapping
+    mapping_optional:               dict
+                                    the optional mapping
+    property_columns:               list
+                                    The property columns to add as property values
+    properties_scope:               str
+                                    The scope to add the property values in
+    instrument_identifier_mapping:  dict
+                                    The mapping for the identifiers
+    file_type:                      str
+                                    The file type to load
+    domain_lookup:                  dict
+                                    The domain lookup
+    Other Parameters
+    ----------------
+    TODO
 
-    :returns list single_requests: A list of populated LUSID request models
+    Returns
+    -------
+    single_requests:                list
+                                    A list of populated LUSID request models
     """
 
     # Get the data types of the columns to be added as properties
@@ -430,20 +531,39 @@ async def _construct_batches(
     """
     This constructs the batches and asynchronously sends them to be loaded into LUSID
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-    :param pd.DataFrame data_frame: The DataFrame containing the data to load
-    :param dict mapping_required: The required mapping
-    :param dict mapping_optional: The optional mapping
-    :param list property_columns: The property columns to add as property values
-    :param str properties_scope: The scope to add the property values in
-    :param dict instrument_identifier_mapping: The mapping for the identifiers
-    :param int batch_size: The batch size to use
-    :param str file_type: The file type to load
-    :param dict domain_lookup: The domain lookup
-    :param sub_holding_keys: The sub holding keys to use
-    :param kwargs: Arguments specific to each call e.g. effective_at for holdings
+    Parameters
+    ----------
+    api_factory:                    lusid.utilities.ApiClientFactory
+                                    The api factory to use
+    data_frame:                     pd.DataFrame
+                                    The DataFrame containing the data to load
+    mapping_required:               dict
+                                    The required mapping
+    mapping_optional:               dict
+                                    The optional mapping
+    property_columns:               list
+                                    The property columns to add as property values
+    properties_scope:               str
+                                    The scope to add the property values in
+    instrument_identifier_mapping:  dict
+                                    The mapping for the identifiers
+    batch_size:                     int
+                                    The batch size to use
+    file_type:                      str
+                                    The file type to load
+    domain_lookup:                  str
+                                    The file type to load
+    sub_holding_keys:               list
+                                    The sub holding keys to use
+    Other Parameters
+    ----------------
+    TODO
 
-    :return: dict: Contains the success responses and the errors (where an API exception has been raised)
+    Returns
+    -------
+    responses:                      dict
+                                    Contains the success responses and the errors (where API exceptions have been raised)
+
     """
 
     # Get the different behaviours required for different entities e.g quotes can be batched without worrying about portfolios
@@ -616,25 +736,125 @@ def load_from_data_frame(
     sub_holding_keys: list = None,
 ):
     """
-    Handles loading data from a DataFrame into LUSID
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-    :param str scope: The scope of the resource to load the data into
-    :param Pandas DataFrame data_frame: The DataFrame containing the data
-    :param dict{str, str} mapping_required: The dictionary mapping the DataFrame columns to LUSID's required attributes
-    :param dict{str, str} mapping_optional: The dictionary mapping the DataFrame columns to LUSID's optional attributes
-    :param str file_type: The type of file e.g. transactions, instruments, holdings, quotes, portfolios
-    :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the DataFrame
-    :param list[str] property_columns: The columns to create properties for
-    :param str properties_scope: The scope to add the properties to
-    :param int batch_size: The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
-    :param bool remove_white_space: remove whitespace either side of each value in the dataframe
-    :param bool instrument_name_enrichment: request additional identifier information from open-figi
-    :param list sub_holding_keys: The sub holding keys to use for this request. Can be a list of property keys or a list of
-    columns in the dataframe to use to create sub holdings
+    Parameters
+    ----------
+    api_factory:                    lusid.utilities.ApiClientFactory api_factory
+                                    The api factory to use
+    scope:                          str
+                                    The scope of the resource to load the data into
+    data_frame:                     pd.DataFrame
+                                    The DataFrame containing the data
+    mapping_required:               dict{str, str}
+                                    The dictionary mapping the DataFrame columns to LUSID's required attributes
+    mapping_optional:               dict{str, str}
+                                    The dictionary mapping the DataFrame columns to LUSID's optional attributes
+    file_type:                      str
+                                    The type of file e.g. transactions, instruments, holdings, quotes, portfolios
+    identifier_mapping:             dict{str, str}
+                                    The dictionary mapping of LUSID instrument identifiers to identifiers in the DataFrame
+    property_columns:               list
+                                    The columns to create properties for
+    properties_scope:               str
+                                    The scope to add the properties to
+    batch_size:                     int
+                                    The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
+    remove_white_space:             bool
+                                    remove whitespace either side of each value in the dataframe
+    instrument_name_enrichment:     bool
+                                    request additional identifier information from open-figi
+    sub_holding_keys:               str
+                                    The sub holding keys to use for this request. Can be a list of property keys or a list of
+                                    columns in the dataframe to use to create sub holdings
 
-    :return: dict responses: The responses from loading the data into LUSID
+    Returns
+    -------
+    responses:                      dict
+                                    The responses from loading the data into LUSID
+
+    Examples
+    --------
+
+    * Loading Instruments
+
+    .. code-block:: none
+
+        result = lusidtools.cocoon.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=instr_df,
+            mapping_required=mapping["instruments"]["required"],
+            mapping_optional={},
+            file_type="instruments",
+            identifier_mapping=mapping["instruments"]["identifier_mapping"],
+            property_columns=mapping["instruments"]["properties"],
+            properties_scope=scope
+        )
+
+    * Loading Instrument Properties
+
+    .. code-block:: none
+
+        result = lusidtools.cocoon.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=strat_properties,
+            mapping_required=strat_mapping,
+            mapping_optional={},
+            file_type="instrument_property",
+            property_columns=["block tag"],
+            properties_scope=scope
+        )
+
+    * Loading Portfolios
+
+    .. code-block:: none
+
+        result = lusidtools.cocoon.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=portfolios,
+            mapping_required=mapping["portfolios"]["required"],
+            mapping_optional={},
+            file_type="portfolios"
+        )
+
+    * Loading Transactions
+
+    .. code-block:: none
+
+        result = lusidtools.cocoon.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=txn_df,
+            mapping_required=mapping["transactions"]["required"],
+            mapping_optional=mapping["transactions"]["optional"],
+            file_type="transactions",
+            identifier_mapping=mapping["transactions"]["identifier_mapping"],
+            property_columns=mapping["transactions"]["properties"],
+            properties_scope=scope
+        )
+
+
+    * Loading Quotes
+
+    .. code-block:: none
+
+        result = lpt.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=df_adjusted_quotes,
+            mapping_required=mapping["quotes"]["required"],
+            mapping_optional={},
+            file_type="quotes"
+        )
+    * loading Holdings
+    TODO
+
+    * Loading Corporate Actions
+    TODO
     """
+
 
     # A mapping between the file type and relevant attributes e.g. domain, top_level_model etc.
     domain_lookup = cocoon.utilities.load_json_file("config/domain_settings.json")

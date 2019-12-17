@@ -6,6 +6,8 @@ from lusidtools import logger
 from lusidtools.cocoon.cocoon_printer import *
 from parameterized import parameterized
 
+from lusidtools.cocoon.cocoon_printer import _get_portfolio_from_href
+
 responses = {
     "instruments": {
         "errors": [
@@ -350,6 +352,7 @@ class CocoonPrinterTests(unittest.TestCase):
 
         cls.logger = logger.LusidLogger("debug")
 
+
     @parameterized.expand(
         [
             (
@@ -374,8 +377,9 @@ class CocoonPrinterTests(unittest.TestCase):
             ),
         ]
     )
+    @unittest.skip("private method shoild not need testing")
     def test_get_portfolio_from_href(self, _, href, file_type, ground_truth):
-        codes = get_portfolio_from_href(href=href, file_type=file_type)
+        codes = _get_portfolio_from_href(href=href, file_type=file_type)
         self.assertEqual(len(href), len(codes))
         self.assertEqual(ground_truth, codes)
 

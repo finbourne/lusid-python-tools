@@ -36,7 +36,14 @@ def load_instruments(args):
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
-    instruments = load_data_to_df_and_detect_delimiter(args)
+
+    instruments = load_data_to_df_and_detect_delimiter(
+        file_path=args["file_path"],
+        delimiter=args["delimiter"],
+        line_terminator=args["line_terminator"],
+        num_header=args["num_header"],
+        num_footer=args["num_footer"]
+    )
 
     # get mappings
     mappings = load_mapping_file_for_file_type(args["mapping"], file_type)

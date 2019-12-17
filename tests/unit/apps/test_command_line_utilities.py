@@ -35,12 +35,12 @@ class AppTests(unittest.TestCase):
         os.path.join(cur_dir, test_data_root.joinpath("instruments_tab.csv")),
     ]
     delimiter = [",", "{}".format("\t")]
-    args_list = []
+    args = []
     for num_h in num_header:
         for num_f in num_footer:
             count = 0
             for delim in delimiter:
-                args_list.append(
+                args.append(
                     (
                         "header:{}_footer:{}_delimiter:{}".format(
                             num_h,
@@ -62,14 +62,22 @@ class AppTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         LusidLogger(cls.valid_args["debug"])
 
-    @parameterized.expand(args_list)
-    def test_get_instruments_data(self, _, args_list):
-        data = load_data_to_df_and_detect_delimiter(args_list)
-        if args_list["num_header"] == 0:
+    @parameterized.expand(args)
+    def test_get_instruments_data(self, _, args):
+
+        data = load_data_to_df_and_detect_delimiter(
+            file_path=args["file_path"],
+            delimiter=args["delimiter"],
+            line_terminator=args["line_terminator"],
+            num_header=args["num_header"],
+            num_footer=args["num_footer"]
+        )
+
+        if args["num_header"] == 0:
             self.assertEqual(data[data.columns[0]][0], "Amazon_Nasdaq_AMZN")
         else:
             self.assertEqual(data[data.columns[0]][0], "BP_LondonStockEx_BP")
-        if args_list["num_footer"] == 0:
+        if args["num_footer"] == 0:
             self.assertEqual(data.tail(1).values[0][0], "Whitebread_LondonStockEx_WTB")
         else:
             self.assertEqual(data.tail(1).values[0][0], "USTreasury_6.875_2025")

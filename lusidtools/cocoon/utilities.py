@@ -652,18 +652,32 @@ def convert_cell_value_to_string(data):
 
 def handle_nested_default_and_column_mapping(
     data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
-):
+) -> tuple:
     """
+    Handles when column/default dictionary is provided instead of just a column name as a string
+
     This function handles when a mapping is provided which contains as a value a dictionary with a column and/or default
     key rather than just a string with the column name. It populates the DataFrame with the default value as appropriate
     and removes the nesting so that the model can be populated later.
 
-    :param pd.DataFrame data_frame: The updated dataframe
-    :param dict mapping: The original mapping (can be required or optional)
-    :param str constant_prefix: The prefix that can be used to specify a constant
+    Parameters
+    ----------
+    data_frame          pandas.DataFrame
+                        The updated dataframe
+    mapping             dict
+                        The original mapping (can be required or optional)
+    constant_prefix     str
+                        The prefix that can be used to specify a constant
 
-    :return: pd.DataFrame dict dataframe mapping_updated: The updated DataFrame and mapping
+    Returns
+    -------
+    data_frame          pandas.DataFrame
+                        The updated DataFrame
+    mapping_updated     dict
+                        The updated mapping
+
     """
+
     mapping_updated = {}
 
     for key, value in mapping.items():
@@ -721,9 +735,18 @@ def handle_nested_default_and_column_mapping(
 
 def load_json_file(relative_file_path: str) -> dict:
     """
+    loads data from a json file
 
-    :param str relative_file_path: path to json file
-    :return: dict data: parsed data from json file
+    Parameters
+    ----------
+    relative_file_path  str
+                        path to json file
+
+    Returns
+    -------
+    data                dict
+                        Parsed data from json file
+
     """
 
     file_path = Path(__file__).parent.joinpath(relative_file_path)
@@ -733,45 +756,57 @@ def load_json_file(relative_file_path: str) -> dict:
 
 
 @checkargs
-def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
+def load_data_to_df_and_detect_delimiter(file_path: str, delimiter=",", line_terminator="\n", num_header=0, num_footer=0) -> pd.DataFrame:
     """
     This function loads data from given file path and converts it into a pandas DataFrame
-    :param dict args: Arguments parsed in from command line, containing
-    :return: pandas.DataFrame: dataframe Containing data from given file path
-    """
-    if not os.path.exists(args["file_path"]):
-        raise OSError(f"file path {args['file_path']} does not exist")
 
-    with open(args["file_path"], "r") as read_file:
-        logging.info(f"loading data from {args['file_path']}")
-        data = csv.reader(read_file, lineterminator=args["line_terminator"])
+    Parameters
+    ----------
+    file_path           Full file location
+    delimiter           Delimiter separating data values (Alias for separation)
+    line_terminator     Character that specifies an end of line
+    num_header          Row number(s) to use as the column names, and the start of the data.
+    num_footer          Number of lines at bottom of file to skip
+
+    Returns
+    -------
+    DataFrame           pandas.DataFrame
+                        DataFrame extracted from file
+    """
+
+    if not os.path.exists(file_path):
+        raise OSError(f"file path {file_path} does not exist")
+
+    with open(file_path, "r") as read_file:
+        logging.info(f"loading data from {file_path}")
+        data = csv.reader(read_file, lineterminator=line_terminator)
 
         # iterate over data in unrelated lines to get to the first line of data that we are interested in
-        for pre_amble in range(args["num_header"]):
+        for pre_amble in range(num_header):
             read_file.readline()
 
         # now that we are at the first line of data, get the header row, that will contain the formatting we are
         # interested in
         header_line = read_file.readline()
 
-        if not args["delimiter"]:
-            args["delimiter"] = get_delimiter(header_line)
+        if not delimiter:
+            delimiter = get_delimiter(header_line)
 
-            if args["delimiter"] == header_line:
+            if delimiter == header_line:
                 err = (
-                    f"Unable to detect delimiter from first line of data at line at line number: {args['num_header']}: "
+                    f"Unable to detect delimiter from first line of data at line at line number: {num_header}: "
                     f"\n\t>> "
                     f"{header_line}"
                 )
                 raise ValueError(err)
 
-    with open(args["file_path"], "r") as read_file:
+    with open(file_path, "r") as read_file:
         # read data from lines specified at command line by num_header and num_footer
         return pd.read_csv(
-            args["file_path"],
-            delimiter=args["delimiter"],
-            header=args["num_header"],
-            skipfooter=args["num_footer"],
+            file_path,
+            delimiter=delimiter,
+            header=num_header,
+            skipfooter=num_footer,
             engine="python",
         )
 
@@ -781,23 +816,33 @@ def get_delimiter(sample_string: str):
 
 
 def check_mapping_fields_exist(
-    required_list: list, search_list: list, file_type: str
+    required_list: list, search_list: list, file_type: str,
 ) -> list:
     """
     This function checks that items in one list exist in another list
-    :param str file_type:
-    :param list[str] required_list: List of items to search for
-    :param list[str] search_list:  list to search in
-    :return: list[str] missing_fields: list of items in required_list missing from search_list
+
+    Parameters
+    ----------
+    required_list               list[str]
+                                List of items to search for
+    search_list                 list[str]
+                                list to search in
+    file_type                   str
+                                type of file eg. instruments, transactions, etc.
+                                list of items in required_list missing from search_list
+    Returns
+    -------
+    missing_fields  list[str]
+
     """
 
     missing_fields = [
         item for item in required_list if item not in search_list and item[0] != "$"
     ]
     if missing_fields:
-        raise ValueError(
-            f"{file_type} fields not found in data columns: {missing_fields}"
-        )
+        err = f"{file_type} fields not found in data columns: {missing_fields}"
+        logging.error(err)
+        raise ValueError(err)
     return missing_fields
 
 
@@ -868,12 +913,25 @@ def scale_quote_of_type(
     df: pd.DataFrame, mapping: dict, file_type: str = "quotes"
 ) -> pd.DataFrame:
     """
+    Scales values that match criteria specified by a scale_quotes configuration in a mapping config
 
-    :param string file_type: File type of data default = "quotes"
-    :param pd.DataFrame df: DataFrame containing data to be scaled
-    :param mapping: mapping configuration containing quote_scalar dictionary
-    :return:
+    Parameters
+    ----------
+    df          pandas.DataFrame
+                DataFrame containing data to be scaled
+    mapping     dict
+                mapping configuration containing quote_scalar dictionary
+    file_type   str
+                file_type in mapping containing the scaling config 'quote_scalar'
+
+    Returns
+    -------
+    df          pandas.DataFrame
+                DataFrame containing scaled data
     """
+
+    check_mapping_fields_exist(["quote_scalar"], mapping[file_type].keys(), file_type)
+    check_mapping_fields_exist(["price", "type", "type_code", "scale_factor"], mapping[file_type]["quote_scalar"].keys(), file_type)
 
     price_col = mapping[file_type]["quote_scalar"]["price"]
     type_col = mapping[file_type]["quote_scalar"]["type"]
@@ -910,16 +968,29 @@ def identify_cash_items(
     dataframe, mappings, file_type: str, remove_cash_items: bool = False
 ) -> (pd.DataFrame, dict):
     """
+    removes or labels cash items in a DataFrame.
+
     This function identifies cash items in a dataframe and either creates a currency_identifier in a new
     currency_identifier_for_LUSID column and amends the mapping dictionary accordingly or deletes cash items from the
     dataframe.
 
-    :param pd.DataFrame dataframe: dataframe to look for cash items in
-    :param dict mappings: Full mapping structure
-    :param str file_type: type of data in dataframe ["instruments", "quotes", "transactions", "portfolios"]
-    :param bool remove_cash_items: indication to remove cash items from dataframe
-    :return: pd.DataFrame dataframe: dataframe containing
-    :return: dict mappings: mapping with currency identifier mapping included
+    Parameters
+    ----------
+    dataframe           pandas.DataFrame
+                        DataFrame to look for cash items in
+    mappings            dict
+                        Full mapping structure
+    file_type           str
+                        type of data in dataframe eg. "instruments", "quotes", "transactions", etc.
+    remove_cash_items   bool
+                        indication to remove cash items from dataframe
+
+    Returns
+    -------
+    dataframe           pandas.DataFrame
+                        updated DataFrame
+    mappings            dict
+                        Full updated mapping structure
     """
 
     cash_flag_specification = mappings["cash_flag"]
@@ -938,7 +1009,7 @@ def identify_cash_items(
                 else:
                     dataframe.at[
                         index, "__currency_identifier_for_LUSID"
-                    ] = populate_currency_identifier_for_LUSID(
+                    ] = get_currency_code_for_row(
                         row, column, cash_flag_specification
                     )
                 break
@@ -948,20 +1019,30 @@ def identify_cash_items(
     return dataframe, mappings
 
 
-def populate_currency_identifier_for_LUSID(
-    row: dict, column, cash_flag_specification: dict
+def get_currency_code_for_row(
+    row: dict, column: str, cash_flag_specification: dict
 ) -> str:
     """
+    Gets the currency code of a row in a dataframe.
+
     This function takes a cash transaction or holding in the form of a row from a dataframe and returns it's currency
     code, given the data's column containing a cash identifier and a dictionary that specifies how to set the currency
     code.
 
-    :param dict row: current data row
-    :param column: current dataframe column that contains values that can be used to identify a cash transaction or
-    holding
-    :param dict cash_flag_specification: dictionary containing cash identifier columns and values with either explicit
-    currancy codes or the column from which the currency code can be infered
-    :return: str currency_code:The currency code for the current transaction or holding
+    Parameters
+    ----------
+    row                         dict
+                                current data row
+    column                      str
+                                dataframe column that contains values that can be used to identify a cash transaction or
+                                holding
+    cash_flag_specification     dict
+                                dictionary containing cash identifier columns and values with either explicit
+                                currancy codes or the column from which the currency code can be infered
+
+    Returns
+    -------
+
     """
 
     if isinstance(cash_flag_specification["cash_identifiers"][column], dict):
@@ -1010,10 +1091,18 @@ def populate_currency_identifier_for_LUSID(
 def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str):
     """
     This function takes a mapping structure and checks that each of the
-    :param dict mapping: mapping containing full mapping structure
-    :param columns: columns from source data to search in
-    :param file_type:
-    :return:
+    Parameters
+    ----------
+    mapping     dict
+                mapping containing full mapping structure
+    columns     list
+                columns from source data to search in
+    file_type   str
+                type of data in file e.g. instruments, holdings, transactions...
+
+    Returns
+    -------
+
     """
     # file_type
     domain_lookup = load_json_file("config/domain_settings.json")
@@ -1058,15 +1147,23 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
         raise ValueError(f"'identifier_mapping' mapping field not provided in mapping")
 
 
-def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+def strip_whitespace(dataframe: pd.DataFrame, columns: list) -> pd.DataFrame:
     """
     This function removes prefixed or postfixed white space from string values in a Pandas DataFrame
 
-    :param pd.Dataframe df: Dataframe containing data to remove whitespace from
-    :param list[dict{dict}] columns: list of nested dictionaries of any depth
-    :return: pd.Dataframe stripped_df: DataFrame with whitespace removed
+    Parameters
+    ----------
+    dataframe   pandas.DataFrame
+                Dataframe containing data to remove whitespace from
+    columns     list
+                list of nested dictionaries of any depth
+
+    Returns
+    -------
+    stripped_df pandas.DataFrame
+                Dataframe with whitespace removed
     """
-    stripped_df = pd.DataFrame.copy(df)
+    stripped_df = pd.DataFrame.copy(dataframe)
 
     for col in columns:
         stripped_df[col] = stripped_df[col].apply(

@@ -58,14 +58,21 @@ class MockTimeGenerator:
 
     def __init__(self, current_datetime):
         """
-        :param int current_datetime: The current datetime in seconds since 1970
+
+        Parameters
+        ----------
+        current_datetime:   int
+                            The current datetime in seconds since 1970
         """
         self.current_datetime = current_datetime
 
     def time(self):
         """
 
-        :return: int datetime current_datetime: The current datetime in seconds since 1970
+        Returns
+        -------
+        int
+            The current datetime in seconds since 1970
         """
         return self.current_datetime
 
