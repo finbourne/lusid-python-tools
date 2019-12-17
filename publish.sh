@@ -19,6 +19,15 @@ pypi_password=$2
 
 api_version=$(cat __version__.py | grep __version__ |  awk '{split($0, a, "="); print a[2]}' | tr -d ' "')
 
+echo "checking if version=$api_version already exists"
+
+status_code=$(curl -L --write-out %{http_code} --silent --output /dev/null --header 'Accept: application/json' https://pypi.org/pypi/lusidtools/$api_version/json)
+
+if [[ "$status_code" -eq 200 ]] ; then
+    echo "### WARNING: lusidtools $api_version already exists, skipping publish ###"
+    exit 0
+fi
+
 # packages to install
 python setup.py sdist bdist_wheel
 

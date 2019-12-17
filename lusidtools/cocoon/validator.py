@@ -6,6 +6,14 @@ class Validator:
         self.value = value
         self.value_name = value_name
 
+    def check_is_not_instance(self, instance_type):
+
+        if isinstance(self.value, instance_type):
+            raise TypeError(
+                f"The {self.value_name} must be of type {str(instance_type)}, you supplied '{str(type(self.value))}' instead."
+            )
+        return self
+
     def check_allowed_value(self, allowed_values: list):
         """
         Checks that value exists in the provided list
