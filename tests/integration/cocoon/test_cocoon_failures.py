@@ -348,21 +348,23 @@ class CocoonTestsFailures(unittest.TestCase):
                 sub_holding_keys=sub_holding_keys,
             )
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "Multi-index DataFrame",
-            "TestScope1",
-            "data/global-fund-combined-instrument-master-missing-identifiers.csv",
-            {"name": "instrument_name"},
-            {},
-            {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
-            ["s&p rating", "moodys_rating", "currency"],
-            "TestPropertiesScope1",
-            "instruments",
-            None,
-            TypeError,
+            [
+                "Multi-index DataFrame",
+                "TestScope1",
+                "data/global-fund-combined-instrument-master-missing-identifiers.csv",
+                {"name": "instrument_name"},
+                {},
+                {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
+                ["s&p rating", "moodys_rating", "currency"],
+                "TestPropertiesScope1",
+                "instruments",
+                None,
+                TypeError,
+            ]
         ]
-    ])
+    )
     def test_load_from_data_frame_failure(
         self,
         test_name,
@@ -397,9 +399,9 @@ class CocoonTestsFailures(unittest.TestCase):
         columns = data_frame.columns
 
         # Make this a multi-index dataframe by grouping on the first two columns
-        data_frame = data_frame.groupby([columns[0], columns[1]]).agg({
-            column: "first" for column in columns
-        })
+        data_frame = data_frame.groupby([columns[0], columns[1]]).agg(
+            {column: "first" for column in columns}
+        )
 
         with self.assertRaises(expected_exception):
 
