@@ -38,7 +38,7 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
 
 @checkargs
 def create_identifiers(
-    index: int,
+    index,
     row: pd.Series,
     file_type: str,
     instrument_identifier_mapping: dict = None,
@@ -49,7 +49,7 @@ def create_identifiers(
     """
     This function creates identifiers to be added to a LUSID model object
 
-    :param int index: The index of the row in the DataFrame
+    :param index: The index of the row in the DataFrame
     :param pd.Series row: The row of the DataFrame to create identifiers for
     :param str file_type: The file type to create identifiers for
     :param dict instrument_identifier_mapping: The instrument identifier mapping to use
@@ -77,7 +77,7 @@ def create_identifiers(
     # If there are no identifiers raise an error
     if len(identifiers) == 0:
         raise ValueError(
-            f"""The row at index {index} has no value for every single one of the provided 
+            f"""The row at index {str(index)} has no value for every single one of the provided 
         identifiers. Please ensure that each row has at least one identifier and try again"""
         )
 
@@ -92,7 +92,7 @@ def create_identifiers(
         # If there are no unique identifiers raise an Exception as you need at least one to make a successful call
         if len(unique_identifiers_populated) == 0:
             raise ValueError(
-                f"""The instrument at index {index} has no value for at least one unique 
+                f"""The instrument at index {str(index)} has no value for at least one unique 
             identifier. Please ensure that each instrument has at least one unique identifier and try again. The
             allowed unique identifiers are {str(unique_identifiers)}"""
             )
