@@ -1,30 +1,20 @@
-# Lusidtools Documentation
+# `lusidtools`
 
-Lusidtools is an opensource project from Finbourne technology that handles data uploads to LUSID.
+The `lusidtools` package is a set of utilities and reference implementation to upload and retrieve data into LUSID.
 
-If you haven’t already done so, you can learn more about LUSID and its benefits by visiting [www.finbourne.com/lusid](www.finbourne.com/lusid). 
+If you haven’t already done so, you can learn more about LUSID and its benefits by visiting [www.lusid.com](www.lusid.com). Go to the [Sign-up page](https://www.lusid.com/app/resources/tutorials/getting-started/create-account/create-domain) to create your own free trial LUSID domain in order to interact with LUSID. 
 
-Go to the [Sign-up page](https://demosetup.lusid.com/app/resources/tutorials/getting-started/create-account/create-domain) to create your own free trial LUSID domain in order to interact with LUSID. 
+The [API Documentation]() and [OpenAPI specification]() are two useful resources that provide documentation and allow authorised clients to query and update their data directly. 
 
-The [API Documentation]() and [Specification in swagger]() are two useful resources that provide in-depth documentation and allow authorised clients to query  and update their data directly. 
+# Summary
 
-SDK's to interact with the LUSID API on GitHub are available in the following languages:
+## Importing LUSID into LUSID
 
-- C#
-- Java
-- JavaScript
-- Python
-
-The Lusidtools package was built as a quick reference implementation of daily operations using python3.
-
-All calls to LUSID are made in a single line of code using the `load_from_data_frame()` function call. The mapping of source data columns to LUSID properties can be configured as a single structure for a given file, and even supports multiple operations from a single file such as Loading instruments, transactions and generating holdings from a single transactions file. 
-
-
-The package also contains a number of utility functions that can be used to process data if required. 
+Calls to LUSID are made using the `load_from_data_frame()` function call which takes a set of mappings from source data to the corresponding LUSID fields, and can be configured per LUSID entity type (e.g. Instrument, Transaction etc.) 
 
 # Tutorials
 
-Example implementations can be found in `lusid-python-tools/tutorials/` for Loading the following file types into LUSID:
+Example implementations can be found in `lusid-python-tools/tutorials/` for loading the following file types into LUSID:
 
 - Instrument Master
 - Instrument Properties
@@ -60,43 +50,41 @@ lusidtools.load_from_data_frame(
 
 ### API Factory
 
-The api factory takes the authenticated credentials of the client. This can be constructed using 3 methods:
+The `api_factory` is provides implementations of the LUSID APIs from the [LUSID Python SDK](https://pypi.org/project/lusid-sdk). It can be initialised in the following ways:
 
-- secrets.json file containing credentials
-- Environment Variables
-- bearer token used to initialise API
+* secrets.json file containing credentials
+* Environment Variables
+* bearer token used to initialise API
 
 See LUSID's support article on [Getting started with the LUSID API and SDKs](https://support.lusid.com/getting-started-with-apis-sdks) to create a secrets JSON file or set your machine's environment variables. 
 
-###### Using local secrets JSON (Recommended for running lusidtools locally)
+##### Using local secrets JSON (Recommended for running `lusidtools` locally)
 
 ```python
-Api_factory =  ApiClientFactory(api_secrets_filename="c:full/path/to/secrets.json")
+api_factory =  ApiClientFactory(api_secrets_filename="c:full/path/to/secrets.json")
 ```
 
-###### Using credentials set as Environment Variables 
+##### Using credentials set as environment variables 
 
 ```python
-Api_factory =  ApiClientFactory()
+api_factory =  ApiClientFactory()
 ```
 
-###### Using Bearer Token (recommended for running lusidtools from an authenticated browser eg. hosted jupyterhub instance)
-
-Using web token from jupyter hub:
+##### LUSID hosted Jupyter notebook
 
 ```python
 ApiClientFactory(token=lusid_sample_data.RefreshingToken(), api_url=os.getenv("FBN_LUSID_API_URL", None), app_name="Jupyter")
 ```
 
-### scope
+### `scope`
 
-The scope of the resource to load the data into. See [this support article](https://support.lusid.com/what-is-a-scope-in-lusid-and-how-is-it-used) to understand more about how scopes are used in LUSID.
+The LUSID `scope` of the resource to load the data into. See [this support article](https://support.lusid.com/what-is-a-scope-in-lusid-and-how-is-it-used) to understand more about how scopes are used in LUSID.
 
-### Dataframe 
+### `data_frame`
 
 The DataFrame containing data. This could be instrument
 
-### Identifier mapping 
+### `identifier_mapping`
 
 The dictionary mapping of LUSID instrument identifier types to the column headers of identifiers in the DataFrame.
 
@@ -117,23 +105,22 @@ Corresponding mapping:
 }
 ```
 
-### Required mapping
+### `mapping_required`
 
-the dictionary mapping the DataFrame columns to LUSID's required attributes
+The dictionary mapping the DataFrame columns to the LUSID required attributes
 
 The required mapping provides the mapping for the parameters marked as **required** for the LUSID API endpoints. The required fields for each API call can be found in the LUSID [documentation](https://www.lusid.com/docs/api/). 
 
-### Optional mapping
+### `mapping_optional`
 
 The dictionary mapping the DataFrame columns to LUSID's optional attributes
 
 
-### File Type
+### `file_type`
 
 The type of file e.g. transactions, instruments, holdings, quotes, portfolios
 
-
-### Property Columns
+### `property_columns`
 
 A list of property column names from the dataframe to be uploaded as properties. See this article on [properties in LUSID](https://support.lusid.com/what-is-a-property) for more information on properties.
 
@@ -154,20 +141,20 @@ Corresponding mapping:
 ]
 ```
 
-### Properties Scope
-The name of the scope in which to upsert properties to.
+### `properties_scope`
+The name of the LUSID `scope` in which to upsert properties to.
 
-### Batch size
+### `batch_size`
 
 Batch size explicitly states the size of the batch to use when using upserting data e.g. upsert instruments, upsert quotes etc.
 
-### Remove white space
+### `remove_white_space`
 
-When set to True, this will remove unintended whitespace in the dataframe.
+This will remove whitespace in the dataframe, default is `True`.
 
-### Instrument name enrichment
+### `instrument_name_enrichment`
 
-When set to True, this will request additional information from open-figi to be added when upserting instruments.
+This will request additional information from OpenFigi to be added when upserting instruments, default is `False`.
 
 # Utility Functions
 
