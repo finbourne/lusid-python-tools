@@ -158,9 +158,9 @@ This will request additional information from OpenFigi to be added when upsertin
 
 # Utility Functions
 
-## identify_cash_items()
+## `identify_cash_items()`
 
-The cash_flag mapping field is used by `identify_cash_items()` to identify cash items and either remove them (when loading instruments from data in a transactions file), or mark them as currencies (for loading cash transactions to a portfolio).
+The `cash_flag` mapping field is used by `identify_cash_items()` to identify cash items and either remove them (when loading instruments from data in a transactions file), or mark them as currencies (for loading cash transactions to a portfolio).
 
 The cash items in this extract can be found by inspecting the values contained within 3 columns: inst_name, FIGI_id and Security type. If any of these values match the values specified in the cash_flag config, then that item can be identified as cash.
 
@@ -196,9 +196,9 @@ mapping = {
 }
 ```
 
->  Removing cash from a dataframe
+### Removing cash from a DataFrame
 
-Setting `remove_cash_items` to True removes any cash from the dataframe. The mapping returned remains unchanged.
+Setting `remove_cash_items` to `True` removes any cash from the DataFrame. The mapping returned remains unchanged.
 
 ```python
 dataframe_cash_removed, mapping = identify_cash_items(
@@ -215,7 +215,7 @@ dataframe_cash_removed, mapping = identify_cash_items(
 | MICROSOFT CORP | BBG007F5XJZ0 | MSFTCHF | Corp          | USD      | Common Stock  |
 | UBER Tech      | BBG00NW4HSM1 | UBER    | Equity        | USD      | Common Stock  |
 
->  Labelling cash in a dataframe 
+### Labelling cash in a DataFrame 
 
 Setting `remove_cash_items` to False labels creates a new column `__currency_identifier_for_LUSID` which is assigned a Currency identifier for any cash items. The mapping for this new field is then appended to the identifier mapping. 
 
@@ -261,10 +261,7 @@ dataframe_cash_labled.head()
 | JPY            |              | JPY     |               | JPY      | Currency      |JPY|
 
 
-
-## scale_quote_of_type()
-
-
+## `scale_quote_of_type()`
 
 # Mapping config
 
