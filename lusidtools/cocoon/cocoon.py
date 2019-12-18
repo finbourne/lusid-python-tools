@@ -4,7 +4,7 @@ import pandas as pd
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
-from lusidtools.cocoon.utilities import checkargs, strip_whitespace
+from lusidtools.cocoon.utilities import _checkargs, strip_whitespace
 from lusidtools.cocoon.validator import Validator
 
 
@@ -42,7 +42,7 @@ class _BatchLoader:
         else:
             unique_identifiers = kwargs["unique_identifiers"]
 
-        @checkargs
+        @_checkargs
         def _get_alphabetically_first_identifier_key(
             instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
@@ -500,7 +500,7 @@ def _convert_batch_to_models(
 
         # Construct the from the mapping, properties and identifiers the single request object and add it to the list
         single_requests.append(
-            cocoon.utilities.populate_model(
+            cocoon.utilities._populate_model(
                 model_object_name=domain_lookup[file_type]["top_level_model"],
                 required_mapping=mapping_required,
                 optional_mapping=mapping_optional,
@@ -719,7 +719,7 @@ async def _construct_batches(
     }
 
 
-@checkargs
+@_checkargs
 def load_from_data_frame(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
@@ -930,7 +930,7 @@ def load_from_data_frame(
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
     # Verify that all the required attributes for this top level model exist in the provided required mapping
-    cocoon.utilities.verify_all_required_attributes_mapped(
+    cocoon.utilities._verify_all_required_attributes_mapped(
         mapping=mapping_required,
         model_object_name=domain_lookup[file_type]["top_level_model"],
         exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
@@ -969,13 +969,13 @@ def load_from_data_frame(
     (
         data_frame,
         mapping_required,
-    ) = cocoon.utilities.handle_nested_default_and_column_mapping(
+    ) = cocoon.utilities._handle_nested_default_and_column_mapping(
         data_frame=data_frame, mapping=mapping_required, constant_prefix="$"
     )
     (
         data_frame,
         mapping_optional,
-    ) = cocoon.utilities.handle_nested_default_and_column_mapping(
+    ) = cocoon.utilities._handle_nested_default_and_column_mapping(
         data_frame=data_frame, mapping=mapping_optional, constant_prefix="$"
     )
 
@@ -1011,7 +1011,7 @@ def load_from_data_frame(
     )
 
     # Converts higher level data types such as dictionaries and lists to strings
-    data_frame = data_frame.applymap(cocoon.utilities.convert_cell_value_to_string)
+    data_frame = data_frame.applymap(cocoon.utilities._convert_cell_value_to_string)
 
     if remove_white_space:
         column_list = [property_columns]

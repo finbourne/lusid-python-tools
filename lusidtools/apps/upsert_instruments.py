@@ -6,9 +6,9 @@ from lusid.utilities import ApiClientFactory
 from lusidtools.cocoon import (
     load_from_data_frame,
     load_data_to_df_and_detect_delimiter,
-    check_mapping_fields_exist,
+    _check_mapping_fields_exist,
     parse_args,
-    validate_mapping_file_structure,
+    _validate_mapping_file_structure,
     identify_cash_items,
 )
 from lusidtools.logger import LusidLogger
@@ -54,7 +54,7 @@ def load_instruments(args):
             r"Please state what scope to upsert properties to using '-s'."
         )
 
-    validate_mapping_file_structure(mappings, instruments.columns, file_type)
+    _validate_mapping_file_structure(mappings, instruments.columns, file_type)
     if "cash_flag" in mappings.keys():
         instruments, mappings = identify_cash_items(
             instruments, mappings, file_type, True

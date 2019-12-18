@@ -15,16 +15,16 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Base URL with forward slash suffix", "https://fbn-prd.lusid.com/api/"],
         ]
     )
-    def test_get_swagger_dict_success(self, _, api_url):
+    def test__get_swagger_dict_success(self, _, api_url):
 
-        swagger_dict = cocoon.utilities.get_swagger_dict(api_url=api_url)
+        swagger_dict = cocoon.utilities._get_swagger_dict(api_url=api_url)
 
         self.assertTrue(expr=isinstance(swagger_dict, dict))
 
     @parameterized.expand(
         [["Base URL with missing /api path", "https://fbn-prd.lusid.com", ValueError]]
     )
-    def test_get_swagger_dict_fail(self, _, api_url, expected_exception):
+    def test__get_swagger_dict_fail(self, _, api_url, expected_exception):
 
         with self.assertRaises(expected_exception):
-            cocoon.utilities.get_swagger_dict(api_url=api_url)
+            cocoon.utilities._get_swagger_dict(api_url=api_url)

@@ -20,7 +20,7 @@ import types
 import typing
 
 
-def checkargs(function: typing.Callable) -> typing.Callable:
+def _checkargs(function: typing.Callable) -> typing.Callable:
     """
     This can be used as a decorator to test the type of arguments are correct. It checks that the provided arguments
     match any type annotations and/or the default value for the parameter.
@@ -85,7 +85,7 @@ def checkargs(function: typing.Callable) -> typing.Callable:
     return _f
 
 
-def make_code_lusid_friendly(raw_code) -> str:
+def _make_code_lusid_friendly(raw_code) -> str:
     """
     This function takes a column name and converts it to a LUSID friendly code creating LUSID objects. LUSID allows
     for up to 64 characters which can be lowercase and uppercase letters, numbers, a dash ("-") or an underscore ("_").
@@ -128,8 +128,8 @@ def make_code_lusid_friendly(raw_code) -> str:
     return friendly_code
 
 
-@checkargs
-def populate_model(
+@_checkargs
+def _populate_model(
     model_object_name: str,
     required_mapping: dict,
     optional_mapping: dict,
@@ -159,12 +159,12 @@ def populate_model(
         raise TypeError("The provided model_object is not a lusid.model object")
 
     # Expand the mapping out from being a dot separated flat dictionary e.g. transaction_price.price to being nested
-    update_dict(required_mapping, optional_mapping)
+    _update_dict(required_mapping, optional_mapping)
 
-    mapping_expanded = expand_dictionary(required_mapping)
+    mapping_expanded = _expand_dictionary(required_mapping)
 
     # Set the attributes on the model
-    return set_attributes_recursive(
+    return _set_attributes_recursive(
         model_object=model_object,
         mapping=mapping_expanded,
         row=row,
@@ -174,8 +174,8 @@ def populate_model(
     )
 
 
-@checkargs
-def set_attributes_recursive(
+@_checkargs
+def _set_attributes_recursive(
     model_object,
     mapping: dict,
     row: pd.Series,
@@ -248,12 +248,12 @@ def set_attributes_recursive(
         # if there is more nesting call the function recursively
         else:
             # Ensure that that if there is a complex attribute type e.g. dict(str, InstrumentIdValue) it is extracted
-            attribute_type, nested_type = extract_lusid_model_from_attribute_type(
+            attribute_type, nested_type = _extract_lusid_model_from_attribute_type(
                 attribute_type
             )
 
             # Call the function recursively
-            value = set_attributes_recursive(
+            value = _set_attributes_recursive(
                 model_object=getattr(lusid.models, attribute_type),
                 mapping=mapping[key],
                 row=row,
@@ -273,8 +273,8 @@ def set_attributes_recursive(
     return model_object(**obj_init_values)
 
 
-@checkargs
-def update_dict(orig_dict: dict, new_dict) -> None:
+@_checkargs
+def _update_dict(orig_dict: dict, new_dict) -> None:
     """
     This is used to update a dictionary with another dictionary. Using the default Python update method does not merge
     nested dictionaries. This method allows for this. This modifies the original dictionary in place.
@@ -289,7 +289,7 @@ def update_dict(orig_dict: dict, new_dict) -> None:
     for key, val in new_dict.items():
         # If a mapping object (e.g. dictionary) call the function recursively
         if isinstance(val, Mapping):
-            tmp = update_dict(orig_dict.get(key, {}), val)
+            tmp = _update_dict(orig_dict.get(key, {}), val)
             orig_dict[key] = tmp
         # If a list then merge it into the original dictionary
         elif isinstance(val, list):
@@ -301,8 +301,8 @@ def update_dict(orig_dict: dict, new_dict) -> None:
     return orig_dict
 
 
-@checkargs
-def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
+@_checkargs
+def _expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
     """
     Takes a flat dictionary (no nesting) with keys separated by a separator and converts it into a nested
     dictionary
@@ -320,15 +320,15 @@ def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
         # Split the key on the separator
         components = key.split(key_separator)
         # Get the expanded dictionary for this key and update the master dictionary
-        update_dict(
-            dict_expanded, expand_dictionary_single_recursive(0, components, value)
+        _update_dict(
+            dict_expanded, _expand_dictionary_single_recursive(0, components, value)
         )
 
     return dict_expanded
 
 
-@checkargs
-def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dict:
+@_checkargs
+def _expand_dictionary_single_recursive(index: int, key_list: list, value) -> dict:
     """
     Takes a list of keys and a value and turns it into a nested dictionary. This is a recursive function.
 
@@ -347,11 +347,11 @@ def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dic
         return {key: value}
 
     # Otherwise if it is not the last key, key it against calling this function recursively with the next key
-    return {key: expand_dictionary_single_recursive(index + 1, key_list, value)}
+    return {key: _expand_dictionary_single_recursive(index + 1, key_list, value)}
 
 
-@checkargs
-def get_swagger_dict(api_url: str) -> dict:
+@_checkargs
+def _get_swagger_dict(api_url: str) -> dict:
     """
     Gets the lusid.json swagger file
 
@@ -373,12 +373,8 @@ def get_swagger_dict(api_url: str) -> dict:
         )
 
 
-def generate_required_attributes_list():
-    pass
-
-
-@checkargs
-def verify_all_required_attributes_mapped(
+@_checkargs
+def _verify_all_required_attributes_mapped(
     mapping: dict,
     model_object_name: str,
     exempt_attributes: list = None,
@@ -410,7 +406,7 @@ def verify_all_required_attributes_mapped(
     )
 
     # Gets the required attributes for this model
-    required_attributes = get_required_attributes_model_recursive(
+    required_attributes = _get_required_attributes_model_recursive(
         model_object=model_object, key_separator=key_separator
     )
 
@@ -429,8 +425,8 @@ def verify_all_required_attributes_mapped(
         )
 
 
-@checkargs
-def get_required_attributes_model_recursive(model_object, key_separator: str = "."):
+@_checkargs
+def _get_required_attributes_model_recursive(model_object, key_separator: str = "."):
     """
     This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
     then it separates the attributes by a '.' until the bottom level where no more models are required and a primitive
@@ -445,7 +441,7 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
     attributes = []
 
     # Get the required attributes for the current model
-    required_attributes = get_required_attributes_from_model(model_object)
+    required_attributes = _get_required_attributes_from_model(model_object)
 
     # Get the types of the attributes for the current model
     open_api_types = model_object.openapi_types
@@ -455,8 +451,8 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
         required_attribute_type = open_api_types[required_attribute]
 
         # Check to see if there is a LUSID model for this required attribute, if no further nesting then add this attribute
-        if not check_nested_model(required_attribute_type):
-            attributes.append(camel_case_to_pep_8(required_attribute))
+        if not _check_nested_model(required_attribute_type):
+            attributes.append(_camel_case_to_pep_8(required_attribute))
 
         # Otherwise call the function recursively
         else:
@@ -464,9 +460,9 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
             (
                 required_attribute_type,
                 nested_type,
-            ) = extract_lusid_model_from_attribute_type(required_attribute_type)
+            ) = _extract_lusid_model_from_attribute_type(required_attribute_type)
 
-            nested_required_attributes = get_required_attributes_model_recursive(
+            nested_required_attributes = _get_required_attributes_model_recursive(
                 model_object=getattr(lusid.models, required_attribute_type),
             )
 
@@ -474,7 +470,7 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
                 attributes.append(
                     key_separator.join(
                         [
-                            camel_case_to_pep_8(required_attribute),
+                            _camel_case_to_pep_8(required_attribute),
                             nested_required_attribute,
                         ]
                     )
@@ -483,7 +479,7 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
     return attributes
 
 
-def get_required_attributes_from_model(model_object) -> list:
+def _get_required_attributes_from_model(model_object) -> list:
     """
     Gets the required attributes for a LUSID model using reflection
 
@@ -548,7 +544,7 @@ def get_required_attributes_from_model(model_object) -> list:
     return required_attributes
 
 
-def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
+def _extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
     """
     Extracts a LUSID model from a complex attribute type e.g. dict(str, InstrumentIdValue) if it exists. If there
     is no LUSID model the attribute type is still returned
@@ -573,8 +569,8 @@ def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
     return attribute_type, nested_type
 
 
-@checkargs
-def check_nested_model(required_attribute_type: str) -> bool:
+@_checkargs
+def _check_nested_model(required_attribute_type: str) -> bool:
     """
     Takes the properties of a required attribute on a model and searches as to whether or not this attribute
     requires a model of its own
@@ -584,7 +580,7 @@ def check_nested_model(required_attribute_type: str) -> bool:
     :return: str: The name of the LUSID model
     """
 
-    required_attribute_type, nested_type = extract_lusid_model_from_attribute_type(
+    required_attribute_type, nested_type = _extract_lusid_model_from_attribute_type(
         required_attribute_type
     )
 
@@ -596,8 +592,8 @@ def check_nested_model(required_attribute_type: str) -> bool:
     return True
 
 
-@checkargs
-def gen_dict_extract(key, var: dict):
+@_checkargs
+def _gen_dict_extract(key, var: dict):
     """
     Searches a nested dictionary for a key, yielding any values it finds against that key
 
@@ -611,16 +607,16 @@ def gen_dict_extract(key, var: dict):
             if k == key:
                 yield v
             if isinstance(v, dict):
-                for result in gen_dict_extract(key, v):
+                for result in _gen_dict_extract(key, v):
                     yield result
             elif isinstance(v, list):
                 for d in v:
-                    for result in gen_dict_extract(key, d):
+                    for result in _gen_dict_extract(key, d):
                         yield result
 
 
-@checkargs
-def camel_case_to_pep_8(attribute_name: str) -> str:
+@_checkargs
+def _camel_case_to_pep_8(attribute_name: str) -> str:
     """
     Converts a camel case name to PEP 8 standard
 
@@ -633,7 +629,7 @@ def camel_case_to_pep_8(attribute_name: str) -> str:
     return "_".join([m.group(0)[0].lower() + m.group(0)[1:] for m in matches])
 
 
-def convert_cell_value_to_string(data):
+def _convert_cell_value_to_string(data):
     """
     Converts the value of a call to a string if it is a list or a dictionary
 
@@ -650,7 +646,7 @@ def convert_cell_value_to_string(data):
         return data
 
 
-def handle_nested_default_and_column_mapping(
+def _handle_nested_default_and_column_mapping(
     data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
 ) -> tuple:
     """
@@ -755,7 +751,7 @@ def load_json_file(relative_file_path: str) -> dict:
     return data
 
 
-@checkargs
+@_checkargs
 def load_data_to_df_and_detect_delimiter(file_path: str, delimiter=",", line_terminator="\n", num_header=0, num_footer=0) -> pd.DataFrame:
     """
     This function loads data from given file path and converts it into a pandas DataFrame
@@ -790,7 +786,7 @@ def load_data_to_df_and_detect_delimiter(file_path: str, delimiter=",", line_ter
         header_line = read_file.readline()
 
         if not delimiter:
-            delimiter = get_delimiter(header_line)
+            delimiter = _get_delimiter(header_line)
 
             if delimiter == header_line:
                 err = (
@@ -811,11 +807,11 @@ def load_data_to_df_and_detect_delimiter(file_path: str, delimiter=",", line_ter
         )
 
 
-def get_delimiter(sample_string: str):
+def _get_delimiter(sample_string: str):
     return detect(sample_string).replace("\\", "\\\\")
 
 
-def check_mapping_fields_exist(
+def _check_mapping_fields_exist(
     required_list: list, search_list: list, file_type: str,
 ) -> list:
     """
@@ -847,6 +843,17 @@ def check_mapping_fields_exist(
 
 
 def parse_args(args: dict):
+    """
+    Parse arguments from command line for configuring loading data, secrets and mapping files
+
+    Parameters
+    ----------
+    args    command line args
+
+    Returns
+    -------
+    args    dict
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument(
         "-f",
@@ -930,8 +937,8 @@ def scale_quote_of_type(
                 DataFrame containing scaled data
     """
 
-    check_mapping_fields_exist(["quote_scalar"], mapping[file_type].keys(), file_type)
-    check_mapping_fields_exist(["price", "type", "type_code", "scale_factor"], mapping[file_type]["quote_scalar"].keys(), file_type)
+    _check_mapping_fields_exist(["quote_scalar"], mapping[file_type].keys(), file_type)
+    _check_mapping_fields_exist(["price", "type", "type_code", "scale_factor"], mapping[file_type]["quote_scalar"].keys(), file_type)
 
     price_col = mapping[file_type]["quote_scalar"]["price"]
     type_col = mapping[file_type]["quote_scalar"]["type"]
@@ -1009,7 +1016,7 @@ def identify_cash_items(
                 else:
                     dataframe.at[
                         index, "__currency_identifier_for_LUSID"
-                    ] = get_currency_code_for_row(
+                    ] = _get_currency_code_for_row(
                         row, column, cash_flag_specification
                     )
                 break
@@ -1019,7 +1026,7 @@ def identify_cash_items(
     return dataframe, mappings
 
 
-def get_currency_code_for_row(
+def _get_currency_code_for_row(
     row: dict, column: str, cash_flag_specification: dict
 ) -> str:
     """
@@ -1088,7 +1095,7 @@ def get_currency_code_for_row(
     return currency_code
 
 
-def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str):
+def _validate_mapping_file_structure(mapping: dict, columns: list, file_type: str):
     """
     This function takes a mapping structure and checks that each of the
     Parameters
@@ -1118,13 +1125,13 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
     if "required" in mapping[file_type].keys():
         for field in mapping[file_type]["required"]:
             if isinstance(mapping[file_type]["required"][field], dict):
-                check_mapping_fields_exist(
+                _check_mapping_fields_exist(
                     mapping[file_type]["required"][field]["column"].values(),
                     columns,
                     "required",
                 )
             else:
-                check_mapping_fields_exist(
+                _check_mapping_fields_exist(
                     mapping[file_type]["required"].values(), columns, "required"
                 )
     else:
@@ -1132,13 +1139,13 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
 
     # optional
     if "optional" in mapping.keys():
-        check_mapping_fields_exist(
+        _check_mapping_fields_exist(
             mapping[file_type]["optional"].values(), columns, "optional"
         )
 
     # identifier_mapping
     if "identifier_mapping" in mapping[file_type].keys():
-        check_mapping_fields_exist(
+        _check_mapping_fields_exist(
             mapping[file_type]["identifier_mapping"].values(),
             columns,
             "identifier_mapping",
@@ -1173,7 +1180,7 @@ def strip_whitespace(dataframe: pd.DataFrame, columns: list) -> pd.DataFrame:
     return stripped_df
 
 
-def create_scope_id(time_generator=None):
+def _create_scope_id(time_generator=None):
     """
     This function creates a unique ID based on the time since epoch for use
     as a scope id.

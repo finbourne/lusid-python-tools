@@ -5,7 +5,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 from lusidtools import logger
-from lusidtools.cocoon.utilities import create_scope_id
+from lusidtools.cocoon.utilities import _create_scope_id
 
 
 class CocoonTestsTransactions(unittest.TestCase):
@@ -183,7 +183,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 ["exposure_counterparty", "compls", "val", "location_region"],
-                f"prime_broker_test_{create_scope_id()}",
+                f"prime_broker_test_{_create_scope_id()}",
                 2,
                 lusid.models.Version,
             ],

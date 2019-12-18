@@ -190,11 +190,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_discard_dict_keys_none_value(self, _, value, value_name, expected_outcome):
 
-        update_dict = Validator(value, value_name).discard_dict_keys_none_value()
+        _update_dict = Validator(value, value_name).discard_dict_keys_none_value()
 
-        self.assertIsInstance(update_dict, Validator)
+        self.assertIsInstance(_update_dict, Validator)
 
-        self.assertEqual(first=update_dict.value, second=expected_outcome)
+        self.assertEqual(first=_update_dict.value, second=expected_outcome)
 
     @parameterized.expand(
         [

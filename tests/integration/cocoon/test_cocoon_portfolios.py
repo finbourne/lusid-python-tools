@@ -5,7 +5,7 @@ import lusid
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
-from lusidtools.cocoon.utilities import create_scope_id
+from lusidtools.cocoon.utilities import _create_scope_id
 
 
 class CocoonTestsPortfolios(unittest.TestCase):
@@ -68,7 +68,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 None,
                 [],
             ],
@@ -102,7 +102,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 ["Strategy", "Broker"],
                 [],
             ],
@@ -119,7 +119,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 ["Trader/Strategy"],
                 [],
             ],
@@ -136,7 +136,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 ["Transaction/Trader/Strategy"],
                 [],
             ],

@@ -1,4 +1,4 @@
-from lusidtools.cocoon.utilities import checkargs
+from lusidtools.cocoon.utilities import _checkargs
 from lusidtools import cocoon
 import lusid
 import pandas as pd
@@ -16,7 +16,7 @@ global_constants = {
 }
 
 
-@checkargs
+@_checkargs
 def check_property_definitions_exist_in_scope_single(
     api_factory: lusid.utilities.ApiClientFactory, property_key: str
 ) -> (bool, str):
@@ -49,7 +49,7 @@ def check_property_definitions_exist_in_scope_single(
     return exists, data_type
 
 
-@checkargs
+@_checkargs
 def check_property_definitions_exist_in_scope(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
@@ -84,7 +84,7 @@ def check_property_definitions_exist_in_scope(
 
         # Create the property key
         property_key = (
-            f"{domain}/{scope}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
+            f"{domain}/{scope}/{cocoon.utilities._make_code_lusid_friendly(column_name)}"
         )
 
         column_property_mapping[property_key] = column_name
@@ -124,7 +124,7 @@ def check_property_definitions_exist_in_scope(
     return missing_property_columns, data_frame
 
 
-@checkargs
+@_checkargs
 def create_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
@@ -168,7 +168,7 @@ def create_property_definitions_from_file(
     for column_name, data_type in missing_property_data_frame.dtypes.iteritems():
 
         # Make the column name LUSID friendly
-        lusid_friendly_code = cocoon.utilities.make_code_lusid_friendly(column_name)
+        lusid_friendly_code = cocoon.utilities._make_code_lusid_friendly(column_name)
 
         # If there is no data Pandas infers a type of float, would prefer to infer object
         if missing_property_data_frame[column_name].isnull().all():
@@ -208,7 +208,7 @@ def create_property_definitions_from_file(
     return property_key_mapping, data_frame
 
 
-@checkargs
+@_checkargs
 def create_missing_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
     properties_scope: str,
@@ -256,7 +256,7 @@ def create_missing_property_definitions_from_file(
     return data_frame
 
 
-@checkargs
+@_checkargs
 def create_property_values(
     row: pd.Series, scope: str, domain: str, dtypes: pd.Series
 ) -> dict:
@@ -310,7 +310,7 @@ def create_property_values(
 
         # Set the property
         property_key = (
-            f"{domain}/{scope}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
+            f"{domain}/{scope}/{cocoon.utilities._make_code_lusid_friendly(column_name)}"
         )
         properties[property_key] = lusid.models.PerpetualProperty(
             key=property_key, value=property_value
@@ -355,7 +355,7 @@ def _infer_full_property_keys(
     return [
         "/".join(
             [
-                cocoon.utilities.make_code_lusid_friendly(partial)
+                cocoon.utilities._make_code_lusid_friendly(partial)
                 for partial in key.split("/")
             ]
         )

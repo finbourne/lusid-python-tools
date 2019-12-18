@@ -2,11 +2,11 @@ from typing import Tuple
 
 import pandas as pd
 import numpy as np
-from lusidtools.cocoon import checkargs
+from lusidtools.cocoon import _checkargs
 from lusid.exceptions import ApiException
 
 
-@checkargs
+@_checkargs
 def _check_dict_for_required_keys(
         target_dict: dict, target_name: str, required_keys: list
 ):
@@ -92,7 +92,7 @@ def _get_portfolio_from_href(href: list, file_type: str):
     return codes
 
 
-@checkargs
+@_checkargs
 def _get_non_href_response(response: dict, file_type: str):
     items_success = [
         key for batch in response[file_type]["success"] for key in batch.values.keys()

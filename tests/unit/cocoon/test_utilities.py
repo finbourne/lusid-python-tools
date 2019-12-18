@@ -11,33 +11,33 @@ import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
 from lusidtools.cocoon.utilities import (
-    checkargs,
-    get_delimiter,
-    check_mapping_fields_exist,
+    _checkargs,
+    _get_delimiter,
+    _check_mapping_fields_exist,
     identify_cash_items,
     strip_whitespace,
-    create_scope_id,
+    _create_scope_id,
 )
 from lusidtools import logger
 
 
-@checkargs
-def checkargs_list(a_list: list):
+@_checkargs
+def _checkargs_list(a_list: list):
     return isinstance(a_list, list)
 
 
-@checkargs
-def checkargs_dict(a_dict: dict):
+@_checkargs
+def _checkargs_dict(a_dict: dict):
     return isinstance(a_dict, dict)
 
 
-@checkargs
-def checkargs_tuple(a_tuple: tuple):
+@_checkargs
+def _checkargs_tuple(a_tuple: tuple):
     return isinstance(a_tuple, tuple)
 
 
-@checkargs
-def checkargs_function(a_function: Callable):
+@_checkargs
+def _checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
 
@@ -129,7 +129,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_expand_dictionary_single_recursive(
+    def test__expand_dictionary_single_recursive(
         self, key_list, value, expected_outcome
     ) -> None:
         """
@@ -142,7 +142,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        nested_dictionary = cocoon.utilities.expand_dictionary_single_recursive(
+        nested_dictionary = cocoon.utilities._expand_dictionary_single_recursive(
             index=0, key_list=key_list, value=value
         )
 
@@ -177,7 +177,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ]
         ]
     )
-    def test_expand_dictionary(self, compacted_dictionary, expected_outcome) -> None:
+    def test__expand_dictionary(self, compacted_dictionary, expected_outcome) -> None:
         """
         Tests that the expansion of a dictionary returns the expected result
 
@@ -187,7 +187,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        expanded_dictionary = cocoon.utilities.expand_dictionary(
+        expanded_dictionary = cocoon.utilities._expand_dictionary(
             dictionary=compacted_dictionary
         )
 
@@ -244,7 +244,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        cocoon.utilities.update_dict(
+        cocoon.utilities._update_dict(
             orig_dict=nested_dictionary_1, new_dict=nested_dictionary_2
         )
 
@@ -624,7 +624,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        populated_model = cocoon.utilities.set_attributes_recursive(
+        populated_model = cocoon.utilities._set_attributes_recursive(
             model_object=model_object,
             mapping=mapping,
             row=row,
@@ -639,7 +639,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             msg="The populated model does not match the expected outcome",
         )
 
-    def test_populate_model(self):
+    def test__populate_model(self):
         pass
 
     def test_file_type_checks(self):
@@ -678,7 +678,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["List", ["My", "List", "Code"], "MyListCode"],
         ]
     )
-    def test_make_code_lusid_friendly_success(
+    def test__make_code_lusid_friendly_success(
         self, _, enemy_code, expected_code
     ) -> None:
         """
@@ -690,7 +690,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        friendly_code = cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
+        friendly_code = cocoon.utilities._make_code_lusid_friendly(raw_code=enemy_code)
 
         self.assertEqual(
             first=friendly_code,
@@ -708,7 +708,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Code cannot be converted to a string", ReturnBytes(), Exception,],
         ]
     )
-    def test_make_code_lusid_friendly_failure(
+    def test__make_code_lusid_friendly_failure(
         self, _, enemy_code, expected_exception
     ) -> None:
         """
@@ -721,7 +721,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         """
 
         with self.assertRaises(expected_exception):
-            cocoon.utilities.make_code_lusid_friendly(raw_code=enemy_code)
+            cocoon.utilities._make_code_lusid_friendly(raw_code=enemy_code)
 
     @parameterized.expand(
         [
@@ -781,10 +781,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ]
         ]
     )
-    def test_get_required_attributes_model_recursive(
+    def test__get_required_attributes_model_recursive(
         self, swagger_dict, model_object, expected_outcome
     ):
-        required_attributes = cocoon.utilities.get_required_attributes_model_recursive(
+        required_attributes = cocoon.utilities._get_required_attributes_model_recursive(
             model_object=model_object
         )
 
@@ -793,7 +793,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         self.assertListEqual(required_attributes, expected_outcome)
 
-    def test_gen_dict_extract(self):
+    def test__gen_dict_extract(self):
         pass
 
     @parameterized.expand(
@@ -808,7 +808,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Test where it is inside a list", "list[ModelProperty]", True],
         ]
     )
-    def test_check_nested_model(
+    def test__check_nested_model(
         self, _, required_attribute_properties, expected_outcome
     ) -> None:
         """
@@ -819,7 +819,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        nested_model_check = cocoon.utilities.check_nested_model(
+        nested_model_check = cocoon.utilities._check_nested_model(
             required_attribute_properties
         )
 
@@ -847,7 +847,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_verify_all_required_attributes_mapped_success(
+    def test__verify_all_required_attributes_mapped_success(
         self, mapping, model_object
     ) -> None:
         """
@@ -859,7 +859,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        cocoon.utilities.verify_all_required_attributes_mapped(
+        cocoon.utilities._verify_all_required_attributes_mapped(
             mapping=mapping,
             model_object_name=model_object,
             exempt_attributes=[
@@ -893,7 +893,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_verify_all_required_attributes_mapped_fail(
+    def test__verify_all_required_attributes_mapped_fail(
         self, mapping, model_object, expected_exception
     ) -> None:
         """
@@ -907,7 +907,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         """
 
         with self.assertRaises(expected_exception):
-            cocoon.utilities.verify_all_required_attributes_mapped(
+            cocoon.utilities._verify_all_required_attributes_mapped(
                 mapping=mapping,
                 model_object=model_object,
                 exempt_attributes=[
@@ -921,7 +921,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [["instrumentIdentifiers", "instrument_identifiers"], ["taxLots", "tax_lots"]]
     )
-    def test_camel_case_to_pep_8(self, attribute_name, expected_outcome) -> None:
+    def test__camel_case_to_pep_8(self, attribute_name, expected_outcome) -> None:
         """
         Tests that the conversion from camel case e.g. instrumentIdentifiers is converted to Python PEP 8 standard
         i.e. instrument_identifiers
@@ -932,7 +932,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         :return: None
         """
 
-        pep_8_name = cocoon.utilities.camel_case_to_pep_8(attribute_name=attribute_name)
+        pep_8_name = cocoon.utilities._camel_case_to_pep_8(attribute_name=attribute_name)
 
         self.assertEqual(first=pep_8_name, second=expected_outcome)
 
@@ -950,7 +950,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Rebalanced", "Rebalanced"],
         ]
     )
-    def test_convert_cell_value_to_string(self, data, expected_outcome) -> None:
+    def test__convert_cell_value_to_string(self, data, expected_outcome) -> None:
         """
         Tests that data can be successfully converted to a string if it is a list or a dictionary
 
@@ -959,7 +959,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        converted_value = cocoon.utilities.convert_cell_value_to_string(data)
+        converted_value = cocoon.utilities._convert_cell_value_to_string(data)
 
         self.assertEqual(first=converted_value, second=expected_outcome)
 
@@ -1081,13 +1081,13 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_handle_nested_default_and_column_mapping_success(
+    def test__handle_nested_default_and_column_mapping_success(
         self, data_frame, mapping, expected_outcome
     ):
         (
             updated_data_frame,
             updated_mapping,
-        ) = cocoon.utilities.handle_nested_default_and_column_mapping(
+        ) = cocoon.utilities._handle_nested_default_and_column_mapping(
             data_frame=data_frame, mapping=mapping
         )
 
@@ -1144,11 +1144,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_handle_nested_default_and_column_mapping_failure(
+    def test__handle_nested_default_and_column_mapping_failure(
         self, data_frame, mapping, expected_exception
     ):
         with self.assertRaises(expected_exception):
-            cocoon.utilities.handle_nested_default_and_column_mapping(
+            cocoon.utilities._handle_nested_default_and_column_mapping(
                 data_frame=data_frame, mapping=mapping
             )
 
@@ -1256,39 +1256,39 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_checkargs_lusid(self, function, expected_exception, args, kwargs):
+    def test__checkargs_lusid(self, function, expected_exception, args, kwargs):
         with self.assertRaises(expected_exception):
             function(*args, **kwargs)
 
     @parameterized.expand(
         [
-            ("list_string", checkargs_list, ["a", "b", "c"]),
-            ("list_number", checkargs_list, [1, 2, 3]),
-            ("dict_string", checkargs_dict, {"a": "b"}),
-            ("dict_mixed", checkargs_dict, {"a": 1}),
-            ("dict_number", checkargs_dict, {1: 2}),
-            ("function", checkargs_function, lambda: print("lambda")),
+            ("list_string", _checkargs_list, ["a", "b", "c"]),
+            ("list_number", _checkargs_list, [1, 2, 3]),
+            ("dict_string", _checkargs_dict, {"a": "b"}),
+            ("dict_mixed", _checkargs_dict, {"a": 1}),
+            ("dict_number", _checkargs_dict, {1: 2}),
+            ("function", _checkargs_function, lambda: print("lambda")),
         ]
     )
-    def test_checkargs(self, _, function, param):
+    def test__checkargs(self, _, function, param):
         self.assertTrue(function(param))
 
     @parameterized.expand(
         [
-            ("list_string", checkargs_list, {}),
-            ("list_none", checkargs_list, None),
-            ("dict_string", checkargs_dict, "a"),
-            ("dict_string", checkargs_dict, None),
-            ("function", checkargs_function, []),
-            ("function", checkargs_function, None),
+            ("list_string", _checkargs_list, {}),
+            ("list_none", _checkargs_list, None),
+            ("dict_string", _checkargs_dict, "a"),
+            ("dict_string", _checkargs_dict, None),
+            ("function", _checkargs_function, []),
+            ("function", _checkargs_function, None),
         ]
     )
-    def test_checkargs_with_incorrect_type(self, _, function, param):
+    def test__checkargs_with_incorrect_type(self, _, function, param):
         with self.assertRaises(TypeError):
             function(param)
 
-    @parameterized.expand([["list_string", checkargs_list, {"b_list": []}]])
-    def test_checkargs_with_invalid_argument(self, _, function, kwargs):
+    @parameterized.expand([["list_string", _checkargs_list, {"b_list": []}]])
+    def test__checkargs_with_invalid_argument(self, _, function, kwargs):
         with self.assertRaises(ValueError):
             function(**kwargs)
 
@@ -1371,25 +1371,25 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ("tab", "{}".format("\t")),
         ]
     )
-    def test_get_delimiter(self, _, delimiter):
+    def test__get_delimiter(self, _, delimiter):
         sample_string = [f"data{i}" + delimiter for i in range(10)]
         sample_string = "".join(sample_string)
-        delimiter_detected = get_delimiter(sample_string)
+        delimiter_detected = _get_delimiter(sample_string)
         self.assertEqual(delimiter, delimiter_detected)
 
-    def test_check_mapping_fields_exist(self):
+    def test__check_mapping_fields_exist(self):
         required_list = ["field1", "field4", "field6"]
         search_list = ["field1", "field2", "field3", "field4", "field5", "field6"]
         self.assertFalse(
-            check_mapping_fields_exist(required_list, search_list, "test_file_type")
+            _check_mapping_fields_exist(required_list, search_list, "test_file_type")
         )
 
-    def test_check_mapping_fields_exist_fail(self):
+    def test__check_mapping_fields_exist_fail(self):
         required_list = ["field1", "field4", "field7", "field8"]
         search_list = ["field1", "field2", "field3", "field4", "field5", "field6"]
 
         with self.assertRaises(ValueError):
-            check_mapping_fields_exist(required_list, search_list, "test_file_type")
+            _check_mapping_fields_exist(required_list, search_list, "test_file_type")
 
     @parameterized.expand(
         [
@@ -1676,9 +1676,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ]
         ]
     )
-    def test_create_scope_id_success(self, _, time_generator, expected_outcome):
+    def test__create_scope_id_success(self, _, time_generator, expected_outcome):
 
-        scope_id = create_scope_id(time_generator)
+        scope_id = _create_scope_id(time_generator)
 
         self.assertEqual(first=expected_outcome, second=scope_id)
 
@@ -1696,10 +1696,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_create_scope_id_failure(self, _, time_generator, expected_exception):
+    def test__create_scope_id_failure(self, _, time_generator, expected_exception):
 
         with self.assertRaises(expected_exception):
-            create_scope_id(time_generator)
+            _create_scope_id(time_generator)
 
     @parameterized.expand(
         [
@@ -1724,11 +1724,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
         ]
     )
-    def test_get_required_attributes_from_model(
+    def test__get_required_attributes_from_model(
         self, _, model_object, expected_outcome
     ):
 
-        required_attributes = cocoon.utilities.get_required_attributes_from_model(
+        required_attributes = cocoon.utilities._get_required_attributes_from_model(
             model_object
         )
 
@@ -1753,14 +1753,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["A list type with a primitive value", "list[str]", "str", "list"],
         ]
     )
-    def test_extract_lusid_model_from_attribute_type(
+    def test__extract_lusid_model_from_attribute_type(
         self, _, attribute_type, expected_attribute, expected_nested
     ):
 
         (
             attribute_type,
             nested_type,
-        ) = cocoon.utilities.extract_lusid_model_from_attribute_type(attribute_type)
+        ) = cocoon.utilities._extract_lusid_model_from_attribute_type(attribute_type)
 
         self.assertEqual(first=expected_attribute, second=attribute_type)
 

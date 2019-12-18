@@ -7,9 +7,9 @@ import lusid
 from lusidtools import logger
 from datetime import datetime
 import pytz
-from lusidtools.cocoon.utilities import create_scope_id
+from lusidtools.cocoon.utilities import _create_scope_id
 
-unique_properties_scope = create_scope_id()
+unique_properties_scope = _create_scope_id()
 
 
 class CocoonTestsInstruments(unittest.TestCase):

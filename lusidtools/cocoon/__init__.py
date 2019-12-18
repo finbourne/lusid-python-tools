@@ -5,16 +5,16 @@ import lusidtools.cocoon.systemConfiguration
 import lusidtools.cocoon.utilities
 from lusidtools.cocoon.instruments import resolve_instruments
 from lusidtools.cocoon.properties import create_property_values
-from lusidtools.cocoon.utilities import set_attributes_recursive
+from lusidtools.cocoon.utilities import _set_attributes_recursive
 from lusidtools.cocoon.cocoon import load_from_data_frame
 from lusidtools.cocoon.utilities import (
-    checkargs,
+    _checkargs,
     load_data_to_df_and_detect_delimiter,
-    check_mapping_fields_exist,
+    _check_mapping_fields_exist,
     parse_args,
     identify_cash_items,
-    validate_mapping_file_structure,
-    get_delimiter,
+    _validate_mapping_file_structure,
+    _get_delimiter,
     scale_quote_of_type,
     strip_whitespace,
 )

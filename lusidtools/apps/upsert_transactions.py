@@ -8,7 +8,7 @@ from lusidtools.cocoon import (
     load_from_data_frame,
     parse_args,
     identify_cash_items,
-    validate_mapping_file_structure,
+    _validate_mapping_file_structure,
 )
 from lusidtools.logger import LusidLogger
 
@@ -35,7 +35,7 @@ def load_transactions(args):
     if "cash_flag" in mappings.keys():
         identify_cash_items(transactions, mappings, file_type)
 
-    validate_mapping_file_structure(mappings, transactions.columns, file_type)
+    _validate_mapping_file_structure(mappings, transactions.columns, file_type)
 
     if args["dryrun"]:
         logging.info("--dryrun specified as True, exiting before upsert call is made")

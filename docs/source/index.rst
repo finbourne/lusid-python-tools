@@ -22,6 +22,8 @@ cocoon
 .. automodule:: lusidtools.cocoon.cocoon
    :members:
 
+cocoon printer
+==============
 .. automodule:: lusidtools.cocoon.cocoon_printer
    :members:
 

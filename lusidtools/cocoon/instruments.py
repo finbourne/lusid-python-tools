@@ -3,7 +3,7 @@ import lusid.models as models
 from lusid.api import InstrumentsApi, SearchApi
 import numpy as np
 import time
-from lusidtools.cocoon.utilities import checkargs
+from lusidtools.cocoon.utilities import _checkargs
 import pandas as pd
 import logging
 import re
@@ -12,7 +12,7 @@ import asyncio
 from typing import Callable
 
 
-@checkargs
+@_checkargs
 def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
     """
     This function prepares the key for the identifier based on whether the full key or just the code is required
@@ -36,7 +36,7 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
         )
 
 
-@checkargs
+@_checkargs
 def create_identifiers(
     index,
     row: pd.Series,
@@ -107,7 +107,7 @@ def create_identifiers(
     return identifiers
 
 
-@checkargs
+@_checkargs
 def resolve_instruments(
     api_factory: lusid.utilities.ApiClientFactory,
     data_frame: pd.DataFrame,
@@ -271,7 +271,7 @@ def resolve_instruments(
     return _data_frame
 
 
-@checkargs
+@_checkargs
 def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
     """
     Tests getting the unique instrument identifiers
@@ -293,7 +293,7 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
     ]
 
 
-@checkargs
+@_checkargs
 async def enrich_instruments(
     api_factory: lusid.utilities.ApiClientFactory,
     data_frame: pd.DataFrame,

@@ -5,7 +5,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 from lusidtools import logger
-from lusidtools.cocoon.utilities import create_scope_id
+from lusidtools.cocoon.utilities import _create_scope_id
 
 
 class CocoonTestsHoldings(unittest.TestCase):
@@ -123,7 +123,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "Currency": "is_cash_with_currency",
                 },
                 ["Prime Broker"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 None,
                 lusid.models.Version,
             ],
@@ -369,7 +369,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "Currency": "is_cash_with_currency",
                 },
                 ["Prime Broker"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{_create_scope_id()}",
                 ["Prime Broker"],
                 lusid.models.Version,
             ],

@@ -9,7 +9,7 @@ from lusidtools.cocoon import (
     load_data_to_df_and_detect_delimiter,
     load_from_data_frame,
     identify_cash_items,
-    validate_mapping_file_structure,
+    _validate_mapping_file_structure,
 )
 
 
@@ -34,7 +34,7 @@ def load_holdings(args):
     if "cash_flag" in mappings.keys():
         holdings, mappings = identify_cash_items(holdings, mappings, file_type)
 
-    validate_mapping_file_structure(mappings, holdings.columns, file_type)
+    _validate_mapping_file_structure(mappings, holdings.columns, file_type)
 
     if args["dryrun"]:
         logging.info("--dryrun specified as True, exiting before upsert call is made")
