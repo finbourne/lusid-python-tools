@@ -15,7 +15,7 @@ setup(
     keywords=["FINBOURNE", "LUSID", "LUSID API", "python"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
-        "lusid-sdk-preview==0.10.*",
+        "lusid-sdk-preview>=0.10.975",
         "msrest==0.6.*",
         "xlrd==1.*",
         "pandas==0.25.*",
