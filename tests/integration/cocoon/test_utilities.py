@@ -11,8 +11,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["Standard Base URL", "https://fbn-prd.lusid.com/api"],
-            ["Base URL with forward slash suffix", "https://fbn-prd.lusid.com/api/"],
+            ["Standard Base URL", "https://fbn-prd.lusid.com/api"], ["Base URL with forward slash suffix", "https://fbn-prd.lusid.com/api/"],
         ]
     )
     def test_get_swagger_dict_success(self, _, api_url):
