@@ -1532,7 +1532,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 {
                     "cash_identifiers": {
                         "instrument_name": {
-                            "inst1": "GBP_EXP",   
+                            "inst1": "GBP_EXP",    
                             "inst2": "GBP_EXP",
                             "inst3": "USD_EXP",
                             "inst4": "USD_EXP",
