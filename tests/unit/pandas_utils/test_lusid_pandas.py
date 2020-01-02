@@ -5,8 +5,8 @@ import unittest
 from lusidtools.pandas_utils.lusid_pandas import lusid_response_to_data_frame
 import pandas as pd
 
-class TestResponseToPandasObject(unittest.TestCase):
 
+class TestResponseToPandasObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
@@ -78,7 +78,9 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_response_to_df_fail(self):
 
-        self.assertRaises(TypeError, lambda: lusid_response_to_data_frame("test_string"))
+        self.assertRaises(
+            TypeError, lambda: lusid_response_to_data_frame("test_string")
+        )
 
     def test_response_none(self):
 
