@@ -164,8 +164,13 @@ class BatchLoader:
             )
 
         # If only an adjustment has been specified
-        if "holdings_adjustment_only" in list(kwargs.keys()) and kwargs["holdings_adjustment_only"]:
-            return api_factory.build(lusid.api.TransactionPortfoliosApi).adjust_holdings(
+        if (
+            "holdings_adjustment_only" in list(kwargs.keys())
+            and kwargs["holdings_adjustment_only"]
+        ):
+            return api_factory.build(
+                lusid.api.TransactionPortfoliosApi
+            ).adjust_holdings(
                 scope=kwargs["scope"],
                 code=kwargs["code"],
                 effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
@@ -623,7 +628,7 @@ def load_from_data_frame(
     remove_white_space: bool = True,
     instrument_name_enrichment: bool = False,
     sub_holding_keys: list = None,
-    holdings_adjustment_only: bool = False
+    holdings_adjustment_only: bool = False,
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -861,7 +866,7 @@ def load_from_data_frame(
         "unique_identifiers": cocoon.instruments.get_unique_identifiers(
             api_factory=api_factory
         ),
-        "holdings_adjustment_only":  holdings_adjustment_only
+        "holdings_adjustment_only": holdings_adjustment_only,
     }
 
     # Get the responses from LUSID

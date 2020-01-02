@@ -516,7 +516,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             sub_holding_keys=sub_holding_keys,
-            holdings_adjustment_only=holdings_adjustment_only
+            holdings_adjustment_only=holdings_adjustment_only,
         )
 
         self.assertGreater(len(responses["holdings"]["success"]), 0)

@@ -33,9 +33,11 @@ def lusid_response_to_data_frame(lusid_response):
 
     elif hasattr(lusid_response, "to_dict"):
 
-        response_df = pd.DataFrame.from_dict((flatten(lusid_response.to_dict(), ".")),
-                                             orient="index",
-                                             columns=["response_values"])
+        response_df = pd.DataFrame.from_dict(
+            (flatten(lusid_response.to_dict(), ".")),
+            orient="index",
+            columns=["response_values"],
+        )
     else:
 
         raise TypeError(
