@@ -26,7 +26,7 @@ setup(
         "coloredlogs==10.*",
         "detect_delimiter==0.1.*",
         "pyyaml==5.*",
-        "flatten-json==0.1.*"
+        "flatten-json==0.1.*",
     ],
     include_package_data=True,
     python_requires=">=3.7",
