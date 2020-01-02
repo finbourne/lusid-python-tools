@@ -163,6 +163,15 @@ class BatchLoader:
                 """There is no mapping for effective_at in the required mapping, please add it"""
             )
 
+        # If only an adjustment has been specified
+        if "holdings_adjustment_only" in list(kwargs.keys()) and kwargs["holdings_adjustment_only"]:
+            return api_factory.build(lusid.api.TransactionPortfoliosApi).adjust_holdings(
+                scope=kwargs["scope"],
+                code=kwargs["code"],
+                effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
+                holding_adjustments=holding_batch,
+            )
+
         return api_factory.build(lusid.api.TransactionPortfoliosApi).set_holdings(
             scope=kwargs["scope"],
             code=kwargs["code"],
@@ -614,6 +623,7 @@ def load_from_data_frame(
     remove_white_space: bool = True,
     instrument_name_enrichment: bool = False,
     sub_holding_keys: list = None,
+    holdings_adjustment_only: bool = False
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -632,6 +642,8 @@ def load_from_data_frame(
     :param bool instrument_name_enrichment: request additional identifier information from open-figi
     :param list sub_holding_keys: The sub holding keys to use for this request. Can be a list of property keys or a list of
     columns in the dataframe to use to create sub holdings
+    :param bool holdings_adjustment_only: Whether to use the adjust_holdings api call rather than set_holdings when
+    working with holdings
 
     :return: dict responses: The responses from loading the data into LUSID
     """
@@ -849,6 +861,7 @@ def load_from_data_frame(
         "unique_identifiers": cocoon.instruments.get_unique_identifiers(
             api_factory=api_factory
         ),
+        "holdings_adjustment_only":  holdings_adjustment_only
     }
 
     # Get the responses from LUSID

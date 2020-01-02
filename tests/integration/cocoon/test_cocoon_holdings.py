@@ -44,6 +44,35 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
+                lusid.models.Version,
+            ],
+            [
+                "Standard successful load with adjustment only",
+                "prime_broker_test",
+                "data/holdings-example-unique-date.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                True,
                 lusid.models.Version,
             ],
             [
@@ -71,6 +100,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -98,6 +128,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -125,6 +156,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 f"operations001_{create_scope_id()}",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -152,6 +184,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -179,6 +212,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -206,6 +240,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -236,6 +271,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -263,6 +299,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
             [
@@ -290,6 +327,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 ["Security Description"],
+                False,
                 lusid.models.Version,
             ],
             [
@@ -317,6 +355,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 ["Security Description", "Prime Broker"],
+                False,
                 lusid.models.Version,
             ],
             [
@@ -344,6 +383,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 ["swap"],
+                False,
                 lusid.models.Version,
             ],
             [
@@ -371,6 +411,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 f"operations001_{create_scope_id()}",
                 ["Prime Broker"],
+                False,
                 lusid.models.Version,
             ],
             [
@@ -398,6 +439,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 ["Quantity"],
+                False,
                 lusid.models.Version,
             ],
             [
@@ -425,6 +467,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Prime Broker"],
                 "operations001",
                 None,
+                False,
                 lusid.models.Version,
             ],
         ]
@@ -440,6 +483,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         property_columns,
         properties_scope,
         sub_holding_keys,
+        holdings_adjustment_only,
         expected_outcome,
     ) -> None:
         """
@@ -452,7 +496,9 @@ class CocoonTestsHoldings(unittest.TestCase):
         :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
         :param list[str] property_columns: The columns to create properties for
         :param str properties_scope: The scope to add the properties to
-        :param dict sub_holding_keys: The sub holding keys to populate on the adjustments as transaction properties
+        :param list sub_holding_keys: The sub holding keys to populate on the adjustments as transaction properties
+        :param bool holdings_adjustment_only: Whether to use the adjust_holdings api call rather than set_holdings when
+               working with holdings
         :param any expected_outcome: The expected outcome
 
         :return: None
@@ -470,6 +516,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             sub_holding_keys=sub_holding_keys,
+            holdings_adjustment_only=holdings_adjustment_only
         )
 
         self.assertGreater(len(responses["holdings"]["success"]), 0)
