@@ -1054,8 +1054,6 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
             columns,
             "identifier_mapping",
         )
-    else:
-        raise ValueError(f"'identifier_mapping' mapping field not provided in mapping")
 
 
 def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
