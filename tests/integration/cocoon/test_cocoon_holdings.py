@@ -106,6 +106,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             [
                 "Standard successful load with duplicate index",
                 "prime_broker_test",
+                             
                 "data/holdings-example-unique-date-duplicate-index.csv",
                 {
                     "code": "FundCode",
