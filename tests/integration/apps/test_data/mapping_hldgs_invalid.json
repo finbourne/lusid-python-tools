@@ -1,0 +1,16 @@
+{
+  "holdings": {
+    "identifier_mapping": {
+      "LusidInstrumentId": "figi"
+    },
+    "required": {
+      "effective_at": "effective_at",
+      "tax_lots.units": "quantity",
+      "code": "portfolio_code"
+    },
+    "optional": {
+    },
+    "property_columns": ["quantity", "price", "currency"]
+
+  }
+}

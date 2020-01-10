@@ -17,6 +17,7 @@ from lusidtools.cocoon.utilities import (
     get_delimiter,
     scale_quote_of_type,
     strip_whitespace,
+    load_json_file
 )
 from lusidtools.cocoon.cocoon_printer import (
     format_holdings_response,

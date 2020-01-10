@@ -719,14 +719,17 @@ def handle_nested_default_and_column_mapping(
     return data_frame, mapping_updated
 
 
-def load_json_file(relative_file_path: str) -> dict:
+def load_json_file(file_path: str) -> dict:
     """
 
     :param str relative_file_path: path to json file
     :return: dict data: parsed data from json file
     """
 
-    file_path = Path(__file__).parent.joinpath(relative_file_path)
+    if not os.path.isabs(file_path):
+        file_path = Path(__file__).parent.joinpath(file_path)
+    if not os.path.exists(file_path):
+        raise OSError(f"Json file not found at {file_path}")
     with open(file_path) as json_file:
         data = json.load(json_file)
     return data
@@ -820,8 +823,8 @@ def parse_args(args: dict):
         "--mapping",
         required=True,
         help=r"full path to mappings.json (see mappings_template.json)",
-    )  # TODO: create support article on mapping.json structure
-    ap.add_argument("-s", "--scope", default=None, help=r"LUSID scope to act in")
+    )
+    ap.add_argument("-s", "--scope", help=r"LUSID scope to act in")
     ap.add_argument(
         "-dl",
         "--delimiter",
@@ -856,7 +859,8 @@ def parse_args(args: dict):
         type=int,
         help="specifies the batch size for async requests",
     )
-    ap.add_argument("-dr", "--dryrun", action="store_true")
+    ap.add_argument("-disp", "--display_response_head", help="Displays the first 40 successful and unsuccessful items", action="store_true")
+    ap.add_argument("-dr", "--dryrun", help="runs the app without calling LUSID", action="store_true")
     ap.add_argument(
         "-d", "--debug", help=r"print debug messages, expected input: 'debug'"
     )
@@ -866,13 +870,14 @@ def parse_args(args: dict):
 
 def scale_quote_of_type(
     df: pd.DataFrame, mapping: dict, file_type: str = "quotes"
-) -> pd.DataFrame:
+) -> (pd.DataFrame, dict):
     """
 
     :param string file_type: File type of data default = "quotes"
     :param pd.DataFrame df: DataFrame containing data to be scaled
     :param mapping: mapping configuration containing quote_scalar dictionary
-    :return:
+    :return: pd.DataFrame df: dataframe containing "__adjusted_quotes" column
+    :return: dict mapping: mapping dictionary with "metric_value.value" updated to be "__adjusted_quotes"
     """
 
     price_col = mapping[file_type]["quote_scalar"]["price"]
@@ -903,7 +908,8 @@ def scale_quote_of_type(
         )
 
         df.at[index, "__adjusted_quote"] = __adjusted_quote
-    return df
+        mapping[file_type]["required"]["metric_value.value"] = "__adjusted_quote"
+    return df, mapping
 
 
 def identify_cash_items(
@@ -1012,7 +1018,7 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
     This function takes a mapping structure and checks that each of the
     :param dict mapping: mapping containing full mapping structure
     :param columns: columns from source data to search in
-    :param file_type:
+    :param str file_type: type of file being upserted
     :return:
     """
     # file_type

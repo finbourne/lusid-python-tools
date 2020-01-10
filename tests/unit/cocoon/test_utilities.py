@@ -123,7 +123,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_expand_dictionary_single_recursive(
-        self, key_list, value, expected_outcome
+            self, key_list, value, expected_outcome
     ) -> None:
         """
         Tests that the recursive function to create a nested dictionary from a list of keys and a final value
@@ -225,7 +225,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_update_nested_dictionary(
-        self, nested_dictionary_1, nested_dictionary_2, expected_outcome
+            self, nested_dictionary_1, nested_dictionary_2, expected_outcome
     ) -> None:
         """
         Tests that updating a nested dictionary provides the correct outcome
@@ -595,14 +595,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_set_attributes(
-        self,
-        model_object,
-        properties,
-        identifiers,
-        sub_holding_keys,
-        mapping,
-        row,
-        expected_outcome,
+            self,
+            model_object,
+            properties,
+            identifiers,
+            sub_holding_keys,
+            mapping,
+            row,
+            expected_outcome,
     ) -> None:
         """
         Tests that setting the attributes on a model works as expected
@@ -672,7 +672,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_make_code_lusid_friendly_success(
-        self, _, enemy_code, expected_code
+            self, _, enemy_code, expected_code
     ) -> None:
         """
         This tests that the utility to make codes LUSID friendly works as expected
@@ -698,11 +698,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "S&PCreditRating(UK)ThisIsAReallyLongCodeThatExceedsTheCharacterLimit",
                 ValueError,
             ],
-            ["Code cannot be converted to a string", ReturnBytes(), Exception,],
+            ["Code cannot be converted to a string", ReturnBytes(), Exception, ],
         ]
     )
     def test_make_code_lusid_friendly_failure(
-        self, _, enemy_code, expected_exception
+            self, _, enemy_code, expected_exception
     ) -> None:
         """
         This tests that the utility to make codes LUSID friendly works as expected
@@ -775,7 +775,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_get_required_attributes_model_recursive(
-        self, swagger_dict, model_object, expected_outcome
+            self, swagger_dict, model_object, expected_outcome
     ):
         required_attributes = cocoon.utilities.get_required_attributes_model_recursive(
             model_object=model_object
@@ -791,7 +791,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["Test on ResourceId where the model does exist", "ResourceId", True,],
+            ["Test on ResourceId where the model does exist", "ResourceId", True, ],
             ["Test where it is a string does not exist at all", "str", False],
             [
                 "Test where it is inside a dictionary",
@@ -802,7 +802,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_check_nested_model(
-        self, _, required_attribute_properties, expected_outcome
+            self, _, required_attribute_properties, expected_outcome
     ) -> None:
         """
         Tests that the name of a nested model is successfully returned from the properties of a required attribute
@@ -841,7 +841,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_verify_all_required_attributes_mapped_success(
-        self, mapping, model_object
+            self, mapping, model_object
     ) -> None:
         """
         Tests that you can successfully verify that all required attributes exist
@@ -887,7 +887,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_verify_all_required_attributes_mapped_fail(
-        self, mapping, model_object, expected_exception
+            self, mapping, model_object, expected_exception
     ) -> None:
         """
         Test that an exception on failure is successfully raised
@@ -997,7 +997,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         ]
                     }
                 ),
-                {"name": {"column": "instrument_name",}},
+                {"name": {"column": "instrument_name", }},
                 [
                     pd.DataFrame(
                         data={
@@ -1024,7 +1024,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         ]
                     }
                 ),
-                {"name": {"default": "unknown_name",}},
+                {"name": {"default": "unknown_name", }},
                 [
                     pd.DataFrame(
                         data={
@@ -1075,7 +1075,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_handle_nested_default_and_column_mapping_success(
-        self, data_frame, mapping, expected_outcome
+            self, data_frame, mapping, expected_outcome
     ):
         (
             updated_data_frame,
@@ -1138,7 +1138,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_handle_nested_default_and_column_mapping_failure(
-        self, data_frame, mapping, expected_exception
+            self, data_frame, mapping, expected_exception
     ):
         with self.assertRaises(expected_exception):
             cocoon.utilities.handle_nested_default_and_column_mapping(
@@ -1288,22 +1288,22 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                "only scale bonds",
-                [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
-                [100, 100, 100],
-                0.01,
+                    "only scale bonds",
+                    [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", 10000.0]],
+                    [100, 100, 100],
+                    0.01,
             ),
             (
-                "missing non-type values",
-                [["name1", "s", 100.0], ["name2", "s", None], ["name3", "b", 1000.0]],
-                [100, None, 100.0],
-                0.1,
+                    "missing non-type values",
+                    [["name1", "s", 100.0], ["name2", "s", None], ["name3", "b", 1000.0]],
+                    [100, None, 100.0],
+                    0.1,
             ),
             (
-                "missing type values",
-                [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", None]],
-                [100, 100.0, None],
-                0.1,
+                    "missing type values",
+                    [["name1", "s", 100.0], ["name2", "s", 100.0], ["name3", "b", None]],
+                    [100, 100.0, None],
+                    0.1,
             ),
         ]
     )
@@ -1316,15 +1316,27 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "type": "type",
                     "type_code": "b",
                     "scale_factor": scale_factor,
-                }
+                },
+                "required": {
+                    "quote_id.quote_series_id.instrument_id_type": "$Isin",
+                    "quote_id.effective_at": "date",
+                    "quote_id.quote_series_id.provider": "$DataScope",
+                    "quote_id.quote_series_id.field": "$mid",
+                    "quote_id.quote_series_id.quote_type": "$Price",
+                    "quote_id.quote_series_id.instrument_id": "isin",
+                    "metric_value.unit": "currency",
+                    "metric_value.value": "price"
+                },
             }
         }
-        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
+        result, mapping = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
 
         [
             self.assertEqual(ground_truth[index], row["__adjusted_quote"])
             for index, row in result.iterrows()
         ]
+
+        self.assertEqual("__adjusted_quote", mapping["quotes"]["required"]["metric_value.value"])
 
     @parameterized.expand(
         [
@@ -1387,93 +1399,93 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                "implicit_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
-                    },
-                    "implicit": "internal_currency",
-                },
-                False,
-                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
-            ),
-            (
-                "explicit_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
+                    "implicit_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
                         },
-                    }
-                },
-                False,
-                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
-            ),
-            (
-                "combined_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "",
-                        },
+                        "implicit": "internal_currency",
                     },
-                    "implicit": "internal_currency",
-                },
-                False,
-                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_EXP"],
+                    False,
+                    ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
             ),
             (
-                "implicit_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    "explicit_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        }
                     },
-                    "implicit": "internal_currency",
-                },
-                False,
-                [],
+                    False,
+                    ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
             ),
             (
-                "explicit_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
+                    "combined_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "",
+                            },
                         },
-                    }
-                },
-                False,
-                [],
-            ),
-            (
-                "combined_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
-                        },
+                        "implicit": "internal_currency",
                     },
-                    "implicit": "internal_currency",
-                },
-                False,
-                [],
+                    False,
+                    ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_EXP"],
+            ),
+            (
+                    "implicit_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                        },
+                        "implicit": "internal_currency",
+                    },
+                    False,
+                    [],
+            ),
+            (
+                    "explicit_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        }
+                    },
+                    False,
+                    [],
+            ),
+            (
+                    "combined_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        },
+                        "implicit": "internal_currency",
+                    },
+                    False,
+                    [],
             ),
         ]
     )
     def test_identify_cash_items_failed(
-        self, _, cash_flag, remove_cash_items, ground_truth
+            self, _, cash_flag, remove_cash_items, ground_truth
     ):
         data = {
             "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
@@ -1517,88 +1529,88 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                "implicit_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
-                    },
-                    "implicit": "internal_currency",
-                },
-                False,
-                ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
-            ),
-            (
-                "explicit_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
+                    "implicit_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
                         },
-                    }
-                },
-                False,
-                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
-            ),
-            (
-                "combined_currency_code_inference",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "",
-                        },
+                        "implicit": "internal_currency",
                     },
-                    "implicit": "internal_currency",
-                },
-                False,
-                ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_IMP"],
+                    False,
+                    ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP"],
             ),
             (
-                "implicit_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                    "explicit_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        }
                     },
-                    "implicit": "internal_currency",
-                },
-                True,
-                [],
+                    False,
+                    ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP"],
             ),
             (
-                "explicit_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
+                    "combined_currency_code_inference",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "",
+                            },
                         },
-                    }
-                },
-                True,
-                [],
-            ),
-            (
-                "combined_currency_code_inference_and_remove",
-                {
-                    "cash_identifiers": {
-                        "instrument_name": {
-                            "inst1": "GBP_EXP",
-                            "inst2": "GBP_EXP",
-                            "inst3": "USD_EXP",
-                            "inst4": "USD_EXP",
-                        },
+                        "implicit": "internal_currency",
                     },
-                    "implicit": "internal_currency",
-                },
-                True,
-                [],
+                    False,
+                    ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_IMP"],
+            ),
+            (
+                    "implicit_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": ["inst1", "inst2", "inst3", "inst4"],
+                        },
+                        "implicit": "internal_currency",
+                    },
+                    True,
+                    [],
+            ),
+            (
+                    "explicit_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        }
+                    },
+                    True,
+                    [],
+            ),
+            (
+                    "combined_currency_code_inference_and_remove",
+                    {
+                        "cash_identifiers": {
+                            "instrument_name": {
+                                "inst1": "GBP_EXP",
+                                "inst2": "GBP_EXP",
+                                "inst3": "USD_EXP",
+                                "inst4": "USD_EXP",
+                            },
+                        },
+                        "implicit": "internal_currency",
+                    },
+                    True,
+                    [],
             ),
         ]
     )
@@ -1612,7 +1624,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         identifier_mapping = {"Figi": "figi"}
         ground_truth.append(None)
         mappings = {
-            file_type: {"identifier_mapping": identifier_mapping,},
+            file_type: {"identifier_mapping": identifier_mapping, },
             "cash_flag": cash_flag,
         }
         mappings_ground_truth = copy.deepcopy(mappings)
@@ -1718,7 +1730,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_get_required_attributes_from_model(
-        self, _, model_object, expected_outcome
+            self, _, model_object, expected_outcome
     ):
 
         required_attributes = cocoon.utilities.get_required_attributes_from_model(
@@ -1747,7 +1759,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_extract_lusid_model_from_attribute_type(
-        self, _, attribute_type, expected_attribute, expected_nested
+            self, _, attribute_type, expected_attribute, expected_nested
     ):
 
         (
