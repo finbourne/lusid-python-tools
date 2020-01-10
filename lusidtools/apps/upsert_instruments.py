@@ -1,6 +1,4 @@
-import json
 import logging
-import os
 import sys
 from lusid.utilities import ApiClientFactory
 from lusidtools.cocoon import (
@@ -10,20 +8,10 @@ from lusidtools.cocoon import (
     parse_args,
     validate_mapping_file_structure,
     identify_cash_items,
+    load_json_file,
+    cocoon_printer
 )
 from lusidtools.logger import LusidLogger
-
-
-def load_mapping_file_for_file_type(mapping_path, file_type) -> dict:
-    """
-    :param mapping_path: The full path of mapping_file.json
-    :param file_type: The type of file i.e. transactions or holdings or instruments
-    :return:
-    """
-    if not os.path.exists(mapping_path):
-        raise OSError(f"mapping file not found at {mapping_path}")
-    with open(mapping_path, "r") as read_file:
-        return json.load(read_file)
 
 
 def load_instruments(args):
@@ -39,13 +27,13 @@ def load_instruments(args):
     instruments = load_data_to_df_and_detect_delimiter(args)
 
     # get mappings
-    mappings = load_mapping_file_for_file_type(args["mapping"], file_type)
+    mappings = load_json_file(args["mapping"])
 
-    if "property_columns" not in mappings.keys() and not args["scope"]:
-        raise ValueError(
-            r"Instrument properties must be upserted to a specified scope, but no scope was provided. "
-            r"Please state what scope to upsert properties to using '-s'."
-        )
+    if "property_columns" in mappings[file_type].keys() and not args["scope"]:
+        err = r"properties must be upserted to a specified scope, but no scope was provided. " \
+              r"Please state what scope to upsert properties to using '-s'."
+        logging.error(err)
+        raise ValueError(err)
 
     validate_mapping_file_structure(mappings, instruments.columns, file_type)
     if "cash_flag" in mappings.keys():
@@ -62,7 +50,8 @@ def load_instruments(args):
         data_frame=instruments,
         scope=args["scope"],
         mapping_required=mappings[file_type]["required"],
-        mapping_optional=mappings[file_type]["optional"],
+        mapping_optional=mappings[file_type]["optional"]
+        if "optional" in mappings[file_type].keys() else {},
         file_type=file_type,
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
@@ -71,20 +60,16 @@ def load_instruments(args):
         else [],
     )
 
-    total_success = sum(
-        [
-            len(resp.values.keys())
-            for resp in instruments_response["instruments"]["success"]
-        ]
-    )
-    total_failed = sum(
-        [
-            len(resp.failed.keys())
-            for resp in instruments_response["instruments"]["success"]
-        ]
-    )
-    logging.info(f"Success: {total_success}/{len(instruments)}")
-    logging.info(f"Fail:    {total_failed}/{len(instruments)}")
+    succ, errors, failed = cocoon_printer.format_instruments_response(instruments_response)
+    logging.info(f"number of successful upserts: {len(succ)}")
+    logging.info(f"number of failed upserts    : {len(failed)}")
+    logging.info(f"number of errors            : {len(errors)}")
+
+    if args["display_response_head"]:
+        logging.info(succ.head(40))
+        logging.info(errors.head(40))
+        logging.info(failed.head(40))
+
     return instruments_response
 
 

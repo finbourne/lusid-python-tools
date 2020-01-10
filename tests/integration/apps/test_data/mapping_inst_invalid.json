@@ -1,0 +1,16 @@
+{
+  "instruments": {
+    "required": {
+      "name": "instrument_name"
+    },
+    "identifier_mapping": {
+      "LusidInstrumentId": "figi",
+      "Isin": "isin",
+      "ClientInternal": "client_internal",
+      "Ticker": "ticker"
+    },
+    "property_columns": ["currency", "exchange_code", "country_issue", "market_sector", "security_type", "coupon"],
+    "optional": {
+    }
+  }
+}

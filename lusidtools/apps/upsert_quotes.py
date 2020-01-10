@@ -1,44 +1,58 @@
-import sys
 import logging
+import sys
+import lusid
 from lusid.utilities import ApiClientFactory
-
 from lusidtools.cocoon import (
-    load_data_to_df_and_detect_delimiter,
     load_from_data_frame,
+    load_data_to_df_and_detect_delimiter,
+    check_mapping_fields_exist,
     parse_args,
-    identify_cash_items,
     validate_mapping_file_structure,
+    identify_cash_items,
     load_json_file,
-    cocoon_printer)
+    scale_quote_of_type,
+    cocoon_printer
+)
 from lusidtools.logger import LusidLogger
 
 
-def load_transactions(args):
-    file_type = "transactions"
+def load_quotes(args):
+    file_type = "quotes"
 
+    # create ApiFactory
     factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
 
+    # get data
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
-    transactions = load_data_to_df_and_detect_delimiter(args)
+    quotes = load_data_to_df_and_detect_delimiter(args)
 
+    # get mappings
     mappings = load_json_file(args["mapping"])
 
-    if "cash_flag" in mappings.keys():
-        identify_cash_items(transactions, mappings, file_type)
+    # check properties exist
+    if "property_columns" in mappings[file_type].keys() and not args["scope"]:
+        err = r"properties must be upserted to a specified scope, but no scope was provided. " \
+              r"Please state what scope to upsert properties to using '-s'."
+        logging.error(err)
+        raise ValueError(err)
 
-    validate_mapping_file_structure(mappings, transactions.columns, file_type)
+    quotes, mappings = identify_cash_items(quotes, mappings, "quotes", True)
+
+    validate_mapping_file_structure(mappings, quotes.columns, file_type)
+
+    if "quote_scalar" in mappings[file_type].keys():
+        quotes, mappings = scale_quote_of_type(quotes, mappings)
 
     if args["dryrun"]:
-        logging.info("--dryrun specified as True, exiting before upsert call is made")
-        return 0
+        return quotes
 
-    transactions_response = load_from_data_frame(
+    quotes_response = load_from_data_frame(
         api_factory=factory,
-        data_frame=transactions,
+        data_frame=quotes,
         scope=args["scope"],
-        identifier_mapping=mappings[file_type]["identifier_mapping"],
+        identifier_mapping={},
         mapping_required=mappings[file_type]["required"],
         mapping_optional=mappings[file_type]["optional"]
         if "optional" in mappings[file_type].keys() else {},
@@ -48,24 +62,22 @@ def load_transactions(args):
         if "property_columns" in mappings[file_type].keys()
         else [],
     )
-
-    # print_response(transactions_response, file_type)
-    succ, errors = cocoon_printer.format_transactions_response(transactions_response)
-
+    succ, errors, failed = cocoon_printer.format_quotes_response(quotes_response)
     logging.info(f"number of successful upserts: {len(succ)}")
+    logging.info(f"number of failed upserts    : {len(failed)}")
     logging.info(f"number of errors            : {len(errors)}")
 
     if args["display_response_head"]:
         logging.info(succ.head(40))
         logging.info(errors.head(40))
+        logging.info(failed.head(40))
 
-    return transactions_response
-
+    return quotes_response
 
 def main(argv):
     args, ap = parse_args(sys.argv[1:])
     LusidLogger(args["debug"])
-    load_transactions(args)
+    load_quotes(args)
 
     return 0
 
