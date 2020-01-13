@@ -5,7 +5,12 @@ from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
-from lusidtools.apps import load_instruments, load_holdings, load_transactions, load_quotes
+from lusidtools.apps import (
+    load_instruments,
+    load_holdings,
+    load_transactions,
+    load_quotes,
+)
 from lusidtools.cocoon import cocoon_printer
 from lusidtools.logger import LusidLogger
 
@@ -21,7 +26,6 @@ class AppTests(unittest.TestCase):
         cls.secrets = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.testscope = "testscope0001"
 
-
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
             "secrets_file": cls.secrets,
@@ -34,7 +38,7 @@ class AppTests(unittest.TestCase):
             "batch_size": None,
             "dryrun": False,
             "line_terminator": r"\n",
-            "display_response_head": True
+            "display_response_head": True,
         }
 
         cls.invalid_args = {
@@ -49,14 +53,12 @@ class AppTests(unittest.TestCase):
             "batch_size": None,
             "dryrun": False,
             "line_terminator": r"\n",
-            "display_response_head": True
+            "display_response_head": True,
         }
 
         LusidLogger("debug")
 
-        factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=cls.secrets
-        )
+        factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         portfolios_api = factory.build(PortfoliosApi)
         portfolios_response = portfolios_api.list_portfolios_for_scope(
             scope=cls.testscope
@@ -215,11 +217,27 @@ class AppTests(unittest.TestCase):
         args["file_path"] = test_data_root.joinpath("quotes.csv")
         args["mapping"] = test_data_root.joinpath("mapping_quote_valid.json")
 
-
         responses = load_quotes(args)
 
-        test_values = [[batch.values[value].metric_value.value for value in batch.values] for batch in responses["quotes"]["success"]][0]
-        ground_truth = [106.51, 106.59, 151.44, 152.28, 152.44, 153.16, 97.0, 96.9,
-                        129.55, 129.22, 100.77, 100.79, 110.0, 110.2]
+        test_values = [
+            [batch.values[value].metric_value.value for value in batch.values]
+            for batch in responses["quotes"]["success"]
+        ][0]
+        ground_truth = [
+            106.51,
+            106.59,
+            151.44,
+            152.28,
+            152.44,
+            153.16,
+            97.0,
+            96.9,
+            129.55,
+            129.22,
+            100.77,
+            100.79,
+            110.0,
+            110.2,
+        ]
 
         self.assertEqual(ground_truth, test_values)
