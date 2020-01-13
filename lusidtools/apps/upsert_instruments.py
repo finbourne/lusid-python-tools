@@ -9,7 +9,7 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     identify_cash_items,
     load_json_file,
-    cocoon_printer
+    cocoon_printer,
 )
 from lusidtools.logger import LusidLogger
 
@@ -30,8 +30,10 @@ def load_instruments(args):
     mappings = load_json_file(args["mapping"])
 
     if "property_columns" in mappings[file_type].keys() and not args["scope"]:
-        err = r"properties must be upserted to a specified scope, but no scope was provided. " \
-              r"Please state what scope to upsert properties to using '-s'."
+        err = (
+            r"properties must be upserted to a specified scope, but no scope was provided. "
+            r"Please state what scope to upsert properties to using '-s'."
+        )
         logging.error(err)
         raise ValueError(err)
 
@@ -51,7 +53,8 @@ def load_instruments(args):
         scope=args["scope"],
         mapping_required=mappings[file_type]["required"],
         mapping_optional=mappings[file_type]["optional"]
-        if "optional" in mappings[file_type].keys() else {},
+        if "optional" in mappings[file_type].keys()
+        else {},
         file_type=file_type,
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
@@ -60,7 +63,9 @@ def load_instruments(args):
         else [],
     )
 
-    succ, errors, failed = cocoon_printer.format_instruments_response(instruments_response)
+    succ, errors, failed = cocoon_printer.format_instruments_response(
+        instruments_response
+    )
     logging.info(f"number of successful upserts: {len(succ)}")
     logging.info(f"number of failed upserts    : {len(failed)}")
     logging.info(f"number of errors            : {len(errors)}")

@@ -38,13 +38,13 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
 
 @checkargs
 def create_identifiers(
-        index,
-        row: pd.Series,
-        file_type: str,
-        instrument_identifier_mapping: dict = None,
-        unique_identifiers: list = None,
-        full_key_format: bool = True,
-        prepare_key: Callable = prepare_key,
+    index,
+    row: pd.Series,
+    file_type: str,
+    instrument_identifier_mapping: dict = None,
+    unique_identifiers: list = None,
+    full_key_format: bool = True,
+    prepare_key: Callable = prepare_key,
 ) -> dict:
     """
     This function creates identifiers to be added to a LUSID model object
@@ -109,9 +109,9 @@ def create_identifiers(
 
 @checkargs
 def resolve_instruments(
-        api_factory: lusid.utilities.ApiClientFactory,
-        data_frame: pd.DataFrame,
-        identifier_mapping: dict,
+    api_factory: lusid.utilities.ApiClientFactory,
+    data_frame: pd.DataFrame,
+    identifier_mapping: dict,
 ):
     """
     This function attempts to resolve each row of the file to an instrument in LUSID
@@ -125,7 +125,7 @@ def resolve_instruments(
     """
 
     if "Currency" not in list(
-            identifier_mapping.keys()
+        identifier_mapping.keys()
     ) and "Instrument/default/Currency" not in list(identifier_mapping.keys()):
         raise KeyError(
             """There is no column specified in the identifier_mapping to identify whether or not an instrument is cash.
@@ -243,8 +243,8 @@ def resolve_instruments(
                     resolvable_current = True
                     luid_current = (
                         result.mastered_instruments[0]
-                            .identifiers["LusidInstrumentId"]
-                            .value
+                        .identifiers["LusidInstrumentId"]
+                        .value
                     )
                     break
 
@@ -295,11 +295,11 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
 
 @checkargs
 async def enrich_instruments(
-        api_factory: lusid.utilities.ApiClientFactory,
-        data_frame: pd.DataFrame,
-        instrument_identifier_mapping: dict,
-        mapping_required: dict,
-        constant_prefix: str = "$",
+    api_factory: lusid.utilities.ApiClientFactory,
+    data_frame: pd.DataFrame,
+    instrument_identifier_mapping: dict,
+    mapping_required: dict,
+    constant_prefix: str = "$",
 ):
     search_requests_all = []
 
@@ -348,15 +348,15 @@ async def enrich_instruments(
 
     # A column for name already exists and needs to be enriched
     elif (
-            isinstance(mapping_required["name"], str)
-            and mapping_required["name"][0] != constant_prefix
+        isinstance(mapping_required["name"], str)
+        and mapping_required["name"][0] != constant_prefix
     ):
         data_frame[mapping_required["name"]] = data_frame[
             mapping_required["name"]
         ].fillna(value=data_frame[enriched_column_name])
 
     elif isinstance(mapping_required["name"], dict) and "column" in list(
-            mapping_required["name"].keys()
+        mapping_required["name"].keys()
     ):
         data_frame[mapping_required["name"]["column"]] = data_frame[
             mapping_required["name"]["column"]
@@ -364,17 +364,17 @@ async def enrich_instruments(
 
     # Is a constant specified by the constant prefix
     elif (
-            isinstance(mapping_required["name"], str)
-            and mapping_required["name"][0] == constant_prefix
+        isinstance(mapping_required["name"], str)
+        and mapping_required["name"][0] == constant_prefix
     ):
         mapping_required["name"] = {"default": mapping_required["name"][1:]}
         mapping_required["name"]["column"] = enriched_column_name
 
     # Is a constant specified by the default nested dictionary specification
     elif (
-            isinstance(mapping_required["name"], dict)
-            and "default" in list(mapping_required["name"].keys())
-            and "column" not in list(mapping_required["name"].keys())
+        isinstance(mapping_required["name"], dict)
+        and "default" in list(mapping_required["name"].keys())
+        and "column" not in list(mapping_required["name"].keys())
     ):
         mapping_required["name"]["column"] = enriched_column_name
 
@@ -382,7 +382,7 @@ async def enrich_instruments(
 
 
 async def instrument_search(
-        api_factory: lusid.utilities.ApiClientFactory, search_requests: list
+    api_factory: lusid.utilities.ApiClientFactory, search_requests: list
 ) -> list:
     """
     Conducts an instrument search for a single instrument
@@ -406,8 +406,8 @@ async def instrument_search(
 
 @run_in_executor
 def instrument_search_single(
-        api_factory: lusid.utilities.ApiClientFactory,
-        search_request: lusid.models.InstrumentSearchProperty,
+    api_factory: lusid.utilities.ApiClientFactory,
+    search_request: lusid.models.InstrumentSearchProperty,
 ) -> list:
     """
     Conducts an instrument search with a single search request

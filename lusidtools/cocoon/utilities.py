@@ -859,8 +859,18 @@ def parse_args(args: dict):
         type=int,
         help="specifies the batch size for async requests",
     )
-    ap.add_argument("-disp", "--display_response_head", help="Displays the first 40 successful and unsuccessful items", action="store_true")
-    ap.add_argument("-dr", "--dryrun", help="runs the app without calling LUSID", action="store_true")
+    ap.add_argument(
+        "-disp",
+        "--display_response_head",
+        help="Displays the first 40 successful and unsuccessful items",
+        action="store_true",
+    )
+    ap.add_argument(
+        "-dr",
+        "--dryrun",
+        help="runs the app without calling LUSID",
+        action="store_true",
+    )
     ap.add_argument(
         "-d", "--debug", help=r"print debug messages, expected input: 'debug'"
     )

@@ -161,12 +161,9 @@ class AppTests(unittest.TestCase):
                 },
             ),
             (
-                    "optional_arg_dryrun",
-                    ["-f", valid_args["file_path"], "-m", valid_args["mapping"],],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                    },
+                "optional_arg_dryrun",
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"],],
+                {"-f": valid_args["file_path"], "-m": valid_args["mapping"],},
             ),
             (
                 "optional_arg_dryrun",

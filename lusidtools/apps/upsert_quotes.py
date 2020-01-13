@@ -11,7 +11,7 @@ from lusidtools.cocoon import (
     identify_cash_items,
     load_json_file,
     scale_quote_of_type,
-    cocoon_printer
+    cocoon_printer,
 )
 from lusidtools.logger import LusidLogger
 
@@ -33,8 +33,10 @@ def load_quotes(args):
 
     # check properties exist
     if "property_columns" in mappings[file_type].keys() and not args["scope"]:
-        err = r"properties must be upserted to a specified scope, but no scope was provided. " \
-              r"Please state what scope to upsert properties to using '-s'."
+        err = (
+            r"properties must be upserted to a specified scope, but no scope was provided. "
+            r"Please state what scope to upsert properties to using '-s'."
+        )
         logging.error(err)
         raise ValueError(err)
 
@@ -55,7 +57,8 @@ def load_quotes(args):
         identifier_mapping={},
         mapping_required=mappings[file_type]["required"],
         mapping_optional=mappings[file_type]["optional"]
-        if "optional" in mappings[file_type].keys() else {},
+        if "optional" in mappings[file_type].keys()
+        else {},
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type]["property_columns"]
@@ -73,6 +76,7 @@ def load_quotes(args):
         logging.info(failed.head(40))
 
     return quotes_response
+
 
 def main(argv):
     args, ap = parse_args(sys.argv[1:])
