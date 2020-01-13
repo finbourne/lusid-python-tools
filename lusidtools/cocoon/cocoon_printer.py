@@ -78,11 +78,13 @@ def format_instruments_response(
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
     request constituents.
+
     :param dict response: response from Lusid-python-tools
     :return: pd.DataFrame: Successful calls from request
     :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
     :return: pd.DataFrame: Failed responses that LUSID rejected
     """
+
     file_type = "instruments"
     check_dict_for_required_keys(
         response[file_type], f"Response from {file_type} request", ["errors", "success"]

@@ -5,7 +5,13 @@ from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
-from lusidtools.apps import load_instruments, load_holdings, load_transactions
+from lusidtools.apps import (
+    load_instruments,
+    load_holdings,
+    load_transactions,
+    load_quotes,
+)
+from lusidtools.cocoon import cocoon_printer
 from lusidtools.logger import LusidLogger
 
 
@@ -32,6 +38,7 @@ class AppTests(unittest.TestCase):
             "batch_size": None,
             "dryrun": False,
             "line_terminator": r"\n",
+            "display_response_head": True,
         }
 
         cls.invalid_args = {
@@ -46,16 +53,15 @@ class AppTests(unittest.TestCase):
             "batch_size": None,
             "dryrun": False,
             "line_terminator": r"\n",
+            "display_response_head": True,
         }
 
-        LusidLogger(cls.valid_args["debug"])
+        LusidLogger("debug")
 
-        factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=cls.valid_args["secrets_file"]
-        )
+        factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         portfolios_api = factory.build(PortfoliosApi)
         portfolios_response = portfolios_api.list_portfolios_for_scope(
-            scope=cls.valid_args["scope"]
+            scope=cls.testscope
         )
 
         existing_portfolios = [
@@ -74,19 +80,23 @@ class AppTests(unittest.TestCase):
                         created="2018-03-05T12:00:00+00:00",
                     )
                     transactions_portfolio_response1 = transactions_portfolio_api.create_portfolio(
-                        scope=cls.valid_args["scope"],
+                        scope=cls.testscope,
                         transaction_portfolio=transaction_portfolio_request1,
                     )
                     logging.info(f"created portfolio: {portfolio}")
 
     def test_upsert_instruments_with_valid_mapping(self):
+
+        args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("instruments.csv")
-        responses = load_instruments(self.valid_args)
+        args["file_path"] = test_data_root.joinpath("instruments.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_inst.json")
+
+        responses = load_instruments(args)
 
         self.assertEqual(0, len(responses["instruments"]["errors"]))
         self.assertEqual(
-            7,
+            20,
             sum(
                 [
                     len(response.values)
@@ -105,14 +115,18 @@ class AppTests(unittest.TestCase):
         )
 
     def test_upsert_instruments_with_invalid_mapping(self):
+
+        args = self.invalid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("instruments.csv")
-        LusidLogger(self.invalid_args["debug"])
-        responses = load_instruments(self.invalid_args)
+        args["file_path"] = test_data_root.joinpath("instruments.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_inst_invalid.json")
+
+        LusidLogger(args["debug"])
+        responses = load_instruments(args)
 
         self.assertEqual(0, len(responses["instruments"]["errors"]))
         self.assertEqual(
-            7,
+            20,
             sum(
                 [
                     len(response.failed)
@@ -130,37 +144,100 @@ class AppTests(unittest.TestCase):
             ),
         )
 
-        LusidLogger(self.valid_args["debug"])
+        LusidLogger("debug")
 
     def test_upsert_holdings_with_valid_mapping(self):
+
+        args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("holdings.csv")
-        responses = load_holdings(self.valid_args)
+        args["file_path"] = test_data_root.joinpath("holdings.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_hldgs.json")
+
+        responses = load_holdings(args)
 
         self.assertEqual(0, len(responses["holdings"]["errors"]))
         self.assertEqual(1, len(responses["holdings"]["success"]))
 
     def test_upsert_holdings_with_invalid_mapping(self):
+
+        args = self.invalid_args.copy()
         file_type = "holdings"
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("holdings.csv")
-        responses = load_holdings(self.invalid_args)
+        args["file_path"] = test_data_root.joinpath("holdings.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_hldgs_invalid.json")
+
+        responses = load_holdings(args)
 
         self.assertEqual(1, len(responses["holdings"]["errors"]))
         self.assertEqual(0, len(responses["holdings"]["success"]))
 
     def test_upsert_transactions_with_valid_mapping(self):
+
+        args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.valid_args["file_path"] = test_data_root.joinpath("transactions.csv")
-        responses = load_transactions(self.valid_args)
+        args["file_path"] = test_data_root.joinpath("transactions.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_trans.json")
+
+        responses = load_transactions(args)
 
         self.assertEqual(0, len(responses["transactions"]["errors"]))
         self.assertEqual(1, len(responses["transactions"]["success"]))
 
     def test_upsert_transactions_with_invalid_mapping(self):
+
+        args = self.invalid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
-        self.invalid_args["file_path"] = test_data_root.joinpath("transactions.csv")
-        responses = load_transactions(self.invalid_args)
+        args["file_path"] = test_data_root.joinpath("transactions.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_trans_invalid.json")
+
+        responses = load_transactions(args)
 
         self.assertEqual(1, len(responses["transactions"]["errors"]))
         self.assertEqual(0, len(responses["transactions"]["success"]))
+
+    def test_upsert_quotes_with_valid_mapping(self):
+
+        args = self.valid_args.copy()
+        test_data_root = Path(__file__).parent.joinpath("test_data")
+        args["file_path"] = test_data_root.joinpath("quotes.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_quote_valid.json")
+
+        responses = load_quotes(args)
+
+        succ, err, failed = cocoon_printer.format_quotes_response(responses)
+
+        self.assertEqual(0, len(err))
+        self.assertEqual(0, len(failed))
+        self.assertEqual(14, len(succ))
+
+    def test_upsert_quotes_with_valid_mapping_check_scaled_values(self):
+
+        args = self.valid_args.copy()
+        test_data_root = Path(__file__).parent.joinpath("test_data")
+        args["file_path"] = test_data_root.joinpath("quotes.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_quote_valid.json")
+
+        responses = load_quotes(args)
+
+        test_values = [
+            [batch.values[value].metric_value.value for value in batch.values]
+            for batch in responses["quotes"]["success"]
+        ][0]
+        ground_truth = [
+            106.51,
+            106.59,
+            151.44,
+            152.28,
+            152.44,
+            153.16,
+            97.0,
+            96.9,
+            129.55,
+            129.22,
+            100.77,
+            100.79,
+            110.0,
+            110.2,
+        ]
+
+        self.assertEqual(ground_truth, test_values)

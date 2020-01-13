@@ -301,11 +301,9 @@ async def enrich_instruments(
     mapping_required: dict,
     constant_prefix: str = "$",
 ):
-
     search_requests_all = []
 
     for index, row in data_frame.iterrows():
-
         search_requests_instrument = [
             lusid.models.InstrumentSearchProperty(
                 key=identifier_lusid

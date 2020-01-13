@@ -1,5 +1,6 @@
 import logging
 import sys
+import lusid
 from lusid.utilities import ApiClientFactory
 from lusidtools.cocoon import (
     load_from_data_frame,
@@ -9,13 +10,14 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     identify_cash_items,
     load_json_file,
+    scale_quote_of_type,
     cocoon_printer,
 )
 from lusidtools.logger import LusidLogger
 
 
-def load_instruments(args):
-    file_type = "instruments"
+def load_quotes(args):
+    file_type = "quotes"
 
     # create ApiFactory
     factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
@@ -24,11 +26,12 @@ def load_instruments(args):
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
-    instruments = load_data_to_df_and_detect_delimiter(args)
+    quotes = load_data_to_df_and_detect_delimiter(args)
 
     # get mappings
     mappings = load_json_file(args["mapping"])
 
+    # check properties exist
     if "property_columns" in mappings[file_type].keys() and not args["scope"]:
         err = (
             r"properties must be upserted to a specified scope, but no scope was provided. "
@@ -37,35 +40,32 @@ def load_instruments(args):
         logging.error(err)
         raise ValueError(err)
 
-    validate_mapping_file_structure(mappings, instruments.columns, file_type)
-    if "cash_flag" in mappings.keys():
-        instruments, mappings = identify_cash_items(
-            instruments, mappings, file_type, True
-        )
+    quotes, mappings = identify_cash_items(quotes, mappings, "quotes", True)
+
+    validate_mapping_file_structure(mappings, quotes.columns, file_type)
+
+    if "quote_scalar" in mappings[file_type].keys():
+        quotes, mappings = scale_quote_of_type(quotes, mappings)
 
     if args["dryrun"]:
-        logging.info("--dryrun specified as True, exiting before upsert call is made")
-        return 0
+        return quotes
 
-    instruments_response = load_from_data_frame(
+    quotes_response = load_from_data_frame(
         api_factory=factory,
-        data_frame=instruments,
+        data_frame=quotes,
         scope=args["scope"],
+        identifier_mapping={},
         mapping_required=mappings[file_type]["required"],
         mapping_optional=mappings[file_type]["optional"]
         if "optional" in mappings[file_type].keys()
         else {},
         file_type=file_type,
-        identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
         property_columns=mappings[file_type]["property_columns"]
         if "property_columns" in mappings[file_type].keys()
         else [],
     )
-
-    succ, errors, failed = cocoon_printer.format_instruments_response(
-        instruments_response
-    )
+    succ, errors, failed = cocoon_printer.format_quotes_response(quotes_response)
     logging.info(f"number of successful upserts: {len(succ)}")
     logging.info(f"number of failed upserts    : {len(failed)}")
     logging.info(f"number of errors            : {len(errors)}")
@@ -75,13 +75,13 @@ def load_instruments(args):
         logging.info(errors.head(40))
         logging.info(failed.head(40))
 
-    return instruments_response
+    return quotes_response
 
 
 def main(argv):
     args, ap = parse_args(sys.argv[1:])
     LusidLogger(args["debug"])
-    load_instruments(args)
+    load_quotes(args)
 
     return 0
 

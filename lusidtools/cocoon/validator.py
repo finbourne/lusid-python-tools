@@ -152,10 +152,10 @@ class Validator:
         """
         if isinstance(self.value, list):
             if len(set(other_list).intersection(set(self.value))) > 0:
-                raise ValueError(
-                    f"""The columns {str(set(other_list).intersection(set(self.value)))} are specified in {self.value_name}
+                err = f"""The columns {str(set(other_list).intersection(set(self.value)))} are specified in {self.value_name}
                                      yet they contain null (NaN) values for some rows in the provided data. Null values are not 
                                      allowed for required fields. Please ensure that required columns do not contain ANY null 
                                      values or specify a default value in your mapping by specifying a dictionary with the keys
                                      "column" and "default"."""
-                )
+                logging.error(err)
+                raise ValueError(err)

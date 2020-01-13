@@ -1316,15 +1316,29 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "type": "type",
                     "type_code": "b",
                     "scale_factor": scale_factor,
-                }
+                },
+                "required": {
+                    "quote_id.quote_series_id.instrument_id_type": "$Isin",
+                    "quote_id.effective_at": "date",
+                    "quote_id.quote_series_id.provider": "$DataScope",
+                    "quote_id.quote_series_id.field": "$mid",
+                    "quote_id.quote_series_id.quote_type": "$Price",
+                    "quote_id.quote_series_id.instrument_id": "isin",
+                    "metric_value.unit": "currency",
+                    "metric_value.value": "price",
+                },
             }
         }
-        result = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
+        result, mapping = cocoon.utilities.scale_quote_of_type(df=df, mapping=mapping)
 
         [
             self.assertEqual(ground_truth[index], row["__adjusted_quote"])
             for index, row in result.iterrows()
         ]
+
+        self.assertEqual(
+            "__adjusted_quote", mapping["quotes"]["required"]["metric_value.value"]
+        )
 
     @parameterized.expand(
         [

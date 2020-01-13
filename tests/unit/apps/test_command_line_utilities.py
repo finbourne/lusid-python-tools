@@ -23,6 +23,7 @@ class AppTests(unittest.TestCase):
         "scope": testscope,
         "num_header": 0,
         "num_footer": 0,
+        "scale_quotes": True,
         "debug": "debug",
         "dryrun": None,
         "line_terminator": r"\n",
@@ -42,16 +43,13 @@ class AppTests(unittest.TestCase):
             for delim in delimiter:
                 args_list.append(
                     (
-                        "header:{}_footer:{}_delimiter:{}".format(
-                            num_h,
-                            num_f,
-                            str(os.path.basename(delimiter_file_names[count])),
-                        ),
+                        f"header:{num_h}_footer:{num_f}_delimiter:{str(os.path.basename(delimiter_file_names[count]))}",
                         {
                             "file_path": delimiter_file_names[count],
                             "num_header": num_h,
                             "num_footer": num_f,
                             "delimiter": delim,
+                            "scale_suotes": True,
                             "line_terminator": r"\n",
                         },
                     )
@@ -79,7 +77,7 @@ class AppTests(unittest.TestCase):
         [
             (
                 "only_required",
-                ["-f", valid_args["file_path"], "-m", valid_args["mapping"],],
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"]],
                 {"-f": valid_args["file_path"], "-m": valid_args["mapping"]},
             ),
             (
@@ -164,7 +162,12 @@ class AppTests(unittest.TestCase):
             ),
             (
                 "optional_arg_dryrun",
-                ["-f", valid_args["file_path"], "-m", valid_args["mapping"], "-dr",],
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"],],
+                {"-f": valid_args["file_path"], "-m": valid_args["mapping"],},
+            ),
+            (
+                "optional_arg_dryrun",
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"], "-dr"],
                 {
                     "-f": valid_args["file_path"],
                     "-m": valid_args["mapping"],

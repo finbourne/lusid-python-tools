@@ -1,0 +1,33 @@
+{
+  "quotes": {
+    "identifier_mapping": {
+      "FIGI": "figi",
+      "ISIN": "isin",
+      "ClientInternal": "client_internal"
+    },
+    "required": {
+      "quote_id.quote_series_id.instrument_id_type": "$LusidInstrumentId",
+      "quote_id.effective_at": "date",
+      "quote_id.quote_series_id.provider": "$DataScope",
+      "quote_id.quote_series_id.field": "$mid",
+      "quote_id.quote_series_id.quote_type": "$Price",
+      "quote_id.quote_series_id.instrument_id": "LUID",
+      "metric_value.unit": "currency",
+      "metric_value.value": "price"
+    },
+    "quote_scalar": {
+      "price": "price",
+      "type": "type",
+      "type_code": "bond",
+      "scale_factor": 0.01
+    }
+  },
+  "cash_flag": {
+    "cash_identifiers": {
+      "type": [
+        "mid_rate"
+      ]
+    },
+    "implicit": "currency"
+  }
+}

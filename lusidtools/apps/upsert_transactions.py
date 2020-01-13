@@ -2,13 +2,14 @@ import sys
 import logging
 from lusid.utilities import ApiClientFactory
 
-from lusidtools.apps.upsert_instruments import load_mapping_file_for_file_type
 from lusidtools.cocoon import (
     load_data_to_df_and_detect_delimiter,
     load_from_data_frame,
     parse_args,
     identify_cash_items,
     validate_mapping_file_structure,
+    load_json_file,
+    cocoon_printer,
 )
 from lusidtools.logger import LusidLogger
 
@@ -23,7 +24,7 @@ def load_transactions(args):
     logging.debug("Getting data")
     transactions = load_data_to_df_and_detect_delimiter(args)
 
-    mappings = load_mapping_file_for_file_type(args["mapping"], file_type)
+    mappings = load_json_file(args["mapping"])
 
     if "cash_flag" in mappings.keys():
         identify_cash_items(transactions, mappings, file_type)
@@ -40,7 +41,9 @@ def load_transactions(args):
         scope=args["scope"],
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         mapping_required=mappings[file_type]["required"],
-        mapping_optional=mappings[file_type]["optional"],
+        mapping_optional=mappings[file_type]["optional"]
+        if "optional" in mappings[file_type].keys()
+        else {},
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type]["property_columns"]
@@ -49,10 +52,15 @@ def load_transactions(args):
     )
 
     # print_response(transactions_response, file_type)
-    total_success = len(transactions_response["transactions"]["success"])
-    total_failed = len(transactions_response["transactions"]["errors"])
-    logging.info(f"Success: {total_success}/{total_success + total_failed}")
-    logging.info(f"Fail:    {total_failed}/{total_success + total_failed}")
+    succ, errors = cocoon_printer.format_transactions_response(transactions_response)
+
+    logging.info(f"number of successful upserts: {len(succ)}")
+    logging.info(f"number of errors            : {len(errors)}")
+
+    if args["display_response_head"]:
+        logging.info(succ.head(40))
+        logging.info(errors.head(40))
+
     return transactions_response
 
 
