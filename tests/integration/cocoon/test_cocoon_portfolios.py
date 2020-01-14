@@ -200,25 +200,27 @@ class CocoonTestsPortfolios(unittest.TestCase):
             second=list(data_frame[mapping_required["code"]].values),
         )
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "400 bad request due to an invalid scope",
-            "p rime_broker_test",
-            "data/metamorph_portfolios-unique.csv",
-            {
-                "code": "FundCode",
-                "display_name": "display_name",
-                "created": "created",
-                "base_currency": "base_currency",
-            },
-            {"description": "description", "accounting_method": None},
-            {},
-            ["base_currency"],
-            "operations001",
-            None,
-            {400},
-        ],
-    ])
+            [
+                "400 bad request due to an invalid scope",
+                "p rime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                "operations001",
+                None,
+                {400},
+            ],
+        ]
+    )
     def test_load_from_data_frame_a_portfolios_failure(
         self,
         _,
@@ -265,16 +267,13 @@ class CocoonTestsPortfolios(unittest.TestCase):
             first=len(responses["portfolios"]["errors"]), second=len(data_frame)
         )
 
-        self.assertEqual(
-            first=len(responses["portfolios"]["success"]), second=0
+        self.assertEqual(first=len(responses["portfolios"]["success"]), second=0)
+
+        response_codes = set(
+            [
+                api_exception.status
+                for api_exception in responses["portfolios"]["errors"]
+            ]
         )
 
-
-        response_codes = set([
-            api_exception.status for api_exception in responses["portfolios"]["errors"]
-        ])
-
-        self.assertEqual(
-            first=response_codes,
-            second=expected_outcome
-        )
+        self.assertEqual(first=response_codes, second=expected_outcome)
