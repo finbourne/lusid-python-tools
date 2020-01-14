@@ -213,6 +213,7 @@ class BatchLoader:
             return api_factory.build(lusid.api.PortfoliosApi).get_portfolio(
                 scope=kwargs["scope"], code=kwargs["code"]
             )
+        # Add in here upsert portfolio properties if it does exist
         except lusid.exceptions.ApiException as e:
             if e.status == 404:
                 return api_factory.build(
@@ -220,7 +221,9 @@ class BatchLoader:
                 ).create_portfolio(
                     scope=kwargs["scope"], transaction_portfolio=portfolio_batch[0]
                 )
-            # Add in here upsert portfolio properties if it does exist
+            else:
+                return e
+
 
     @staticmethod
     @run_in_executor
