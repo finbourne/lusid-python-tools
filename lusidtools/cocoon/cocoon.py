@@ -224,7 +224,6 @@ class BatchLoader:
             else:
                 return e
 
-
     @staticmethod
     @run_in_executor
     def load_instrument_property_batch(
