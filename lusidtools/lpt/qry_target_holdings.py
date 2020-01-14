@@ -37,9 +37,15 @@ def process_args(api, args):
         lots = lpt.to_df(adj.tax_lots, taxlot_fields)
         lots["instrument_uid"] = adj.instrument_uid
         identifiers.update(adj.instrument_identifiers.keys())
+
         # TODO: sub-holding-keys and properties
         for k, v in adj.instrument_identifiers.items():
             lots[k] = v
+
+        if adj.sub_holding_keys is not None:
+            for k, v in adj.sub_holding_keys.items():
+                lots[f"SHK:{k}"] = v.value.label_value
+
         return lots
 
     def get_success(result):
