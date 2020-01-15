@@ -30,4 +30,19 @@ setup(
     ],
     include_package_data=True,
     python_requires=">=3.7",
+    entry_points = {
+        'console_scripts':
+            [
+                'agg=lusidtools.commands.agg:main',
+                'cons=lusidtools.commands.cons:main',
+                'hld=lusidtools.commands.hld:main',
+                'instr_id=lusidtools.commands.instr_id:main',
+                'scopes=lusidtools.commands.scopes:main',
+                'portfolios=lusidtools.commands.portfolios:main',
+                'quotes=lusidtools.commands.quotes:main',
+                'targets=lusidtools.commands.targets:main',
+                'txn=lusidtools.commands.txn:main',
+                'txn_config=lusidtools.commands.txn_config:main'
+            ],
+    }
 )

@@ -2,4 +2,10 @@
 
 import lusidtools.lpt.qry_constituents as qry
 
-qry.main()
+
+def main():
+    qry.main()
+
+
+if __name__ == '__main__':
+    main()
