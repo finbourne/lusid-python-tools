@@ -73,10 +73,11 @@ def process_args(api, args):
         def get_success(result):
             y.dump(
                 y.TransactionSetConfigurationDataNoLinks(
-                    result.content.transaction_configs,
-                    result.content.side_definitions),
+                    result.content.transaction_configs, result.content.side_definitions
+                ),
                 args.filename,
-                args.raw)
+                args.raw,
+            )
             return None
 
         return api.call.list_configuration_transaction_types().bind(get_success)
@@ -112,9 +113,10 @@ def process_args(api, args):
             print(txn_types)
             return None
         else:
-            return api.call.set_configuration_transaction_types(
-                types=txn_types
-            ).bind(set_success)
+            return api.call.set_configuration_transaction_types(types=txn_types).bind(
+                set_success
+            )
+
 
 # Standalone tool
 def main(parse=parse):
