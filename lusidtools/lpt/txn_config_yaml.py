@@ -64,8 +64,13 @@ class TxnConfigYaml:
     with the suffix "_rep" and a constructor method which converts YAML to a LUSID model with the suffix "_con".
     """
 
-    def __init__(self, models, UpdateLoader: yaml.Loader = UpdateLoader,
-                 QueryLoader: yaml.Loader = QueryLoader, CustomDumper: yaml.Dumper = CustomDumper):
+    def __init__(
+        self,
+        models,
+        UpdateLoader: yaml.Loader = UpdateLoader,
+        QueryLoader: yaml.Loader = QueryLoader,
+        CustomDumper: yaml.Dumper = CustomDumper,
+    ):
         """
         The initialisation here will set up the custom constructors and representers. It will add these to the the
         CustomDumper, QueryLoader and UpdateLoader.
@@ -75,39 +80,87 @@ class TxnConfigYaml:
         :param yaml.Loader QueryLoader: The loader to use for querying (reading from LUSID)
         :param yaml.Dumper CustomDumper: The dumper used for converting LUSID models to YAML
         """
-        self.YAMLConverter("!Txn", self.config_rep, self.TransactionSetConfigurationDataNoLinks, self.config_con,
-                           self.TransactionSetConfigurationDataNoLinks, models.TransactionSetConfigurationDataRequest)
+        self.YAMLConverter(
+            "!Txn",
+            self.config_rep,
+            self.TransactionSetConfigurationDataNoLinks,
+            self.config_con,
+            self.TransactionSetConfigurationDataNoLinks,
+            models.TransactionSetConfigurationDataRequest,
+        )
 
-        self.YAMLConverter("!TxnConfig", self.trans_config_rep, models.TransactionConfigurationData, self.trans_config_con,
-                      models.TransactionConfigurationData, models.TransactionConfigurationDataRequest)
+        self.YAMLConverter(
+            "!TxnConfig",
+            self.trans_config_rep,
+            models.TransactionConfigurationData,
+            self.trans_config_con,
+            models.TransactionConfigurationData,
+            models.TransactionConfigurationDataRequest,
+        )
 
-        self.YAMLConverter("!Mvmt", self.mvmt_rep, models.TransactionConfigurationMovementData, self.mvmt_con,
-                      models.TransactionConfigurationMovementData,
-                      models.TransactionConfigurationMovementDataRequest)
+        self.YAMLConverter(
+            "!Mvmt",
+            self.mvmt_rep,
+            models.TransactionConfigurationMovementData,
+            self.mvmt_con,
+            models.TransactionConfigurationMovementData,
+            models.TransactionConfigurationMovementDataRequest,
+        )
 
-        self.YAMLConverter("!Map", self.pm_rep, models.TransactionPropertyMapping, self.pm_con,
-                      models.TransactionPropertyMapping,
-                      models.TransactionPropertyMappingRequest)
+        self.YAMLConverter(
+            "!Map",
+            self.pm_rep,
+            models.TransactionPropertyMapping,
+            self.pm_con,
+            models.TransactionPropertyMapping,
+            models.TransactionPropertyMappingRequest,
+        )
 
-        self.YAMLConverter("!Alias", self.alias_rep, models.TransactionConfigurationTypeAlias, self.alias_con,
-                      models.TransactionConfigurationTypeAlias, models.TransactionConfigurationTypeAlias)
+        self.YAMLConverter(
+            "!Alias",
+            self.alias_rep,
+            models.TransactionConfigurationTypeAlias,
+            self.alias_con,
+            models.TransactionConfigurationTypeAlias,
+            models.TransactionConfigurationTypeAlias,
+        )
 
-        self.YAMLConverter("!SideConfig", self.side_config_rep, models.SideConfigurationData, self.side_config_con,
-                      models.SideConfigurationData, models.SideConfigurationDataRequest)
+        self.YAMLConverter(
+            "!SideConfig",
+            self.side_config_rep,
+            models.SideConfigurationData,
+            self.side_config_con,
+            models.SideConfigurationData,
+            models.SideConfigurationDataRequest,
+        )
 
-        self.YAMLConverter("!Prop", self.pp_rep, models.PerpetualProperty, self.pp_con,
-                      models.PerpetualProperty, models.PerpetualProperty)
+        self.YAMLConverter(
+            "!Prop",
+            self.pp_rep,
+            models.PerpetualProperty,
+            self.pp_con,
+            models.PerpetualProperty,
+            models.PerpetualProperty,
+        )
 
     class YAMLConverter:
         """
         This class handles the configuration for a single element of the model e.g. aliases on a
         TransactionTypeConfiguration.
         """
-        def __init__(self, tag: str, representation_function: Callable, representation_model,
-                     constructor_function: Callable, constructor_read_model, constructor_update_model,
-                     representation_dumper: yaml.Dumper = CustomDumper,
-                     constructor_read_loader: yaml.Loader = QueryLoader,
-                     constructor_update_loader: yaml.Loader = UpdateLoader):
+
+        def __init__(
+            self,
+            tag: str,
+            representation_function: Callable,
+            representation_model,
+            constructor_function: Callable,
+            constructor_read_model,
+            constructor_update_model,
+            representation_dumper: yaml.Dumper = CustomDumper,
+            constructor_read_loader: yaml.Loader = QueryLoader,
+            constructor_update_loader: yaml.Loader = UpdateLoader,
+        ):
             """
             The initialisation function creates the representation and constructor functions from the provided
             base callable functions and registers them with the dumper and loaders.
@@ -128,11 +181,12 @@ class TxnConfigYaml:
             type_mapping = {
                 "<class 'dict'>": "represent_mapping",
                 "<class 'str'>": "represent_scalar",
-                "<class 'list'>": "represent_sequence"
+                "<class 'list'>": "represent_sequence",
             }
 
-            def representation_function_dumper(dumper: yaml.Dumper, data,
-                                               repr: Callable = representation_function) -> Callable:
+            def representation_function_dumper(
+                dumper: yaml.Dumper, data, repr: Callable = representation_function
+            ) -> Callable:
                 """
                 This function is used by the dumper to turn a LUSID model object into YAML
 
@@ -150,24 +204,21 @@ class TxnConfigYaml:
                 # Construct and return the appropriate dumper representation function
                 if representation_type == "represent_sequence":
                     return getattr(dumper, representation_type)(
-                        tag,
-                        payload,
-                        flow_style=True
+                        tag, payload, flow_style=True
                     )
                 else:
-                    return getattr(dumper, representation_type)(
-                        tag,
-                        payload
-                    )
+                    return getattr(dumper, representation_type)(tag, payload)
 
             # Add the dumper function
             yaml.add_representer(
                 data_type=representation_model,
                 representer=representation_function_dumper,
-                Dumper=representation_dumper
+                Dumper=representation_dumper,
             )
 
-            def constructor_function_read(loader: yaml.Loader, node, con: Callable = constructor_function):
+            def constructor_function_read(
+                loader: yaml.Loader, node, con: Callable = constructor_function
+            ):
                 """
                 This function is used to construct a LUSID model from YAML when reading from LUSID
 
@@ -196,14 +247,14 @@ class TxnConfigYaml:
             yaml.add_constructor(
                 tag=tag,
                 constructor=constructor_function_read,
-                Loader=constructor_read_loader
+                Loader=constructor_read_loader,
             )
 
             # Add the YAML to LUSID model constructor for writing to LUSID
             yaml.add_constructor(
                 tag=tag,
                 constructor=constructor_function_update,
-                Loader=constructor_update_loader
+                Loader=constructor_update_loader,
             )
 
     @staticmethod
@@ -241,12 +292,14 @@ class TxnConfigYaml:
     def config_rep(data):
         return {
             "transactionConfigRequests": data.transaction_configs,
-            "sideConfigRequests": data.side_definitions
+            "sideConfigRequests": data.side_definitions,
         }
 
     @classmethod
     def config_con(cls, loader, node):
-        txn = loader.construct_sequence(cls.find_by_tag(node, "transactionConfigRequests"))
+        txn = loader.construct_sequence(
+            cls.find_by_tag(node, "transactionConfigRequests")
+        )
         side = loader.construct_sequence(cls.find_by_tag(node, "sideConfigRequests"))
         return txn, side
 
@@ -256,25 +309,25 @@ class TxnConfigYaml:
         return {
             "aliases": data.aliases,
             "movements": data.movements,
-            "properties": list(data.properties.values())
+            "properties": list(data.properties.values()),
         }
 
     @classmethod
     def trans_config_con(cls, loader, node):
         a = loader.construct_sequence(cls.find_by_tag(node, "aliases"))
         m = loader.construct_sequence(cls.find_by_tag(node, "movements"))
-        p = cls.prepare_properties(loader.construct_sequence(cls.find_by_tag(node, "properties")))
+        p = cls.prepare_properties(
+            loader.construct_sequence(cls.find_by_tag(node, "properties"))
+        )
         return a, m, p
 
     # Set up the YAML converter for the TransactionConfigurationMovementData (movements)
     @staticmethod
     def mvmt_rep(data):
         return [
-            [
-                abbrev(data.side), data.direction, abbrev(data.movement_types)
-            ],
+            [abbrev(data.side), data.direction, abbrev(data.movement_types)],
             list(data.properties.values()),
-            data.mappings
+            data.mappings,
         ]
 
     @classmethod
@@ -319,7 +372,7 @@ class TxnConfigYaml:
             data.description,
             data.transaction_group,
             data.transaction_class,
-            abbrev(data.transaction_roles)
+            abbrev(data.transaction_roles),
         ]
 
     @staticmethod
@@ -358,9 +411,7 @@ class TxnConfigYaml:
     @staticmethod
     def pp_con(loader, node):
         s = unabbrev(node.value).split("=")
-        return (
-            s[0], models.property_value.PropertyValue(s[1])
-        )
+        return (s[0], models.property_value.PropertyValue(s[1]))
 
     # END OF THE INITIALISER ############################################
 
@@ -371,6 +422,7 @@ class TxnConfigYaml:
         This class is used to replace TransactionSetConfigurationData so that it has no extra information e.g. links
         which get converted to YAML.
         """
+
         def __init__(self, transaction_configs, side_definitions):
             self.transaction_configs = transaction_configs
             self.side_definitions = side_definitions
