@@ -1,3 +1,9 @@
 import lusidtools.lpt.txn_config as cfg
 
-cfg.main()
+
+def main():
+    cfg.main()
+
+
+if __name__ == '__main__':
+    main()

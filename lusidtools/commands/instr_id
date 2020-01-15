@@ -1,5 +1,0 @@
-#!/usr/bin/python3
-
-import lusidtools.lpt.qry_instr_ids as qry
-
-qry.main()
