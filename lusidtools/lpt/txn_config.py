@@ -71,7 +71,12 @@ def process_args(api, args):
     if args.action == "get":
 
         def get_success(result):
-            y.dump(result.content.transaction_configs, args.filename, args.raw)
+            y.dump(
+                y.TransactionSetConfigurationDataNoLinks(
+                    result.content.transaction_configs,
+                    result.content.side_definitions),
+                args.filename,
+                args.raw)
             return None
 
         return api.call.list_configuration_transaction_types().bind(get_success)
@@ -83,7 +88,7 @@ def process_args(api, args):
     if args.action == "set":
 
         def set_success(result):
-            print(y.get_yaml(result.content.transaction_configs))
+            print(y.get_yaml(result.content))
             return None
 
         if args.group:
@@ -92,7 +97,7 @@ def process_args(api, args):
             result = api.call.list_configuration_transaction_types()
 
             if result.right is not None:
-                txn_types_old = result.right.content.transaction_configs
+                txn_types_old = result.right.content
             else:
                 raise ValueError("Api call did not return correct result")
 
@@ -108,9 +113,8 @@ def process_args(api, args):
             return None
         else:
             return api.call.set_configuration_transaction_types(
-                types=api.models.TransactionSetConfigurationDataRequest(txn_types)
+                types=txn_types
             ).bind(set_success)
-
 
 # Standalone tool
 def main(parse=parse):
