@@ -1,4 +1,5 @@
 import argparse
+import copy
 import csv
 import os
 import numpy as np
@@ -69,8 +70,8 @@ def checkargs(function: typing.Callable) -> typing.Callable:
 
             # If the argument value is of the wrong type e.g. list instead of dict then throw an error
             if (
-                not isinstance(argument_value, argument_details.annotation)
-                and argument_details.annotation is not argument_details.empty
+                    not isinstance(argument_value, argument_details.annotation)
+                    and argument_details.annotation is not argument_details.empty
             ):
                 # Only exception to this is if it matches the default value which may be of a different type e.g. None
                 if not is_default_value:
@@ -119,10 +120,10 @@ def make_code_lusid_friendly(raw_code) -> str:
         r"[^\w]",
         "",
         raw_code.replace("%", "Percentage")
-        .replace("&", "and")
-        .replace(".", "_")
-        .replace("-", "_")
-        .strip(),
+            .replace("&", "and")
+            .replace(".", "_")
+            .replace("-", "_")
+            .strip(),
     )
 
     return friendly_code
@@ -130,13 +131,13 @@ def make_code_lusid_friendly(raw_code) -> str:
 
 @checkargs
 def populate_model(
-    model_object_name: str,
-    required_mapping: dict,
-    optional_mapping: dict,
-    row: pd.Series,
-    properties,
-    identifiers: dict = None,
-    sub_holding_keys=None,
+        model_object_name: str,
+        required_mapping: dict,
+        optional_mapping: dict,
+        row: pd.Series,
+        properties,
+        identifiers: dict = None,
+        sub_holding_keys=None,
 ) -> typing.Callable:
     """
     This function populates the provided LUSID model object in lusid.models with values from a Pandas Series
@@ -176,12 +177,12 @@ def populate_model(
 
 @checkargs
 def set_attributes_recursive(
-    model_object,
-    mapping: dict,
-    row: pd.Series,
-    properties=None,
-    identifiers: dict = None,
-    sub_holding_keys=None,
+        model_object,
+        mapping: dict,
+        row: pd.Series,
+        properties=None,
+        identifiers: dict = None,
+        sub_holding_keys=None,
 ):
     """
     This function takes a lusid.model object name and an expanded mapping between its attributes and the provided
@@ -379,10 +380,10 @@ def generate_required_attributes_list():
 
 @checkargs
 def verify_all_required_attributes_mapped(
-    mapping: dict,
-    model_object_name: str,
-    exempt_attributes: list = None,
-    key_separator: str = ".",
+        mapping: dict,
+        model_object_name: str,
+        exempt_attributes: list = None,
+        key_separator: str = ".",
 ) -> None:
     """
     Verifies that all required attributes are included in the mapping, passes silently if they are and raises an exception
@@ -405,8 +406,8 @@ def verify_all_required_attributes_mapped(
     # Convert a None to an empty list
     exempt_attributes = (
         Validator(exempt_attributes, "exempt_attributes")
-        .set_default_value_if_none([])
-        .value
+            .set_default_value_if_none([])
+            .value
     )
 
     # Gets the required attributes for this model
@@ -651,7 +652,7 @@ def convert_cell_value_to_string(data):
 
 
 def handle_nested_default_and_column_mapping(
-    data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
+        data_frame: pd.DataFrame, mapping: dict, constant_prefix: str = "$"
 ):
     """
     This function handles when a mapping is provided which contains as a value a dictionary with a column and/or default
@@ -680,14 +681,14 @@ def handle_nested_default_and_column_mapping(
 
             # If there is only a default specified, create a new column filled with the default
             elif not ("column" in list(value.keys())) and (
-                "default" in list(value.keys())
+                    "default" in list(value.keys())
             ):
                 mapping_updated[key] = f"LUSID.{key}"
                 data_frame[mapping_updated[key]] = value["default"]
 
             # If there is only a column specified unnest it
             elif ("column" in list(value.keys())) and not (
-                "default" in list(value.keys())
+                    "default" in list(value.keys())
             ):
                 mapping_updated[key] = value["column"]
 
@@ -784,7 +785,7 @@ def get_delimiter(sample_string: str):
 
 
 def check_mapping_fields_exist(
-    required_list: list, search_list: list, file_type: str
+        required_list: list, search_list: list, file_type: str
 ) -> list:
     """
     This function checks that items in one list exist in another list
@@ -816,7 +817,7 @@ def parse_args(args: dict):
         "-c",
         "--secrets_file",
         help=r"full path for credential secrets (eg. c:\Users\Joe\secrets.json). Not required if set as "
-        r"environment variables",
+             r"environment variables",
     )
     ap.add_argument(
         "-m",
@@ -879,7 +880,7 @@ def parse_args(args: dict):
 
 
 def scale_quote_of_type(
-    df: pd.DataFrame, mapping: dict, file_type: str = "quotes"
+        df: pd.DataFrame, mapping: dict, file_type: str = "quotes"
 ) -> (pd.DataFrame, dict):
     """
 
@@ -923,7 +924,7 @@ def scale_quote_of_type(
 
 
 def identify_cash_items(
-    dataframe, mappings, file_type: str, remove_cash_items: bool = False
+        dataframe, mappings, file_type: str, remove_cash_items: bool = False
 ) -> (pd.DataFrame, dict):
     """
     This function identifies cash items in a dataframe and either creates a currency_identifier in a new
@@ -965,7 +966,7 @@ def identify_cash_items(
 
 
 def populate_currency_identifier_for_LUSID(
-    row: dict, column, cash_flag_specification: dict
+        row: dict, column, cash_flag_specification: dict
 ) -> str:
     """
     This function takes a cash transaction or holding in the form of a row from a dataframe and returns it's currency
@@ -1035,10 +1036,10 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
     domain_lookup = load_json_file("config/domain_settings.json")
     file_type_check = (
         Validator(file_type, "file_type")
-        .make_singular()
-        .make_lower()
-        .check_allowed_value(list(domain_lookup.keys()))
-        .value
+            .make_singular()
+            .make_lower()
+            .check_allowed_value(list(domain_lookup.keys()))
+            .value
     )
 
     # required
@@ -1104,7 +1105,7 @@ def create_scope_id(time_generator=None):
         time_generator = default_time
 
     elif getattr(time_generator, "time", None) is None or not isinstance(
-        getattr(time_generator, "time"), types.MethodType
+            getattr(time_generator, "time"), types.MethodType
     ):
         raise AttributeError(
             "The provided time_generator does not have a method called time"
@@ -1121,5 +1122,185 @@ def create_scope_id(time_generator=None):
     # Multiply by 7 to get value to 100s of nano seconds
     timestamp = hex(int(test * 10000000.0))
     # Create the scope id by joining the hex representation with dashes every 4 characters
-    scope_id = "-".join(timestamp[i : i + 4] for i in range(2, len(timestamp), 4))
+    scope_id = "-".join(timestamp[i: i + 4] for i in range(2, len(timestamp), 4))
     return scope_id
+
+
+def default_fx_forward_model(df: pd.DataFrame, fx_code: str, func_b: typing.Callable[[], bool],
+                             func_s: typing.Callable[[], bool], mapping: dict) -> (pd.DataFrame, dict):
+    """
+    Function that takes 2 rows representing a single forward and merge them into a single transaction
+
+    Parameters
+    ----------
+    df          pd.DataFrame
+                DataFrame containing transactions data
+    fx_code     str
+                The transaction type that identifies a forward
+    func_b      typing.Callable[[], bool]
+                function that evaluates to true for where the dataframe row is a buy side
+    func_s      typing.Callable[[], bool]
+                function that evaluates to true for where the dataframe row is a sell side
+    mapping     dict
+                mapping for FX transactions
+
+    Returns
+    -------
+    fwds_txn_df         pd.DataFrame
+                        DataFrame containing FX transactions merged into a single row
+    mapping_cash_txn    dict
+                        updates mapping dictionary for fwds_txn_df
+    """
+
+    logging.info(f"combining transactions of type {fx_code} into a single line using {default_fx_forward_model.__name__}"
+                 f" utility function")
+    t_type = mapping["transactions"]["required"]["type"]
+
+    fwds_df = pd.DataFrame(df[df[t_type] == fx_code])
+
+    buy_df = fwds_df[func_b]
+    sell_df = fwds_df[func_s]
+
+    t_id = mapping["transactions"]["required"]["transaction_id"]
+
+
+    buy_suffix = "_b"
+    sell_suffix = "_s"
+    logging.info(f"merging buy and sell legs of FX trades and suffixing with {[buy_suffix, sell_suffix]}")
+    fwds_txn_df = pd.merge(buy_df, sell_df, how="outer", on=[t_id, t_type],
+                           suffixes=[buy_suffix, sell_suffix])
+
+    mapping_cash_txn = remap_after_merge(mapping, buy_suffix=buy_suffix, sell_suffix=sell_suffix)
+
+    return fwds_txn_df, mapping_cash_txn
+
+
+def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
+    """
+    Remaps buy and sell fields in a mapping dictionary to the suffixed column names after a dataframe merge
+
+    Parameters
+    ----------
+    mapping         dict
+                    mapping dictionary that needs updating
+    buy_suffix      str
+                    Suffix appended to buy side transaction fields (e.g. "_b")
+    sell_suffix     str
+                    Suffix appended to sell side transaction fields(e.g. "_s")
+    Returns
+    -------
+    mapping         dict
+                    updated mapping dictionary
+    """
+    new_mapping = copy.deepcopy(mapping)
+    file_type = "transactions"
+    logging.info(f"updating mapping to new Total Consideration and transaction fields ")
+    # currencies and amounts coming into the portfolio i.e. buy
+    buy_fields = [
+        'total_consideration.amount',
+        'total_consideration.currency',
+        "settlement_currency",
+    ]
+
+    # currencies and amounts leaving the portfolio i.e. sell
+    sell_fields = [
+        "units",
+        "transaction_currency"
+    ]
+
+    for key in new_mapping[file_type]["required"].keys():
+        if key in buy_fields:
+            update_dict_value(new_mapping, key, new_mapping[file_type]["required"][key] + buy_suffix, [file_type])
+        elif key in sell_fields:
+            update_dict_value(new_mapping, key, new_mapping[file_type]["required"][key] + sell_suffix, [file_type])
+    return new_mapping
+
+
+def update_dict_value(d: dict, s_key: str, val: typing.Union[str, float], top_level_values_to_search=[]):
+    """
+    Recursively searches a dictionary for a key and updates the value
+
+    This function searches for a key in a dictionary and updates the value belonging to any matching keys. The top level
+    values in which to search can be specified as
+
+    Parameters
+    ----------
+    d           dict
+                Dictionary to update
+    s_key       str
+                Key to search for that belongs to the value to be updated
+    val         typing.Union[str, float]
+                Updated value belonging to search key
+    file_type   str
+                (optional) specific file_type in mapping to update. If not specified, all matches are replaced
+
+    Returns
+    -------
+    d           dict
+                updated dictionary
+
+    """
+    # if a file type had been specified, only search that values belonging to that key
+    if top_level_values_to_search:
+        for f_type in top_level_values_to_search:
+            if f_type in d.keys():
+                d[f_type] = update_dict_value(d.get(f_type, {}), s_key, val)
+            else:
+                err = f"file_type {top_level_values_to_search} not found in top level of mapping. If passing full mapping structure," \
+                      f"ensure file type had been corrctly specified. If passing in a partial mapping structure," \
+                      f"remove this parameter."
+                logging.error(err)
+                raise KeyError(err)
+
+    for k, v in d.items():
+        # if no type specified and search key in keys
+        if s_key in k:
+            d[k] = update_value(d[k], val)
+        # if no search key found, make recursive call for each key
+        elif isinstance(v, dict) and not top_level_values_to_search:
+            d[k] = update_dict_value(d.get(k, {}), s_key, val)
+    return d
+
+
+def update_value(d: typing.Union[dict, str], val: typing.Union[str, float]):
+    """
+    Updates value in dictionary and handles default and constant ($) specification
+
+    Parameters
+    ----------
+    d       typing.Union[dict, str]
+            Data key to update
+    val     typing.Union[dict, str]
+            value to update
+
+    Returns
+    -------
+
+    """
+
+    # update values provided in "column" "default" format
+    if isinstance(d, dict):
+        if set(d.keys()) != {"column", "default"}:
+            err = f"Failed to update dictionary. Expected ['column', 'default'] in {d}, but found {list(d.keys())}"
+            raise ValueError(err)
+
+        if type(val) != type(d["column"]):
+            warn = f"new data type is not same as original value"
+        #             logging.warning(warn)
+        d["column"] = val
+        return d
+
+    if type(val) != type(d):
+        warn = f"new data type is not same as original value"
+    #         logging.warning(warn)
+
+    # update value provided with constant format using "$"
+    if isinstance(d, str) and d[0] == "$":
+        return {
+            "default": d[1:],
+            "column": val
+        }
+    # for any other data types, simply update the value
+    d = val
+
+    return d

@@ -18,6 +18,7 @@ from lusidtools.cocoon.utilities import (
     scale_quote_of_type,
     strip_whitespace,
     load_json_file,
+    default_fx_forward_model
 )
 from lusidtools.cocoon.cocoon_printer import (
     format_holdings_response,
