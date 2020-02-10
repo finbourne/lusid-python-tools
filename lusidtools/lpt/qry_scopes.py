@@ -61,8 +61,6 @@ def process_args(api, args):
             args.limit,
             sort=['Scope','Portfolio'] if args.portfolios else 'Scopes')
 
-    return api.call.list_portfolios().bind(success)
-
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
