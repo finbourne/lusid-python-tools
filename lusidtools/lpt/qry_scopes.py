@@ -41,25 +41,27 @@ def process_args(api, args):
             )
         results.append(df)
 
-        links = [l for l in result.content.links if l.relation=='NextPage']
+        links = [l for l in result.content.links if l.relation == "NextPage"]
 
         if len(links) > 0:
-           match = rexp.match(links[0].href)
-           if match:
-              return urllib.parse.unquote(match.group(1))
+            match = rexp.match(links[0].href)
+            if match:
+                return urllib.parse.unquote(match.group(1))
         return None
 
     page = Either(None)
     while True:
-          page = fetch_page(page.right).bind(got_page)
-          if page.is_left():
-             return page
-          if page.right == None:
-             break
+        page = fetch_page(page.right).bind(got_page)
+        if page.is_left():
+            return page
+        if page.right == None:
+            break
 
-    return lpt.trim_df(pd.concat(results,ignore_index=True,sort=False),
-            args.limit,
-            sort=['Scope','Portfolio'] if args.portfolios else 'Scopes')
+    return lpt.trim_df(
+        pd.concat(results, ignore_index=True, sort=False),
+        args.limit,
+        sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
+    )
 
 
 # Standalone tool
