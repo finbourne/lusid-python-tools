@@ -9,7 +9,8 @@ from parameterized import parameterized
 responses = {
     "instruments": {
         "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
+            lusid.exceptions.ApiException(status="404",
+                                reason="not found"),
             lusid.exceptions.ApiException(status="404", reason="not found"),
         ],
         "success": [
