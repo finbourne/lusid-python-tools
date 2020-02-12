@@ -1,6 +1,6 @@
 # Pull Request Checklist
 
-- [ ] Read the [contributing guidelines](https://github.com/finbourne/lusid-python-tools/blob/master/CONTRIBUTING.md)
+- [ ] Read the [contributing guidelines](https://github.com/finbourne/lusid-python-tools/blob/master/docs/CONTRIBUTING.md)
 - [ ] Tests pass
 
 # Description of the PR
