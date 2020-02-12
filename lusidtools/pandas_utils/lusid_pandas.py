@@ -65,7 +65,8 @@ def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False
             # find the property code substring
             # The property code should always be displayed after the second "/"
             # Example: sub_holding_keys.Transaction/MultiAssetScope/PortionSubClass.value.label_value
-            property_code = str(column[(column.rfind("/") + 1) :])[
+            property_code = str(
+                column[(column.rfind("/") + 1) :])[
                 : column[(column.rfind("/") + 1) :].find(".")
             ]
 
