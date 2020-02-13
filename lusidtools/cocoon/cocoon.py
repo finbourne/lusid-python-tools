@@ -843,7 +843,7 @@ def load_from_data_frame(
     if instrument_name_enrichment:
         loop = cocoon.async_tools.start_event_loop_new_thread()
 
-        data_frame, mapping_required = asyncio.run_coroutine_threadsafe(
+        data_frame, mapping_required, instrument_identifier_mapping = asyncio.run_coroutine_threadsafe(
             cocoon.instruments.enrich_instruments(
                 api_factory=api_factory,
                 data_frame=data_frame,

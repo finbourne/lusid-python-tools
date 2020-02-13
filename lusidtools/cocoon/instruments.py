@@ -3,7 +3,7 @@ import lusid.models as models
 from lusid.api import InstrumentsApi, SearchApi
 import numpy as np
 import time
-from lusidtools.cocoon.utilities import checkargs
+from lusidtools.cocoon.utilities import checkargs, enrich_existing_column
 import pandas as pd
 import logging
 import re
@@ -292,6 +292,14 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
         if identifier.is_unique_identifier_type
     ]
 
+def get_leaf(d, IDs, constant_prefix):
+    for lusidID, dataID in d.items():
+        if isinstance(dataID, dict) and "column" not in dataID:
+            get_leaf(dataID, IDs, constant_prefix)
+        elif isinstance(dataID, dict) and "column" in dataID:
+            IDs.append((lusidID, dataID["column"]))
+        elif dataID[0] != constant_prefix:
+            IDs.append((lusidID, dataID))
 
 async def enrich_instruments(
     api_factory: lusid.utilities.ApiClientFactory,
@@ -303,6 +311,9 @@ async def enrich_instruments(
 ):
     search_requests_all = []
 
+    valid_IDs = []
+    get_leaf(instrument_identifier_mapping, valid_IDs, constant_prefix)
+
     for index, row in data_frame.iterrows():
         search_requests_instrument = [
             lusid.models.InstrumentSearchProperty(
@@ -311,7 +322,7 @@ async def enrich_instruments(
                 else f"Instrument/default/{identifier_lusid}",
                 value=row[identifier_column],
             )
-            for identifier_lusid, identifier_column in instrument_identifier_mapping.items()
+            for identifier_lusid, identifier_column in valid_IDs
             if not pd.isna(row[identifier_column])
         ]
 
@@ -328,59 +339,40 @@ async def enrich_instruments(
     )
 
     names = []
+    figis = []
 
     for response in responses:
         name = np.NaN
+        figi = np.NaN
         for single_search in response:
             if isinstance(single_search, Exception):
                 logging.warning(single_search)
                 continue
             elif len(single_search[0].external_instruments) > 0:
                 name = single_search[0].external_instruments[0].name
+                figi = single_search[0].external_instruments[0].identifiers["Figi"].value
                 break
         names.append(name)
+        figis.append(figi)
 
     enriched_column_name = "LUSID.Name.Enriched"
+    enriched_column_figi = "LUSID.Figi.Enriched"
 
     data_frame[enriched_column_name] = names
+    data_frame[enriched_column_figi] = figis
 
     # Missing mapping for name altogether
     if "name" not in list(mapping_required.keys()):
         mapping_required["name"] = enriched_column_name
+    else:
+        mapping_required = enrich_existing_column(data_frame, mapping_required, "name", enriched_column_name, constant_prefix)
 
-    # A column for name already exists and needs to be enriched
-    elif (
-        isinstance(mapping_required["name"], str)
-        and mapping_required["name"][0] != constant_prefix
-    ):
-        data_frame[mapping_required["name"]] = data_frame[
-            mapping_required["name"]
-        ].fillna(value=data_frame[enriched_column_name])
+    if "Figi" not in list(instrument_identifier_mapping.keys()):
+        instrument_identifier_mapping["Figi"] = enriched_column_figi
+    else:
+        mapping_required = enrich_existing_column(data_frame, instrument_identifier_mapping, "Figi", enriched_column_figi, constant_prefix)
 
-    elif isinstance(mapping_required["name"], dict) and "column" in list(
-        mapping_required["name"].keys()
-    ):
-        data_frame[mapping_required["name"]["column"]] = data_frame[
-            mapping_required["name"]["column"]
-        ].fillna(value=data_frame[enriched_column_name])
-
-    # Is a constant specified by the constant prefix
-    elif (
-        isinstance(mapping_required["name"], str)
-        and mapping_required["name"][0] == constant_prefix
-    ):
-        mapping_required["name"] = {"default": mapping_required["name"][1:]}
-        mapping_required["name"]["column"] = enriched_column_name
-
-    # Is a constant specified by the default nested dictionary specification
-    elif (
-        isinstance(mapping_required["name"], dict)
-        and "default" in list(mapping_required["name"].keys())
-        and "column" not in list(mapping_required["name"].keys())
-    ):
-        mapping_required["name"]["column"] = enriched_column_name
-
-    return data_frame, mapping_required
+    return data_frame, mapping_required, instrument_identifier_mapping
 
 
 async def instrument_search(

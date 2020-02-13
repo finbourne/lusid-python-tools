@@ -1329,6 +1329,65 @@ def update_value(d: typing.Union[dict, str], val: typing.Union[str, float]):
 
     return d
 
+@checkargs
+def enrich_existing_column(data_frame: pd.DataFrame, mapping: dict, field_name: str, enriched_column: str, constant_prefix: str):
+    """
+    Enriches a dataframe column using values supplied by another column containing a list of reference values
+
+    This function accepts a dataframe with a column that contains missing data values as well as a column containing
+    data from another source. The missing values in the first column are then replaces with available values from the
+    reference column
+
+    Parameters
+    ----------
+    data_frame          pd.DataFrame
+                        DataFrame containing data to be enriched
+    mapping             dict
+                        Dictionary containing mapping from column names to LUSID api fields
+    field_name          str
+                        Name of column containing data to be enriched
+    enriched_column     str
+                        Name of new column that stores the data received from open-figi
+    constant_prefix     str
+                        Identifying string that indicates that a value is to be used as a constant
+
+    Returns
+    -------
+
+    """
+    # A column for provided field_name already exists and needs to be enriched
+    if (
+        isinstance(mapping[field_name], str)
+        and mapping[field_name][0] != constant_prefix
+    ):
+        data_frame[mapping[field_name]] = data_frame[
+            mapping[field_name]
+        ].fillna(value=data_frame[enriched_column])
+
+    elif isinstance(mapping[field_name], dict) and "column" in list(
+        mapping[field_name].keys()
+    ):
+        data_frame[mapping[field_name]["column"]] = data_frame[
+            mapping[field_name]["column"]
+        ].fillna(value=data_frame[enriched_column])
+
+    # Is a constant specified by the constant prefix
+    elif (
+        isinstance(mapping[field_name], str)
+        and mapping[field_name][0] == constant_prefix
+    ):
+        mapping[field_name] = {"default": mapping[field_name][1:]}
+        mapping[field_name]["column"] = enriched_column
+
+    # Is a constant specified by the default nested dictionary specification
+    elif (
+        isinstance(mapping[field_name], dict)
+        and "default" in list(mapping[field_name].keys())
+        and "column" not in list(mapping[field_name].keys())
+    ):
+        mapping[field_name]["column"] = enriched_column
+
+    return mapping
 
 def group_request_into_one(
     model_type: str, request_list: list, attribute_for_grouping: list, batch_index=0

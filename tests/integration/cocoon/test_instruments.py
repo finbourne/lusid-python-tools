@@ -117,32 +117,57 @@ class CocoonInstrumentsTests(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
             ],
             [
-                "Constant prefix",
+                "Constant prefix - missing name",
                 "data/global-fund-combined-instrument-master-missing-name.csv",
                 {"name": "$Unknown"},
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
             ],
             [
-                "Default specified",
+                "Default specified - missing name",
                 "data/global-fund-combined-instrument-master-missing-name.csv",
                 {"name": {"default": "$Unknown"}},
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
             ],
             [
-                "Default specified with column name",
+                "Default specified with column name - missing name",
                 "data/global-fund-combined-instrument-master-missing-name.csv",
                 {"name": {"default": "$Unknown", "column": "instrument_name"}},
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
             ],
+            [
+                "Constant prefix - missing figi",
+                "data/global-fund-combined-instrument-master-missing-figi.csv",
+                {"name": "instrument_name"},
+                {"Figi": "$Unknown", "Isin": "isin", "ClientInternal": "client_internal"},
+            ],
+            [
+                "Default specified - missing figi",
+                "data/global-fund-combined-instrument-master-missing-figi.csv",
+                {"name": "instrument_name"},
+                {"Figi": {"default": "$Unknown"}, "Isin": "isin", "ClientInternal": "client_internal"},
+            ],
+            [
+                "Default specified with column name - missing figi column",
+                "data/global-fund-combined-instrument-master-missing-figi.csv",
+                {"name": "instrument_name"},
+                {"Figi": {"default": "$Unknown", "column": "figi"}, "Isin": "isin", "ClientInternal": "client_internal"},
+            ],
+            [
+                "No figi column",
+                "data/global-fund-combined-instrument-master-no-figi.csv",
+                {"name": "instrument_name"},
+                {"Isin": "isin", "ClientInternal": "client_internal"},
+            ],
         ]
     )
+    # @unittest.skip("Call to openfigi not optimised")
     def test_enrich_instruments(
         self, _, file_name, mapping_required, instrument_identifier_mapping
     ):
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
-        data_frame_updated, mapping_required = asyncio.run_coroutine_threadsafe(
+        data_frame_updated, mapping_required, instrument_identifiers = asyncio.run_coroutine_threadsafe(
             cocoon.instruments.enrich_instruments(
                 api_factory=self.api_factory,
                 data_frame=data_frame,
