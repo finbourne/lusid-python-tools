@@ -799,7 +799,7 @@ def load_from_data_frame(
         ).result()
 
         # Stop the additional event loop
-        loop.stop()
+        cocoon.async_tools.stop_event_loop_new_thread(loop)
 
     """
     Unnest and populate defaults where a mapping is provided with column and/or default fields in a nested dictionary
@@ -940,7 +940,6 @@ def load_from_data_frame(
     ).result()
 
     # Stop the additional event loop
-    loop.stop()
+    cocoon.async_tools.stop_event_loop_new_thread(loop)
 
-    # Prefix the responses with the file type
     return {file_type + "s": responses}
