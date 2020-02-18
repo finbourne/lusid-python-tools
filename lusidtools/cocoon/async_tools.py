@@ -3,6 +3,7 @@ import functools
 from threading import Thread, enumerate
 import concurrent.futures
 
+
 def start_event_loop_new_thread() -> asyncio.AbstractEventLoop:
     """
     Creates and starts a new event loop in a new thread
@@ -55,6 +56,8 @@ def run_in_executor(f):
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
 
-        return loop.run_in_executor(concurrent.futures.ThreadPoolExecutor(), lambda: f(*args, **kwargs))
+        return loop.run_in_executor(
+            concurrent.futures.ThreadPoolExecutor(), lambda: f(*args, **kwargs)
+        )
 
     return inner
