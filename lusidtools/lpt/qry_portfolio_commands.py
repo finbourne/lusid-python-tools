@@ -3,6 +3,8 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt import lpt
 
+TOOLNAME="port_cmds"
+TOOLTIP="Display all portfolio commands posted to LUSID"
 
 def parse(extend=None, args=None):
     return (

@@ -3,6 +3,8 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt.either import Either
 
+TOOLNAME="upload"
+TOOLTIP="Create a portfolio and upload holdings/transactions"
 
 def parse(extend=None, args=None):
     return (
