@@ -12,6 +12,7 @@ CUM = "cum"
 ORDER = "sort"
 JOIN = "join"
 
+TOOLTIP="Demo Cash-Ladder report"
 
 def cash_ladder(api, scope, portfolio, date):
 

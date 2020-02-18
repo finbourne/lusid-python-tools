@@ -79,7 +79,7 @@ def add_days(date, days):
 def display_df(df, decimals=2):
     fmt = "{:,." + str(decimals) + "f}"
     pd.options.display.float_format = fmt.format
-    pd.set_option("max_colwidth", -1)
+    pd.set_option("max_colwidth", None)
 
     try:
         if len(df) == 1 and len(df.columns) > 5:
