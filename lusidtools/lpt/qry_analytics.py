@@ -7,8 +7,9 @@ import lusidtools.lpt.lpt as lpt
 from lusidtools.lpt import lse
 import lse
 
-TOOLNAME="analytics"
-TOOLTIP="Query the analytics"
+TOOLNAME = "analytics"
+TOOLTIP = "Query the analytics"
+
 
 def parse(extend=None):
     parser = argparse.ArgumentParser(description="List Analytics")

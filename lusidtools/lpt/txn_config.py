@@ -3,8 +3,9 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt import txn_config_yaml as tcy
 
-TOOLNAME="txn_cfg"
-TOOLTIP="Get/Set the transaction configuration"
+TOOLNAME = "txn_cfg"
+TOOLTIP = "Get/Set the transaction configuration"
+
 
 def parse(extend=None, args=None):
     return (

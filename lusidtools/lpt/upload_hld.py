@@ -7,8 +7,9 @@ from lusidtools.lpt.either import Either
 
 SHK = "SHK:"
 P = "P:"
-TOOLNAME="upload_hld"
-TOOLTIP="Upload holdings in csv or json format"
+TOOLNAME = "upload_hld"
+TOOLTIP = "Upload holdings in csv or json format"
+
 
 def parse(extend=None, args=None):
     return (

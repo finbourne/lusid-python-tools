@@ -3,8 +3,9 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt import lpt
 
-TOOLNAME="port_grp"
-TOOLTIP="Query Portfolio Groups"
+TOOLNAME = "port_grp"
+TOOLTIP = "Query Portfolio Groups"
+
 
 def parse(extend=None, args=None):
     return (
