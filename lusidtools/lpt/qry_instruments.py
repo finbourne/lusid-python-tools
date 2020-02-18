@@ -9,8 +9,9 @@ import urllib.parse
 
 rexp = re.compile(r".*page=([^=']{10,}).*")
 
-TOOLNAME="instr_list"
-TOOLTIP="List all instruments"
+TOOLNAME = "instr_list"
+TOOLTIP = "List all instruments"
+
 
 def parse(extend=None, args=None):
     return (
