@@ -5,8 +5,8 @@ from lusidtools.lpt import stdargs
 
 TYPE_COL = "Type"
 INSTR_COL = "LUID"
-TOOLNAME="hld"
-TOOLTIP="Query Holdings"
+TOOLNAME = "hld"
+TOOLTIP = "Query Holdings"
 
 columns = [
     ("instrument_uid", INSTR_COL),

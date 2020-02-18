@@ -2,8 +2,9 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
-TOOLNAME="cons"
-TOOLTIP="Show constituents from a reference Portfolio"
+TOOLNAME = "cons"
+TOOLTIP = "Show constituents from a reference Portfolio"
+
 
 def parse(extend=None, args=None):
     return (

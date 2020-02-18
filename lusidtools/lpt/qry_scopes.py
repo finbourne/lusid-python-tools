@@ -9,8 +9,9 @@ import urllib.parse
 
 rexp = re.compile(r".*page=([^=']{10,}).*")
 
-TOOLNAME="scopes"
-TOOLTIP="List scopes"
+TOOLNAME = "scopes"
+TOOLTIP = "List scopes"
+
 
 def parse(extend=None, args=None):
     return (

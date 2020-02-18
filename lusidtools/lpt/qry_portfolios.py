@@ -3,8 +3,9 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt import lpt
 
-TOOLNAME="portfolios"
-TOOLTIP="List portfolios for a scope"
+TOOLNAME = "portfolios"
+TOOLTIP = "List portfolios for a scope"
+
 
 def parse(extend=None, args=None):
     return (

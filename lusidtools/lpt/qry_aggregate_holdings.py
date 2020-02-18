@@ -3,8 +3,8 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
-TOOLNAME="agg"
-TOOLTIP="Query Aggregate Holdings"
+TOOLNAME = "agg"
+TOOLTIP = "Query Aggregate Holdings"
 
 AGG_INSTR = "Instrument/default/Name"
 AGG_UID = "Instrument/default/LusidInstrumentId"
