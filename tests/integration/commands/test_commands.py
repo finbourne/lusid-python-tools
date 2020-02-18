@@ -50,7 +50,7 @@ class CommandsTests(unittest.TestCase):
     def display_df(self, df, decimals=2):
         fmt = "{:,." + str(decimals) + "f}"
         pd.options.display.float_format = fmt.format
-        pd.set_option("max_colwidth", -1)
+        pd.set_option("max_colwidth", None)
 
         try:
             if len(df) == 1 and len(df.columns) > 5:
@@ -249,7 +249,7 @@ class CommandsTests(unittest.TestCase):
             parse=lambda: search_instruments.parse(
                 args=[
                     "--properties",
-                    "Instrument/default/Name=test",
+                    "Instrument/system/Name=test",
                     "--secrets",
                     f"{self.secrets_file}",
                 ]

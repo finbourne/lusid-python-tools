@@ -4,6 +4,8 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
+TOOLNAME='instr_id'
+TOOLTIP='Display configured Instrument Identifiers'
 
 def parse(extend=None, args=None):
     return (

@@ -5,6 +5,8 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
+TOOLNAME="prop_create"
+TOOLTIP="Create simple property definitions"
 
 def parse(extend=None, args=None):
     return (
