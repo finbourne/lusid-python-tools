@@ -1,5 +1,5 @@
 {
-  "env": "refinitiv",
+  "env": "ipsum_lorem",
   "cert": "path-to-certificate-file-goes-here",
   "user": "your-name-here" ,
   "api": {
