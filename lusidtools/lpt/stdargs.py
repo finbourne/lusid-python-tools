@@ -65,7 +65,7 @@ class Parser:
             dest="env",
             default=["lusid"],
             nargs="+",
-            help="choose a special LUSID environment. E.g. 'refinitiv'",
+            help="choose a special LUSID environment. E.g. 'ipsum_lorem'",
         )
 
         self.add(
