@@ -1,13 +1,34 @@
 import asyncio
 import functools
-from threading import Thread
+from threading import Thread, enumerate
+import concurrent.futures
 
 
 def start_event_loop_new_thread() -> asyncio.AbstractEventLoop:
+    """
+    Creates and starts a new event loop in a new thread
+
+    :return: asyncio.AbstractEventLoop loop: The newly created loop
+    """
     loop = asyncio.new_event_loop()
     t = Thread(target=start_background_loop, args=(loop,), daemon=True)
     t.start()
     return loop
+
+
+def stop_event_loop_new_thread(loop: asyncio.AbstractEventLoop) -> None:
+    """
+    Takes an event loop, stops it and once stopped closes it
+
+    :param asyncio.AbstractEventLoop loop: The loop to stop and close
+    :return: None
+    """
+    thread_id = loop._thread_id
+    loop.call_soon_threadsafe(loop.stop)
+    threads = enumerate()
+    match = [thread for thread in threads if thread.ident == thread_id]
+    if len(match) == 1:
+        match[0].join(timeout=1)
 
 
 def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
@@ -35,6 +56,8 @@ def run_in_executor(f):
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
 
-        return loop.run_in_executor(None, lambda: f(*args, **kwargs))
+        return loop.run_in_executor(
+            concurrent.futures.ThreadPoolExecutor(), lambda: f(*args, **kwargs)
+        )
 
     return inner

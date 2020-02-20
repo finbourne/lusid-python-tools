@@ -4,6 +4,9 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
+TOOLNAME = "txn"
+TOOLTIP = "Query transactions"
+
 
 def parse(extend=None, args=None):
     return (

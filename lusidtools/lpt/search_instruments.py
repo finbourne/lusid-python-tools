@@ -4,6 +4,9 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
+TOOLNAME = "instr_search"
+TOOLTIP = "Search for Instruments"
+
 
 def parse(extend=None, args=None):
     return (

@@ -5,6 +5,9 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from datetime import datetime
 
+TOOLNAME = "targets"
+TOOLTIP = "List and display target holdings"
+
 
 def parse(extend=None, args=None):
     return (

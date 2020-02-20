@@ -3,6 +3,9 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt import lpt
 
+TOOLNAME = "port_props"
+TOOLTIP = "Show properties on a portfolio"
+
 
 def parse(extend=None, args=None):
     return (

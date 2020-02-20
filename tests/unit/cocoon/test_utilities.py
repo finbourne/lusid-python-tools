@@ -510,7 +510,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 {
                     "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
                         key="Holding/Operations/MarketDataVendor",
-                        value=lusid.models.PropertyValue(label_value="Refinitiv"),
+                        value=lusid.models.PropertyValue(label_value="ipsum_lorem"),
                     ),
                     "Holding/Operations/MarketValBaseCurrency": lusid.models.PerpetualProperty(
                         key="Holding/Operations/MarketValBaseCurrency",
@@ -560,7 +560,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     properties={
                         "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
                             key="Holding/Operations/MarketDataVendor",
-                            value=lusid.models.PropertyValue(label_value="Refinitiv"),
+                            value=lusid.models.PropertyValue(label_value="ipsum_lorem"),
                         ),
                         "Holding/Operations/MarketValBaseCurrency": lusid.models.PerpetualProperty(
                             key="Holding/Operations/MarketValBaseCurrency",

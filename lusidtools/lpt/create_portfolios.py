@@ -7,6 +7,8 @@ from lusidtools.lpt import stdargs
 # column names
 CA_SCOPE = "corporateActionSourceId.scope"
 CA_CODE = "corporateActionSourceId.code"
+TOOLNAME = "port_create"
+TOOLTIP = "Create portfolios for a scope"
 
 
 def parse(extend=None, args=None):

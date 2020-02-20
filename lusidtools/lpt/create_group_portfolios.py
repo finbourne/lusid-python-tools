@@ -9,6 +9,8 @@ PORTFOLIOS = "Portfolios"
 SUB_GROUPS = "Sub-groups"
 DISPLAY_NAME = "Display Name"
 DESCRIPTION = "Description"
+TOOLNAME = "port_grp_create"
+TOOLTIP = "Display specified Instruments"
 
 
 def parse(extend=None, args=None):

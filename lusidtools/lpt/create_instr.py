@@ -8,6 +8,8 @@ from lusidtools.lpt import stdargs
 NAME = "name"
 LT_SCOPE = "look_through_portfolio_id.scope"
 LT_CODE = "look_through_portfolio_id.code"
+TOOLNAME = "instr_create"
+TOOLTIP = "Create Instruments"
 
 
 def parse(extend=None, args=None):
