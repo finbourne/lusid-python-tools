@@ -13,6 +13,7 @@ class CocoonTestsAsyncTools(unittest.TestCase):
     """"
     These tests are to ensure that the Asynchronous Tools work as expected.
     """
+
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
@@ -21,32 +22,31 @@ class CocoonTestsAsyncTools(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "Standard load with ~700 portfolios in 1 batch with max_threads per batch of 5",
-            "data/holdings-example-large.csv",
-            1,
-            5
-        ],
-        [
-            "Standard load with ~700 portfolios in 5 batches with max_threads per batch of 5",
-            "data/holdings-example-large.csv",
-            5,
-            5
-        ],
-        [
-            "Standard load with ~700 portfolios in 5 batches with max_threads per batch of 20",
-            "data/holdings-example-large.csv",
-            5,
-            20,
-        ],
-    ])
+            [
+                "Standard load with ~700 portfolios in 1 batch with max_threads per batch of 5",
+                "data/holdings-example-large.csv",
+                1,
+                5,
+            ],
+            [
+                "Standard load with ~700 portfolios in 5 batches with max_threads per batch of 5",
+                "data/holdings-example-large.csv",
+                5,
+                5,
+            ],
+            [
+                "Standard load with ~700 portfolios in 5 batches with max_threads per batch of 20",
+                "data/holdings-example-large.csv",
+                5,
+                20,
+            ],
+        ]
+    )
     def test_multiple_threads(
-        self,
-        _,
-        file_name,
-        number_threads,
-        thread_pool_max_workers):
+        self, _, file_name, number_threads, thread_pool_max_workers
+    ):
         """
         This tests different combinations of running load_from_data_frame across multiple threads and configuring
         the max number of workers that each call to load_from_data_frame will use in its thread pool.
@@ -112,17 +112,25 @@ class CocoonTestsAsyncTools(unittest.TestCase):
                 False,
                 None,
                 False,
-                thread_pool_max_workers
-            ) for i in range(number_threads)
+                thread_pool_max_workers,
+            )
+            for i in range(number_threads)
         ]
 
         # Get the results
         responses = [future.result() for future in futures]
 
         # Check that the results are as expected
-        self.assertGreater(sum([len(response["holdings"]["success"]) for response in responses]), 0)
-        self.assertEqual(sum([len(response["holdings"]["success"]) for response in responses]), len(data_frame))
-        self.assertEqual(sum([len(response["holdings"]["errors"]) for response in responses]), 0)
+        self.assertGreater(
+            sum([len(response["holdings"]["success"]) for response in responses]), 0
+        )
+        self.assertEqual(
+            sum([len(response["holdings"]["success"]) for response in responses]),
+            len(data_frame),
+        )
+        self.assertEqual(
+            sum([len(response["holdings"]["errors"]) for response in responses]), 0
+        )
 
         self.assertTrue(
             expr=all(
@@ -131,4 +139,3 @@ class CocoonTestsAsyncTools(unittest.TestCase):
                 for succcess_response in response["holdings"]["success"]
             )
         )
-
