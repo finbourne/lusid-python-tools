@@ -30,6 +30,8 @@ jobs:
           else
             echo "no changes";
           fi
+          
+          echo "commiting to: ${GITHUB_REF##*/}"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
