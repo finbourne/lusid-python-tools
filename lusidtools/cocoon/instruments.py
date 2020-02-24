@@ -293,13 +293,13 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
     ]
 
 
-@checkargs
 async def enrich_instruments(
     api_factory: lusid.utilities.ApiClientFactory,
     data_frame: pd.DataFrame,
     instrument_identifier_mapping: dict,
     mapping_required: dict,
     constant_prefix: str = "$",
+    **kwargs
 ):
     search_requests_all = []
 
@@ -319,7 +319,7 @@ async def enrich_instruments(
 
     responses = await asyncio.gather(
         *[
-            instrument_search(api_factory=api_factory, search_requests=search_requests)
+            instrument_search(api_factory=api_factory, search_requests=search_requests, **kwargs)
             for search_requests in search_requests_all
         ],
         return_exceptions=False,
@@ -382,7 +382,7 @@ async def enrich_instruments(
 
 
 async def instrument_search(
-    api_factory: lusid.utilities.ApiClientFactory, search_requests: list
+    api_factory: lusid.utilities.ApiClientFactory, search_requests: list, **kwargs
 ) -> list:
     """
     Conducts an instrument search for a single instrument
@@ -397,7 +397,7 @@ async def instrument_search(
 
     for search_request in search_requests:
         try:
-            result = await instrument_search_single(api_factory, search_request)
+            result = await instrument_search_single(api_factory, search_request, **kwargs)
             instrument_search_results.append(result)
         except lusid.exceptions.ApiException as e:
             instrument_search_results.append(e)
@@ -408,6 +408,7 @@ async def instrument_search(
 def instrument_search_single(
     api_factory: lusid.utilities.ApiClientFactory,
     search_request: lusid.models.InstrumentSearchProperty,
+    **kwargs
 ) -> list:
     """
     Conducts an instrument search with a single search request
