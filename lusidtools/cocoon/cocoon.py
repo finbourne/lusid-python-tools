@@ -2,7 +2,7 @@ import asyncio
 import lusid
 import pandas as pd
 from lusidtools import cocoon
-from lusidtools.cocoon.async_tools import run_in_executor
+from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
 from lusidtools.cocoon.utilities import checkargs, strip_whitespace
 from lusidtools.cocoon.validator import Validator
@@ -631,6 +631,7 @@ def load_from_data_frame(
     instrument_name_enrichment: bool = False,
     sub_holding_keys: list = None,
     holdings_adjustment_only: bool = False,
+    thread_pool_max_workers: int = 5
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -651,6 +652,7 @@ def load_from_data_frame(
     columns in the dataframe to use to create sub holdings
     :param bool holdings_adjustment_only: Whether to use the adjust_holdings api call rather than set_holdings when
     working with holdings
+    :param int thread_pool_max_workers: The maximum number of workers to use in the thread pool used by the function
 
     :return: dict responses: The responses from loading the data into LUSID
     """
@@ -735,6 +737,9 @@ def load_from_data_frame(
         exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
     )
 
+    # Create the thread pool to use with the async_tools.run_in_executor decorator to make sync functions awaitable
+    thread_pool = ThreadPool(thread_pool_max_workers).thread_pool
+
     if instrument_name_enrichment:
         loop = cocoon.async_tools.start_event_loop_new_thread()
 
@@ -745,6 +750,7 @@ def load_from_data_frame(
                 instrument_identifier_mapping=identifier_mapping,
                 mapping_required=mapping_required,
                 constant_prefix="$",
+                **{"thread_pool": thread_pool}
             ),
             loop,
         ).result()
@@ -869,6 +875,7 @@ def load_from_data_frame(
             api_factory=api_factory
         ),
         "holdings_adjustment_only": holdings_adjustment_only,
+        "thread_pool": thread_pool
     }
 
     # Get the responses from LUSID
