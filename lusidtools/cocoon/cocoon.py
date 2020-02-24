@@ -631,7 +631,7 @@ def load_from_data_frame(
     instrument_name_enrichment: bool = False,
     sub_holding_keys: list = None,
     holdings_adjustment_only: bool = False,
-    thread_pool_max_workers: int = 5
+    thread_pool_max_workers: int = 5,
 ):
     """
     Handles loading data from a DataFrame into LUSID
@@ -750,7 +750,7 @@ def load_from_data_frame(
                 instrument_identifier_mapping=identifier_mapping,
                 mapping_required=mapping_required,
                 constant_prefix="$",
-                **{"thread_pool": thread_pool}
+                **{"thread_pool": thread_pool},
             ),
             loop,
         ).result()
@@ -875,7 +875,7 @@ def load_from_data_frame(
             api_factory=api_factory
         ),
         "holdings_adjustment_only": holdings_adjustment_only,
-        "thread_pool": thread_pool
+        "thread_pool": thread_pool,
     }
 
     # Get the responses from LUSID

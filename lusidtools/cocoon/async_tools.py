@@ -58,7 +58,8 @@ def run_in_executor(f):
 
         return loop.run_in_executor(
             # If the function to be wrapped has been provided with a thread pool use that, otherwise create one
-            kwargs.get("thread_pool", ThreadPool(5).thread_pool), lambda: f(*args, **kwargs)
+            kwargs.get("thread_pool", ThreadPool(5).thread_pool),
+            lambda: f(*args, **kwargs),
         )
 
     return inner
@@ -68,5 +69,8 @@ class ThreadPool:
     """
     Creates a class which has a thread pool.
     """
+
     def __init__(self, max_workers):
-        self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+        self.thread_pool = concurrent.futures.ThreadPoolExecutor(
+            max_workers=max_workers
+        )
