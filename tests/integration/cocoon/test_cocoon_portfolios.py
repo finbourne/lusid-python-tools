@@ -39,6 +39,23 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 [],
             ],
             [
+                "Standard load with ~700 portfolios",
+                "prime_broker_test",
+                "data/metamorph_portfolios-large.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                "operations001",
+                None,
+                [],
+            ],
+            [
                 "Add in some constants",
                 "prime_broker_test",
                 "data/metamorph_portfolios-unique.csv",
