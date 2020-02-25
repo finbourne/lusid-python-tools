@@ -367,10 +367,23 @@ async def enrich_instruments(
     else:
         mapping_required = enrich_existing_column(data_frame, mapping_required, "name", enriched_column_name, constant_prefix)
 
-    if "Figi" not in list(instrument_identifier_mapping.keys()):
-        instrument_identifier_mapping["Figi"] = enriched_column_figi
+    if "Figi" in list(instrument_identifier_mapping.keys()):
+        id = "Figi"
+    elif prepare_key("Figi", True) in list(instrument_identifier_mapping.keys()):
+        id = prepare_key("Figi", True)
     else:
-        mapping_required = enrich_existing_column(data_frame, instrument_identifier_mapping, "Figi", enriched_column_figi, constant_prefix)
+        id = None
+
+    if id:
+        mapping_required = enrich_existing_column(data_frame, instrument_identifier_mapping, id,
+                                                  enriched_column_figi, constant_prefix)
+    else:
+        instrument_identifier_mapping["Figi"] = enriched_column_figi
+
+    # if "Figi" not in list(instrument_identifier_mapping.keys()):
+    #     instrument_identifier_mapping["Figi"] = enriched_column_figi
+    # else:
+    #     mapping_required = enrich_existing_column(data_frame, instrument_identifier_mapping, "Figi", enriched_column_figi, constant_prefix)
 
     return data_frame, mapping_required, instrument_identifier_mapping
 

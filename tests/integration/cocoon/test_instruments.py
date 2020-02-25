@@ -158,7 +158,13 @@ class CocoonInstrumentsTests(unittest.TestCase):
                 {"name": "instrument_name"},
                 {"Isin": "isin", "ClientInternal": "client_internal"},
             ],
-        ]
+            [
+                "Full instrument definition",
+                "data/global-fund-combined-instrument-master-missing-figi.csv",
+                {"name": "instrument_name"},
+                {"Instrument/default/Figi": {"default": "$Unknown", "column": "figi"}, "Isin": "isin", "ClientInternal": "client_internal"},
+            ]
+        ],
     )
     # @unittest.skip("Call to openfigi not optimised")
     def test_enrich_instruments(
