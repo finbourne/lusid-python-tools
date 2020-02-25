@@ -2,14 +2,13 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+import lusid.models as models
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
 
 
 class CocoonTestPortfolioGroup(unittest.TestCase):
-    api_factory = None
-
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
@@ -17,6 +16,29 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             api_secrets_filename=secrets_file
         )
         cls.logger = logger.LusidLogger("debug")
+
+        def create_portfolio_model(code):
+            model = models.CreateTransactionPortfolioRequest(
+                display_name=code,
+                code=code,
+                base_currency="GBP",
+                description="Paper transaction portfolio",
+                created="2020-02-25T00:00:00Z",
+            )
+            return model
+
+        try:
+
+            for code in ["TEST_COM1", "TEST_COM2", "TEST_COM3", "TEST_COM4"]:
+                cls.api_factory.build(
+                    lusid.api.TransactionPortfoliosApi
+                ).create_portfolio(
+                    scope="test_scope_20200225",
+                    transaction_portfolio=create_portfolio_model(code),
+                )
+        except lusid.exceptions.ApiException as e:
+            if e.status == 404:
+                print(f"The portfolio {code} already exists")
 
     @parameterized.expand(
         [
