@@ -14,6 +14,7 @@ import functools
 from pathlib import Path
 import re
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
+import lusid.models as models
 import logging
 import time as default_time
 from lusidtools.cocoon.validator import Validator
@@ -1327,3 +1328,72 @@ def update_value(d: typing.Union[dict, str], val: typing.Union[str, float]):
     d = val
 
     return d
+
+
+def group_request_into_one(
+    model_type, request_list: list, attribute_for_grouping: list, batch_index=0
+):
+
+    """
+    Description
+    ------------
+    This function take a list of requests and collates an attribute from each request, adding the collated attributes
+    back onto the first request in the list. The function returns the modified first request.
+    For example, the function can take a list of CreatePortfolioGroupRequests, extract the "values" or portfolios from
+    each request, and then add all portfolios back onto the first request in the list.
+    :param lusid.models model_type:
+    :param list request_list:
+    :param list attribute_for_grouping:
+    :return: a single LUSID request
+    """
+
+    # Define a base request for modifying - this is the first request in the list by default
+
+    base_request = request_list[batch_index]
+
+    for attrib in attribute_for_grouping:
+
+        if getattr(models, model_type).openapi_types[attrib] == "list[ResourceId]":
+
+            # Collect the attributes from each request onto a list
+
+            batch_attrib = [
+                attrib
+                for nested_list in [
+                    attrib.values
+                    for attrib in request_list
+                    if attrib.values is not None
+                ]
+                for attrib in nested_list
+            ]
+
+            # Assign collated values onto the base request
+
+            setattr(base_request, "values", batch_attrib)
+
+        elif (
+            getattr(models, model_type).openapi_types[attrib]
+            == "dict(str, ModelProperty)"
+        ):
+
+            # Collect the attributes from each request onto a dictionary
+
+            batch_attrib = dict(
+                [
+                    (attrib, nested_list[attrib])
+                    for nested_list in [
+                        attrib.properties
+                        for attrib in request_list
+                        if attrib.properties is not None
+                    ]
+                    for attrib in nested_list
+                ]
+            )
+
+            # Assign collated values onto the base request
+
+            setattr(base_request, "properties", batch_attrib)
+
+    # Return base request with collated attributes
+
+    return base_request
