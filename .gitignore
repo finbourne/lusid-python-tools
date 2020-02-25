@@ -249,3 +249,6 @@ venv.bak/
 
 **/*secrets*
 **/*.data/
+
+tests/config.yaml
+tests/scratch_pad.py
