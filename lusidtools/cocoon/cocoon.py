@@ -304,8 +304,6 @@ class BatchLoader:
 
         updated_request = group_request_into_one("CreatePortfolioGroupRequest", portfolio_group_batch, ["values"])
 
-        print(updated_request)
-
         if "scope" not in list(kwargs.keys()):
             raise KeyError(
                 "You are trying to load a portfolio group without a scope, please ensure that a scope is provided."

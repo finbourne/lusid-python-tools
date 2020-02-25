@@ -83,7 +83,3 @@ def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False
         response_df.rename(columns=rename_dict, inplace=True)
 
     return response_df.dropna(axis=1, how="all")
-
-
-
-def 
