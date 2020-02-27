@@ -1341,9 +1341,9 @@ def group_request_into_one(
     back onto the first request in the list. The function returns the modified first request.
     For example, the function can take a list of CreatePortfolioGroupRequests, extract the "values" or portfolios from
     each request, and then add all portfolios back onto the first request in the list.
-    :param lusid.models model_type:
-    :param list request_list:
-    :param list attribute_for_grouping:
+    :param lusid.models model_type: the model type which we will modify (eg CreatePortfolioGroupRequest).
+    :param list request_list: a list of request.
+    :param list attribute_for_grouping: the attributes on these requests which will be grouped.
     :return: a single LUSID request
     """
 
@@ -1353,28 +1353,25 @@ def group_request_into_one(
 
     for attrib in attribute_for_grouping:
 
-        if getattr(models, model_type).openapi_types[attrib] == "list[ResourceId]":
+        if "list" in getattr(models, model_type).openapi_types[attrib]:
 
             # Collect the attributes from each request onto a list
 
             batch_attrib = [
                 attrib
                 for nested_list in [
-                    attrib.values
-                    for attrib in request_list
-                    if attrib.values is not None
+                    getattr(response, attrib)
+                    for response in request_list
+                    if getattr(response, attrib) is not None
                 ]
                 for attrib in nested_list
             ]
 
             # Assign collated values onto the base request
 
-            setattr(base_request, "values", batch_attrib)
+            setattr(base_request, attrib, batch_attrib)
 
-        elif (
-            getattr(models, model_type).openapi_types[attrib]
-            == "dict(str, ModelProperty)"
-        ):
+        elif ("dict" in getattr(models, model_type).openapi_types[attrib]):
 
             # Collect the attributes from each request onto a dictionary
 
@@ -1382,9 +1379,10 @@ def group_request_into_one(
                 [
                     (attrib, nested_list[attrib])
                     for nested_list in [
-                        attrib.properties
-                        for attrib in request_list
-                        if attrib.properties is not None
+
+                        getattr(response, attrib)
+                        for response in request_list
+                        if getattr(response, attrib) is not None
                     ]
                     for attrib in nested_list
                 ]
@@ -1392,7 +1390,7 @@ def group_request_into_one(
 
             # Assign collated values onto the base request
 
-            setattr(base_request, "properties", batch_attrib)
+            setattr(base_request, attrib, batch_attrib)
 
     # Return base request with collated attributes
 

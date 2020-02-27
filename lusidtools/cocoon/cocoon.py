@@ -1,11 +1,18 @@
 import asyncio
 import lusid
 import pandas as pd
+import numpy as np
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
-from lusidtools.cocoon.utilities import checkargs, strip_whitespace, group_request_into_one
+from lusidtools.cocoon.utilities import (
+    checkargs,
+    strip_whitespace,
+    group_request_into_one,
+)
 from lusidtools.cocoon.validator import Validator
+from datetime import datetime
+import pytz
 
 
 class BatchLoader:
@@ -290,7 +297,9 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_group_batch(
-            api_factory: lusid.utilities.ApiClientFactory, portfolio_group_batch: list, **kwargs
+        api_factory: lusid.utilities.ApiClientFactory,
+        portfolio_group_batch: list,
+        **kwargs,
     ) -> lusid.models.PortfolioGroup:
         """
         Upserts a batch of portfolios to LUSID
@@ -300,7 +309,11 @@ class BatchLoader:
         :return: lusid.models.PortfolioGroup: The response from LUSID
         """
 
-        updated_request = group_request_into_one("CreatePortfolioGroupRequest", portfolio_group_batch, ["values"])
+        updated_request = group_request_into_one(
+            portfolio_group_batch[0].__class__.__name__,
+            portfolio_group_batch,
+            ["values"],
+        )
 
         if "scope" not in list(kwargs.keys()):
             raise KeyError(
@@ -313,18 +326,45 @@ class BatchLoader:
             )
 
         try:
-            return api_factory.build(lusid.api.PortfolioGroupsApi).get_portfolio_group(
-                scope=kwargs["scope"], code=kwargs["code"]
+
+            current_portfolio_group = api_factory.build(
+                lusid.api.PortfolioGroupsApi
+            ).get_portfolio_group(scope=kwargs["scope"], code=kwargs["code"])
+
+            #  Capture all portfolios - the ones currently in group + the new ones to be added
+            all_portfolios_to_add = (
+                updated_request.values + current_portfolio_group.portfolios
             )
+
+            # Parse out new portfolios only
+            new_portfolios = [
+                code
+                for code in all_portfolios_to_add
+                if code not in current_portfolio_group.portfolios
+            ]
+
+            for code, scope in set(
+                [(resource.code, resource.scope) for resource in new_portfolios]
+            ):
+                api_factory.build(lusid.api.PortfolioGroupsApi).add_portfolio_to_group(
+                    scope=kwargs["scope"],
+                    code=kwargs["code"],
+                    effective_at=datetime.now(tz=pytz.UTC),
+                    portfolio_id=lusid.models.ResourceId(scope=scope, code=code),
+                )
+
+            print(
+                api_factory.build(lusid.api.PortfolioGroupsApi).get_portfolio_group(
+                    scope=kwargs["scope"], code=kwargs["code"]
+                )
+            )
+
         # Add in here upsert portfolio properties if it does exist
         except lusid.exceptions.ApiException as e:
             if e.status == 404:
                 return api_factory.build(
                     lusid.api.PortfolioGroupsApi
-                ).create_portfolio_group(
-                    scope=kwargs["scope"],
-                    request=updated_request
-                )
+                ).create_portfolio_group(scope=kwargs["scope"], request=updated_request)
             else:
                 return e
 
