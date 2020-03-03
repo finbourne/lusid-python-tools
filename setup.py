@@ -30,5 +30,13 @@ setup(
     ],
     include_package_data=True,
     python_requires=">=3.7",
-    entry_points={"console_scripts": ["lpt=lusidtools.commands.commands:main"],},
+    entry_points={
+        "console_scripts": [
+            "lusidtools=lusidtools.commands.commands:main",
+            "upsert_instruments=lusidtools.apps.upsert_instruments:main",
+            "upsert_holdings=lusidtools.apps.upsert_holdings:main",
+            "upsert_quotes=lusidtools.apps.upsert_quotes:main",
+            "upsert_transactions=lusidtools.apps.upsert_transactions:main"
+        ],
+    },
 )
