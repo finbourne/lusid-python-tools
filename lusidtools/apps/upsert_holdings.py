@@ -62,7 +62,7 @@ def load_holdings(args):
     return holdings_response
 
 
-def main(argv):
+def main():
     args, ap = parse_args(sys.argv[1:])
     LusidLogger(args["debug"])
     load_holdings(args)
@@ -71,4 +71,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
