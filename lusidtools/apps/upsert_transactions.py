@@ -64,7 +64,7 @@ def load_transactions(args):
     return transactions_response
 
 
-def main(argv):
+def main():
     args, ap = parse_args(sys.argv[1:])
     LusidLogger(args["debug"])
     load_transactions(args)
@@ -73,4 +73,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

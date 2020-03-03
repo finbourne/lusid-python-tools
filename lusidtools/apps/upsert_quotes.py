@@ -78,7 +78,7 @@ def load_quotes(args):
     return quotes_response
 
 
-def main(argv):
+def main():
     args, ap = parse_args(sys.argv[1:])
     LusidLogger(args["debug"])
     load_quotes(args)
@@ -87,4 +87,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
