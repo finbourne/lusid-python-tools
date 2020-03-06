@@ -19,6 +19,7 @@ import logging
 
 LusidLogger()
 
+
 class BatchLoader:
     """
     This class contains all the methods used for loading data in batches. The @run_in_executor decorator makes the
@@ -346,9 +347,11 @@ class BatchLoader:
                 if code in current_portfolio_group.portfolios
             ]
 
-            if len(current_portfolios_in_group)>0:
+            if len(current_portfolios_in_group) > 0:
                 for code in current_portfolios_in_group:
-                    logging.info(f"The portfolio {code.code} with scope {code.scope} is already in group {current_portfolio_group.id.code}")
+                    logging.info(
+                        f"The portfolio {code.code} with scope {code.scope} is already in group {current_portfolio_group.id.code}"
+                    )
 
             # Parse out new portfolios only
             new_portfolios = [
@@ -357,15 +360,20 @@ class BatchLoader:
                 if code not in current_portfolio_group.portfolios
             ]
 
-            for code, scope in set([(resource.code, resource.scope) for resource in new_portfolios]):
+            for code, scope in set(
+                [(resource.code, resource.scope) for resource in new_portfolios]
+            ):
 
                 try:
 
-                    current_portfolio_group = api_factory.build(lusid.api.PortfolioGroupsApi).add_portfolio_to_group(
-                    scope=kwargs["scope"],
-                    code=kwargs["code"],
-                    effective_at=datetime.now(tz=pytz.UTC),
-                    portfolio_id=lusid.models.ResourceId(scope=scope, code=code),)
+                    current_portfolio_group = api_factory.build(
+                        lusid.api.PortfolioGroupsApi
+                    ).add_portfolio_to_group(
+                        scope=kwargs["scope"],
+                        code=kwargs["code"],
+                        effective_at=datetime.now(tz=pytz.UTC),
+                        portfolio_id=lusid.models.ResourceId(scope=scope, code=code),
+                    )
 
                 except lusid.exceptions.ApiException as e:
                     logging.error(json.loads(e.body)["title"])

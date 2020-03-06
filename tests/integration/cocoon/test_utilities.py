@@ -4,7 +4,6 @@ from parameterized import parameterized
 from lusidtools import logger
 
 
-
 class CocoonUtilitiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -29,4 +28,3 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         with self.assertRaises(expected_exception):
             cocoon.utilities.get_swagger_dict(api_url=api_url)
-
