@@ -14,6 +14,7 @@ import functools
 from pathlib import Path
 import re
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
+import lusid.models as models
 import logging
 import time as default_time
 from lusidtools.cocoon.validator import Validator
@@ -1327,3 +1328,80 @@ def update_value(d: typing.Union[dict, str], val: typing.Union[str, float]):
     d = val
 
     return d
+
+
+def group_request_into_one(
+    model_type: str, request_list: list, attribute_for_grouping: list, batch_index=0
+):
+
+    """
+    Description
+    ------------
+    This function take a list of requests and collates an attribute from each request, adding the collated attributes
+    back onto the first request in the list. The function returns the modified first request.
+    For example, the function can take a list of CreatePortfolioGroupRequests, extract the "values" or portfolios from
+    each request, and then add all portfolios back onto the first request in the list.
+    :param str model_type: the model type which we will modify (eg "CreatePortfolioGroupRequest").
+    :param list request_list: a list of requests.
+    :param list attribute_for_grouping: the attributes on these requests which will be grouped.
+    :return: a single LUSID request
+    """
+
+    # Define a base request for modifying - this is the first request in the list by default
+
+    if model_type not in dir(models):
+        raise ValueError(f"The model {model_type} is not a valid LUSID model.")
+
+    if batch_index > len(request_list):
+        raise IndexError(
+            f"The length of the batch_index ({batch_index}) is greater than the request_list ({len(request_list)}) provided."
+        )
+
+    if type(attribute_for_grouping) == list and len(attribute_for_grouping) == 0:
+        raise ValueError("The provided list of attribute_for_grouping is empty.")
+
+    base_request = request_list[batch_index]
+
+    for attrib in attribute_for_grouping:
+
+        if "list" in getattr(models, model_type).openapi_types[attrib]:
+
+            # Collect the attributes from each request onto a list
+
+            batch_attrib = [
+                lusid_model
+                for nested_list in [
+                    getattr(request, attrib)
+                    for request in request_list
+                    if getattr(request, attrib) is not None
+                ]
+                for lusid_model in nested_list
+            ]
+
+            # Assign collated values onto the base request
+
+            setattr(base_request, attrib, batch_attrib)
+
+        elif "dict" in getattr(models, model_type).openapi_types[attrib]:
+
+            # Collect the attributes from each request onto a dictionary
+
+            batch_attrib = dict(
+                [
+                    (lusid_model, nested_list[lusid_model])
+                    for nested_list in [
+                        getattr(request, attrib)
+                        for request in request_list
+                        if getattr(request, attrib) is not None
+                    ]
+                    for lusid_model in nested_list
+                ]
+            )
+
+            # Assign collated values onto the base request
+
+            setattr(base_request, attrib, batch_attrib)
+
+    # Return base request with collated attributes
+
+    return base_request
