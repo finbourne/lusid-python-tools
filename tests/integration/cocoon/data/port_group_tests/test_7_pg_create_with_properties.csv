@@ -1,0 +1,3 @@
+PortGroupCode,PortGroupDisplayName,FundCode,location,MifidFlag,
+PG_TEST1,Test Portfolio Group,TEST_COM1,UK,Y,
+PG_TEST1,Test Portfolio Group,TEST_COM2,UK,Y,
