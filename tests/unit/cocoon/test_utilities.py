@@ -20,8 +20,10 @@ from lusidtools.cocoon.utilities import (
     create_scope_id,
     default_fx_forward_model,
     update_dict_value,
+    group_request_into_one,
 )
 from lusidtools import logger
+import lusid.models as models
 
 
 @checkargs
@@ -2323,3 +2325,316 @@ class CocoonUtilitiesTests(unittest.TestCase):
         )
 
         self.assertEqual(gt, dict_test)
+
+
+class GroupRequestUtilitiesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.logger = logger.LusidLogger("debug")
+
+    def test_group_request_into_one_portfolio_group(self):
+
+        requests = [
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[models.ResourceId(scope="TEST1", code="PORT1")],
+                properties={
+                    "test": models.ModelProperty(key="test", value="prop1"),
+                    "test2": models.ModelProperty(key="test", value="prop2"),
+                },
+                sub_groups=None,
+                description=None,
+                created="2019-01-01",
+            ),
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[models.ResourceId(scope="TEST1", code="PORT2")],
+                sub_groups=None,
+                properties={
+                    "test3": models.ModelProperty(key="test", value="prop3"),
+                    "test2": models.ModelProperty(key="test", value="prop4"),
+                },
+                description=None,
+                created="2019-01-01",
+            ),
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[models.ResourceId(scope="TEST1", code="PORT3")],
+                sub_groups=None,
+                description=None,
+                created="2019-01-01",
+            ),
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[models.ResourceId(scope="TEST1", code="PORT4")],
+                sub_groups=None,
+                description=None,
+                created="2019-01-01",
+            ),
+        ]
+
+        # Run list tests
+
+        list_grouped_request = group_request_into_one(
+            "CreatePortfolioGroupRequest", requests, ["values"]
+        )
+
+        self.assertEqual(len(list_grouped_request.values), 4)
+        self.assertEqual(
+            list_grouped_request,
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[
+                    lusid.models.ResourceId(code="PORT1", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT2", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT3", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT4", scope="TEST1"),
+                ],
+                properties={
+                    "test": models.ModelProperty(key="test", value="prop1"),
+                    "test2": models.ModelProperty(key="test", value="prop2"),
+                },
+                sub_groups=None,
+                description=None,
+                created="2019-01-01",
+            ),
+        )
+
+        dict_grouped_request = group_request_into_one(
+            "CreatePortfolioGroupRequest", requests, ["properties"]
+        )
+
+        self.assertEqual(len(dict_grouped_request.properties), 3)
+        self.assertEqual(
+            dict_grouped_request,
+            models.CreatePortfolioGroupRequest(
+                code="PORT_GROUP1",
+                display_name="Portfolio Group 1",
+                values=[
+                    lusid.models.ResourceId(code="PORT1", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT2", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT3", scope="TEST1"),
+                    lusid.models.ResourceId(code="PORT4", scope="TEST1"),
+                ],
+                properties={
+                    "test": models.ModelProperty(key="test", value="prop1"),
+                    "test2": models.ModelProperty(key="test", value="prop4"),
+                    "test3": models.ModelProperty(key="test", value="prop3"),
+                },
+                sub_groups=None,
+                description=None,
+                created="2019-01-01",
+            ),
+        )
+
+    def test_group_request_into_one_holdings(self):
+
+        holding_requests = [
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=10,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=10,
+                        price=10,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=20,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=20,
+                        price=20,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+        ]
+
+        # Run list tests
+
+        list_grouped_request = group_request_into_one(
+            "HoldingAdjustment", holding_requests, ["tax_lots"]
+        )
+        self.assertEqual(len(list_grouped_request.tax_lots), 2)
+        self.assertEqual(
+            first=list_grouped_request,
+            second=models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=10,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=10,
+                        price=10,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    ),
+                    models.TargetTaxLot(
+                        units=20,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=20,
+                        price=20,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    ),
+                ],
+            ),
+        )
+
+    def test_group_request_into_one_bad_model(self):
+
+        holding_requests = [
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=10,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=10,
+                        price=10,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=20,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=20,
+                        price=20,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+        ]
+
+        # Run  tests
+        with self.assertRaises(ValueError) as error:
+            group_request_into_one("HoldingAdjustmentBadModel", holding_requests, [])
+        self.assertEqual(
+            error.exception.args[0],
+            "The model HoldingAdjustmentBadModel is not a valid LUSID model.",
+        )
+
+    def test_group_request_into_one_empty_list(self):
+
+        holding_requests = [
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=10,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=10,
+                        price=10,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=20,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=20,
+                        price=20,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+        ]
+
+        # Run  tests
+        with self.assertRaises(ValueError) as error:
+            group_request_into_one("HoldingAdjustment", holding_requests, [])
+        self.assertEqual(
+            error.exception.args[0],
+            "The provided list of attribute_for_grouping is empty.",
+        )
+
+    def test_group_request_into_one_index_greater_than_range(self):
+        holding_requests = [
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=10,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=10,
+                        price=10,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+            models.HoldingAdjustment(
+                instrument_identifiers="TEST_ID",
+                instrument_uid="TEST_LUID",
+                sub_holding_keys="Startegy1",
+                properties=None,
+                tax_lots=[
+                    models.TargetTaxLot(
+                        units=20,
+                        cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
+                        portfolio_cost=20,
+                        price=20,
+                        purchase_date="2020-02-20",
+                        settlement_date="2020-02-22",
+                    )
+                ],
+            ),
+        ]
+
+        # Run  tests
+        with self.assertRaises(IndexError) as error:
+            group_request_into_one(
+                "HoldingAdjustment", holding_requests, ["tax_lots"], batch_index=3
+            )
+        self.assertEqual(
+            error.exception.args[0],
+            "The length of the batch_index (3) is greater than the request_list (2) provided.",
+        )
