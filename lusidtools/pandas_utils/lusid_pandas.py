@@ -1,8 +1,10 @@
 import pandas as pd
 from flatten_json import flatten
+import logging
 
+logger = logging.getLogger()
 
-def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False):
+def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False, column_name_mapping: dict = None):
     """
     Description:
     This function takes a LUSID API response and attempts to convert the response into a Pandas DataFrame or Series.
@@ -16,6 +18,8 @@ def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False
     :param lusid_response: a response from the LUSID APIs (e.g. VersionedResourceListOfPortfolioHolding)
     :param bool rename_properties: this parameter formats the returned DataFrame. Specifically, the formatter does two things;
     (1) removes any metadata columns for properties and SHKs, and (2) simplifies the naming of column headers for properties and SHKs.
+    :param dict rename_mapping: a dictionary which is used to map old column headers to new ones. The dictionary key is old header
+    while the dictionary value in new header. If key does not exist, the function will ignore the non-existant mapping.
     Returns:
     pandas DataFrame
     """
@@ -80,5 +84,10 @@ def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False
             )
 
         response_df.rename(columns=rename_dict, inplace=True)
+
+    if column_name_mapping:
+
+        response_df.rename(columns=column_name_mapping, inplace=True)
+
 
     return response_df.dropna(axis=1, how="all")
