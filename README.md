@@ -1,3 +1,5 @@
+![LUSID by Finbourne](docs/images/LUSID_repo.png)
+
 # lusid-python-tools
 Python tools for the LUSID
 
