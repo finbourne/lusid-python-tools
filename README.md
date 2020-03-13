@@ -1,4 +1,4 @@
-![LUSID by Finbourne](docs/images/LUSID_repo.png)
+![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
 # lusid-python-tools
 Python tools for the LUSID
