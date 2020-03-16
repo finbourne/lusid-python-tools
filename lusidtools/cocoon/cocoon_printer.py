@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from lusidtools.cocoon import checkargs
 from lusid.exceptions import ApiException
+from flatten_json import flatten
 
 
 @checkargs
@@ -61,15 +62,39 @@ def get_portfolio_from_href(href: list, file_type: str):
 
 
 @checkargs
-def get_non_href_response(response: dict, file_type: str):
-    items_success = [
-        key for batch in response[file_type]["success"] for key in batch.values.keys()
+def get_non_href_response(response: dict, file_type: str, data_entity_details=False):
+    dict_items_success = [
+        (key, value)
+        for batch in response[file_type]["success"]
+        for (key, value) in batch.values.items()
+    ]
+    dict_items_failed = [
+        (key, value)
+        for batch in response[file_type]["success"]
+        for (key, value) in batch.failed.items()
     ]
 
-    items_failed = [
-        key for batch in response[file_type]["success"] for key in batch.failed.keys()
-    ]
-    return items_success, items_failed
+    def extract_value_details_from_success_request(data_entity_dict):
+        return pd.DataFrame(
+            flatten(value[1].to_dict(), ".") for value in data_entity_dict
+        )
+
+    def extract_key_details_from_success_request(data_entity_dict):
+        return pd.DataFrame(value[0] for value in data_entity_dict)
+
+    if data_entity_details:
+
+        return (
+            extract_value_details_from_success_request(dict_items_success),
+            extract_value_details_from_success_request(dict_items_failed),
+        )
+
+    else:
+
+        return (
+            extract_key_details_from_success_request(dict_items_success),
+            extract_key_details_from_success_request(dict_items_failed),
+        )
 
 
 def format_instruments_response(
@@ -78,7 +103,6 @@ def format_instruments_response(
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
     request constituents.
-
     :param dict response: response from Lusid-python-tools
     :return: pd.DataFrame: Successful calls from request
     :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
@@ -193,10 +217,12 @@ def format_quotes_response(
     check_dict_for_required_keys(
         response[file_type], f"Response from {file_type} request", ["errors", "success"]
     )
-    items_success, items_failed = get_non_href_response(response, file_type)
+    items_success, items_failed = get_non_href_response(
+        response, file_type, data_entity_details=True
+    )
 
     return (
-        pd.DataFrame(items_success, columns=["successful items"]),
+        pd.DataFrame(items_success),
         get_errors_from_response(response[file_type]["errors"]),
         pd.DataFrame(items_failed, columns=["failed_items"]),
     )
