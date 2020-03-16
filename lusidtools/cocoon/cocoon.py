@@ -18,7 +18,6 @@ from lusidtools.logger import LusidLogger
 import logging
 
 
-
 class BatchLoader:
     """
     This class contains all the methods used for loading data in batches. The @run_in_executor decorator makes the
