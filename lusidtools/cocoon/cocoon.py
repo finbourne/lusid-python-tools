@@ -17,7 +17,6 @@ import pytz
 from lusidtools.logger import LusidLogger
 import logging
 
-LusidLogger()
 
 
 class BatchLoader:
