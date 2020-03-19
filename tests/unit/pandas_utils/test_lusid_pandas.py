@@ -215,10 +215,13 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         self.assertEqual(type(holdings_df), pd.DataFrame)
         self.assertEqual(holdings_df.loc[0]["Instrument ID"], "LUID_123")
-        self.assertEqual(set(["Holding Type", "Units", "Settled Units", "Quantity", "Cost Currency"]),
+        self.assertEqual(
             set(
                 ["Holding Type", "Units", "Settled Units", "Quantity", "Cost Currency"]
-            ).intersection(set(df_columns))
+            ),
+            set(
+                ["Holding Type", "Units", "Settled Units", "Quantity", "Cost Currency"]
+            ).intersection(set(df_columns)),
         )
 
     def test_response_to_df_rename_mapping_with_column_not_exist(self):
@@ -246,10 +249,11 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         self.assertEqual(type(holdings_df), pd.DataFrame)
         self.assertEqual(holdings_df.loc[0]["Instrument ID"], "LUID_123")
-        self.assertEqual(set(["Holding Type", "Quantity", "Cost Currency"]),
-            set(
-                ["Holding Type", "Quantity", "Cost Currency"]
-            ).intersection(set(df_columns))
+        self.assertEqual(
+            set(["Holding Type", "Quantity", "Cost Currency"]),
+            set(["Holding Type", "Quantity", "Cost Currency"]).intersection(
+                set(df_columns)
+            ),
         )
         self.assertNotIn("settled_units", df_columns)
 
@@ -262,7 +266,7 @@ class TestResponseToPandasObject(unittest.TestCase):
             "settled_units": "Settled Units",
             "cost.amount": "Quantity",
             "cost.currency": "Cost Currency",
-            "properties.Instrument/MultiAssetScope/shares_out.key": "Shares Outstanding"
+            "properties.Instrument/MultiAssetScope/shares_out.key": "Shares Outstanding",
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
@@ -279,9 +283,23 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         self.assertEqual(type(holdings_df), pd.DataFrame)
         self.assertEqual(holdings_df.loc[0]["Instrument ID"], "LUID_123")
-        self.assertEqual(set(["Holding Type", "Units", "Quantity", "Cost Currency", "Shares Outstanding"]),
+        self.assertEqual(
             set(
-                ["Holding Type", "Units", "Quantity", "Cost Currency", "Shares Outstanding"]
-            ).intersection(set(df_columns))
+                [
+                    "Holding Type",
+                    "Units",
+                    "Quantity",
+                    "Cost Currency",
+                    "Shares Outstanding",
+                ]
+            ),
+            set(
+                [
+                    "Holding Type",
+                    "Units",
+                    "Quantity",
+                    "Cost Currency",
+                    "Shares Outstanding",
+                ]
+            ).intersection(set(df_columns)),
         )
-
