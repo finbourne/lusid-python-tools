@@ -4,7 +4,10 @@ import logging
 
 logger = logging.getLogger()
 
-def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False, column_name_mapping: dict = None):
+
+def lusid_response_to_data_frame(
+    lusid_response, rename_properties: bool = False, column_name_mapping: dict = None
+):
     """
     Description:
     This function takes a LUSID API response and attempts to convert the response into a Pandas DataFrame or Series.
@@ -88,6 +91,5 @@ def lusid_response_to_data_frame(lusid_response, rename_properties: bool = False
     if column_name_mapping:
 
         response_df.rename(columns=column_name_mapping, inplace=True)
-
 
     return response_df.dropna(axis=1, how="all")
