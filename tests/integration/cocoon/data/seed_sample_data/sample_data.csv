@@ -1,0 +1,45 @@
+﻿portfolio_code,portfolio_name,base_currency,portfolio_description,portfolio_base_currency,txn_id,txn_type,txn_trade_date,txn_settle_date,txn_units,txn_price,txn_consideration,instrument_id,cash_transactions,instrument_type,name,sedol,ticker,currency,strategy
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0006,FundsIn,01/01/2020,01/01/2020,5000000,1,5000000,AUD,AUD,Cash,Cash,,,AUD,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0033,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668046,,Equity,Mesoblast,B04SF48,,AUD,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0002,FundsIn,01/01/2020,01/01/2020,10000000,1,10000000,EUR,EUR,Cash,Cash,,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0008,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667944,,Equity,Boussard & Gavaudan Holdings,B1FQG45,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0013,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667999,,Equity,Volkswagen,,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0017,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668008,,Equity,Vastned Retail REIT,4927194,VASTN NA,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0018,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668009,,Equity,Vonovia SE,BBJPFY1,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0037,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668050,,Equity,Kingspan Group,4491235,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0039,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668052,,Equity,Takeaway.com,BYQ7HZ6,,EUR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0001,FundsIn,01/01/2020,01/01/2020,10000000,1,10000000,GBP,GBP,Cash,Cash,,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0010,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667983,,Equity,3i Infrastructure,BF5FX16,3IN LN,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0011,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667984,,Equity,BBGI,B6QWXM4,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0014,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668003,,Equity,Better Capital,BYXP9G8,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0016,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668007,,Equity,UK Commercial Property Trust,B19Z2J5,UKCM LN,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0019,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668010,,Equity,Doric Nimrod Air Two Limited,B3Z6252,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0021,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668012,,Equity,Juridica Investments,B29LSW5,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0022,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668019,,Equity,Aviva PLC,,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0024,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668021,,Equity,Morrissons PLC,,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0025,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668022,,Equity,Sainsburys PLC,,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0043,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668070,,Equity,Informa,BMJ6DW5,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0044,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668071,,Equity,PageGroup,3023231,,GBP,UK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0004,FundsIn,01/01/2020,01/01/2020,10000000,1,10000000,JPY,JPY,Cash,Cash,,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0023,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668020,,Equity,Honda,,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0026,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668023,,Equity,Sony Corporation,,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0027,Buy,01/01/2020,03/01/2020,20000,100,2000000,EQ_204668024,,Equity,Sony Corporation,,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0040,Buy,01/02/2020,03/02/2020,10000,100,1000000,EQ_204668067,,Equity,Fast Retailing,6332439,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0041,Buy,01/02/2020,03/02/2020,10000,100,1000000,EQ_204668068,,Equity,Fanuc,6356934,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0042,Buy,01/02/2020,03/02/2020,10000,100,1000000,EQ_204668069,,Equity,SBI Holdings Inc,6309466,,JPY,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0005,FundsIn,01/01/2020,01/01/2020,5000000,1,5000000,SGD,SGD,Cash,Cash,,,SGD,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0031,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668044,,Equity,United Overseas Bank,6916781,,SGD,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0035,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668048,,Equity,Thai Beverage PCL (Singapore),B15F664,,SGD,AsiaPacific
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0003,FundsIn,01/01/2020,01/01/2020,5000000,1,5000000,USD,USD,Cash,Cash,,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0009,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667964,,Equity,ETFS Nickel,B15KY21,NICK,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0012,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204667998,,Equity,Fondul Proprietatea GDR,BWV69Y7,FP/ LI,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0015,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668004,,Equity,NB Private Equity Partners (USD),BD9PCY4,NBPU LN,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0020,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668011,,Equity,DP Aircraft I Limited,BBP6HP3,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0028,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668036,,Equity,Facebook Cl.A,B7TL820,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0029,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668037,,Equity,Zillow Group Inc Class A,BVYJBR3,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0030,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668038,,Equity,Grubhub Inc,BKY7XF2,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0032,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668045,,Equity,Jardine Matheson,6472119,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0036,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668049,,Equity,MercadoLibre,B23X1H3,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0038,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668051,,Equity,Mettler-Toledo,2126249,,USD,NorthAmerica
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0007,FundsIn,01/01/2020,01/01/2020,5000000,1,5000000,ZAR,ZAR,Cash,Cash,,,ZAR,EuropeAfricaExUK
+EQ_FUND,Equity Fund,GBP,Fund of Global Equities,GBP,trd_0034,Buy,01/01/2020,03/01/2020,10000,100,1000000,EQ_204668047,,Equity,Naspers Ltd - N shares,6622691,,ZAR,EuropeAfricaExUK
