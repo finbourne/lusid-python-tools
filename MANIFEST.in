@@ -1,4 +1,4 @@
-include lusidtools/cocoon/config/domain_settings.json
+include lusidtools/cocoon/config/*.json
 exclude lusidtools/commands/**
 exclude lusidtools/data/*
 exclude lusidtools/lpt/*
