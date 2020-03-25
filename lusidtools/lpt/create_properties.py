@@ -11,7 +11,7 @@ TOOLTIP = "Create simple property definitions"
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Create property definitions", ["filename", "quiet"])
+        stdargs.Parser("Create property definitions", ["filename", "quiet", "NODFQ"])
         .add("--property", nargs="+")
         .add("--type", default="Label", choices=["Label", "Metric"])
         .extend(extend)
