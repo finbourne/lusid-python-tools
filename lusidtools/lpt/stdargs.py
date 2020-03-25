@@ -88,6 +88,15 @@ class Parser:
         if "test" in sections:
             self.add("--test", action="store_true", help="Run in test mode")
 
+        # If a filename parameter is given then pass output via dfq
+        # Can be supressed by the NODFQ option
+        if 'filename' in sections and 'NODFQ' not in sections:
+            self.add(
+               '--dfq',
+               nargs=argparse.REMAINDER,
+               help = "pass the output through to 'dfq' - see dfq --help for options"
+            )
+
     def add(self, *args, **kwargs):
         # Add arguments to a list, so they can be removed
         self.arguments.append((args[0], args, kwargs))
