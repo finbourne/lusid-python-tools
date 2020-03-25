@@ -8,14 +8,33 @@ from collections import UserString
 
 
 class DateOrCutLabel(UserString):
-    def __init__(self, datetime_value):
-        def convert_datetime_utc(datetime_value):
+    def __init__(self, datetime_value, custom_date_format=None):
+        def convert_datetime_utc(datetime_value, custom_date_format=None):
             """
             This function ensures that a variable is a timezone aware UTC datetime
 
             :param any datetime_value:
             :return: datetime datetime_value: The converted timezone aware datetime in the UTC timezone
             """
+            if custom_date_format:
+                if not isinstance(datetime_value, str):
+                    raise TypeError(f"Date {datetime_value} is of type {type(datetime_value)} must be of type 'str' "
+                                    f"when specifying a custom date format. ")
+
+                try:
+                    datetime_value = pd.to_datetime(datetime_value, format=custom_date_format,
+                                                    utc=False)
+                except ValueError:
+                        raise ValueError(f"The date format provided {custom_date_format} was not recognised in the"
+                                         f" datetime provided: {datetime_value}")
+
+                def formatdt(dt):
+                    return str(
+                                    np.datetime_as_string(
+                                        arr=np.datetime64(dt.strftime("%Y-%m-%d %H:%M:%S.%f")), timezone="UTC", unit="us"
+                                    )
+                                )
+                datetime_value = formatdt(datetime_value)
 
             # If the datetime is a pandas timestamp convert it to ISO format and parse to string
             if isinstance(datetime_value, pd.Timestamp):
@@ -66,6 +85,17 @@ class DateOrCutLabel(UserString):
                 else:
                     return datetime_value.astimezone(pytz.UTC).isoformat()
 
+
+            # If datetime is numpy datetime convert to ISO format and parse to string
+            if isinstance(datetime_value, np.datetime64):
+                datetime_value = str(
+                    np.datetime_as_string(
+                        arr=datetime_value, timezone="UTC", unit="us"
+                    )
+                )
+                print(datetime_value)
+
+
             # If datetime is numpy datetime convert to ISO format and parse to string
             if isinstance(datetime_value, np.ndarray):
                 datetime_value = str(
@@ -75,4 +105,4 @@ class DateOrCutLabel(UserString):
                 )
             return datetime_value
 
-        self.data = convert_datetime_utc(datetime_value)
+        self.data = convert_datetime_utc(datetime_value, custom_date_format)
