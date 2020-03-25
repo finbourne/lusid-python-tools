@@ -256,7 +256,11 @@ def standard_flow(parser, connector, executor, display_df=display_df):
                 else:
                     df.to_csv(fn, index=False)
             else:
-                return display_df(df)
+                if 'dfq' in args and args.dfq:
+                    from . import dfq
+                    dfq.dfq(dfq.parse(False,args.dfq),df)
+                else:
+                    return display_df(df)
 
     return either.match(left=display_error, right=success)
 
