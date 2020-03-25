@@ -3,12 +3,60 @@
 # lusid-python-tools
 Python tools for the LUSID
 
-The PyPi package for lusid-python-tools can installed using the following command:
-```
-$ pip install lusidtools
-```
-
 ![](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
 [![Build Status](https://travis-ci.org/finbourne/lusid-python-tools.svg?branch=master)](https://travis-ci.org/finbourne/lusid-python-tools)
 
 For more details see the lusid-python-tools [wiki](https://github.com/finbourne/lusid-python-tools/wiki).
+
+## Getting Started
+
+You can learn more about LUSID and its benefits by visiting [www.lusid.com](https://www.lusid.com/app/home). 
+
+In order to interact with LUSID, if you have not already done so, go to the [create a LUSID account](https://www.lusid.com/app/signup) page to create your own free trial LUSID domain.
+
+The PyPi package for lusid-python-tools can installed globally on your machine using the following command:
+
+```sh
+$ pip install lusidtools
+```
+
+or if you are running as a non privileged user you may prefer to install specifically for your user account:
+
+```sh
+$ pip install --user lusidtools
+```
+
+### Testing it works
+
+Once you have an LUSID account you will need to create a developer secrets file.  The steps to do this are covered in this [article](https://support.finbourne.com/getting-started-with-apis-sdks)
+
+Check that the python `bin` folder is on your search path, you may have received a warning for this when you installed the tools above.   
+
+Run the command below, substituting your secrets file path for the one below.,
+
+``` sh
+lpt instr_id --secrets-file ~/.lusid/dev-secrets.json
+```
+
+This should run and return a list if configured instrument identifer types.
+
+## Contributing
+
+We welcome community participation in our tools.  For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
+
+## Reporting Issues
+If you encounter any issues please report these the Github [issues page](https://github.com/finbourne/lusid-python-tools/issues).
+
+## Upgrading
+
+To upgrade lusidtools run one of the commands below 
+
+```sh
+$ pip install lusidtools -U
+```
+
+or
+
+```sh
+$ pip install lusidtools -U --user
+```
