@@ -69,14 +69,39 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-09-01T09:31:22.664000Z",
             ],
             [
-                "numpy datetime with nanoseconds",
+                "numpy datetime with microseconds",
                 np.array(["2019-09-01T09:31:22.664"], dtype="datetime64[ns]"),
                 "2019-09-01T09:31:22.664000Z",
             ],
             [
-                "pandas datetime with nanoseconds",
+                "pandas datetime with microseconds",
                 pd.Timestamp("2019-09-01T09:31:22.664"),
                 "2019-09-01T09:31:22.664000+00:00",
+            ],
+            [
+                "numpy datetime64 UTC false",
+                np.datetime64("2019-07-02", format="%Y%m%d",utc=False),
+                "2019-07-02T00:00:00.000000Z"
+            ],
+            [
+                "custom date format YYYY-mm-dd",
+                ("2019-09-01", "%Y-%m-%d"),
+                "2019-09-01T00:00:00.000000Z",
+            ],
+            [
+                "custom date format dd/mm/YYYY",
+                ("01/09/2019", "%d/%m/%Y"),
+                "2019-09-01T00:00:00.000000Z",
+            ],
+            [
+                "custom date format YYYY-mm-dd HH:MM:SS",
+                ("2019-09-01 6:30:30", "%Y-%m-%d %H:%M:%S"),
+                "2019-09-01T06:30:30.000000Z",
+            ],
+            [
+                "custom date format YYYY-mm-dd HH:MM:SS.000001",
+                ("2019-09-01 6:30:30.005001", "%Y-%m-%d %H:%M:%S.%f"),
+                "2019-09-01T06:30:30.005001Z",
             ],
         ]
     )
@@ -84,6 +109,11 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
         ignore = ["A date with month first"]
         if test_name in ignore:
             self.skipTest("Test not implemented ")
-        date_or_cut_label = DateOrCutLabel(datetime_value)
+        if "custom date" in test_name:
+            datetime_value, custom_format = datetime_value
+        else:
+            custom_format = None
 
-        self.assertEqual(first=date_or_cut_label, second=expected_outcome)
+        date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
+
+        self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))
