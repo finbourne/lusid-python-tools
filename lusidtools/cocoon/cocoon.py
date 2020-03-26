@@ -98,7 +98,7 @@ class BatchLoader:
             )
 
         return api_factory.build(lusid.api.QuotesApi).upsert_quotes(
-            scope=kwargs["scope"],
+            scope=kwargs["scope"], 
             quotes={
                 "_".join(
                     [
