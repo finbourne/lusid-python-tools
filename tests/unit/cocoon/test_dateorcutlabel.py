@@ -83,26 +83,6 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 np.datetime64("2019-07-02", format="%Y%m%d",utc=False),
                 "2019-07-02T00:00:00.000000Z"
             ],
-            [
-                "custom date format YYYY-mm-dd",
-                ("2019-09-01", "%Y-%m-%d"),
-                "2019-09-01T00:00:00.000000Z",
-            ],
-            [
-                "custom date format dd/mm/YYYY",
-                ("01/09/2019", "%d/%m/%Y"),
-                "2019-09-01T00:00:00.000000Z",
-            ],
-            [
-                "custom date format YYYY-mm-dd HH:MM:SS",
-                ("2019-09-01 6:30:30", "%Y-%m-%d %H:%M:%S"),
-                "2019-09-01T06:30:30.000000Z",
-            ],
-            [
-                "custom date format YYYY-mm-dd HH:MM:SS.000001",
-                ("2019-09-01 6:30:30.005001", "%Y-%m-%d %H:%M:%S.%f"),
-                "2019-09-01T06:30:30.005001Z",
-            ],
         ]
     )
     def test_dateorcutlabel(self, test_name, datetime_value, expected_outcome):
@@ -116,4 +96,37 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
 
         date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
 
+        self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))
+
+    @parameterized.expand(
+        [
+            [
+                "YYYY-mm-dd_dashes",
+                "2019-09-01",
+                "%Y-%m-%d",
+                "2019-09-01T00:00:00.000000Z",
+            ],
+            [
+                "dd/mm/YYYY_ forwardslashes",
+                "01/09/2019",
+                "%d/%m/%Y",
+                "2019-09-01T00:00:00.000000Z",
+            ],
+            [
+                "YYYY-mm-dd HH:MM:SS_dashes_and_colons",
+                "2019-09-01 6:30:30",
+                "%Y-%m-%d %H:%M:%S",
+                "2019-09-01T06:30:30.000000Z",
+            ],
+            [
+                "YYYY-mm-dd HH:MM:SS.000001_dashes_colons_and microseconds",
+                "2019-09-01 6:30:30.005001",
+                "%Y-%m-%d %H:%M:%S.%f",
+                "2019-09-01T06:30:30.005001Z",
+            ],
+        ]
+    )
+    def test_dateorcutlabel_with_custom_format(self, test_name, datetime_value, custom_format, expected_outcome):
+
+        date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
         self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))
