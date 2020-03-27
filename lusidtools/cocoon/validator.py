@@ -18,10 +18,16 @@ class Validator:
         """
         Checks that value exists in the provided list
 
-        :param list allowed_values: The list of allowed values
+        Parameters
+        ----------
+        allowed_values :    list
+                            The list of allowed values
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if self.value not in allowed_values:
             raise ValueError(
                 f"The {self.value_name} must be one of {str(allowed_values)}, you supplied '{self.value}' instead."
@@ -32,8 +38,11 @@ class Validator:
         """
         Makes a plural string singular
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, str):
             self.value = self.value.rstrip("s")
             logging.debug(
@@ -45,8 +54,11 @@ class Validator:
         """
         Makes a string lowercase
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, str):
             self.value = self.value.lower()
             logging.debug(f"The value of {self.value_name} has been made lower case")
@@ -56,10 +68,16 @@ class Validator:
         """
         Sets a default value if the current value is None
 
-        :param default: The default value
+        Parameters
+        ----------
+        default
+            The default value
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if self.value is None:
             self.value = default
             logging.debug(
@@ -71,11 +89,18 @@ class Validator:
         """
         Overrides the current value of the ovverride_flag is True
 
-        :param bool override_flag: Whether or not to override the current value
-        :param override_value: The value to use to override the existing value
+        Parameters
+        ----------
+        override_flag :     bool
+                            Whether or not to override the current value
+        override_value :
+                            The value to use to override the existing values
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if override_flag:
             self.value = override_value
             logging.debug(
@@ -87,8 +112,11 @@ class Validator:
         """
         Discards dictionary key, value pairs where the value is None
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, dict):
             invalid_keys = [key for key, value in self.value.items() if value is None]
             if len(invalid_keys) > 0:
@@ -103,8 +131,11 @@ class Validator:
         """
         Gets a list of values from a dictionary
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, dict):
             self.value = list(self.value.values())
         return self
@@ -113,9 +144,16 @@ class Validator:
         """
         Filters a list of strings by looking to see if the first character matches the provided
 
-        :param str first_character: The character to look for in the first character of each element
-        :return: self
+        Parameters
+        ----------
+        first_character :   str
+                            The character to look for in the first character of each element
+
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, list):
             to_remove = []
             for value in self.value:
@@ -128,11 +166,18 @@ class Validator:
         """
         Checks if one list is a subset of another
 
-        :param list superset: The superset to check of the value is a subset of
-        :param list superset_name: The name of the superset
+        Parameters
+        ----------
+        superset :      list
+                        The superset to check of the value is a subset of
+        superset_name : list
+                        The name of the superset
 
-        :return: self
+        Returns
+        -------
+        self
         """
+
         if isinstance(self.value, list):
             if len(set(self.value) - set(superset)) > 0:
                 raise ValueError(
@@ -145,17 +190,25 @@ class Validator:
         """
         Checks that the value has no intersection with a provided list
 
-        :param list other_list: The list to check the value has no intersection with
-        :param str list_name: The name of the list
+        Parameters
+        ----------
+        other_list :    list
+                        The list to check the value has no intersection with
+        list_name :     list
+                        The name of the list
 
-        :return: self
+        Returns
+        -------
+        self
+        
         """
+
         if isinstance(self.value, list):
             if len(set(other_list).intersection(set(self.value))) > 0:
                 err = f"""The columns {str(set(other_list).intersection(set(self.value)))} are specified in {self.value_name}
-                                     yet they contain null (NaN) values for some rows in the provided data. Null values are not 
-                                     allowed for required fields. Please ensure that required columns do not contain ANY null 
-                                     values or specify a default value in your mapping by specifying a dictionary with the keys
-                                     "column" and "default"."""
+                         yet they contain null (NaN) values for some rows in the provided data. Null values are not 
+                         allowed for required fields. Please ensure that required columns do not contain ANY null 
+                         values or specify a default value in your mapping by specifying a dictionary with the keys
+                         "column" and "default"."""
                 logging.error(err)
                 raise ValueError(err)

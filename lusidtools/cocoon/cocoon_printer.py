@@ -10,12 +10,22 @@ def check_dict_for_required_keys(
     target_dict: dict, target_name: str, required_keys: list
 ):
     """
-    This function checks that a named dictionary contains a list of required keys
-    :param dict target_dict: Dictionary to check for keys in
-    :param str target_name: Variable name of dictionary
-    :param list required_keys: List of required keys
-    :return:
+    This function checks that a named dictionary contains a list of required key
+
+    Parameters
+    ----------
+    target_dict : dict
+        Dictionary to check for keys in
+    target_name : str
+        Variable name of dictionary
+    required_keys : list
+        List of required keys
+
+    Returns
+    -------
+
     """
+
     for key in required_keys:
         if key not in target_dict.keys():
             raise ValueError(
@@ -27,9 +37,18 @@ def check_dict_for_required_keys(
 def get_errors_from_response(list_of_API_exceptions: list):
     """
     This function gets the status code and reason from API exception
-    :param list list_of_API_exceptions:
-    :return pd.DataFrame: a Pandas DataFrame containing the reasons and status codes for ApiExceptions from a request
+
+    Parameters
+    ----------
+    list_of_API_exceptions : list
+        A list of ApiExceptions
+
+    Returns
+    -------
+    pd.DataFrame
+        a Pandas DataFrame containing the reasons and status codes for ApiExceptions from a request
     """
+
     # check all items are ApiExceptions
     for i in list_of_API_exceptions:
         if not isinstance(i, ApiException):
@@ -50,9 +69,17 @@ def get_errors_from_response(list_of_API_exceptions: list):
 def get_portfolio_from_href(href: list, file_type: str):
     """
     This function finds the protfolio code contained within a href for a given file_type
-    :param list href: Full href from LUSID response
-    :param str file_type:
-    :return list: portfolio codes taken from hrefs
+
+    Parameters
+    ----------
+    href : list
+        list of hrefs from LUSID response
+    file_type : str
+
+    Returns
+    -------
+    list
+        portfolio codes taken from hrefs
     """
 
     # get portfolio codes from each href
@@ -103,10 +130,19 @@ def format_instruments_response(
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
     request constituents.
-    :param dict response: response from Lusid-python-tools
-    :return: pd.DataFrame: Successful calls from request
-    :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
-    :return: pd.DataFrame: Failed responses that LUSID rejected
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+         successful calls from request
+    error : pd.DataFrame
+        Error responses from request that fail (APIExceptions: 400 errors)
+    fail : pd.Dataframe
+        Failed responses that LUSID rejected
     """
 
     file_type = "instruments"
@@ -128,9 +164,18 @@ def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from portfolio requests and returns successful and errored statuses for
     request constituents.
-    :param dict response: response from Lusid-python-tools
-    :return: pd.DataFrame: Successful calls from request
-    :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
+
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+         successful calls from request
+    error : pd.DataFrame
+        Error responses from request that fail (APIExceptions: 400 errors)
     """
     file_type = "portfolios"
     check_dict_for_required_keys(
@@ -149,11 +194,20 @@ def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame)
     """
     This function unpacks a response from transaction requests and returns successful and errored statuses for
     request constituents.
-    :param dict response: response from Lusid-python-tools
-    :param str file_type: file_type of Lusid-python-tools
-    :return: pd.DataFrame: Successful calls from request
-    :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
+
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+         successful calls from request
+    error : pd.DataFrame
+        Error responses from request that fail (APIExceptions: 400 errors)
     """
+
     file_type = "transactions"
 
     check_dict_for_required_keys(
@@ -178,10 +232,21 @@ def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from holding requests and returns successful and errored statuses for
     request constituents.
-    :param dict response: response from Lusid-python-tools
-    :return: pd.DataFrame: Successful calls from request
-    :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
+
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+         successful calls from request
+    error : pd.DataFrame
+        Error responses from request that fail (APIExceptions: 400 errors)
+
     """
+
     file_type = "holdings"
     check_dict_for_required_keys(
         response[file_type], f"Response from {file_type} request", ["errors", "success"]
@@ -207,11 +272,22 @@ def format_quotes_response(
     """
     This function unpacks a response from quotes requests and returns successful, failed and errored statuses for
     request constituents.
-    :param dict response: response from Lusid-python-tools
-    :return: pd.DataFrame: Successful calls from request
-    :return: pd.DataFrame: Error responses from request that fail (APIExceptions: 400 errors)
-    :return: pd.DataFrame: Failed responses that LUSID rejected
+
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+         successful calls from request
+    error : pd.DataFrame
+        Error responses from request that fail (APIExceptions: 400 errors)
+    fail : pd.Dataframe
+        Failed responses that LUSID rejected
     """
+
     file_type = "quotes"
 
     check_dict_for_required_keys(

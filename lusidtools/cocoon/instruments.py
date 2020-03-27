@@ -17,11 +17,19 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
     """
     This function prepares the key for the identifier based on whether the full key or just the code is required
 
-    :param str identifier_lusid: The LUSID identifier in either full key format or code only
-    :param bool full_key_format: Whether or not they key needs to be in the full key format
+    Parameters
+    ----------
+    identifier_lusid :  str
+                        The LUSID identifier in either full key format or code only
+    full_key_format :   bool
+                        Whether or not they key needs to be in the full key format
 
-    :return: str: The LUSID identifier in the correct format
+    Returns
+    -------
+    str
+        The LUSID identifier in the correct format
     """
+
     if full_key_format:
         return (
             identifier_lusid
@@ -47,17 +55,28 @@ def create_identifiers(
     prepare_key: Callable = prepare_key,
 ) -> dict:
     """
-    This function creates identifiers to be added to a LUSID model object
 
-    :param index: The index of the row in the DataFrame
-    :param pd.Series row: The row of the DataFrame to create identifiers for
-    :param str file_type: The file type to create identifiers for
-    :param dict instrument_identifier_mapping: The instrument identifier mapping to use
-    :param list unique_identifiers: The list of allowable unique instrument identifiers
-    :param bool full_key_format: Whether or not the full key format i.e. 'Instrument/default/Figi' is required
-    :param callable prepare_key: The function to use to prepare the key
+    Parameters
+    ----------
+    index
+                                    The index of the row in the DataFrame
+    row :                           pd.Series
+                                    The row of the DataFrame to create identifiers for
+    file_type :                     str
+                                    The file type to create identifiers for
+    instrument_identifier_mapping : dict
+                                    The instrument identifier mapping to use
+    unique_identifiers :            list
+                                    The list of allowable unique instrument identifiers
+    full_key_format :               bool
+                                    Whether or not the full key format i.e. 'Instrument/default/Figi' is required
+    prepare_key :                   callable
+                                    The function to use to prepare the key
 
-    :return: dict identifiers: The identifiers to use on the request
+    Returns
+    -------
+    identifiers :                   dict
+                                    The identifiers to use on the request
     """
 
     # Populate the identifiers for this instrument
@@ -116,12 +135,20 @@ def resolve_instruments(
     """
     This function attempts to resolve each row of the file to an instrument in LUSID
 
-    :param lusid.utilities.ApiClientFactory api_factory: An instance of the Lusid Api Factory
-    :param Pandas DataFrame data_frame: The DataFrame containing the transactions or holdings to resolve to unique instruments
-    :param dict identifier_mapping: The column mapping between allowable identifiers in LUSID
-                                    and identifier columns in the dataframe
+    Parameters
+    ----------
+    api_factory :       lusid.utilities.ApiClientFactory
+                        An instance of the Lusid Api Factory
+    data_frame :        pd.DataFrame
+                        The DataFrame containing the transactions or holdings to resolve to unique instruments
+    identifier_mapping: dict
+                        The column mapping between allowable identifiers in LUSID
+                        and identifier columns in the dataframe
 
-    :return: Pandas DataFrame _data_frame: The input DataFrame with resolution columns added
+    Returns
+    -------
+    _data_frame :       pd.DataFrame
+                        The input DataFrame with resolution columns added
     """
 
     if "Currency" not in list(
@@ -276,8 +303,15 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
     """
     Tests getting the unique instrument identifiers
 
-    :param lusid.utilities.ApiClientFactory api_factory: The LUSID api factory to use
-    :return: list[str]: The property keys of the available identifiers
+    Parameters
+    ----------
+    api_factory :   lusid.utilities.ApiClientFactory
+                    The LUSID api factory to use
+
+    Returns
+    -------
+    list[str]
+                    The property keys of the available identifiers
     """
 
     # Get the allowed instrument identifiers from LUSID
@@ -389,10 +423,17 @@ async def instrument_search(
     """
     Conducts an instrument search for a single instrument
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-    :param list[lusid.models.InstrumentSearchProperty] search_requests: The search requests for this instrument
+    Parameters
+    ----------
+    api_factory :       lusid.utilities.ApiClientFactory
+                        The api factory to use
+    search_requests:    list[lusid.models.InstrumentSearchProperty]
+                        The search requests for this instrument
+    kwargs
 
-    :return:
+    Returns
+    -------
+
     """
 
     instrument_search_results = []
@@ -417,10 +458,18 @@ def instrument_search_single(
     """
     Conducts an instrument search with a single search request
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use
-    :param lusid.models.InstrumentSearchProperty search_request: The search request
+    Parameters
+    ----------
+    api_factory :   lusid.utilities.ApiClientFactory
+                    The Api factory to use
+    search_request: lusid.models.InstrumentSearchProperty
+                    The search request
+    kwargs
 
-    :return: list[lusid.models.InstrumentMatch]: The results of the search
+    Returns
+    -------
+    list[lusid.models.InstrumentMatch]
+                    The results of the search
     """
 
     return lusid.api.SearchApi(
