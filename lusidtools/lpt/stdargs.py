@@ -90,11 +90,11 @@ class Parser:
 
         # If a filename parameter is given then pass output via dfq
         # Can be supressed by the NODFQ option
-        if 'filename' in sections and 'NODFQ' not in sections:
+        if "filename" in sections and "NODFQ" not in sections:
             self.add(
-               '--dfq',
-               nargs=argparse.REMAINDER,
-               help = "pass the output through to 'dfq' - see dfq --help for options"
+                "--dfq",
+                nargs=argparse.REMAINDER,
+                help="pass the output through to 'dfq' - see dfq --help for options",
             )
 
     def add(self, *args, **kwargs):

@@ -9,7 +9,9 @@ TOOLTIP = "Get/Set the transaction configuration"
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Get/Set transaction configuration", ["filename", "limit", "NODFQ"])
+        stdargs.Parser(
+            "Get/Set transaction configuration", ["filename", "limit", "NODFQ"]
+        )
         .add(
             "action",
             choices=("get", "set", "try"),
