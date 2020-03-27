@@ -21,9 +21,7 @@ def _process_timestamp(datetime_value: pd.Timestamp):
     datetime    pd.Timestamp
                 Datetime value in ISO format
     """
-    return pd.to_datetime(
-        datetime_value, utc=True, unit="us"
-    ).isoformat()
+    return pd.to_datetime(datetime_value, utc=True, unit="us").isoformat()
 
 
 def _process_custom_date(datetime_value: str, date_format: str) -> str:
@@ -42,20 +40,25 @@ def _process_custom_date(datetime_value: str, date_format: str) -> str:
                         Datetime value as str
     """
     if not isinstance(datetime_value, str):
-        raise TypeError(f"Date {datetime_value} is of type {type(datetime_value)} must be of type 'str' "
-                        f"when specifying a custom date format. ")
+        raise TypeError(
+            f"Date {datetime_value} is of type {type(datetime_value)} must be of type 'str' "
+            f"when specifying a custom date format. "
+        )
 
     try:
-        datetime_value = pd.to_datetime(datetime_value, format=date_format,
-                                        utc=False)
+        datetime_value = pd.to_datetime(datetime_value, format=date_format, utc=False)
     except ValueError:
-        raise ValueError(f"The date format provided {date_format} was not recognised in the"
-                         f" datetime provided: {datetime_value}")
+        raise ValueError(
+            f"The date format provided {date_format} was not recognised in the"
+            f" datetime provided: {datetime_value}"
+        )
 
     def format_dt(dt):
         return str(
             np.datetime_as_string(
-                arr=np.datetime64(dt.strftime("%Y-%m-%d %H:%M:%S.%f")), timezone="UTC", unit="us"
+                arr=np.datetime64(dt.strftime("%Y-%m-%d %H:%M:%S.%f")),
+                timezone="UTC",
+                unit="us",
             )
         )
 
@@ -82,20 +85,12 @@ def _process_date_as_string(datetime_value: str):
         pass
     # Already in isoformat
     elif (
-            re.findall(
-                "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d+",
-                datetime_value,
-            )
-            or re.findall(
-        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value
-    )
-            or re.findall(
-        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value
-    )
-            or re.findall(
-        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}",
-        datetime_value,
-    )
+        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d+", datetime_value,)
+        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value)
+        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value)
+        or re.findall(
+            "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}", datetime_value,
+        )
     ):
         pass
     # ISO format with no timezone
@@ -104,7 +99,9 @@ def _process_date_as_string(datetime_value: str):
     elif re.findall("\d{4}-\d{2}-\d{2}", datetime_value):
         datetime_value = datetime_value + "T00:00:00+00:00"
     else:
-        datetime_value = _process_datetime(parser.parse(timestr=datetime_value, dayfirst=True))
+        datetime_value = _process_datetime(
+            parser.parse(timestr=datetime_value, dayfirst=True)
+        )
     return datetime_value
 
 
@@ -123,11 +120,7 @@ def _process_numpy_datetime64(datetime_value: np.datetime64) -> str:
                     timezone aware UTC date
 
     """
-    return str(
-        np.datetime_as_string(
-            arr=datetime_value, timezone="UTC", unit="us"
-        )
-    )
+    return str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us"))
 
 
 def _process_ndarray(datetime_value: np.ndarray) -> str:
@@ -144,18 +137,14 @@ def _process_ndarray(datetime_value: np.ndarray) -> str:
                     timezone aware UTC date
 
     """
-    return str(
-        np.datetime_as_string(
-            arr=datetime_value, timezone="UTC", unit="us"
-        )[0]
-    )
+    return str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us")[0])
 
 
 def _process_datetime(datetime_value):
     # If there is no timezone assume that it is in UTC
     if (
-            datetime_value.tzinfo is None
-            or datetime_value.tzinfo.utcoffset(datetime_value) is None
+        datetime_value.tzinfo is None
+        or datetime_value.tzinfo.utcoffset(datetime_value) is None
     ):
         return datetime_value.replace(tzinfo=pytz.UTC).isoformat()
     # If there is a timezone convert to UTC
