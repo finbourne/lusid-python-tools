@@ -38,7 +38,8 @@ class BatchLoader:
             The api factory to use
         instrument_batch : list[lusid.models.InstrumentDefinition]
             The batch of instruments to upsert
-        kwargs
+        **kwargs
+            arguments specific to each call e.g. effective_at for holdings, unique_identifiers
 
         Returns
         -------
@@ -107,9 +108,8 @@ class BatchLoader:
             The api factory to use
         quote_batch : list[lusid.models.UpsertQuoteRequest]
             The batch of quotes to upsert
-        scope : str
-            The scope to upsert quotes into
         kwargs
+            scope
 
         Returns
         -------
@@ -154,6 +154,7 @@ class BatchLoader:
         transaction_batch : list[lusid.models.TransactionRequest]
             The batch of transactions to upsert
         kwargs
+            code -The code of the TransactionPortfolio to upsert the transactions into
 
         Returns
         -------
@@ -856,42 +857,42 @@ def load_from_data_frame(
 
     Parameters
     ----------
-    api_factory :                   lusid.utilities.ApiClientFactory api_factory
-                                    The api factory to use
-    scope :                         str
-                                    The scope of the resource to load the data into
-    data_frame :                    pd.DataFrame
-                                    The DataFrame containing the data
-    mapping_required :              dict{str, str}
-                                    The dictionary mapping the DataFrame columns to LUSID's required attributes
-    mapping_optional :              dict{str, str}
-                                    The dictionary mapping the DataFrame columns to LUSID's optional attributes
-    file_type :                     str
-                                    The type of file e.g. transactions, instruments, holdings, quotes, portfolios
-    identifier_mapping :            dict{str, str}
-                                    The dictionary mapping of LUSID instrument identifiers to identifiers in the DataFrame
-    property_columns :              list
-                                    The columns to create properties for
-    properties_scope :              str
-                                    The scope to add the properties to
-    batch_size :                    int
-                                    The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
-    remove_white_space :            bool
-                                    remove whitespace either side of each value in the dataframe
-    instrument_name_enrichment :    bool
-                                    request additional identifier information from open-figi
-    sub_holding_keys :              str
-                                    The sub holding keys to use for this request. Can be a list of property keys or a list of
-                                    columns in the dataframe to use to create sub holdings
-    holdings_adjustment_only :      bool
-                                    Whether to use the adjust_holdings api call rather than set_holdings when working with holdings
-    thread_pool_max_workers :       int
-                                    The maximum number of workers to use in the thread pool used by the function
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    data_frame : pd.DataFrame
+        The DataFrame containing the data
+    mapping_required : dict{str, str}
+        The dictionary mapping the DataFrame columns to LUSID's required attributes
+    mapping_optional : dict{str, str}
+        The dictionary mapping the DataFrame columns to LUSID's optional attributes
+    file_type : str
+        The type of file e.g. transactions, instruments, holdings, quotes, portfolios
+    identifier_mapping : dict{str, str}
+        The dictionary mapping of LUSID instrument identifiers to identifiers in the DataFrame
+    property_columns : list
+        The columns to create properties for
+    properties_scope : str
+        The scope to add the properties to
+    batch_size : int
+        The size of the batch to use when using upsert calls e.g. upsert instruments, upsert quotes etc.
+    remove_white_space : bool
+        remove whitespace either side of each value in the dataframe
+    instrument_name_enrichment : bool
+        request additional identifier information from open-figi
+    sub_holding_keys : list
+        The sub holding keys to use for this request. Can be a list of property keys or a list of
+        columns in the dataframe to use to create sub holdings
+    holdings_adjustment_only : bool
+        Whether to use the adjust_holdings api call rather than set_holdings when working with holdings
+    thread_pool_max_workers : int
+        The maximum number of workers to use in the thread pool used by the function
 
     Returns
     -------
-    responses:                      dict
-                                    The responses from loading the data into LUSID
+    responses: dict
+        The responses from loading the data into LUSID
 
     Examples
     --------
@@ -969,11 +970,21 @@ def load_from_data_frame(
             mapping_optional={},
             file_type="quotes"
         )
-    * loading Holdings
-    TODO
 
-    * Loading Corporate Actions
-    TODO
+    * loading Holdings
+
+    .. code-block:: none
+
+        result = lpt.load_from_data_frame(
+            api_factory=api_factory,
+            scope=holdings_scope,
+            data_frame=seg_df,
+            mapping_required=mapping["holdings"]["required"],
+            mapping_optional=mapping["holdings"]["optional"],
+            identifier_mapping=holdings_mapping["holdings"]["identifier_mapping"],
+            file_type="holdings"
+        )
+
     """
 
     # A mapping between the file type and relevant attributes e.g. domain, top_level_model etc.

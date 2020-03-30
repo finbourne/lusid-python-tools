@@ -200,7 +200,7 @@ class Validator:
         Returns
         -------
         self
-        
+
         """
 
         if isinstance(self.value, list):

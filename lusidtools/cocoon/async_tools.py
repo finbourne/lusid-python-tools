@@ -30,9 +30,6 @@ def stop_event_loop_new_thread(loop: asyncio.AbstractEventLoop) -> None:
     loop : asyncio.AbstractEventLoop
         The loop to stop and close
 
-    Returns
-    -------
-
     """
 
     thread_id = loop._thread_id
@@ -52,9 +49,6 @@ def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
     loop : asyncio.AbstractEventLoop
         The event loop to use
 
-    Returns
-    -------
-
     """
 
     asyncio.set_event_loop(loop)
@@ -72,7 +66,7 @@ def run_in_executor(f):
 
     Returns
     -------
-    callable
+    inner : callable
         An awaitable version of the function with the execution delegated to another thread
     """
 
