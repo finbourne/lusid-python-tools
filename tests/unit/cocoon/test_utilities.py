@@ -1730,7 +1730,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "transaction_date",
                     "settlement_date",
                     "units",
-                    "transaction_price",
                     "total_consideration",
                 ],
             ],
