@@ -3,11 +3,17 @@ import lusid
 import asyncio
 from functools import reduce
 from typing import Dict, List
-from lusidtools.cocoon.async_tools import start_event_loop_new_thread, stop_event_loop_new_thread
+from lusidtools.cocoon.async_tools import (
+    start_event_loop_new_thread,
+    stop_event_loop_new_thread,
+)
 
 
-def _join_holdings(holdings_to_join: Dict[str, List[lusid.models.PortfolioHolding]],
-                   group_by_portfolio: bool = False, dict_key="GroupHoldings") -> Dict[str, List[lusid.models.PortfolioHolding]]:
+def _join_holdings(
+    holdings_to_join: Dict[str, List[lusid.models.PortfolioHolding]],
+    group_by_portfolio: bool = False,
+    dict_key="GroupHoldings",
+) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function joins the holdings together from multiple Portfolios into a single list of PortfolioHolding
 
@@ -42,49 +48,69 @@ def _join_holdings(holdings_to_join: Dict[str, List[lusid.models.PortfolioHoldin
         return holdings_to_join
 
     # Flatten the holdings into a single list
-    all_holdings = [holding for holding_list in holdings_to_join.values() for holding in holding_list]
+    all_holdings = [
+        holding
+        for holding_list in holdings_to_join.values()
+        for holding in holding_list
+    ]
     # Initialise a dictionary to hold the positions against a key
     all_holdings_keyed = {}
     # Construct the keyed dictionary using the LUSID instrument id, holding type and currency as the unique key for each holding
-    [all_holdings_keyed.setdefault(f"{holding.instrument_uid}:{holding.holding_type}:{holding.cost.currency}", []).append(
-        holding
-    ) for holding in all_holdings]
+    [
+        all_holdings_keyed.setdefault(
+            f"{holding.instrument_uid}:{holding.holding_type}:{holding.cost.currency}",
+            [],
+        ).append(holding)
+        for holding in all_holdings
+    ]
 
     # Initialise a list to hold the joined holdings
     joined_holdings = []
 
     # Reduce the list of holdings against each key to a single holding
     for key, value in all_holdings_keyed.items():
-        joined_holdings.append(lusid.models.PortfolioHolding(
-            # Use the instrument_uid from the key
-            instrument_uid=key.split(":")[0],
-            # Use the holding type from the key
-            holding_type=key.split(":")[1],
-            # Add the metric fields together
-            units=reduce((lambda x, y: x+y), list(map(lambda x: x.units, value))),
-            settled_units=reduce((lambda x, y: x+y), list(map(lambda x: x.settled_units, value))),
-            cost=lusid.models.CurrencyAndAmount(
-                # Use the currency form the key
-                currency=key.split(":")[2],
-                amount=reduce((lambda x, y: x+y), list(map(lambda x: x.cost.amount, value)))
-            ),
-            cost_portfolio_ccy=lusid.models.CurrencyAndAmount(
-                # Use the first currency, these holdings could be from different portfolios, so the validity of this is questionable
-                currency=value[0].cost_portfolio_ccy.currency,
-                amount=reduce((lambda x,y: x+y), list(map(lambda x: x.cost_portfolio_ccy.amount, value)))
-            ),
-            # Takes the properties from the first value, only allows instrument properties
-            properties={
-                property_key: value for property_key, value in value[0].properties.items() if value.key.split("/")[0] == "Instrument"
-            }
+        joined_holdings.append(
+            lusid.models.PortfolioHolding(
+                # Use the instrument_uid from the key
+                instrument_uid=key.split(":")[0],
+                # Use the holding type from the key
+                holding_type=key.split(":")[1],
+                # Add the metric fields together
+                units=reduce((lambda x, y: x + y), list(map(lambda x: x.units, value))),
+                settled_units=reduce(
+                    (lambda x, y: x + y), list(map(lambda x: x.settled_units, value))
+                ),
+                cost=lusid.models.CurrencyAndAmount(
+                    # Use the currency form the key
+                    currency=key.split(":")[2],
+                    amount=reduce(
+                        (lambda x, y: x + y), list(map(lambda x: x.cost.amount, value))
+                    ),
+                ),
+                cost_portfolio_ccy=lusid.models.CurrencyAndAmount(
+                    # Use the first currency, these holdings could be from different portfolios, so the validity of this is questionable
+                    currency=value[0].cost_portfolio_ccy.currency,
+                    amount=reduce(
+                        (lambda x, y: x + y),
+                        list(map(lambda x: x.cost_portfolio_ccy.amount, value)),
+                    ),
+                ),
+                # Takes the properties from the first value, only allows instrument properties
+                properties={
+                    property_key: value
+                    for property_key, value in value[0].properties.items()
+                    if value.key.split("/")[0] == "Instrument"
+                },
+            )
         )
-    )
 
     return {dict_key: joined_holdings}
 
 
 @run_in_executor
-def _get_portfolio_group(api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str, **kwargs) -> lusid.models.PortfolioGroup:
+def _get_portfolio_group(
+    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str, **kwargs
+) -> lusid.models.PortfolioGroup:
     """
     This function gets a Portfolio Group from LUSID.
 
@@ -114,21 +140,21 @@ def _get_portfolio_group(api_factory: lusid.utilities.ApiClientFactory, scope: s
 
     # Filter out the relevant keyword arguments as the LUSID API will raise an exception if given extras
     lusid_keyword_arguments = {
-        key: value for key, value in kwargs.items() if key in ['effective_at', 'as_at']
+        key: value for key, value in kwargs.items() if key in ["effective_at", "as_at"]
     }
 
     # Call LUSID to get the portfolio group
-    response = lusid.api.PortfolioGroupsApi(api_factory.build(lusid.api.PortfolioGroupsApi)).get_portfolio_group(
-        scope=scope,
-        code=code,
-        **lusid_keyword_arguments
-    )
+    response = lusid.api.PortfolioGroupsApi(
+        api_factory.build(lusid.api.PortfolioGroupsApi)
+    ).get_portfolio_group(scope=scope, code=code, **lusid_keyword_arguments)
 
     return response
 
 
 @run_in_executor
-def _get_portfolio_holdings(api_factory: lusid.utilities.ApiClientFactory, scope: str, code : str, **kwargs) -> Dict[str, List[lusid.models.PortfolioHolding]]:
+def _get_portfolio_holdings(
+    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str, **kwargs
+) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function gets the holdings of a Portfolio from LUSID.
 
@@ -171,16 +197,15 @@ def _get_portfolio_holdings(api_factory: lusid.utilities.ApiClientFactory, scope
 
     # Filter out the relevant keyword arguments as the LUSID API will raise an exception if given extras
     lusid_keyword_arguments = {
-        key: value for key, value in kwargs.items() if key in ['effective_at', 'as_at', 'filter',
-                                                               'by_taxlots', 'property_keys']
+        key: value
+        for key, value in kwargs.items()
+        if key in ["effective_at", "as_at", "filter", "by_taxlots", "property_keys"]
     }
 
     # Call LUSID to get the holdings for the Portfolio
-    response = lusid.api.TransactionPortfoliosApi(api_factory.build(lusid.api.TransactionPortfoliosApi)).get_holdings(
-        scope=scope,
-        code=code,
-        **lusid_keyword_arguments
-    )
+    response = lusid.api.TransactionPortfoliosApi(
+        api_factory.build(lusid.api.TransactionPortfoliosApi)
+    ).get_holdings(scope=scope, code=code, **lusid_keyword_arguments)
 
     # Key the response with the unique scope/code combination
     return {f"{scope} : {code}": response.values}
@@ -191,7 +216,7 @@ async def _get_holdings_for_group_recursive(
     group_scope: str,
     group_code: str,
     group_by_portfolio=False,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function recursively gets the holdings for a Portfolio Group in LUSID by making a request to get the holdings for
@@ -230,7 +255,9 @@ async def _get_holdings_for_group_recursive(
     """
 
     # Get the details for the Portfolio Group including its sub-group and Portfolio members
-    response = await _get_portfolio_group(api_factory, group_scope, group_code, **kwargs)
+    response = await _get_portfolio_group(
+        api_factory, group_scope, group_code, **kwargs
+    )
     portfolios = response.portfolios
     sub_groups = response.sub_groups
 
@@ -252,7 +279,11 @@ async def _get_holdings_for_group_recursive(
     portfolio_holdings_keyed = {k: v for d in portfolio_holdings for k, v in d.items()}
 
     # Join the holdings across all portfolios together
-    joined_portfolio_holdings = _join_holdings(portfolio_holdings_keyed, group_by_portfolio, dict_key=f"{group_scope} : {group_code}")
+    joined_portfolio_holdings = _join_holdings(
+        portfolio_holdings_keyed,
+        group_by_portfolio,
+        dict_key=f"{group_scope} : {group_code}",
+    )
 
     # If there aren't any sub-groups return these joined holdings
     if len(sub_groups) == 0:
@@ -274,19 +305,35 @@ async def _get_holdings_for_group_recursive(
         )
 
         # Turn the list of dictionaries into a single dictionary where the holdings are keyed by the Portfolio scope : code
-        sub_group_holdings_keyed = {k: v for d in sub_group_holdings for k, v in d.items()}
+        sub_group_holdings_keyed = {
+            k: v for d in sub_group_holdings for k, v in d.items()
+        }
 
         # Join together the holdings across all the sub-groups
-        joined_sub_group_holdings = _join_holdings(sub_group_holdings_keyed, group_by_portfolio, dict_key="SubGroupHoldings")
+        joined_sub_group_holdings = _join_holdings(
+            sub_group_holdings_keyed, group_by_portfolio, dict_key="SubGroupHoldings"
+        )
 
         # There shouldn't be any overlap between the keys in these two sets
-        if len(set(joined_sub_group_holdings.keys()).intersection(set(joined_portfolio_holdings))) > 0:
-            raise ValueError("There are duplicate Portfolios in the Portfolio Group. This is not currently supported. "
-                             "Please ensure that there are no duplicates in your Porfolio Group via sub-groups and try again")
+        if (
+            len(
+                set(joined_sub_group_holdings.keys()).intersection(
+                    set(joined_portfolio_holdings)
+                )
+            )
+            > 0
+        ):
+            raise ValueError(
+                "There are duplicate Portfolios in the Portfolio Group. This is not currently supported. "
+                "Please ensure that there are no duplicates in your Porfolio Group via sub-groups and try again"
+            )
 
         # Join and return the joined sub-group holdings with the joined portfolio holdings
-        return _join_holdings({**joined_sub_group_holdings, **joined_portfolio_holdings}, group_by_portfolio,
-                              dict_key=f"{group_scope} : {group_code}")
+        return _join_holdings(
+            {**joined_sub_group_holdings, **joined_portfolio_holdings},
+            group_by_portfolio,
+            dict_key=f"{group_scope} : {group_code}",
+        )
 
 
 def get_holdings_for_group(
@@ -295,7 +342,7 @@ def get_holdings_for_group(
     group_code: str,
     group_by_portfolio: bool = False,
     num_threads=5,
-    **kwargs
+    **kwargs,
 ) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function gets the holdings for a Portfolio Group in LUSID.
