@@ -8,8 +8,13 @@ def start_event_loop_new_thread() -> asyncio.AbstractEventLoop:
     """
     Creates and starts a new event loop in a new thread
 
-    :return: asyncio.AbstractEventLoop loop: The newly created loop
+    Returns
+    -------
+    loop : asyncio.AbstractEventLoop
+        The newly created loop
+
     """
+
     loop = asyncio.new_event_loop()
     t = Thread(target=start_background_loop, args=(loop,), daemon=True)
     t.start()
@@ -20,9 +25,13 @@ def stop_event_loop_new_thread(loop: asyncio.AbstractEventLoop) -> None:
     """
     Takes an event loop, stops it and once stopped closes it
 
-    :param asyncio.AbstractEventLoop loop: The loop to stop and close
-    :return: None
+    Parameters
+    ----------
+    loop : asyncio.AbstractEventLoop
+        The loop to stop and close
+
     """
+
     thread_id = loop._thread_id
     loop.call_soon_threadsafe(loop.stop)
     threads = enumerate()
@@ -35,10 +44,13 @@ def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
     """
     Sets and starts the event loop
 
-    :param asyncio.AbstractEventLoop loop: The event loop to use
+    Parameters
+    ----------
+    loop : asyncio.AbstractEventLoop
+        The event loop to use
 
-    :return: None
     """
+
     asyncio.set_event_loop(loop)
     loop.run_forever()
 
@@ -47,9 +59,15 @@ def run_in_executor(f):
     """
     Passes a synchronous & blocking function off to another thread so that it can be awaited
 
-    :param f: The function to transform into an awaitable
+    Parameters
+    ----------
+    f
+        The function to transform into an awaitable
 
-    :return: An awaitable version of the function with the execution delegated to another thread
+    Returns
+    -------
+    inner : callable
+        An awaitable version of the function with the execution delegated to another thread
     """
 
     @functools.wraps(f)

@@ -13,13 +13,13 @@ def _process_timestamp(datetime_value: pd.Timestamp):
 
     Parameters
     ----------
-    datetime    pd.Timestamp
-                Datetime value
+    datetime : pd.Timestamp
+        Datetime value
 
     Returns
     -------
-    datetime    pd.Timestamp
-                Datetime value in ISO format
+    datetime : pd.Timestamp
+        Datetime value in ISO format
     """
     return pd.to_datetime(datetime_value, utc=True, unit="us").isoformat()
 
@@ -27,17 +27,18 @@ def _process_timestamp(datetime_value: pd.Timestamp):
 def _process_custom_date(datetime_value: str, date_format: str) -> str:
     """
     Processes a datetime provided in custom format
+
     Parameters
     ----------
-    datetime_value      str
-                        Custom Datetime value
-    date_format  str
-                        Format of custom Datetime
+    datetime_value : str
+        Custom Datetime value
+    date_format : str
+        Format of custom Datetime
 
     Returns
     -------
-    datetime_value      str
-                        Datetime value as str
+    datetime_value : str
+        Datetime value as str
     """
     if not isinstance(datetime_value, str):
         raise TypeError(
@@ -71,13 +72,13 @@ def _process_date_as_string(datetime_value: str):
 
     Parameters
     ----------
-    datetime_value  str
-                    Datetime value provided as a string
+    datetime_value : str
+        Datetime value provided as a string
 
     Returns
     -------
-    datetime_value str
-                    Datetime value provided as a string in valid ISO format
+    datetime_value : str
+        Datetime value provided as a string in valid ISO format
 
     """
     # Cut label regular expression, no modification required
@@ -111,13 +112,13 @@ def _process_numpy_datetime64(datetime_value: np.datetime64) -> str:
 
     Parameters
     ----------
-    datetime_value  np.datetime64
-                    Datetime value
+    datetime_value : np.datetime64
+        Datetime value
 
     Returns
     -------
-    datetime_value  str
-                    timezone aware UTC date
+    datetime_value : str
+        timezone aware UTC date
 
     """
     return str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us"))
@@ -126,15 +127,16 @@ def _process_numpy_datetime64(datetime_value: np.datetime64) -> str:
 def _process_ndarray(datetime_value: np.ndarray) -> str:
     """
     Converts numpy.ndarray to UTC date to a string
+
     Parameters
     ----------
-    datetime_value  np.ndarray
-                    Datetime value
+    datetime_value : np.ndarray
+        Datetime value
 
     Returns
     -------
-    datetime_value  str
-                    timezone aware UTC date
+    datetime_value : str
+        timezone aware UTC date
 
     """
     return str(np.datetime_as_string(arr=datetime_value, timezone="UTC", unit="us")[0])
@@ -160,15 +162,15 @@ class DateOrCutLabel(UserString):
 
             Parameters
             ----------
-            datetime_value  any
-                            Datetime variable
-            date_format     str
-                            (optional)The format of a custom date as a string eg "%Y-%m-%d %H:%M:%S.%f". see https://strftime.org/
+            datetime_value : any
+                Datetime variable
+            date_format : str
+                (optional)The format of a custom date as a string eg "%Y-%m-%d %H:%M:%S.%f". see https://strftime.org/
 
             Returns
             -------
-            datetime_value  str
-                            The converted timezone aware datetime in the UTC timezone
+            datetime_value : str
+                The converted timezone aware datetime in the UTC timezone
 
             """
 

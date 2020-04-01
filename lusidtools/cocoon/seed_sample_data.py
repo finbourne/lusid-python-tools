@@ -18,19 +18,31 @@ def seed_data(
     mappings: dict = mappings,
     sub_holding_keys=[],
 ):
-
     """
-    Description:
     This function allows users to seed their LUSID environment with some core data (e.g. instruments,
     portfolios, and transaction) from one file.
 
-    :param lusid.utilities.ApiClientFactory api_factory: The api factory to use.
-    :param list[str] domains: A list of the file_types for upload.
-    :param str scope: The scope of the transaction portfolio.
-    :param str transaction_file: the absolute or relative path to source file of transaction data.
-    :param str file_type: the file extension (e.g. "csv" for "test_transaction.csv".
-    :param dict mappings: a file containing mapping of DataFrame headers to LUSID headers.
-    :param list sub_holding_keys: a list of sub-holding keys for grouping.
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory
+        The api factory to use
+    domains : list[str]
+        A list of the file_types for upload.
+    scope : str
+        The scope of the transaction portfolio.
+    transaction_file : str
+        The absolute or relative path to source file of transaction data.
+    file_type : str
+        the file extension (e.g. "csv" for "test_transaction.csv".
+    mappings : dict
+        a file containing mapping of DataFrame headers to LUSID headers.
+    sub_holding_keys : list
+        a list of sub-holding keys for grouping.
+
+    Returns
+    -------
+    None
+
     """
 
     # Gather a dictionary of supported files
