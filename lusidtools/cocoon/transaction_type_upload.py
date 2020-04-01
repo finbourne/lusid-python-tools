@@ -9,12 +9,20 @@ def create_transaction_type_configuration(api_factory, alias, movements):
     """
     This function creates a transaction type configuration if it doesn't already exist.
 
-    :param lusid.utilities.ClientApiFactory api_factory: The LUSID api factory to use
-    :param lusid.models.TransactionConfigurationTypeAlias alias: An aliases with type and group
-    :param list[lusid.models.TransactionConfigurationMovementDataRequest] movements: The movements to use for
-    transaction type
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ClientApiFactory
+        The LUSID api factory to use
+    alias : lusid.models.TransactionConfigurationTypeAlias
+        An aliases with type and group
+    movements : list[lusid.models.TransactionConfigurationMovementDataRequest]
+        The movements to use for
+        transaction type
 
-    return (lusid.models.createtransactiontyperesponse) response: The response from creating the transaction type
+    Returns
+    -------
+    response : (lusid.models.createtransactiontyperesponse)
+        The response from creating the transaction type
     """
 
     # Call LUSID to get your transaction type configuration

@@ -11,6 +11,8 @@ Welcome to Lusidtools's documentation!
    lusidtools/cocoon/cocoon
    lusidtools/cocoon_printer
    lsuditools/utilities
+   lusidtools/pandas_utils
+   lusidtools/extract
 
 Cocoon
 ======
@@ -28,6 +30,18 @@ Utilities
 =========
 
 .. automodule:: lusidtools.cocoon.utilities
+   :members:
+
+Pandas Utilities
+================
+
+.. automodule:: lusidtools.pandas_utils.lusid_pandas
+   :members:
+
+Extract
+=======
+
+.. automodule:: lusidtools.extract.group_holdings
    :members:
 
 Indices and tables

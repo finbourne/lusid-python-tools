@@ -374,6 +374,7 @@ class BatchLoader:
     ) -> lusid.models.PortfolioGroup:
         """
         Upserts a batch of portfolios to LUSID
+
         Parameters
         ----------
         api_factory : lusid.utilities.ApiClientFactory
@@ -540,6 +541,7 @@ def _convert_batch_to_models(
         The sub holding keys to use
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
+
     Returns
     -------
     single_requests : list

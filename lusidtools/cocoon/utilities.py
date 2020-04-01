@@ -29,14 +29,13 @@ def checkargs(function: typing.Callable) -> typing.Callable:
 
     Parameters
     ----------
-    function :  typing.Callable
-                The function to wrap with annotated types, all parameters must be annotated with a
-                type
+    function : typing.Callable
+        The function to wrap with annotated types, all parameters must be annotated with a type
 
     Returns
     -------
-    _f :        typing.Callable
-                The wrapped function
+    _f : typing.Callable
+        The wrapped function
     """
 
     @functools.wraps(function)
@@ -101,13 +100,13 @@ def make_code_lusid_friendly(raw_code) -> str:
 
     Parameters
     ----------
-    raw_code :      any
-                    A raw column header which needs special characters stripped out
+    raw_code : any
+        A raw column header which needs special characters stripped out
 
     Returns
     -------
     friendly_code : str
-                    A LUSID friendly code with special characters removed
+        A LUSID friendly code with special characters removed
     """
 
     # Convert any type to a string
@@ -158,24 +157,24 @@ def populate_model(
     Parameters
     ----------
     model_object_name : str
-                        The name of the model object to populate
-    required_mapping :  dict
-                        The required mapping between the row columns and the model attributes
-    optional_mapping :  dict
-                        The optional mapping between the row columns and the model attributes
-    row :               pd.Series
-                        The row from the provided pd.DataFrame to use to populate the model
-    properties :
-                        The properties for this model
-    identifiers :       dict
-                        The identifiers for this model
-    sub_holding_keys :
-                        The sub holding keys to use
+        The name of the model object to populate
+    required_mapping : dict
+        The required mapping between the row columns and the model attributes
+    optional_mapping : dict
+        The optional mapping between the row columns and the model attributes
+    row : pd.Series
+        The row from the provided pd.DataFrame to use to populate the model
+    properties
+        The properties for this model
+    identifiers : dict
+        The identifiers for this model
+    sub_holding_keys
+        The sub holding keys to use
 
     Returns
     -------
-    set_attributes :    typing.Callable
-                        The function to set the attributes for the model
+    set_attributes : typing.Callable
+        The function to set the attributes for the model
     """
 
     # Check that the provided model name actually exists
@@ -215,23 +214,23 @@ def set_attributes_recursive(
 
     Parameters
     ----------
-    model_object :      lusid.models
-                        The object from lusid.models to populate
-    mapping :           dict
-                        The expanded dictionary mapping the Series columns to the LUSID model attributes
-    row :               pd.Series
-                        The current row of the DataFrame being worked on
-    properties :        any
-                        The properties to use on this model
-    identifiers :       any
-                        The instrument identifiers to use on this model
-    sub_holding_keys :
-                        The sub holding keys to use on this model
+    model_object : lusid.models
+        The object from lusid.models to populate
+    mapping : dict
+        The expanded dictionary mapping the Series columns to the LUSID model attributes
+    row : pd.Series
+        The current row of the DataFrame being worked on
+    properties : any
+        The properties to use on this model
+    identifiers : any
+        The instrument identifiers to use on this model
+    sub_holding_keys
+        The sub holding keys to use on this model
 
     Returns
     -------
-    new model_object :      lusid.models
-                        An instance of the model object with populated attributes
+    new model_object : lusid.models
+        An instance of the model object with populated attributes
     """
 
     # Get the object attributes
@@ -319,14 +318,14 @@ def update_dict(orig_dict: dict, new_dict) -> None:
     Parameters
     ----------
     orig_dict : dict
-                The original dictionary to update
-    new_dict :  dict
-                The new dictionary to merge with the original
+        The original dictionary to update
+    new_dict : dict
+        The new dictionary to merge with the original
 
     Returns
     -------
     orig_dict : dict
-                The updated original dictionary
+        The updated original dictionary
     """
 
     # Iterate over key value pairs in the new dictionary to merge into the original
@@ -353,14 +352,15 @@ def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
 
     Parameters
     ----------
-    dictionary :    dict
-                    The input dictionary with separated keys
+    dictionary : dict
+        The input dictionary with separated keys
     key_separator : str
-                    The seprator to use
+        The seprator to use
+
     Returns
     -------
     dict_expanded : dict
-                    The expanded nested dictionary
+        The expanded nested dictionary
     """
 
     dict_expanded = {}
@@ -384,17 +384,17 @@ def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dic
 
     Parameters
     ----------
-    index :     int
-                The current index of the key in the list of keys
-    key_list :  list[str]
-                The list of keys to turn into a nested dictionary
-    value :     any
-                The final value to match against the last (deepest) key
+    index : int
+        The current index of the key in the list of keys
+    key_list : list[str]
+        The list of keys to turn into a nested dictionary
+    value : any
+        The final value to match against the last (deepest) key
 
     Returns
     -------
     dict
-                The final value to match against the last (deepest) key
+        The final value to match against the last (deepest) key
     """
 
     # Gets the current key in the list
@@ -415,13 +415,13 @@ def get_swagger_dict(api_url: str) -> dict:
 
     Parameters
     ----------
-    api_url :   str
-                The base api url for the LUSID instance
+    api_url : str
+        The base api url for the LUSID instance
 
     Returns
     -------
     dict
-                The swagger file as a dictionary
+        The swagger file as a dictionary
     """
 
     swagger_path = "/swagger/v0/swagger.json"
@@ -454,19 +454,19 @@ def verify_all_required_attributes_mapped(
 
     Parameters
     ----------
-    mapping :           dict
-                        The required mapping
+    mapping : dict
+        The required mapping
     model_object_name : str
-                        The name of the lusid.models object that the mapping is for
+        The name of the lusid.models object that the mapping is for
     exempt_attributes : list[str]
-                        The attributes that are exempt from needing to be in the required mapping
-    key_separator :     str
-                        The separator to use to join the required attributes together
+        The attributes that are exempt from needing to be in the required mapping
+    key_separator : str
+        The separator to use to join the required attributes together
 
     Returns
     -------
-    key_separator :     str
-                        The separator to use to join the required attributes together
+    key_separator : str
+        The separator to use to join the required attributes together
     """
 
     # Check that the provided model name actually exists
@@ -511,15 +511,15 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
 
     Parameters
     ----------
-    model_object :  lusid.model
-                    The model to get required attributes for
+    model_object : lusid.model
+        The model to get required attributes for
     key_separator : str
-                    The separator to use to join the required attributes together
+        The separator to use to join the required attributes together
 
     Returns
     -------
     list[str]
-                    The required attributes of the model
+        The required attributes of the model
     """
 
     attributes = []
@@ -569,12 +569,13 @@ def get_required_attributes_from_model(model_object) -> list:
 
     Parameters
     ----------
-    model_object :  lusid.models
-                    A LUSID model object
+    model_object : lusid.models
+        A LUSID model object
 
     Returns
     -------
-    list[str] :     The required attributes
+    list[str]
+        The required attributes
     """
 
     # Get the source code for the model
@@ -640,15 +641,15 @@ def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
 
     Parameters
     ----------
-    attribute_type :    str
-                        The attribute type to extract the model from
+    attribute_type : str
+        The attribute type to extract the model from
 
     Returns
     -------
-    attribute_type :    str
-                        The returned attribute type with the LUSID model extracted if possible
-    nested_type :       str
-                        The type of nesting used e.g. List or Dict
+    attribute_type : str
+        The returned attribute type with the LUSID model extracted if possible
+    nested_type : str
+        The type of nesting used e.g. List or Dict
     """
 
     nested_type = None
@@ -673,8 +674,8 @@ def check_nested_model(required_attribute_type: str) -> bool:
 
     Parameters
     ----------
-    required_attribute_type :   str
-                                The type of the required attribute
+    required_attribute_type : str
+        The type of the required attribute
 
     Returns
     -------
@@ -701,10 +702,10 @@ def gen_dict_extract(key, var: dict):
 
     Parameters
     ----------
-    key :   str
-            The key to search for
-    var :   dict
-            The dictionary to search
+    key : str
+        The key to search for
+    var : dict
+        The dictionary to search
 
     Returns
     -------
@@ -732,8 +733,8 @@ def camel_case_to_pep_8(attribute_name: str) -> str:
 
     Parameters
     ----------
-    attribute_name :    str
-                        The camel case attribute name
+    attribute_name : str
+        The camel case attribute name
 
     Returns
     -------
@@ -783,19 +784,19 @@ def handle_nested_default_and_column_mapping(
 
     Parameters
     ----------
-    data_frame :        pd.DataFrame
-                        The updated dataframe
-    mapping :           dict
-                        The original mapping (can be required or optional)
-    constant_prefix:    str
-                        The prefix that can be used to specify a constant
+    data_frame : pd.DataFrame
+        The updated dataframe
+    mapping : dict
+        The original mapping (can be required or optional)
+    constant_prefix : str
+        The prefix that can be used to specify a constant
 
     Returns
     -------
-    dataframe :         pd.DataFrame
-                        The updated DataFrame
-    mapping_updated :   dict
-                        THe updated mapping
+    dataframe : pd.DataFrame
+        The updated DataFrame
+    mapping_updated : dict
+        The updated mapping
     """
 
     mapping_updated = {}
@@ -859,12 +860,12 @@ def load_json_file(file_path: str) -> dict:
     Parameters
     ----------
     file_path : str
-                relative_file_path
+        relative_file_path
 
     Returns
     -------
-    data :  dict
-            parsed data from json file
+    data : dict
+        parsed data from json file
     """
 
     if not os.path.isabs(file_path):
@@ -883,12 +884,13 @@ def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
 
     Parameters
     ----------
-    args :  dict
-            Arguments parsed in from command line, containing args["file_path"]
+    args : dict
+        Arguments parsed in from command line, containing args["file_path"]
 
     Returns
     -------
-    pd.DataFrame :  pd.dataframe Containing data
+    pd.DataFrame : pd.dataframe
+        DataFrame containing data
     """
     if not os.path.exists(args["file_path"]):
         raise OSError(f"file path {args['file_path']} does not exist")
@@ -940,16 +942,16 @@ def check_mapping_fields_exist(
     Parameters
     ----------
     required_list : list[str]
-                    list of items to search for
-    search_list :   list[str]
-                    list to search in
-    file_type :     list[str]
-                    the file type of the data eg.instruments, holdings, transactions
+        list of items to search for
+    search_list : list[str]
+        list to search in
+    file_type : list[str]
+        the file type of the data eg.instruments, holdings, transactions
 
     Returns
     -------
-    missing_fields :    list[str]
-                        list of items in required_list missing from search_list
+    missing_fields : list[str]
+        list of items in required_list missing from search_list
     """
 
     missing_fields = [
@@ -1060,18 +1062,19 @@ def scale_quote_of_type(
 
     Parameters
     ----------
-    df :        pd.DataFrame
-                DataFrame containing quotes,
-    mapping :   dict
-                mapping containing containing mapping[file_type]["quote_scalar"]
+    df : pd.DataFrame
+        DataFrame containing quotes,
+    mapping : dict
+        mapping containing containing mapping[file_type]["quote_scalar"]
     file_type : str
-                File type of data default = "quotes"
+        File type of data default = "quotes"
 
     Returns
     -------
-    df :        pd.DataFrame
-                dataframe containing "__adjusted_quotes" column
-    mapping :   mapping updated with "metric_value.value" updated to be "__adjusted_quotes"
+    df : pd.DataFrame
+        dataframe containing "__adjusted_quotes" column
+    mapping : dict
+        mapping updated with "metric_value.value" updated to be "__adjusted_quotes"
     """
 
     price_col = mapping[file_type]["quote_scalar"]["price"]
@@ -1116,21 +1119,21 @@ def identify_cash_items(
 
     Parameters
     ----------
-    dataframe :         pd.DataFrame
-                        the dataframe to look for cash items in
-    mappings :          dict
-                        Full mapping structure
-    file_type :         str
-                        type of data in dataframe eg. "instruments", "quotes", "transactions", "portfolios"
-    remove_cash_items:  bool
-                        indication to remove cash items from dataframe
+    dataframe : pd.DataFrame
+        The dataframe to look for cash items in
+    mappings : dict
+        Full mapping structure
+    file_type : str
+        type of data in dataframe eg. "instruments", "quotes", "transactions", "portfolios"
+    remove_cash_items: bool
+        indication to remove cash items from dataframe
 
     Returns
     -------
-    dataframe :         pd.DataFrame
-                        dataframe containing scaled quotes
-    mappings :          dict
-                        mapping with currency identifier mapping included
+    dataframe : pd.DataFrame
+        dataframe containing scaled quotes
+    mappings : dict
+        mapping with currency identifier mapping included
     """
 
     cash_flag_specification = mappings["cash_flag"]
@@ -1169,19 +1172,19 @@ def populate_currency_identifier_for_LUSID(
 
     Parameters
     ----------
-    row :                       dict
-                                current data row
-    column :                    str
-                                current dataframe column that contains values that can be used to identify a cash transaction or
-                                holding
-    cash_flag_specification :   dict
-                                dictionary containing cash identifier columns and values with either explicit
-                                currancy codes or the column from which the currency code can be infered
+    row : dict
+        current data row
+    column : str
+        current dataframe column that contains values that can be used to identify a cash transaction or
+        holding
+    cash_flag_specification : dict
+        dictionary containing cash identifier columns and values with either explicit currancy codes or the column from
+        which the currency code can be infered
 
     Returns
     -------
-    currency_code :             str
-                                The currency code for the current transaction or holding
+    currency_code : str
+        The currency code for the current transaction or holding
     """
 
 
@@ -1234,15 +1237,16 @@ def validate_mapping_file_structure(mapping: dict, columns: list, file_type: str
 
     Parameters
     ----------
-    mapping :       dict
-                    mapping containing full mapping structure
-    columns :       list
-                    columns from source data to search in
-    file_type :     str
-                    type of file being upserted eg. "instruments", "holdings", etc.
+    mapping : dict
+        mapping containing full mapping structure
+    columns : list
+        columns from source data to search in
+    file_type : str
+        type of file being upserted eg. "instruments", "holdings", etc.
 
     Returns
     -------
+    None
 
     """
 
@@ -1293,15 +1297,15 @@ def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
 
     Parameters
     ----------
-    df :            pd.DataFrame
-                    Dataframe containing data to remove whitespace from
-    columns :       list[dict{dict}]
-                    list of nested dictionaries of any depth
+    df : pd.DataFrame
+        Dataframe containing data to remove whitespace from
+    columns : list[dict{dict}]
+        list of nested dictionaries of any depth
 
     Returns
     -------
-    stripped_df :   pd.DataFrame
-                    DataFrame with whitespace removed
+    stripped_df : pd.DataFrame
+        DataFrame with whitespace removed
     """
 
     stripped_df = pd.DataFrame.copy(df)
@@ -1322,12 +1326,12 @@ def create_scope_id(time_generator=None):
     Parameters
     ----------
     time_generator
-                    Any class that has a .time() method on it which produces time since 1970 in seconds
+        Any class that has a .time() method on it which produces time since 1970 in seconds
 
     Returns
     -------
-    scope_id :      str
-                    Scope identifier
+    scope_id : str
+        Scope identifier
     """
 
     if time_generator is None or isinstance(time_generator, types.ModuleType):
@@ -1367,23 +1371,23 @@ def default_fx_forward_model(
 
     Parameters
     ----------
-    df          pd.DataFrame
-                DataFrame containing transactions data
-    fx_code     str
-                The transaction type that identifies a forward
-    func_b      typing.Callable[[], bool]
-                function that evaluates to true for where the dataframe row is a buy side
-    func_s      typing.Callable[[], bool]
-                function that evaluates to true for where the dataframe row is a sell side
-    mapping     dict
-                mapping for FX transactions
+    df : pd.DataFrame
+        DataFrame containing transactions data
+    fx_code : str
+        The transaction type that identifies a forward
+    func_b : typing.Callable[[], bool]
+        function that evaluates to true for where the dataframe row is a buy side
+    func_s : typing.Callable[[], bool]
+        function that evaluates to true for where the dataframe row is a sell side
+    mapping : dict
+        mapping for FX transactions
 
     Returns
     -------
-    fwds_txn_df         pd.DataFrame
-                        DataFrame containing FX transactions merged into a single row
-    mapping_cash_txn    dict
-                        updates mapping dictionary for fwds_txn_df
+    fwds_txn_df : pd.DataFrame
+        DataFrame containing FX transactions merged into a single row
+    mapping_cash_txn : dict
+        updates mapping dictionary for fwds_txn_df
     """
 
     logging.info(
@@ -1425,16 +1429,17 @@ def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
 
     Parameters
     ----------
-    mapping         dict
-                    mapping dictionary that needs updating
-    buy_suffix      str
-                    Suffix appended to buy side transaction fields (e.g. "_b")
-    sell_suffix     str
-                    Suffix appended to sell side transaction fields(e.g. "_s")
+    mapping : dict
+        mapping dictionary that needs updating
+    buy_suffix : str
+        Suffix appended to buy side transaction fields (e.g. "_b")
+    sell_suffix : str
+        Suffix appended to sell side transaction fields(e.g. "_s")
+
     Returns
     -------
-    mapping         dict
-                    updated mapping dictionary
+    mapping : dict
+        updated mapping dictionary
     """
     new_mapping = copy.deepcopy(mapping)
     file_type = "transactions"
@@ -1478,19 +1483,19 @@ def update_dict_value(
 
     Parameters
     ----------
-    d           dict
-                Dictionary to update
-    s_key       str
-                Key to search for that belongs to the value to be updated
-    val         typing.Union[str, float]
-                Updated value belonging to search key
-    file_type   str
-                (optional) specific file_type in mapping to update. If not specified, all matches are replaced
+    d : dict
+        Dictionary to update
+    s_key : str
+        Key to search for that belongs to the value to be updated
+    val : typing.Union[str, float]
+        Updated value belonging to search key
+    file_type : str
+        (optional) specific file_type in mapping to update. If not specified, all matches are replaced
 
     Returns
     -------
-    d           dict
-                updated dictionary
+    d : dict
+        updated dictionary
 
     """
     # if a file type had been specified, only search that values belonging to that key
@@ -1523,13 +1528,14 @@ def update_value(d: typing.Union[dict, str], val: typing.Union[str, float]):
 
     Parameters
     ----------
-    d       typing.Union[dict, str]
-            Data key to update
-    val     typing.Union[dict, str]
-            value to update
+    d : typing.Union[dict, str]
+        Data key to update
+    val : typing.Union[dict, str]
+        value to update
 
     Returns
     -------
+    None
 
     """
 
@@ -1562,17 +1568,28 @@ def group_request_into_one(
     model_type: str, request_list: list, attribute_for_grouping: list, batch_index=0
 ):
     """
-    Description
-    ------------
     This function take a list of requests and collates an attribute from each request, adding the collated attributes
     back onto the first request in the list. The function returns the modified first request.
     For example, the function can take a list of CreatePortfolioGroupRequests, extract the "values" or portfolios from
     each request, and then add all portfolios back onto the first request in the list.
-    :param str model_type: the model type which we will modify (eg "CreatePortfolioGroupRequest").
-    :param list request_list: a list of requests.
-    :param list attribute_for_grouping: the attributes on these requests which will be grouped.
-    :return: a single LUSID request
+
+    Parameters
+    ----------
+    model_type : str
+        the model type which we will modify (eg "CreatePortfolioGroupRequest").
+    request_list : list
+        a list of requests.
+    attribute_for_grouping : list
+        the attributes on these requests which will be grouped.
+    batch_index
+        The index of the batch
+
+    Returns
+    -------
+    request
+        a single LUSID request
     """
+
 
     # Define a base request for modifying - this is the first request in the list by default
 

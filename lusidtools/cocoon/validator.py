@@ -20,12 +20,12 @@ class Validator:
 
         Parameters
         ----------
-        allowed_values :    list
-                            The list of allowed values
+        allowed_values : list
+            The list of allowed values
 
         Returns
         -------
-        self
+        Validator
         """
 
         if self.value not in allowed_values:
@@ -40,7 +40,7 @@ class Validator:
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, str):
@@ -56,7 +56,7 @@ class Validator:
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, str):
@@ -75,7 +75,7 @@ class Validator:
 
         Returns
         -------
-        self
+        Validator
         """
 
         if self.value is None:
@@ -91,14 +91,14 @@ class Validator:
 
         Parameters
         ----------
-        override_flag :     bool
-                            Whether or not to override the current value
-        override_value :
-                            The value to use to override the existing values
+        override_flag : bool
+            Whether or not to override the current value
+        override_value
+            The value to use to override the existing values
 
         Returns
         -------
-        self
+        Validator
         """
 
         if override_flag:
@@ -114,7 +114,7 @@ class Validator:
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, dict):
@@ -133,7 +133,7 @@ class Validator:
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, dict):
@@ -146,12 +146,12 @@ class Validator:
 
         Parameters
         ----------
-        first_character :   str
-                            The character to look for in the first character of each element
+        first_character : str
+            The character to look for in the first character of each element
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, list):
@@ -168,14 +168,14 @@ class Validator:
 
         Parameters
         ----------
-        superset :      list
-                        The superset to check of the value is a subset of
+        superset : list
+            The superset to check of the value is a subset of
         superset_name : list
-                        The name of the superset
+            The name of the superset
 
         Returns
         -------
-        self
+        Validator
         """
 
         if isinstance(self.value, list):
@@ -192,14 +192,14 @@ class Validator:
 
         Parameters
         ----------
-        other_list :    list
-                        The list to check the value has no intersection with
-        list_name :     list
-                        The name of the list
+        other_list : list
+            The list to check the value has no intersection with
+        list_name : list
+            The name of the list
 
         Returns
         -------
-        self
+        Validator
 
         """
 

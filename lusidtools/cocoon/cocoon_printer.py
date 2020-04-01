@@ -23,7 +23,7 @@ def check_dict_for_required_keys(
 
     Returns
     -------
-
+    None
     """
 
     for key in required_keys:

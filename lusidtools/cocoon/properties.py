@@ -25,17 +25,17 @@ def check_property_definitions_exist_in_scope_single(
 
     Parameters
     ----------
-    api_factory :   lusid.utilities.ApiClientFactory
-                    The ApiFactory to use
-    property_key:   str
-                    The property key to get from LUSID
+    api_factory : lusid.utilities.ApiClientFactory
+        The ApiFactory to use
+    property_key: str
+        The property key to get from LUSID
 
     Returns
     -------
-    exists :        bool
-                    Whether or not the property definition exists
-    data_type :     str
-                    property definition's data type
+    exists : bool
+        Whether or not the property definition exists
+    data_type : str
+        property definition's data type
     """
 
     data_type = None
@@ -71,23 +71,23 @@ def check_property_definitions_exist_in_scope(
 
     Parameters
     ----------
-    api_factory :       lusid.utilities.ApiClientFactory
-                        The Api Factory to use
-    scope :             str
-                        The scope to check for property definitions in
-    domain :            str
-                        The domain to check for property definitions in
-    data_frame :        pd.DataFrame
-                        The dataframe to check properties for
-    property_columns :  list[str]
-                        The columns to add properties for
+    api_factory :   lusid.utilities.ApiClientFactory
+        The Api Factory to use
+    scope : str
+        The scope to check for property definitions in
+    domain : str
+        The domain to check for property definitions in
+    data_frame : pd.DataFrame
+        The dataframe to check properties for
+    property_columns : list[str]
+        The columns to add properties for
 
     Returns
     -------
     missing_property_columns :  list[str]
-                                The columns missing properties in LUSID
-    data_frame :                pd.DataFrame
-                                The input DataFrame with types updated
+        The columns missing properties in LUSID
+    data_frame : pd.DataFrame
+        The input DataFrame with types updated
     """
 
     data_type_update_map = {"number": "float64", "string": "object"}
@@ -156,21 +156,21 @@ def create_property_definitions_from_file(
 
     Parameters
     ----------
-    api_factory :               lusid.utilities.ApiClientFactory
-                                The ApiFactory to use
-    scope :                     str
-                                The scope to create the property definitions in
-    domain :                    domain
-                                The domain to create the property definitions in
-    data_frame :                pd.Series
-                                The dataframe dtypes to add definitions for
-    missing_property_columns :  list[str]
-                                The columns that property defintions are missing for
+    api_factory : lusid.utilities.ApiClientFactory
+        The ApiFactory to use
+    scope : str
+        The scope to create the property definitions in
+    domain : domain
+        The domain to create the property definitions in
+    data_frame : pd.Series
+        The dataframe dtypes to add definitions for
+    missing_property_columns : list[str]
+        The columns that property defintions are missing for
 
     Returns
     -------
-    property_key_mapping :      dict
-                                A mapping of data_frame columns to property keys
+    property_key_mapping : dict
+        A mapping of data_frame columns to property keys
     """
 
     missing_property_data_frame = data_frame.loc[:, missing_property_columns]
@@ -294,14 +294,14 @@ def create_property_values(
 
     Parameters
     ----------
-    row :       pd.Series
-                The current row of the data frame to create property values for
-    scope :     str
-                The domain to create the property values in
-    domain :    str
-                The domain to create the property values in
-    dtypes :    pd.Series
-                The data types of each column to create property values for
+    row : pd.Series
+        The current row of the data frame to create property values for
+    scope : str
+        The domain to create the property values in
+    domain : str
+        The domain to create the property values in
+    dtypes : pd.Series
+        The data types of each column to create property values for
 
     Returns
     -------
@@ -367,12 +367,12 @@ def _infer_full_property_keys(
 
     Parameters
     ----------
-    partial_keys :      list[str]
-                        The partial keys
-    properties_scope :  str
-                        The scope of the properties
-    domain :            str
-                        The domain of the properties
+    partial_keys : list[str]
+        The partial keys
+    properties_scope : str
+        The scope of the properties
+    domain : str
+        The domain of the properties
     Returns
     -------
     list[str]

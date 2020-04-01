@@ -19,10 +19,10 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
 
     Parameters
     ----------
-    identifier_lusid :  str
-                        The LUSID identifier in either full key format or code only
-    full_key_format :   bool
-                        Whether or not they key needs to be in the full key format
+    identifier_lusid : str
+        The LUSID identifier in either full key format or code only
+    full_key_format : bool
+        Whether or not they key needs to be in the full key format
 
     Returns
     -------
@@ -59,24 +59,24 @@ def create_identifiers(
     Parameters
     ----------
     index
-                                    The index of the row in the DataFrame
-    row :                           pd.Series
-                                    The row of the DataFrame to create identifiers for
-    file_type :                     str
-                                    The file type to create identifiers for
+        The index of the row in the DataFrame
+    row : pd.Series
+        The row of the DataFrame to create identifiers for
+    file_type : str
+        The file type to create identifiers for
     instrument_identifier_mapping : dict
-                                    The instrument identifier mapping to use
-    unique_identifiers :            list
-                                    The list of allowable unique instrument identifiers
-    full_key_format :               bool
-                                    Whether or not the full key format i.e. 'Instrument/default/Figi' is required
-    prepare_key :                   callable
-                                    The function to use to prepare the key
+        The instrument identifier mapping to use
+    unique_identifiers : list
+        The list of allowable unique instrument identifiers
+    full_key_format : bool
+        Whether or not the full key format i.e. 'Instrument/default/Figi' is required
+    prepare_key : callable
+        The function to use to prepare the key
 
     Returns
     -------
-    identifiers :                   dict
-                                    The identifiers to use on the request
+    identifiers : dict
+        The identifiers to use on the request
     """
 
     # Populate the identifiers for this instrument
@@ -137,18 +137,17 @@ def resolve_instruments(
 
     Parameters
     ----------
-    api_factory :       lusid.utilities.ApiClientFactory
-                        An instance of the Lusid Api Factory
-    data_frame :        pd.DataFrame
-                        The DataFrame containing the transactions or holdings to resolve to unique instruments
-    identifier_mapping: dict
-                        The column mapping between allowable identifiers in LUSID
-                        and identifier columns in the dataframe
+    api_factory : lusid.utilities.ApiClientFactory
+        An instance of the Lusid Api Factory
+    data_frame : pd.DataFrame
+        The DataFrame containing the transactions or holdings to resolve to unique instruments
+    identifier_mapping : dict
+        The column mapping between allowable identifiers in LUSID and identifier columns in the dataframe
 
     Returns
     -------
-    _data_frame :       pd.DataFrame
-                        The input DataFrame with resolution columns added
+    _data_frame : pd.DataFrame
+        The input DataFrame with resolution columns added
     """
 
     if "Currency" not in list(
@@ -300,20 +299,20 @@ def resolve_instruments(
 
 @checkargs
 def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
+
     """
     Tests getting the unique instrument identifiers
 
     Parameters
     ----------
-    api_factory :   lusid.utilities.ApiClientFactory
-                    The LUSID api factory to use
+    api_factory : lusid.utilities.ApiClientFactory
+        The LUSID api factory to use
 
     Returns
     -------
     list[str]
-                    The property keys of the available identifiers
+        The property keys of the available identifiers
     """
-
     # Get the allowed instrument identifiers from LUSID
     identifiers = api_factory.build(
         lusid.api.InstrumentsApi
@@ -433,6 +432,7 @@ async def instrument_search(
 
     Returns
     -------
+    None
 
     """
 
@@ -460,16 +460,16 @@ def instrument_search_single(
 
     Parameters
     ----------
-    api_factory :   lusid.utilities.ApiClientFactory
-                    The Api factory to use
-    search_request: lusid.models.InstrumentSearchProperty
-                    The search request
+    api_factory : lusid.utilities.ApiClientFactory
+        The Api factory to use
+    search_request : lusid.models.InstrumentSearchProperty
+        The search request
     kwargs
 
     Returns
     -------
     list[lusid.models.InstrumentMatch]
-                    The results of the search
+        The results of the search
     """
 
     return lusid.api.SearchApi(

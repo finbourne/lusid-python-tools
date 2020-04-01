@@ -5,9 +5,17 @@ def set_transaction_mapping(client, transaction_mapping):
     """
     Sets the transaction mapping in LUSID so that the system can resolve the transactions into movements
 
-    :param LusidApi client: The LusidApi client to use
-    :param dict transaction_mapping: The transaction mapping configuration
-    :return: ResourceListOfTransactionConfigurationData response: The response from LUSID
+    Parameters
+    ----------
+    client : lusid.utilities.ClientApiFactory
+        The LusidApi client to use
+    transaction_mapping : dict
+        The transaction mapping configuration
+
+    Returns
+    -------
+    response : lusid.models.ResourceListOfTransactionConfigurationData
+        The response from LUSID
     """
 
     # Initialise your list of configuration requests, one for each transaction type
