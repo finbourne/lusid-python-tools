@@ -1187,7 +1187,6 @@ def populate_currency_identifier_for_LUSID(
         The currency code for the current transaction or holding
     """
 
-
     if isinstance(cash_flag_specification["cash_identifiers"][column], dict):
         if row[column] in cash_flag_specification["cash_identifiers"][column]:
             logging.debug("Getting currency code from explicit definition in mapping")
@@ -1589,7 +1588,6 @@ def group_request_into_one(
     request
         a single LUSID request
     """
-
 
     # Define a base request for modifying - this is the first request in the list by default
 
