@@ -32,3 +32,4 @@ import lusidtools.cocoon.async_tools
 import lusidtools.cocoon.validator
 import lusidtools.cocoon.dateorcutlabel
 from lusidtools.cocoon.seed_sample_data import seed_data
+from lusidtools.cocoon.transaction_type_upload import create_transaction_type_configuration
