@@ -8,11 +8,6 @@ Welcome to Lusidtools's documentation!
 
 .. toctree::
    :maxdepth: 2
-   lusidtools/cocoon/cocoon
-   lusidtools/cocoon_printer
-   lsuditools/utilities
-   lusidtools/pandas_utils
-   lusidtools/extract
 
 Cocoon
 ======

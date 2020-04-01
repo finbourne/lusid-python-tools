@@ -41,7 +41,7 @@ def create_transaction_type_configuration(api_factory, alias, movements):
     )
 
     if (alias.type, alias.transaction_group) in aliases_current:
-        logging.error(
+        logging.info(
             "The following alias already exists: "
             + f"Type of {alias.type} with source {alias.transaction_group}"
         )
