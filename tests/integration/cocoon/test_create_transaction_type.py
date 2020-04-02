@@ -89,6 +89,6 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             )
 
             self.assertEqual(
-                f"ERROR:root:The following alias already exists: Type of {self.alias.type} with source {self.alias.transaction_group}",
+                f"WARNING:root:The following alias already exists: Type of {self.alias.type} with source {self.alias.transaction_group}",
                 context_manager.output[1],
             )
