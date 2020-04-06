@@ -36,7 +36,7 @@ Check that the python `bin` folder is on your search path, you may have received
 Run the command below, substituting your secrets file path for the one below.,
 
 ``` sh
-lpt instr_id --secrets-file ~/.lusid/dev-secrets.json
+lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json
 ```
 
 This should run and return a list if configured instrument identifer types.
