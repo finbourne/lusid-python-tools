@@ -36,11 +36,31 @@ def lusid_response_to_data_frame(
     pandas.DataFrame
     """
 
-    if hasattr(lusid_response, "values") and type(lusid_response.values) == list:
+    # Check if lusid_response is a list of the same objects which all have to_dict() method
+
+    if type(lusid_response) == list:
+
+        first_item_type = type(lusid_response[0])
+
+        if not all(isinstance(x, first_item_type) for x in lusid_response):
+            raise TypeError("All items in list must be of same data type")
+
+        if not hasattr(first_item_type, "to_dict"):
+            raise TypeError("All object items in list must have a to_dict() method")
+
+        response_df = pd.DataFrame(
+            flatten(value.to_dict(), ".") for value in lusid_response
+        )
+
+    # Check if lusid_response has a values attribute with data type of list
+
+    elif hasattr(lusid_response, "values") and type(lusid_response.values) == list:
 
         response_df = pd.DataFrame(
             flatten(value.to_dict(), ".") for value in lusid_response.values
         )
+
+    # Check if response object has to_dict() method
 
     elif hasattr(lusid_response, "to_dict"):
 
@@ -52,8 +72,9 @@ def lusid_response_to_data_frame(
     else:
 
         raise TypeError(
-            """Cannot map response object to pandas DataFrame or Series. The LUSID response object must be
-                        either values or to_dict"""
+            """Cannot map response object to pandas DataFrame or Series. The LUSID response object must have
+                        either the values attribute or the to_dict() method, or be a list of objects with 
+                        the to_dict() method"""
         )
 
     if rename_properties:
