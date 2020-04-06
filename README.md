@@ -3,8 +3,9 @@
 # lusid-python-tools
 Python tools for the LUSID
 
-![](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
+[![PyPI version](https://badge.fury.io/py/lusidtools.svg)](https://badge.fury.io/py/lusidtools)
 [![Build Status](https://travis-ci.org/finbourne/lusid-python-tools.svg?branch=master)](https://travis-ci.org/finbourne/lusid-python-tools)
+![](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
 
 For more details see the lusid-python-tools [wiki](https://github.com/finbourne/lusid-python-tools/wiki).
 
