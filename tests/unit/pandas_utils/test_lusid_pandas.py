@@ -84,6 +84,34 @@ class TestResponseToPandasObject(unittest.TestCase):
             units=1372228.0,
         )
 
+        cls.test_instrument_response_1 = lusid.models.instrument.Instrument(
+            lusid_instrument_id="LUID_TEST1",
+            version=1,
+            name="Test LUID1",
+            identifiers={
+                "ClientInternal": "imd_35349922",
+                "Figi": "BBG000BRVH22",
+                "Isin": "GB00B1KJJ422",
+                "LusidInstrumentId": "LUID_ZJJ1IY22",
+                "Ticker": "WTB22",
+            },
+            state="Active",
+        )
+
+        cls.test_instrument_response_2 = lusid.models.instrument.Instrument(
+            lusid_instrument_id="LUID_TEST2",
+            version=1,
+            name="Test LUID2",
+            identifiers={
+                "ClientInternal": "imd_35349900",
+                "Figi": "BBG000BRVH05",
+                "Isin": "GB00B1KJJ408",
+                "LusidInstrumentId": "LUID_ZJJ1IYJS",
+                "Ticker": "WTB",
+            },
+            state="Active",
+        )
+
     def test_response_to_df(self):
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
@@ -96,17 +124,9 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_instrument_response_to_df(self):
 
-        test_instrument_response = lusid.models.instrument.Instrument(
-            lusid_instrument_id="LUID_TEST",
-            version=1,
-            name="Test LUID",
-            identifiers={},
-            state="Active",
-        )
-
-        instrument_df = lusid_response_to_data_frame(test_instrument_response)
+        instrument_df = lusid_response_to_data_frame(self.test_instrument_response_1)
         self.assertEqual(type(instrument_df), pd.DataFrame)
-        self.assertEqual(instrument_df.loc["lusid_instrument_id"][0], "LUID_TEST")
+        self.assertEqual(instrument_df.loc["lusid_instrument_id"][0], "LUID_TEST1")
 
     def test_transaction_alias_response_to_df(self):
 
@@ -302,4 +322,60 @@ class TestResponseToPandasObject(unittest.TestCase):
                     "Shares Outstanding",
                 ]
             ).intersection(set(df_columns)),
+        )
+
+    def test_list_of_lusid_objects(self):
+
+        list_response = [
+            self.test_instrument_response_1,
+            self.test_instrument_response_2,
+        ]
+
+        instrument_df = lusid_response_to_data_frame(list_response)
+        self.assertEqual(type(instrument_df), pd.DataFrame)
+        self.assertEqual(
+            instrument_df.columns.to_list(),
+            [
+                "lusid_instrument_id",
+                "version",
+                "name",
+                "identifiers.ClientInternal",
+                "identifiers.Figi",
+                "identifiers.Isin",
+                "identifiers.LusidInstrumentId",
+                "identifiers.Ticker",
+                "state",
+            ],
+        )
+        self.assertEqual(
+            instrument_df["lusid_instrument_id"].to_list()[0], "LUID_TEST1"
+        )
+
+    def test_list_of_different_lusid_objects(self):
+
+        with self.assertRaises(TypeError) as error:
+
+            list_response = [
+                self.test_instrument_response_1,
+                self.test_instrument_response_2,
+                self.holding_1,
+            ]
+
+            lusid_response_to_data_frame(list_response)
+
+        self.assertEqual(
+            error.exception.args[0], "All items in list must be of same data type",
+        )
+
+    def test_list_of_same_lusid_objects_no_to_dict(self):
+
+        with self.assertRaises(TypeError) as error:
+
+            bad_list = ["random_string_1", "random_string_2"]
+
+            lusid_response_to_data_frame(bad_list)
+
+        self.assertEqual(
+            error.exception.args[0],
+            "All object items in list must have a to_dict() method",
         )
