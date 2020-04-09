@@ -66,7 +66,7 @@ def load_instruments(args):
     succ, errors, failed = cocoon_printer.format_instruments_response(
         instruments_response
     )
-    logging.info(f"number of successful upserts: {len(succ)}")     
+    logging.info(f"number of successful upserts: {len(succ)}")
     logging.info(f"number of failed upserts    : {len(failed)}")
     logging.info(f"number of errors            : {len(errors)}")
 
