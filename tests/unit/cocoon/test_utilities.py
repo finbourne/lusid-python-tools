@@ -965,6 +965,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         [
             # Test a column and default
             [
+                "Test a column and default",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -992,6 +993,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test just a column
             [
+                "Test just a column",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1019,6 +1021,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test just a default
             [
+                "Test just a default",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1052,6 +1055,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test no nesting
             [
+                "Test no nesting",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1080,7 +1084,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_handle_nested_default_and_column_mapping_success(
-        self, data_frame, mapping, expected_outcome
+        self, _, data_frame, mapping, expected_outcome
     ):
         (
             updated_data_frame,
@@ -1095,8 +1099,25 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
+            # Test empty string
+            [
+                "Test empty string",
+                pd.DataFrame(
+                    data={
+                        "instrument_name": [
+                            "International Business Machines",
+                            np.NaN,
+                            "Amazon",
+                            "Apple",
+                        ]
+                    }
+                ),
+                {"name": ""},
+                IndexError,
+            ],
             # Test providing a dictionary with no column or default keys
             [
+                "Test providing a dictionary with no column or default keys",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1112,6 +1133,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test providing an empty dictionary
             [
+                "Test providing an empty dictionary",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1127,6 +1149,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test providing a list
             [
+                "Test providing a list",
                 pd.DataFrame(
                     data={
                         "instrument_name": [
@@ -1143,7 +1166,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_handle_nested_default_and_column_mapping_failure(
-        self, data_frame, mapping, expected_exception
+        self,_ , data_frame, mapping, expected_exception
     ):
         with self.assertRaises(expected_exception):
             cocoon.utilities.handle_nested_default_and_column_mapping(
