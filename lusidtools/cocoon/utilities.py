@@ -836,6 +836,11 @@ def handle_nested_default_and_column_mapping(
                 )
 
         elif isinstance(value, str):
+
+            if len(value) == 0:
+                raise IndexError(f"Unspecified mapping field: {key}. Please assign a value or remove this from the "
+                                 f"mapping")
+
             if value[0] != constant_prefix:
                 mapping_updated[key] = value
             else:
