@@ -1357,6 +1357,7 @@ def generate_time_based_unique_id(time_generator: None):
     uid = "-".join(timestamp[i : i + 4] for i in range(2, len(timestamp), 4))
     return uid
 
+
 def create_scope_id(time_generator=None):
     """
     This function creates a unique ID based on the time since epoch for use
