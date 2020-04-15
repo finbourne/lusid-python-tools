@@ -154,9 +154,9 @@ def format_instruments_response(
     items_success, items_failed = get_non_href_response(response, file_type)
 
     return (
-        pd.DataFrame(items_success, columns=["successful items"]),
+        items_success,
         get_errors_from_response(response[file_type]["errors"]),
-        pd.DataFrame(items_failed, columns=["failed_items"]),
+        items_failed,
     )
 
 
@@ -298,7 +298,7 @@ def format_quotes_response(
     )
 
     return (
-        pd.DataFrame(items_success),
+        items_success,
         get_errors_from_response(response[file_type]["errors"]),
-        pd.DataFrame(items_failed, columns=["failed_items"]),
+        items_failed,
     )
