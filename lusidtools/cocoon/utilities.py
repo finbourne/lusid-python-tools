@@ -1317,6 +1317,46 @@ def strip_whitespace(df: pd.DataFrame, columns: list) -> pd.DataFrame:
     return stripped_df
 
 
+def generate_time_based_unique_id(time_generator: None):
+    """
+    Generates a unique ID based on the time since epoch.
+
+    Parameters
+    ----------
+    time_generator
+        Any class that has a .time() method on it which produces time since 1970 in seconds
+
+    Returns
+    -------
+    uid : str
+        Unique, time based ID
+
+    """
+
+    if time_generator is None or isinstance(time_generator, types.ModuleType):
+        time_generator = default_time
+
+    elif getattr(time_generator, "time", None) is None or not isinstance(
+        getattr(time_generator, "time"), types.MethodType
+    ):
+        raise AttributeError(
+            "The provided time_generator does not have a method called time"
+        )
+
+    # Get the current time since epoch
+    current_time = time_generator.time()
+
+    if not isinstance(current_time, int) and not isinstance(current_time, float):
+        raise ValueError(
+            f"The provided response time time_generator.time() is not an int it is a {type(current_time)}"
+        )
+
+    # Multiply by 7 to get value to 100s of nano seconds
+    timestamp = hex(int(current_time * 10000000.0))
+    # Create the scope id by joining the hex representation with dashes every 4 characters
+    uid = "-".join(timestamp[i : i + 4] for i in range(2, len(timestamp), 4))
+    return uid
+
 def create_scope_id(time_generator=None):
     """
     This function creates a unique ID based on the time since epoch for use
@@ -1333,29 +1373,7 @@ def create_scope_id(time_generator=None):
         Scope identifier
     """
 
-    if time_generator is None or isinstance(time_generator, types.ModuleType):
-        time_generator = default_time
-
-    elif getattr(time_generator, "time", None) is None or not isinstance(
-        getattr(time_generator, "time"), types.MethodType
-    ):
-        raise AttributeError(
-            "The provided time_generator does not have a method called time"
-        )
-
-    # Get the current time since epoch
-    test = time_generator.time()
-
-    if not isinstance(test, int) and not isinstance(test, float):
-        raise ValueError(
-            f"The provided response time time_generator.time() is not an int it is a {type(test)}"
-        )
-
-    # Multiply by 7 to get value to 100s of nano seconds
-    timestamp = hex(int(test * 10000000.0))
-    # Create the scope id by joining the hex representation with dashes every 4 characters
-    scope_id = "-".join(timestamp[i : i + 4] for i in range(2, len(timestamp), 4))
-    return scope_id
+    return generate_time_based_unique_id(time_generator)
 
 
 def default_fx_forward_model(
