@@ -381,62 +381,103 @@ class CocoonPrinterTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("standard_response", responses, 2),
-            ("empty_response", empty_response_with_full_shape, 0),
-            ("empty_response_missing_shape", empty_response_missing_shape, 0),
+            ("standard_response", responses,  2,
+             {
+                 "succ": ["ClientInternal: imd_00001234", "ClientInternal: imd_00001234"],
+                 "failed": ["ClientInternal: imd_00001234", "ClientInternal: imd_00001234"],
+                 "err": ["not found", "not found"]
+             }),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
         ]
     )
-    def test_format_instruments_response_success(self, _, response, num_items):
+    def test_format_instruments_response_success(self, _, response, num_items, ground_truth):
         succ, err, failed = format_instruments_response(response)
         self.assertEqual(num_items, len(failed))
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
+        [self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]]) for index, row in succ.iterrows()]
+        [self.assertEqual(ground_truth["failed"][index], row[failed.columns[0]]) for index, row in failed.iterrows()]
+        [self.assertEqual(ground_truth["err"][index], row[err.columns[0]]) for index, row in err.iterrows()]
     @parameterized.expand(
         [
-            ("standard_response", responses, 2),
-            ("empty_response", empty_response_with_full_shape, 0),
+            ("standard_response", responses, 2,
+             {
+                 "succ": ["ID00001", "ID00001"],
+                 "err": ["not found", "not found"]
+             }
+             ),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
         ]
     )
-    def test_format_portfolios_response_success(self, _, response, num_items):
+    def test_format_portfolios_response_success(self, _, response, num_items, ground_truth):
         succ, err = format_portfolios_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
+        [self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]]) for index, row in succ.iterrows()]
+        [self.assertEqual(ground_truth["err"][index], row[err.columns[0]]) for index, row in err.iterrows()]
+
     @parameterized.expand(
         [
-            ("standard_response", responses, 2),
-            ("empty_response", empty_response_with_full_shape, 0),
+            ("standard_response", responses, 2,
+             {
+                 "succ": ["code", "code"],
+                 "err": ["not found", "not found"]
+             }
+             ),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
         ]
     )
-    def test_format_transactions_response_success(self, _, response, num_items):
+    def test_format_transactions_response_success(self, _, response, num_items, ground_truth):
         succ, err = format_transactions_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
+        [self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]]) for index, row in succ.iterrows()]
+        [self.assertEqual(ground_truth["err"][index], row[err.columns[0]]) for index, row in err.iterrows()]
     @parameterized.expand(
         [
-            ("standard_response", responses, 2),
-            ("empty_response", empty_response_with_full_shape, 0),
-            ("empty_response_missing_shape", empty_response_missing_shape, 0),
+            ("standard_response", responses, 2,
+             {
+                 "succ": ["BBG001MM1KV4", "BBG001MM1KV4"],
+                 "failed": ["BBG001MM1KV4", "BBG001MM1KV4"],
+                 "err": ["not found", "not found"]
+             }
+             ),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
         ]
     )
-    def test_format_quotes_response_success(self, _, response, num_items):
+    def test_format_quotes_response_success(self, _, response, num_items, ground_truth):
         succ, err, failed = format_quotes_response(response)
         self.assertEqual(num_items, len(failed))
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
+        [self.assertEqual(ground_truth["succ"][index], row['quote_id.quote_series_id.instrument_id']) for index, row in succ.iterrows()]
+        [self.assertEqual(ground_truth["failed"][index], row['quote_id.quote_series_id.instrument_id']) for index, row in failed.iterrows()]
+        [self.assertEqual(ground_truth["err"][index], row[err.columns[0]]) for index, row in err.iterrows()]
+
     @parameterized.expand(
         [
-            ("standard_response", responses, 2),
-            ("empty_response", empty_response_with_full_shape, 0),
+            ("standard_response", responses, 2,
+             {
+                 "succ": ["code", "code"],
+                 "err": ["not found", "not found"]
+             }
+             ),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
         ]
     )
-    def test_format_holdings_response_success(self, _, response, num_items):
+    def test_format_holdings_response_success(self, _, response, num_items, ground_truth):
         succ, err = format_holdings_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
+
+        [self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]]) for index, row in succ.iterrows()]
+        [self.assertEqual(ground_truth["err"][index], row[err.columns[0]]) for index, row in err.iterrows()]
 
     # Test failure cases
 
