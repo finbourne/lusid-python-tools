@@ -1470,14 +1470,14 @@ def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
     file_type = "transactions"
     logging.info(f"updating mapping to new Total Consideration and transaction fields ")
     # currencies and amounts coming into the portfolio i.e. buy
-    buy_fields = [
+    sell_fields = [
         "total_consideration.amount",
         "total_consideration.currency",
         "settlement_currency",
     ]
 
     # currencies and amounts leaving the portfolio i.e. sell
-    sell_fields = ["units", "transaction_currency"]
+    buy_fields = ["units", "transaction_currency"]
 
     for key in new_mapping[file_type]["required"].keys():
         if key in buy_fields:
