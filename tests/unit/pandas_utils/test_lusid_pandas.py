@@ -379,3 +379,13 @@ class TestResponseToPandasObject(unittest.TestCase):
             error.exception.args[0],
             "All object items in list must have a to_dict() method",
         )
+
+    def test_empty_list_lusid_response(self):
+
+        empty_list = []
+
+        empty_df = lusid_response_to_data_frame(empty_list)
+
+        print(empty_df)
+
+        self.assertEqual(empty_df.empty, True)

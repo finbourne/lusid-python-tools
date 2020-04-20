@@ -38,7 +38,10 @@ def lusid_response_to_data_frame(
 
     # Check if lusid_response is a list of the same objects which all have to_dict() method
 
-    if type(lusid_response) == list:
+    if type(lusid_response) == list and len(lusid_response) == 0:
+        return pd.DataFrame()
+
+    elif type(lusid_response) == list and len(lusid_response) > 0:
 
         first_item_type = type(lusid_response[0])
 
