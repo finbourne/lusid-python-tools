@@ -1916,15 +1916,15 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         "required": {
                             "code": "$fund_id",
                             "settlement_date": "date",
-                            "total_consideration.amount": "quantity_b",
-                            "total_consideration.currency": "currency_b",
-                            "transaction_currency": "currency_s",
+                            "total_consideration.amount": "quantity_s",
+                            "total_consideration.currency": "currency_s",
+                            "transaction_currency": "currency_b",
                             "transaction_date": "date",
                             "transaction_id": "TX_ID",
                             "transaction_price.price": "Price",
                             "transaction_price.type": "$Price",
                             "type": "type",
-                            "units": "quantity_s",
+                            "units": "quantity_b",
                         }
                     }
                 },
