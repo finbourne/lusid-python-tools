@@ -1442,13 +1442,17 @@ def default_fx_forward_model(
     )
 
     mapping_cash_txn = remap_after_merge(
-        mapping, transaction_units_suffix=transaction_units_suffix, total_consideration_suffix=total_consideration_suffix
+        mapping,
+        transaction_units_suffix=transaction_units_suffix,
+        total_consideration_suffix=total_consideration_suffix,
     )
 
     return fwds_txn_df, mapping_cash_txn
 
 
-def remap_after_merge(mapping: dict, transaction_units_suffix: str, total_consideration_suffix: str) -> dict:
+def remap_after_merge(
+    mapping: dict, transaction_units_suffix: str, total_consideration_suffix: str
+) -> dict:
     """
     Remaps buy and sell fields in a mapping dictionary to the suffixed column names after a dataframe merge
 
