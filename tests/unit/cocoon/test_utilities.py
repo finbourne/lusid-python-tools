@@ -1166,7 +1166,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_handle_nested_default_and_column_mapping_failure(
-        self,_ , data_frame, mapping, expected_exception
+        self, _, data_frame, mapping, expected_exception
     ):
         with self.assertRaises(expected_exception):
             cocoon.utilities.handle_nested_default_and_column_mapping(
