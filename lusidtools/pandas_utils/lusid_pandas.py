@@ -38,24 +38,22 @@ def lusid_response_to_data_frame(
 
     # Check if lusid_response is a list of the same objects which all have to_dict() method
 
-    if type(lusid_response) == list:
+    if type(lusid_response) == list and len(lusid_response) == 0:
+        return pd.DataFrame()
 
-        if len(lusid_response) == 0:
-            return pd.DataFrame()
+    elif type(lusid_response) == list and len(lusid_response) > 0:
 
-        else:
+        first_item_type = type(lusid_response[0])
 
-            first_item_type = type(lusid_response[0])
+        if not all(isinstance(x, first_item_type) for x in lusid_response):
+            raise TypeError("All items in list must be of same data type")
 
-            if not all(isinstance(x, first_item_type) for x in lusid_response):
-                raise TypeError("All items in list must be of same data type")
+        if not hasattr(first_item_type, "to_dict"):
+            raise TypeError("All object items in list must have a to_dict() method")
 
-            if not hasattr(first_item_type, "to_dict"):
-                raise TypeError("All object items in list must have a to_dict() method")
-
-            response_df = pd.DataFrame(
-                flatten(value.to_dict(), ".") for value in lusid_response
-            )
+        response_df = pd.DataFrame(
+            flatten(value.to_dict(), ".") for value in lusid_response
+        )
 
     # Check if lusid_response has a values attribute with data type of list
 
