@@ -1387,8 +1387,8 @@ def create_scope_id(time_generator=None):
 def default_fx_forward_model(
     df: pd.DataFrame,
     fx_code: str,
-    func_b: typing.Callable[[], bool],
-    func_s: typing.Callable[[], bool],
+    func_transaction_units: typing.Callable[[], bool],
+    func_total_consideration: typing.Callable[[], bool],
     mapping: dict,
 ) -> (pd.DataFrame, dict):
     """
@@ -1400,10 +1400,10 @@ def default_fx_forward_model(
         DataFrame containing transactions data
     fx_code : str
         The transaction type that identifies a forward
-    func_b : typing.Callable[[], bool]
-        function that evaluates to true for where the dataframe row is a buy side
-    func_s : typing.Callable[[], bool]
-        function that evaluates to true for where the dataframe row is a sell side
+    func_transaction_units : typing.Callable[[], bool]
+        function that evaluates to true for where the dataframe row contains transaction units
+    func_total_consideration : typing.Callable[[], bool]
+        function that evaluates to true for where the dataframe row contains total consideration
     mapping : dict
         mapping for FX transactions
 
@@ -1423,32 +1423,32 @@ def default_fx_forward_model(
 
     fwds_df = pd.DataFrame(df[df[t_type] == fx_code])
 
-    buy_df = fwds_df[func_b]
-    sell_df = fwds_df[func_s]
+    transaction_units_df = fwds_df[func_transaction_units]
+    total_consideration_df = fwds_df[func_total_consideration]
 
     t_id = mapping["transactions"]["required"]["transaction_id"]
 
-    buy_suffix = "_b"
-    sell_suffix = "_s"
+    transaction_units_suffix = "_txn"
+    total_consideration_suffix = "_tc"
     logging.info(
-        f"merging buy and sell legs of FX trades and suffixing with {[buy_suffix, sell_suffix]}"
+        f"merging buy and sell legs of FX trades and suffixing with {[transaction_units_suffix, total_consideration_suffix]}"
     )
     fwds_txn_df = pd.merge(
-        buy_df,
-        sell_df,
+        transaction_units_df,
+        total_consideration_df,
         how="outer",
         on=[t_id, t_type],
-        suffixes=[buy_suffix, sell_suffix],
+        suffixes=[transaction_units_suffix, total_consideration_suffix],
     )
 
     mapping_cash_txn = remap_after_merge(
-        mapping, buy_suffix=buy_suffix, sell_suffix=sell_suffix
+        mapping, transaction_units_suffix=transaction_units_suffix, total_consideration_suffix=total_consideration_suffix
     )
 
     return fwds_txn_df, mapping_cash_txn
 
 
-def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
+def remap_after_merge(mapping: dict, transaction_units_suffix: str, total_consideration_suffix: str) -> dict:
     """
     Remaps buy and sell fields in a mapping dictionary to the suffixed column names after a dataframe merge
 
@@ -1456,10 +1456,10 @@ def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
     ----------
     mapping : dict
         mapping dictionary that needs updating
-    buy_suffix : str
-        Suffix appended to buy side transaction fields (e.g. "_b")
-    sell_suffix : str
-        Suffix appended to sell side transaction fields(e.g. "_s")
+    transaction_units_suffix : str
+        Suffix appended to transaction units transaction fields (e.g. "_txn")
+    total_consideration_suffix : str
+        Suffix appended to total consideration transaction fields(e.g. "_tc")
 
     Returns
     -------
@@ -1470,28 +1470,30 @@ def remap_after_merge(mapping: dict, buy_suffix: str, sell_suffix: str) -> dict:
     file_type = "transactions"
     logging.info(f"updating mapping to new Total Consideration and transaction fields ")
     # currencies and amounts coming into the portfolio i.e. buy
-    sell_fields = [
+
+    total_consideration_fields = [
         "total_consideration.amount",
         "total_consideration.currency",
         "settlement_currency",
     ]
 
     # currencies and amounts leaving the portfolio i.e. sell
-    buy_fields = ["units", "transaction_currency"]
+
+    transaction_units_fields = ["units", "transaction_currency"]
 
     for key in new_mapping[file_type]["required"].keys():
-        if key in buy_fields:
+        if key in transaction_units_fields:
             update_dict_value(
                 new_mapping,
                 key,
-                new_mapping[file_type]["required"][key] + buy_suffix,
+                new_mapping[file_type]["required"][key] + transaction_units_suffix,
                 [file_type],
             )
-        elif key in sell_fields:
+        elif key in total_consideration_fields:
             update_dict_value(
                 new_mapping,
                 key,
-                new_mapping[file_type]["required"][key] + sell_suffix,
+                new_mapping[file_type]["required"][key] + total_consideration_suffix,
                 [file_type],
             )
     return new_mapping
