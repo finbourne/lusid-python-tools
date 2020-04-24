@@ -250,8 +250,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
 
         self.assertEqual(
             error.exception.args[0],
-            f"""Inconsistent file and file extensions passed: {seed_sample_data_override_csv} does 
-                not have file extension {self.file_extension}""",
+            f"""Inconsistent file and file extensions passed: {seed_sample_data_override_csv} does not have file extension {self.file_extension}""",
         )
 
     def test_file_not_exist(self):
@@ -266,4 +265,25 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
             self.scope,
             self.transaction_file,
             file_type="csv",
+        )
+
+
+class CocoonTestSeedDataPassDataFrame(unittest.TestCase, CocoonSeedDataTestsBase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.scope = create_scope_id().replace("-", "_")
+        cls.api_factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=secrets_file
+        )
+
+        cls.test_dataframe = pd.read_csv(sample_data_csv)
+        cls.sample_data = pd.read_csv(sample_data_csv)
+
+        seed_data(
+            cls.api_factory,
+            ["portfolios", "instruments", "transactions"],
+            cls.scope,
+            cls.test_dataframe,
+            sub_holding_keys=[f"Transaction/{cls.scope}/strategy"],
+            file_type="DataFrame",
         )
