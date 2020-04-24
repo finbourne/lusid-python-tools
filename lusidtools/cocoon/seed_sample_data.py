@@ -56,8 +56,7 @@ def seed_data(
 
         if Path(transaction_file).suffix != "." + file_type.lower():
             raise ValueError(
-                f"""Inconsistent file and file extensions passed: {str(transaction_file)} does 
-                    not have file extension {file_type}"""
+                f"""Inconsistent file and file extensions passed: {str(transaction_file)} does not have file extension {file_type}"""
             )
 
         if file_type not in supported_files:

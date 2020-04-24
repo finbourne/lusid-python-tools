@@ -250,8 +250,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
 
         self.assertEqual(
             error.exception.args[0],
-            f"""Inconsistent file and file extensions passed: {seed_sample_data_override_csv} does 
-                not have file extension {self.file_extension}""",
+            f"""Inconsistent file and file extensions passed: {seed_sample_data_override_csv} does not have file extension {self.file_extension}""",
         )
 
     def test_file_not_exist(self):
@@ -269,9 +268,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
         )
 
 
-class CocoonTestSeedDataPassDataFrame(
-    unittest.TestCase, CocoonSeedDataTestsBase
-):
+class CocoonTestSeedDataPassDataFrame(unittest.TestCase, CocoonSeedDataTestsBase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
