@@ -267,3 +267,26 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
             self.transaction_file,
             file_type="csv",
         )
+
+
+class CocoonTestSeedDataPassDataFrame(
+    unittest.TestCase, CocoonSeedDataTestsBase
+):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.scope = create_scope_id().replace("-", "_")
+        cls.api_factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=secrets_file
+        )
+
+        cls.test_dataframe = pd.read_csv(sample_data_csv)
+        cls.sample_data = pd.read_csv(sample_data_csv)
+
+        seed_data(
+            cls.api_factory,
+            ["portfolios", "instruments", "transactions"],
+            cls.scope,
+            cls.test_dataframe,
+            sub_holding_keys=[f"Transaction/{cls.scope}/strategy"],
+            file_type="DataFrame",
+        )

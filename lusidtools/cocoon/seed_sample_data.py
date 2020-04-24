@@ -45,22 +45,27 @@ def seed_data(
 
     """
 
-    # Gather a dictionary of supported files
+    if file_type == "DataFrame" and type(transaction_file) == pd.DataFrame:
+        data_frame = transaction_file
 
-    supported_files = {"csv": "csv", "xlsx": "excel"}
+    else:
 
-    if Path(transaction_file).suffix != "." + file_type.lower():
-        raise ValueError(
-            f"""Inconsistent file and file extensions passed: {str(transaction_file)} does 
-                not have file extension {file_type}"""
-        )
+        # Gather a dictionary of supported files
 
-    if file_type not in supported_files:
-        raise ValueError(
-            f"Unsupported file type, please upload one of the following: {list(supported_files.keys())}"
-        )
+        supported_files = {"csv": "csv", "xlsx": "excel"}
 
-    data_frame = getattr(pd, f"read_{supported_files[file_type]}")(transaction_file)
+        if Path(transaction_file).suffix != "." + file_type.lower():
+            raise ValueError(
+                f"""Inconsistent file and file extensions passed: {str(transaction_file)} does 
+                    not have file extension {file_type}"""
+            )
+
+        if file_type not in supported_files:
+            raise ValueError(
+                f"Unsupported file type, please upload one of the following: {list(supported_files.keys())}"
+            )
+
+        data_frame = getattr(pd, f"read_{supported_files[file_type]}")(transaction_file)
 
     def generic_load_from_data_frame(file_type):
 
