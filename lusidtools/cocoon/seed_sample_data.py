@@ -30,8 +30,8 @@ def seed_data(
         A list of the file_types for upload.
     scope : str
         The scope of the transaction portfolio.
-    transaction_file : str
-        The absolute or relative path to source file of transaction data.
+    transaction_file : Union[str, panads.DataFrame]
+        The absolute or relative path to source file of transaction data or a pandas DataFrame
     file_type : str
         the file extension (e.g. "csv" for "test_transaction.csv".
     mappings : dict
