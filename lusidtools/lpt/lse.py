@@ -4,8 +4,6 @@ import inspect
 import json
 import os
 
-import msrest
-
 from . import lpt
 from .either import Either
 from .record import Rec
@@ -114,16 +112,6 @@ class Caller:
                     err.status,
                     {},
                 ]
-            except msrest.exceptions.ClientRequestError as cerr:
-                return Either.Left(
-                    "ERROR: exception in call to {}\n{}".format(name, cerr)
-                )
-            except msrest.exceptions.HttpOperationError as herr:
-                return Either.Left(
-                    "ERROR: exception in call to {}\n{}".format(
-                        name, herr.response.text
-                    )
-                )
 
             endTime = datetime.datetime.now()
 

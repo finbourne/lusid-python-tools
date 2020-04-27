@@ -92,6 +92,7 @@ def dfq(args, given_df=None):
         args.first
         if args.first > 0
         and args.last == 0
+        and given_df is None
         and args.groupby is None
         and args.where is None
         and args.order is None
@@ -104,7 +105,7 @@ def dfq(args, given_df=None):
 
         args.input = glob.glob(args.input[0])
 
-    if args.columns:
+    if args.columns and given_df is None:
         args.input = args.input[0:1]
         nrows = 2
 
