@@ -134,7 +134,6 @@ def make_code_lusid_friendly(raw_code) -> str:
         raw_code.replace("%", "Percentage")
         .replace("&", "and")
         .replace(".", "_")
-        .replace("-", "_")
         .strip(),
     )
 
