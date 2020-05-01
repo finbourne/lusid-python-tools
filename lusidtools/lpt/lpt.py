@@ -136,7 +136,7 @@ def from_df(
                     key=property_key,
                     value=complex_types["PropertyValue"](label_value=value),
                 )
-            elif value != None:
+            elif pd.isna(value) == False:
                 return ptype(
                     key=property_key,
                     value=complex_types["PropertyValue"](
