@@ -12,8 +12,7 @@ class TestResponseToPandasObject(unittest.TestCase):
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+            api_secrets_filename=secrets_file)
 
         cls.holding_no_props_1 = lusid.models.portfolio_holding.PortfolioHolding(
             cost={"amount": 549997.05, "currency": "GBP"},
