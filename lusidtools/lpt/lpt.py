@@ -342,7 +342,7 @@ def Serialise(api, body, bodyType):
 
 def process_input(aliases, api, args, fn):
     df = pd.concat(
-        [lpt.read_input(input_file, dtype=str) for input_file in args.input],
+        [read_input(input_file, dtype=str) for input_file in args.input],
         ignore_index=True,
         sort=False,
     )
