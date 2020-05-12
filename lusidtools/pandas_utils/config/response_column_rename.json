@@ -1,0 +1,37 @@
+{
+    "TransactionRequest": {
+        "transaction_id": "TransactionId",
+        "type": "TransactionType",
+        "description": "TransactionTypeDescription",
+        "instrument_identifiers.Instrument/default/ClientInternal": "ClientInternalId",
+        "instrument_identifiers.Instrument/default/Currency": "InstrumentCurrency",
+        "instrument_uid": "LusidInstrumentId",
+        "transaction_date": "TransactionDate",
+        "settlement_date": "SettlementDate",
+        "units": "Units",
+        "transaction_amount": "TransactionAmount",
+        "transaction_price.price": "Price",
+        "transaction_price.type": "PriceType",
+        "total_consideration.amount": "TotalConsiderationAmount",
+        "total_consideration.currency": "TotalConsiderationCurrency",
+        "exchange_rate": "ExchangeRate",
+        "transaction_to_portfolio_rate": "TxnToPortRate",
+        "transaction_currency": "TransactionCurrency",
+        "ResultantHolding(default-Properties)": "ResultantHolding",
+        "Name(default-Properties)": "InstrumentName",
+        "transaction_status": "TransactionStatus",
+        "entry_date_time": "EntryDateTime"
+    },
+    "PortfolioHolding": {
+        "instrument_uid": "LusidInstrumentId",
+        "holding_type": "HoldingType",
+        "units": "Units",
+        "settled_units": "SettledUnits",
+        "cost.amount": "AmountCost",
+        "cost.currency": "CurrencyCost",
+        "cost_portfolio_ccy.amount": "CostPortfolioCcyAmount",
+        "cost_portfolio_ccy.currency": "CostPortfolioCcyCurrency",
+        "Name(default-Properties)": "InstrumentName"
+
+    }
+}

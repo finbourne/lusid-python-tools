@@ -1,12 +1,19 @@
 import pandas as pd
-from flatten_json import flatten
+import json
 import logging
+import lusid
+from pathlib import Path
+from flatten_json import flatten
+
 
 logger = logging.getLogger()
 
 
 def lusid_response_to_data_frame(
-    lusid_response, rename_properties: bool = False, column_name_mapping: dict = None
+    lusid_response,
+    rename_properties: bool = False,
+    column_name_mapping: dict = None,
+    lusidtools_column_rename=False,
 ):
     """
     This function takes a LUSID API response and attempts to convert the response into a Pandas DataFrame or Series.
@@ -55,6 +62,8 @@ def lusid_response_to_data_frame(
             flatten(value.to_dict(), ".") for value in lusid_response
         )
 
+        lusid_response_model = lusid_response[0].__class__.__name__
+
     # Check if lusid_response has a values attribute with data type of list
 
     elif hasattr(lusid_response, "values") and type(lusid_response.values) == list:
@@ -62,6 +71,8 @@ def lusid_response_to_data_frame(
         response_df = pd.DataFrame(
             flatten(value.to_dict(), ".") for value in lusid_response.values
         )
+
+        lusid_response_model = lusid_response.values[0].__class__.__name__
 
     # Check if response object has to_dict() method
 
@@ -124,5 +135,18 @@ def lusid_response_to_data_frame(
     if column_name_mapping:
 
         response_df.rename(columns=column_name_mapping, inplace=True)
+
+    if lusidtools_column_rename:
+
+        config_file = Path(__file__).parent.joinpath(
+            "config/response_column_rename.json"
+        )
+
+        with open(config_file, "r") as rename_json_file:
+            rename_json_mapping = json.load(rename_json_file)
+
+        rename_dict = rename_json_mapping[lusid_response_model]
+
+        response_df.rename(columns=rename_dict, inplace=True)
 
     return response_df.dropna(axis=1, how="all")
