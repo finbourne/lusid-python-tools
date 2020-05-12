@@ -18,9 +18,14 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
     @parameterized.expand(
         [
             [
-                "Already in ISO format",
+                "Already in ISO format positive offset",
                 "2019-11-04T13:25:34+00:00",
                 "2019-11-04T13:25:34+00:00",
+            ],
+            [
+                "Already in ISO format negative offset",
+                "2020-04-29T09:30:00-05:00",
+                "2020-04-29T09:30:00-05:00",
             ],
             [
                 "Already in ISO format with microseconds",
@@ -86,15 +91,13 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
         ]
     )
     def test_dateorcutlabel(self, test_name, datetime_value, expected_outcome):
+        # There is no handling for month first, it will assume it is day first
         ignore = ["A date with month first"]
         if test_name in ignore:
-            self.skipTest("Test not implemented ")
-        if "custom date" in test_name:
-            datetime_value, custom_format = datetime_value
-        else:
-            custom_format = None
+            self.skipTest(
+                "Test not implemented ")
 
-        date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
+        date_or_cut_label = DateOrCutLabel(datetime_value)
 
         self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))
 

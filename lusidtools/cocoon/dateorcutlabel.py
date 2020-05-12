@@ -86,11 +86,11 @@ def _process_date_as_string(datetime_value: str):
         pass
     # Already in isoformat
     elif (
-        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d+", datetime_value,)
+        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d+", datetime_value,)
         or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value)
         or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value)
         or re.findall(
-            "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}", datetime_value,
+            "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+[\+-]\d{2}:\d{2}", datetime_value,
         )
     ):
         pass
