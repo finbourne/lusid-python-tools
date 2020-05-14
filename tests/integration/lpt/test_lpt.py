@@ -82,12 +82,14 @@ class LptTests(unittest.TestCase):
         # Load orders from the file: examples/orders.csv
         co.process_args(
             self.api,
-            co.parse(args=[
-                "--identifiers",
-                "Ticker",
-                "--",
-                f".{os.path.sep}examples{os.path.sep}orders.csv"
-            ]),
+            co.parse(
+                args=[
+                    "--identifiers",
+                    "Ticker",
+                    "--",
+                    f".{os.path.sep}examples{os.path.sep}orders.csv",
+                ]
+            ),
         ).if_left(lambda r: self.fail(r))
 
     def test_create_properties(self):

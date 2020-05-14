@@ -54,12 +54,23 @@ def upsert_orders(api, args, df, identifiers, prop_keys):
                 id=api.models.ResourceId(row["id.scope"], row["id.code"]),
                 side=row["side"],
                 quantity=row["quantity"],
-                order_book_id=api.models.ResourceId(row["orderBookId.scope"], row["orderBookId.code"]),
-                portfolio_id=api.models.ResourceId(row["portfolioId.scope"], row["portfolioId.code"]),
-                instrument_identifiers={'Instrument/default/' + identifier: row[identifier] for identifier in
-                                        identifiers},
-                properties={key[2:]: api.models.ModelProperty(key[2:], api.models.PropertyValue(row[key])) for key in
-                            prop_keys if pd.notna(row[key])}
+                order_book_id=api.models.ResourceId(
+                    row["orderBookId.scope"], row["orderBookId.code"]
+                ),
+                portfolio_id=api.models.ResourceId(
+                    row["portfolioId.scope"], row["portfolioId.code"]
+                ),
+                instrument_identifiers={
+                    "Instrument/default/" + identifier: row[identifier]
+                    for identifier in identifiers
+                },
+                properties={
+                    key[2:]: api.models.ModelProperty(
+                        key[2:], api.models.PropertyValue(row[key])
+                    )
+                    for key in prop_keys
+                    if pd.notna(row[key])
+                },
             )
             for idx, row in df.iterrows()
         ]

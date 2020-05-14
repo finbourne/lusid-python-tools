@@ -63,9 +63,7 @@ def create_instr(api, args, df, identifiers, prop_keys):
         ]
 
     def success(r):
-        df = lpt.to_df(
-            [err[1] for err in r.content.failed.items()], ["id", "detail"]
-        )
+        df = lpt.to_df([err[1] for err in r.content.failed.items()], ["id", "detail"])
         df.columns = ["FAILED-INSTRUMENT", "ERROR"]
         return lpt.trim_df(df, args.limit, sort="FAILED-INSTRUMENT")
 
