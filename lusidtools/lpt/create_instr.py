@@ -5,6 +5,8 @@ from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 
 # Instrument column names
+from lusidtools.lpt.lpt import process_input
+
 NAME = "name"
 LT_SCOPE = "look_through_portfolio_id.scope"
 LT_CODE = "look_through_portfolio_id.code"
@@ -42,78 +44,55 @@ def process_args(api, args):
     }
 
     if args.input:
-        df = pd.concat(
-            [lpt.read_input(input_file, dtype=str) for input_file in args.input],
-            ignore_index=True,
-            sort=False,
-        )
+        return process_input(aliases, api, args, create_instr)
 
-        if args.mappings:
-            df.rename(
-                columns=dict(
-                    [
-                        (s[1], aliases.get(s[0], s[0]))
-                        for s in [m.split("=") for m in args.mappings]
-                    ]
-                ),
-                inplace=True,
-            )
 
-        prop_keys = [col for col in df.columns.values if col.startswith("P:")]
+def create_instr(api, args, df, identifiers, prop_keys):
+    def make_identifiers(row):
+        return {
+            identifier: api.models.InstrumentIdValue(row[identifier])
+            for identifier in identifiers
+            if pd.notna(row[identifier])
+        }
 
-        identifiers = [col for col in df.columns.values if col in args.identifiers]
-
-        # Identifiers have to be unique
-        df = df.drop_duplicates(identifiers)
-
-        def make_identifiers(row):
-            return {
-                identifier: api.models.InstrumentIdValue(row[identifier])
-                for identifier in identifiers
-                if pd.notna(row[identifier])
-            }
-
-        def make_properties(row):
-            return [
-                api.models.ModelProperty(key[2:], api.models.PropertyValue(row[key]))
-                for key in prop_keys
-                if pd.notna(row[key])
-            ]
-
-        def success(r):
-            df = lpt.to_df(
-                [err[1] for err in r.content.failed.items()], ["id", "detail"]
-            )
-            df.columns = ["FAILED-INSTRUMENT", "ERROR"]
-            return lpt.trim_df(df, args.limit, sort="FAILED-INSTRUMENT")
-
-        has_lookthrough = LT_SCOPE in df.columns.values
-
-        requests = [
-            api.models.InstrumentDefinition(
-                row["name"],
-                make_identifiers(row),
-                make_properties(row),
-                api.models.ResourceId(row[LT_SCOPE], row[LT_CODE])
-                if (has_lookthrough and pd.notna(row[LT_SCOPE]))
-                else None,
-            )
-            for idx, row in df.iterrows()
+    def make_properties(row):
+        return [
+            api.models.ModelProperty(key[2:], api.models.PropertyValue(row[key]))
+            for key in prop_keys
+            if pd.notna(row[key])
         ]
 
-        # Convert valid requests to dictionary
-        def make_key(r):
-            sec_id = list(r.identifiers.items())[0]
-            return "{}:{}".format(sec_id[0], sec_id[1].value)
+    def success(r):
+        df = lpt.to_df(
+            [err[1] for err in r.content.failed.items()], ["id", "detail"]
+        )
+        df.columns = ["FAILED-INSTRUMENT", "ERROR"]
+        return lpt.trim_df(df, args.limit, sort="FAILED-INSTRUMENT")
 
-        requests = {make_key(r): r for r in requests if len(r.identifiers.keys()) > 0}
+    has_lookthrough = LT_SCOPE in df.columns.values
+    requests = [
+        api.models.InstrumentDefinition(
+            row["name"],
+            make_identifiers(row),
+            make_properties(row),
+            api.models.ResourceId(row[LT_SCOPE], row[LT_CODE])
+            if (has_lookthrough and pd.notna(row[LT_SCOPE]))
+            else None,
+        )
+        for idx, row in df.iterrows()
+    ]
 
-        if args.test:
-            lpt.display_df(df[identifiers + prop_keys + ["name"]])
-            print(requests)
-            exit()
+    # Convert valid requests to dictionary
+    def make_key(r):
+        sec_id = list(r.identifiers.items())[0]
+        return "{}:{}".format(sec_id[0], sec_id[1].value)
 
-        return api.call.upsert_instruments(instruments=requests).bind(success)
+    requests = {make_key(r): r for r in requests if len(r.identifiers.keys()) > 0}
+    if args.test:
+        lpt.display_df(df[identifiers + prop_keys + ["name"]])
+        print(requests)
+        exit()
+    return api.call.upsert_instruments(instruments=requests).bind(success)
 
 
 def main():
