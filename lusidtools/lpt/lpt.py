@@ -338,3 +338,27 @@ def perpetual_upsert(models, df, prefix="P:"):
 # Return the serialised representation of the object
 def Serialise(api, body, bodyType):
     return api.api._serialize.body(body, bodyType)
+
+
+def process_input(aliases, api, args, fn):
+    df = pd.concat(
+        [read_input(input_file, dtype=str) for input_file in args.input],
+        ignore_index=True,
+        sort=False,
+    )
+    if args.mappings:
+        df.rename(
+            columns=dict(
+                [
+                    (s[1], aliases.get(s[0], s[0]))
+                    for s in [m.split("=") for m in args.mappings]
+                ]
+            ),
+            inplace=True,
+        )
+    prop_keys = [col for col in df.columns.values if col.startswith("P:")]
+    identifiers = [col for col in df.columns.values if col in args.identifiers]
+    # Identifiers have to be unique
+    df = df.drop_duplicates(identifiers)
+
+    return fn(api, args, df, identifiers, prop_keys)

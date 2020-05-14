@@ -1,0 +1,2 @@
+﻿id.scope,id.code,side,quantity,Ticker,orderBookId.scope,orderBookId.code,portfolioId.scope,portfolioId.code,P:Order/testScope/someProperty
+testScope,ORD001,buy,100,AAPL,testScope,testOrderBook,testScope,testPortfolio,somePropertyValue

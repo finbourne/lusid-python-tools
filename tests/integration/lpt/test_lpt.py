@@ -10,6 +10,7 @@ from lusidtools.lpt import (
     upload_portfolio as up,
     create_instr as ci,
     create_properties as cp,
+    create_orders as co,
 )
 
 
@@ -75,6 +76,18 @@ class LptTests(unittest.TestCase):
         ci.process_args(
             self.api,
             ci.parse(args=[f".{os.path.sep}examples{os.path.sep}ibm-msft.csv"]),
+        ).if_left(lambda r: self.fail(r))
+
+    def test_upsert_orders(self):
+        # Load orders from the file: examples/orders.csv
+        co.process_args(
+            self.api,
+            co.parse(args=[
+                "--identifiers",
+                "Ticker",
+                "--",
+                f".{os.path.sep}examples{os.path.sep}orders.csv"
+            ]),
         ).if_left(lambda r: self.fail(r))
 
     def test_create_properties(self):
