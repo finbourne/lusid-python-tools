@@ -377,8 +377,12 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
         # Key the LUSID result against portfolio and then instrument name
         lusid_results_keyed = {}
         for holding in lusid_results.values:
-            portfolio_scope = holding.properties["Holding/default/SourcePortfolioScope"].value.label_value
-            portfolio_code = holding.properties["Holding/default/SourcePortfolioId"].value.label_value
+            portfolio_scope = holding.properties[
+                "Holding/default/SourcePortfolioScope"
+            ].value.label_value
+            portfolio_code = holding.properties[
+                "Holding/default/SourcePortfolioId"
+            ].value.label_value
             portfolio = f"{portfolio_scope} : {portfolio_code}"
 
             instrument_name = holding.properties[
