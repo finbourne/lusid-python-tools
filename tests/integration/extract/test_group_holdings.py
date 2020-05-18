@@ -118,10 +118,10 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
     ):
 
         # Check that there are the right number of results and they have the correct keys
-        self.assertEqual(set(group_holdings.keys()), set(expected_values.keys()))
+        self.assertSetEqual(set(group_holdings.keys()), set(expected_values.keys()))
 
         if lusid_results_keyed is not None:
-            self.assertEqual(
+            self.assertSetEqual(
                 set(group_holdings.keys()), set(lusid_results_keyed.keys())
             )
 
@@ -377,9 +377,10 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
         # Key the LUSID result against portfolio and then instrument name
         lusid_results_keyed = {}
         for holding in lusid_results.values:
-            portfolio = holding.properties[
-                "Holding/default/SourcePortfolioId"
-            ].value.label_value.replace("/", " : ")
+            portfolio_scope = holding.properties["Holding/default/SourcePortfolioScope"].value.label_value
+            portfolio_code = holding.properties["Holding/default/SourcePortfolioId"].value.label_value
+            portfolio = f"{portfolio_scope} : {portfolio_code}"
+
             instrument_name = holding.properties[
                 "Instrument/default/Name"
             ].value.label_value
