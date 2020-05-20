@@ -129,7 +129,7 @@ def make_code_lusid_friendly(raw_code) -> str:
 
     # Specifically convert known unfriendly characters with a specific string and remove the rest completely
     friendly_code = re.sub(
-        r"[^\w]",
+        r"[^-\w]",
         "",
         raw_code.replace("%", "Percentage")
         .replace("&", "and")
