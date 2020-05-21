@@ -671,6 +671,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Dollar Dollar Bills",
                 "DollarDollarBills",
             ],
+            [
+                "Explicitly known valid character '-' - Dash",
+                "Buy-SellIndicator",
+                "Buy-SellIndicator",
+            ],
             ["Integer", 1, "1"],
             ["Decimal", 1.8596, "1_8596"],
             ["List", ["My", "List", "Code"], "MyListCode"],
