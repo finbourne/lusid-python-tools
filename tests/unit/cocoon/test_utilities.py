@@ -1952,6 +1952,65 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
+                    "No fx forward transactions present.",
+                    pd.DataFrame(
+                        data=[
+                            [1000, 1, 1, -500, "GBP", "NonFxType1", "b1", "2020/01/01"],
+                            [1001, 1, 1, 500, "GBP", "NonFxType2", "sl", "2020/01/01"],
+                            [1002, 1, 1, -500, "USD", "NonFxType3", "~", "2020/01/01"],
+                        ],
+                        columns=[
+                            "TX_ID",
+                            "Price",
+                            "price (local)",
+                            "quantity",
+                            "currency",
+                            "type",
+                            "leg",
+                            "date",
+                        ],
+                    ),
+                    {
+                        "transactions": {
+                            "required": {
+                                "code": "$fund_id",
+                                "settlement_date": "date",
+                                "total_consideration.amount": "quantity",
+                                "total_consideration.currency": "currency",
+                                "transaction_currency": "currency",
+                                "transaction_date": "date",
+                                "transaction_id": "TX_ID",
+                                "transaction_price.price": "Price",
+                                "transaction_price.type": "$Price",
+                                "type": "type",
+                                "units": "quantity",
+                            }
+                        }
+                    },
+                    ValueError
+            )
+        ]
+    )
+    def test_default_fx_forward_model_on_missing_fx_transaction_type(
+            self, _, df_with_no_fx_transactions, mapping, expected_exception
+    ):
+        """
+                This tests that an exception is raised if a set of transactions is passed in  and do not contain
+                any transactions with an fx type as defined by the fx_code parameter.
+
+                :param pd.dataFrame df_with_no_fx_transactions : input set of transactions with no fx transactions
+                :param dict mapping: fx transactions mapping
+                :param expected_exception: expected exception on missing fx transaction
+
+                :return: None
+                """
+
+        with self.assertRaises(expected_exception):
+            default_fx_forward_model(df_with_no_fx_transactions, "FW", None, None, mapping)
+
+    @parameterized.expand(
+        [
+            (
                 "Replace one single matching value standard syntax",
                 {
                     "a1": {
