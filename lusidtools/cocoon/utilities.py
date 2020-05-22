@@ -1418,6 +1418,9 @@ def default_fx_forward_model(
         f"combining transactions of type {fx_code} into a single line using {default_fx_forward_model.__name__}"
         f" utility function"
     )
+    if fx_code not in df["type"].values:
+        raise ValueError(f"Input transactions have no fx transaction types {fx_code}")
+
     t_type = mapping["transactions"]["required"]["type"]
 
     fwds_df = pd.DataFrame(df[df[t_type] == fx_code])
