@@ -1938,7 +1938,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             )
         ]
     )
-    def test_default_fx_forward_model(
+    def test_default_fx_forward_model_success(
         self, _, df, df_gt, mapping, mapping_gt, fun1, fun2
     ):
 
@@ -1991,7 +1991,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             )
         ]
     )
-    def test_default_fx_forward_model_on_missing_fx_transaction_type(
+    def test_default_fx_forward_model_failure(
             self, _, df_with_no_fx_transactions, mapping, expected_exception
     ):
         """
