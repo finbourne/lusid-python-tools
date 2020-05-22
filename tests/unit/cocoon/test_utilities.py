@@ -1952,47 +1952,47 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                    "No fx forward transactions present.",
-                    pd.DataFrame(
-                        data=[
-                            [1000, 1, 1, -500, "GBP", "NonFxType1", "b1", "2020/01/01"],
-                            [1001, 1, 1, 500, "GBP", "NonFxType2", "sl", "2020/01/01"],
-                            [1002, 1, 1, -500, "USD", "NonFxType3", "~", "2020/01/01"],
-                        ],
-                        columns=[
-                            "TX_ID",
-                            "Price",
-                            "price (local)",
-                            "quantity",
-                            "currency",
-                            "type",
-                            "leg",
-                            "date",
-                        ],
-                    ),
-                    {
-                        "transactions": {
-                            "required": {
-                                "code": "$fund_id",
-                                "settlement_date": "date",
-                                "total_consideration.amount": "quantity",
-                                "total_consideration.currency": "currency",
-                                "transaction_currency": "currency",
-                                "transaction_date": "date",
-                                "transaction_id": "TX_ID",
-                                "transaction_price.price": "Price",
-                                "transaction_price.type": "$Price",
-                                "type": "type",
-                                "units": "quantity",
-                            }
+                "No fx forward transactions present.",
+                pd.DataFrame(
+                    data=[
+                        [1000, 1, 1, -500, "GBP", "NonFxType1", "b1", "2020/01/01"],
+                        [1001, 1, 1, 500, "GBP", "NonFxType2", "sl", "2020/01/01"],
+                        [1002, 1, 1, -500, "USD", "NonFxType3", "~", "2020/01/01"],
+                    ],
+                    columns=[
+                        "TX_ID",
+                        "Price",
+                        "price (local)",
+                        "quantity",
+                        "currency",
+                        "type",
+                        "leg",
+                        "date",
+                    ],
+                ),
+                {
+                    "transactions": {
+                        "required": {
+                            "code": "$fund_id",
+                            "settlement_date": "date",
+                            "total_consideration.amount": "quantity",
+                            "total_consideration.currency": "currency",
+                            "transaction_currency": "currency",
+                            "transaction_date": "date",
+                            "transaction_id": "TX_ID",
+                            "transaction_price.price": "Price",
+                            "transaction_price.type": "$Price",
+                            "type": "type",
+                            "units": "quantity",
                         }
-                    },
-                    ValueError
+                    }
+                },
+                ValueError,
             )
         ]
     )
     def test_default_fx_forward_model_failure(
-            self, _, df_with_no_fx_transactions, mapping, expected_exception
+        self, _, df_with_no_fx_transactions, mapping, expected_exception
     ):
         """
                 This tests that an exception is raised if a set of transactions is passed in  and do not contain
@@ -2006,7 +2006,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 """
 
         with self.assertRaises(expected_exception):
-            default_fx_forward_model(df_with_no_fx_transactions, "FW", None, None, mapping)
+            default_fx_forward_model(
+                df_with_no_fx_transactions, "FW", None, None, mapping
+            )
 
     @parameterized.expand(
         [
