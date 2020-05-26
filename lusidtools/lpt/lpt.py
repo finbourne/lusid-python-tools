@@ -298,8 +298,8 @@ def read_csv(path, frame_type=None, **kwargs):
 # Read in a data-file and apply any backwards compatibility settings
 def read_input(path, frame_type=None, mappings=None, **kwargs):
     sheet = kwargs.get("sheet_name", 0)
-    if ":" in path:
-        path, sheet = path.split(":")
+    if is_path_supported_excel_with_sheet(path):
+        path, sheet = path.rsplit(":", 1)
 
     if ".xls" in path.lower():
         df = pd.read_excel(path, sheet_name=sheet, **kwargs)
@@ -311,6 +311,11 @@ def read_input(path, frame_type=None, mappings=None, **kwargs):
         df = df[list(set(mappings.values()) & set(df.columns))]
 
     return back_compat.convert(frame_type, df)
+
+
+# Check if a path is a supported excel file with a suffixed sheet
+def is_path_supported_excel_with_sheet(path):
+    return re.match(".*\.(xls|xlsx|xlsm|xlsb):", path)
 
 
 # Create PerpetualProperties request from prefixed columns in a dataframe
