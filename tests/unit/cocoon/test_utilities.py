@@ -1513,9 +1513,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ),
         ]
     )
-    def test_identify_cash_items_failed(
-        self, _, cash_flag, expected_values
-    ):
+    def test_identify_cash_items_failed(self, _, cash_flag, expected_values):
         data = {
             "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
             "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
@@ -1530,7 +1528,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         }
         mappings_expected_value = copy.deepcopy(mappings)
 
-
         mappings_expected_value[file_type]["identifier_mapping"][
             "Currency"
         ] = "__currency_identifier_for_LUSID"
@@ -1543,12 +1540,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
 
-            self.assertListEqual(
-                4, len(list(dataframe["instrument_name"]))
-            )
-            self.assertListEqual(
-                expected_values, list(dataframe["instrument_name"])
-            )
+            self.assertListEqual(4, len(list(dataframe["instrument_name"])))
+            self.assertListEqual(expected_values, list(dataframe["instrument_name"]))
             self.assertDictEqual(mappings_expected_value, mappings_test)
 
     @parameterized.expand(
@@ -1576,7 +1569,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     }
                 },
                 ["GBP_EXP", "GBP_EXP", "USD_EXP", "USD_EXP", None],
-            )
+            ),
         ]
     )
     def test_identify_cash_items_without_remove(self, _, cash_flag, expected_values):
@@ -1593,7 +1586,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
             "cash_flag": cash_flag,
         }
         mappings_expected_value = copy.deepcopy(mappings)
-
 
         mappings_expected_value[file_type]["identifier_mapping"][
             "Currency"
@@ -1654,7 +1646,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ),
         ]
     )
-    def test_identify_cash_items_with_remove_cash_items(self, _, cash_flag, expected_values):
+    def test_identify_cash_items_with_remove_cash_items(
+        self, _, cash_flag, expected_values
+    ):
         data = {
             "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
             "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
@@ -1675,12 +1669,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
             dataframe, mappings, file_type, True
         )
 
-        self.assertListEqual(
-            expected_values, list(dataframe["instrument_name"])
-        )
+        self.assertListEqual(expected_values, list(dataframe["instrument_name"]))
 
         self.assertDictEqual(mappings_expected_value, mappings_test)
-
 
     @parameterized.expand(
         [

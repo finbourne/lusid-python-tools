@@ -9,7 +9,7 @@ from lusidtools.cocoon.cocoon_printer import (
     format_holdings_response,
     format_quotes_response,
     format_transactions_response,
-    get_portfolio_from_href
+    get_portfolio_from_href,
 )
 from parameterized import parameterized
 
@@ -27,14 +27,14 @@ instrument_success = models.UpsertInstrumentsResponse(
         )
     },
     failed={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
+        "ClientInternal: imd_00001234": models.Instrument(
+            lusid_instrument_id="LUID_01234567",
+            version=1,
+            name="name1",
+            identifiers=["Luid", "Figi"],
+            state="Active",
+        )
+    },
 )
 
 portfolio_success = models.Portfolio(
@@ -56,37 +56,37 @@ transaction_success = models.UpsertPortfolioTransactionsResponse(
 
 quote_success = models.UpsertQuotesResponse(
     failed={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
+        "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
+            as_at="2019-01-16",
+            quote_id=models.QuoteId(
+                quote_series_id=models.QuoteSeriesId(
+                    provider="Default",
+                    instrument_id="BBG001MM1KV4",
+                    instrument_id_type="Figi",
+                    quote_type="Price",
+                    field="Mid",
+                ),
+                effective_at="2019-01-16",
+            ),
+            uploaded_by="test",
+        )
+    },
     values={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
+        "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
+            as_at="2019-01-16",
+            quote_id=models.QuoteId(
+                quote_series_id=models.QuoteSeriesId(
+                    provider="Default",
+                    instrument_id="BBG001MM1KV4",
+                    instrument_id_type="Figi",
+                    quote_type="Price",
+                    field="Mid",
+                ),
+                effective_at="2019-01-16",
+            ),
+            uploaded_by="test",
+        )
+    },
 )
 
 adjust_holding_success = models.AdjustHolding(
@@ -102,9 +102,7 @@ api_exception = lusid.exceptions.ApiException(status="404", reason="not found")
 responses = {
     "instruments": {
         "errors": [api_exception for _ in range(2)],
-        "success": [
-            instrument_success for _ in range(2)
-        ],
+        "success": [instrument_success for _ in range(2)],
     },
     "portfolios": {
         "errors": [api_exception for _ in range(2)],
@@ -147,38 +145,18 @@ empty_response_missing_shape = {
 }
 
 responses_no_error_field = {
-    "instruments": {
-        "success": [instrument_success],
-    },
-    "portfolios": {
-        "success": [portfolio_success],
-    },
-    "transactions": {
-        "success": [transaction_success],
-    },
-    "quotes": {
-        "success": [quote_success]
-    },
-    "holdings": {
-        "success": [adjust_holding_success],
-    },
+    "instruments": {"success": [instrument_success],},
+    "portfolios": {"success": [portfolio_success],},
+    "transactions": {"success": [transaction_success],},
+    "quotes": {"success": [quote_success]},
+    "holdings": {"success": [adjust_holding_success],},
 }
 responses_no_success_field = {
-    "instruments": {
-        "errors": [api_exception for _ in range(2)],
-    },
-    "portfolios": {
-        "errors": [api_exception for _ in range(2)],
-    },
-    "transactions": {
-        "errors": [api_exception for _ in range(2)],
-    },
-    "quotes": {
-        "errors": [api_exception for _ in range(2)],
-    },
-    "holdings": {
-        "errors": [api_exception for _ in range(2)],
-    },
+    "instruments": {"errors": [api_exception for _ in range(2)],},
+    "portfolios": {"errors": [api_exception for _ in range(2)],},
+    "transactions": {"errors": [api_exception for _ in range(2)],},
+    "quotes": {"errors": [api_exception for _ in range(2)],},
+    "holdings": {"errors": [api_exception for _ in range(2)],},
 }
 
 
@@ -331,7 +309,9 @@ class CocoonPrinterTests(unittest.TestCase):
             ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
         ]
     )
-    def test_format_quotes_response_success(self, _, response, num_items, expected_value):
+    def test_format_quotes_response_success(
+        self, _, response, num_items, expected_value
+    ):
         succ, err, failed = format_quotes_response(response)
         self.assertEqual(num_items, len(failed))
         self.assertEqual(num_items, len(succ))
