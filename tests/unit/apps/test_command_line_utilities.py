@@ -192,10 +192,10 @@ class AppTests(unittest.TestCase):
             ),
         ]
     )
-    def test_parse_args(self, _, args_true, ground_truth):
+    def test_parse_args(self, _, args_true, expected_value):
         args_test = parse_args(args_true)
 
-        map_args_to_ground_truth = {
+        map_args_to_expected_value = {
             "-f": "file_path",
             "-m": "mapping",
             "-c": "secrets_file",
@@ -211,7 +211,7 @@ class AppTests(unittest.TestCase):
 
         [
             self.assertEqual(
-                args_test[0][map_args_to_ground_truth[key]], ground_truth[key]
+                args_test[0][map_args_to_expected_value[key]], expected_value[key]
             )
-            for key in ground_truth.keys()
+            for key in expected_value.keys()
         ]

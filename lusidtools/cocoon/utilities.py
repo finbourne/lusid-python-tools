@@ -1143,8 +1143,8 @@ def identify_cash_items(
     """
 
     cash_flag_specification = mappings["cash_flag"]
-    dataframe["__currency_identifier_for_LUSID"] = None
     if not remove_cash_items:
+        dataframe["__currency_identifier_for_LUSID"] = None
         mappings[file_type]["identifier_mapping"][
             "Currency"
         ] = "__currency_identifier_for_LUSID"
