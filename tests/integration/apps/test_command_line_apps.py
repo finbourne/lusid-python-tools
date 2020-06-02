@@ -223,7 +223,7 @@ class AppTests(unittest.TestCase):
             [batch.values[value].metric_value.value for value in batch.values]
             for batch in responses["quotes"]["success"]
         ][0]
-        ground_truth = [
+        expected_value = [
             106.51,
             106.59,
             151.44,
@@ -240,4 +240,4 @@ class AppTests(unittest.TestCase):
             110.2,
         ]
 
-        self.assertEqual(ground_truth, test_values)
+        self.assertEqual(expected_value, test_values)

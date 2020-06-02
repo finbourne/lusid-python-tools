@@ -29,14 +29,14 @@ class CocoonInstrumentsTests(unittest.TestCase):
         names = ["Inst1", "Inst2"]
 
         data = {"ids": source_ids, "is_cash": [None, None]}
-        data_ground_truth = {
+        data_expected_value = {
             "inst_name": names,
             "ids": source_ids,
             "is_cash": [None, None],
         }
-        required_mapping_ground_truth = {"name": "inst_name"}
+        required_mapping_expected_value = {"name": "inst_name"}
 
-        identifier_mapping_ground_truth = {
+        identifier_mapping_expected_value = {
             "Figi": "ids",
             "Instrument/default/Currency": "is_cash",
         }
@@ -44,15 +44,15 @@ class CocoonInstrumentsTests(unittest.TestCase):
         identifier_mapping = {"Figi": "ids", "Instrument/default/Currency": "is_cash"}
 
         df = pd.DataFrame(data)
-        df_ground_truth = pd.DataFrame(data_ground_truth)
+        df_expected_value = pd.DataFrame(data_expected_value)
         upsert_response = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
-            mapping_required=required_mapping_ground_truth,
+            mapping_required=required_mapping_expected_value,
             mapping_optional={},
-            data_frame=df_ground_truth,
+            data_frame=df_expected_value,
             scope="default",
             file_type="instruments",
-            identifier_mapping=identifier_mapping_ground_truth,
+            identifier_mapping=identifier_mapping_expected_value,
         )
 
         result = cocoon.instruments.resolve_instruments(

@@ -3,197 +3,127 @@ import lusid
 import lusid.models as models
 import unittest
 from lusidtools import logger
-from lusidtools.cocoon.cocoon_printer import *
+from lusidtools.cocoon.cocoon_printer import (
+    format_portfolios_response,
+    format_instruments_response,
+    format_holdings_response,
+    format_quotes_response,
+    format_transactions_response,
+    get_portfolio_from_href
+)
 from parameterized import parameterized
+
+
+# Set up api responses
+
+instrument_success = models.UpsertInstrumentsResponse(
+    values={
+        "ClientInternal: imd_00001234": models.Instrument(
+            lusid_instrument_id="LUID_01234567",
+            version=1,
+            name="name1",
+            identifiers=["Luid", "Figi"],
+            state="Active",
+        )
+    },
+    failed={
+                    "ClientInternal: imd_00001234": models.Instrument(
+                        lusid_instrument_id="LUID_01234567",
+                        version=1,
+                        name="name1",
+                        identifiers=["Luid", "Figi"],
+                        state="Active",
+                    )
+                },
+)
+
+portfolio_success = models.Portfolio(
+    links=[],
+    version="1",
+    type="Transaction",
+    display_name="name2",
+    description="test portfolio",
+    created="2019-01-01",
+    href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
+    id=models.ResourceId(code="ID00001", scope="default test"),
+)
+
+transaction_success = models.UpsertPortfolioTransactionsResponse(
+    href="https://www.notadonaim.lusid.com/api/api/code/transactions?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
+    links=[],
+    version="1",
+)
+
+quote_success = models.UpsertQuotesResponse(
+    failed={
+                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
+                        as_at="2019-01-16",
+                        quote_id=models.QuoteId(
+                            quote_series_id=models.QuoteSeriesId(
+                                provider="Default",
+                                instrument_id="BBG001MM1KV4",
+                                instrument_id_type="Figi",
+                                quote_type="Price",
+                                field="Mid",
+                            ),
+                            effective_at="2019-01-16",
+                        ),
+                        uploaded_by="test",
+                    )
+                },
+    values={
+                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
+                        as_at="2019-01-16",
+                        quote_id=models.QuoteId(
+                            quote_series_id=models.QuoteSeriesId(
+                                provider="Default",
+                                instrument_id="BBG001MM1KV4",
+                                instrument_id_type="Figi",
+                                quote_type="Price",
+                                field="Mid",
+                            ),
+                            effective_at="2019-01-16",
+                        ),
+                        uploaded_by="test",
+                    )
+                },
+)
+
+adjust_holding_success = models.AdjustHolding(
+    href="https://notadomain.lusid.com/api/api/code/holdings?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
+    version="1",
+)
+
+api_exception = lusid.exceptions.ApiException(status="404", reason="not found")
+
+
+# build lusidtools responses
 
 responses = {
     "instruments": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ],
+        "errors": [api_exception for _ in range(2)],
         "success": [
-            models.UpsertInstrumentsResponse(
-                values={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-                failed={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-            ),
-            models.UpsertInstrumentsResponse(
-                values={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-                failed={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-            ),
+            instrument_success for _ in range(2)
         ],
     },
     "portfolios": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ],
-        "success": [
-            models.Portfolio(
-                links=[],
-                version="1",
-                type="Transaction",
-                display_name="name2",
-                description="test portfolio",
-                created="2019-01-01",
-                href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                id=models.ResourceId(code="ID00001", scope="default test"),
-            ),
-            models.Portfolio(
-                links=[],
-                version="1",
-                type="Transaction",
-                display_name="name2",
-                description="test portfolio",
-                created="2019-01-01",
-                href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                id=models.ResourceId(code="ID00001", scope="default test"),
-            ),
-        ],
+        "errors": [api_exception for _ in range(2)],
+        "success": [portfolio_success for _ in range(2)],
     },
     "transactions": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ],
-        "success": [
-            models.UpsertPortfolioTransactionsResponse(
-                href="https://www.notadonaim.lusid.com/api/api/code/transactions?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                links=[],
-                version="1",
-            ),
-            models.UpsertPortfolioTransactionsResponse(
-                href="https://www.notadonaim.lusid.com/api/api/code/transactions?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                links=[],
-                version="1",
-            ),
-        ],
+        "errors": [api_exception for _ in range(2)],
+        "success": [transaction_success for _ in range(2)],
     },
     "quotes": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ],
-        "success": [
-            models.UpsertQuotesResponse(
-                failed={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-                values={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-            ),
-            models.UpsertQuotesResponse(
-                failed={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-                values={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-            ),
-        ],
+        "errors": [api_exception for _ in range(2)],
+        "success": [quote_success for _ in range(2)],
     },
     "holdings": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ],
-        "success": [
-            models.AdjustHolding(
-                href="https://notadomain.lusid.com/api/api/code/holdings?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                version="1",
-            ),
-            models.AdjustHolding(
-                href="https://notadomain.lusid.com/api/api/code/holdings?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                version="1",
-            ),
-        ],
+        "errors": [api_exception for _ in range(2)],
+        "success": [adjust_holding_success for _ in range(2)],
     },
 }
+
 empty_response_with_full_shape = {
     "instruments": {
         "errors": [],
@@ -207,6 +137,7 @@ empty_response_with_full_shape = {
     },
     "holdings": {"errors": [], "success": [],},
 }
+
 empty_response_missing_shape = {
     "instruments": {"errors": [], "success": [],},
     "portfolios": {"errors": [], "success": [],},
@@ -214,131 +145,39 @@ empty_response_missing_shape = {
     "quotes": {"errors": [], "success": []},
     "holdings": {"errors": [], "success": [],},
 }
+
 responses_no_error_field = {
     "instruments": {
-        "success": [
-            models.UpsertInstrumentsResponse(
-                values={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-                failed={
-                    "ClientInternal: imd_00001234": models.Instrument(
-                        lusid_instrument_id="LUID_01234567",
-                        version=1,
-                        name="name1",
-                        identifiers=["Luid", "Figi"],
-                        state="Active",
-                    )
-                },
-            )
-        ],
+        "success": [instrument_success],
     },
     "portfolios": {
-        "success": [
-            models.Portfolio(
-                links=[],
-                version="1",
-                type="Transaction",
-                display_name="name2",
-                description="test portfolio",
-                created="2019-01-01",
-                href="https://www.tes.lusid/code/portfolios?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                id=models.ResourceId(code="ID00001", scope="default test"),
-            )
-        ],
+        "success": [portfolio_success],
     },
     "transactions": {
-        "success": [
-            models.UpsertPortfolioTransactionsResponse(
-                href="https://www.notadonaim.lusid.com/api/api/code/portfolios?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                links=[],
-                version="1",
-            )
-        ],
+        "success": [transaction_success],
     },
     "quotes": {
-        "success": [
-            models.UpsertQuotesResponse(
-                failed={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-                values={
-                    "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-                        as_at="2019-01-16",
-                        quote_id=models.QuoteId(
-                            quote_series_id=models.QuoteSeriesId(
-                                provider="Default",
-                                instrument_id="BBG001MM1KV4",
-                                instrument_id_type="Figi",
-                                quote_type="Price",
-                                field="Mid",
-                            ),
-                            effective_at="2019-01-16",
-                        ),
-                        uploaded_by="test",
-                    )
-                },
-            )
-        ]
+        "success": [quote_success]
     },
     "holdings": {
-        "success": [
-            models.AdjustHolding(
-                href="https://notadomain.lusid.com/api/api/code/portfolios?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-                version="1",
-            )
-        ],
+        "success": [adjust_holding_success],
     },
 }
 responses_no_success_field = {
     "instruments": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ]
+        "errors": [api_exception for _ in range(2)],
     },
     "portfolios": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ]
+        "errors": [api_exception for _ in range(2)],
     },
     "transactions": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ]
+        "errors": [api_exception for _ in range(2)],
     },
     "quotes": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ]
+        "errors": [api_exception for _ in range(2)],
     },
     "holdings": {
-        "errors": [
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-            lusid.exceptions.ApiException(status="404", reason="not found"),
-        ]
+        "errors": [api_exception for _ in range(2)],
     },
 }
 
@@ -374,10 +213,10 @@ class CocoonPrinterTests(unittest.TestCase):
             ),
         ]
     )
-    def test_get_portfolio_from_href(self, _, href, file_type, ground_truth):
+    def test_get_portfolio_from_href(self, _, href, file_type, expected_value):
         codes = get_portfolio_from_href(href=href, file_type=file_type)
         self.assertEqual(len(href), len(codes))
-        self.assertEqual(ground_truth, codes)
+        self.assertEqual(expected_value, codes)
 
     @parameterized.expand(
         [
@@ -402,7 +241,7 @@ class CocoonPrinterTests(unittest.TestCase):
         ]
     )
     def test_format_instruments_response_success(
-        self, _, response, num_items, ground_truth
+        self, _, response, num_items, expected_value
     ):
         succ, err, failed = format_instruments_response(response)
         self.assertEqual(num_items, len(failed))
@@ -410,15 +249,15 @@ class CocoonPrinterTests(unittest.TestCase):
         self.assertEqual(num_items, len(err))
 
         [
-            self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]])
+            self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
             for index, row in succ.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["failed"][index], row[failed.columns[0]])
+            self.assertEqual(expected_value["failed"][index], row[failed.columns[0]])
             for index, row in failed.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["err"][index], row[err.columns[0]])
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
             for index, row in err.iterrows()
         ]
 
@@ -434,18 +273,18 @@ class CocoonPrinterTests(unittest.TestCase):
         ]
     )
     def test_format_portfolios_response_success(
-        self, _, response, num_items, ground_truth
+        self, _, response, num_items, expected_value
     ):
         succ, err = format_portfolios_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
         [
-            self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]])
+            self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
             for index, row in succ.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["err"][index], row[err.columns[0]])
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
             for index, row in err.iterrows()
         ]
 
@@ -461,18 +300,18 @@ class CocoonPrinterTests(unittest.TestCase):
         ]
     )
     def test_format_transactions_response_success(
-        self, _, response, num_items, ground_truth
+        self, _, response, num_items, expected_value
     ):
         succ, err = format_transactions_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
         [
-            self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]])
+            self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
             for index, row in succ.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["err"][index], row[err.columns[0]])
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
             for index, row in err.iterrows()
         ]
 
@@ -492,7 +331,7 @@ class CocoonPrinterTests(unittest.TestCase):
             ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
         ]
     )
-    def test_format_quotes_response_success(self, _, response, num_items, ground_truth):
+    def test_format_quotes_response_success(self, _, response, num_items, expected_value):
         succ, err, failed = format_quotes_response(response)
         self.assertEqual(num_items, len(failed))
         self.assertEqual(num_items, len(succ))
@@ -500,20 +339,20 @@ class CocoonPrinterTests(unittest.TestCase):
 
         [
             self.assertEqual(
-                ground_truth["succ"][index],
+                expected_value["succ"][index],
                 row["quote_id.quote_series_id.instrument_id"],
             )
             for index, row in succ.iterrows()
         ]
         [
             self.assertEqual(
-                ground_truth["failed"][index],
+                expected_value["failed"][index],
                 row["quote_id.quote_series_id.instrument_id"],
             )
             for index, row in failed.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["err"][index], row[err.columns[0]])
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
             for index, row in err.iterrows()
         ]
 
@@ -529,18 +368,18 @@ class CocoonPrinterTests(unittest.TestCase):
         ]
     )
     def test_format_holdings_response_success(
-        self, _, response, num_items, ground_truth
+        self, _, response, num_items, expected_value
     ):
         succ, err = format_holdings_response(response)
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
 
         [
-            self.assertEqual(ground_truth["succ"][index], row[succ.columns[0]])
+            self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
             for index, row in succ.iterrows()
         ]
         [
-            self.assertEqual(ground_truth["err"][index], row[err.columns[0]])
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
             for index, row in err.iterrows()
         ]
 
