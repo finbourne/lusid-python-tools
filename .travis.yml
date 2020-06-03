@@ -3,30 +3,44 @@ services:
 - docker
 install:
 - pip install twine wheel pyOpenSSL
-script:
-- |
+- pip install -r requirements.txt
 
-  export last_commit_author=`git log -1 --pretty=format:%ae`
+branches:
+  only:
+  - /^feature.*$/
+  - master
 
-  docker build -t finbourne/lusid-python-tools-test .
+jobs:
+  include:
+    - stage: Run black formatter and commit any changes
+      if: branch != master
+      script:
+        - bash ci_tools/new_commit_with_black.sh
+    - stage: Check that black formatter was succesful
+      if: branch = master
+      script:
+        - bash ci_tools/black_formatter_check.sh
+    - stage: Run LPT package tests 
+      script:
+      - |
 
-  docker run \
-      -e FBN_TOKEN_URL="$fbn_token_url" \
-      -e FBN_USERNAME="$fbn_username" \
-      -e FBN_PASSWORD="$fbn_password" \
-      -e FBN_CLIENT_ID="$fbn_clientid" \
-      -e FBN_CLIENT_SECRET="$fbn_client_secret" \
-      -e FBN_LUSID_API_URL="$fbn_lusid_api_url" \
-      -e FBN_APP_NAME="$fbn_app_name" \
-      -v $(pwd):/usr/src/ \
-      finbourne/lusid-python-tools-test
+        docker build -t finbourne/lusid-python-tools-test .
+
+        docker run \
+            -e FBN_TOKEN_URL="$fbn_token_url" \
+            -e FBN_USERNAME="$fbn_username" \
+            -e FBN_PASSWORD="$fbn_password" \
+            -e FBN_CLIENT_ID="$fbn_clientid" \
+            -e FBN_CLIENT_SECRET="$fbn_client_secret" \
+            -e FBN_LUSID_API_URL="$fbn_lusid_api_url" \
+            -e FBN_APP_NAME="$fbn_app_name" \
+            -v $(pwd):/usr/src/ \
+            finbourne/lusid-python-tools-test
 
 deploy:
   - provider: script
-    script: bash ./publish.sh "$fbn_pypi_username" "$fbn_pypi_password"
-    on:
-      branch: master
-      condition: $last_commit_author = action@github.com
+    script: bash ci_tools/publish.sh "$fbn_pypi_username" "$fbn_pypi_password"
+    on: master
 
 notifications:
   slack:
