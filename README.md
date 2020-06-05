@@ -1,7 +1,7 @@
 ![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
 # lusid-python-tools
-Python tools for the LUSID
+Python tools for LUSID
 
 ![PyPI](https://img.shields.io/pypi/v/lusidtools?color=blue)
 [![Build Status](https://travis-ci.org/finbourne/lusid-python-tools.svg?branch=master)](https://travis-ci.org/finbourne/lusid-python-tools)
@@ -39,11 +39,11 @@ Run the command below, substituting your secrets file path for the one below.,
 lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json
 ```
 
-This should run and return a list if configured instrument identifer types.
+This should run and return a list if configured instrument identifier types.
 
 ## Contributing
 
-We welcome community participation in our tools.  For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
+We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
 
 ## Reporting Issues
 If you encounter any issues please report these the Github [issues page](https://github.com/finbourne/lusid-python-tools/issues).
