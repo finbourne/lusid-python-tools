@@ -27,7 +27,7 @@ or if you are running as a non privileged user you may prefer to install specifi
 $ pip install --user lusidtools
 ```
 
-### Testing it all works
+### Testing it works
 
 Once you have an LUSID account you will need to create a developer secrets file.  The steps to do this are covered in this [article](https://support.finbourne.com/getting-started-with-apis-sdks)
 
