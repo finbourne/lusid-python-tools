@@ -16,13 +16,11 @@ jobs:
       if: branch != master
       script:
         - bash ci_tools/new_commit_with_black.sh
-    - stage: Check that black formatter was succesful
-      if: branch = master
-      script:
-        - bash ci_tools/black_formatter_check.sh
-    - stage: Run LPT package tests 
+    - stage: Check black formatter was successful and run lusidtools package tests 
       script:
       - |
+
+        bash ci_tools/black_formatter_check.sh
 
         docker build -t finbourne/lusid-python-tools-test .
 
