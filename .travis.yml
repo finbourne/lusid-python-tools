@@ -3,7 +3,7 @@ services:
 - docker
 install:
 - pip install twine wheel pyOpenSSL
-- pip install -r requirements.txt
+- pip install -r requirements.dev.txt
 
 branches:
   only:
@@ -39,14 +39,28 @@ jobs:
 
 deploy:
   - provider: script
-    script: bash ci_tools/publish.sh "$fbn_pypi_username" "$fbn_pypi_password"
+    script: >-
+            bash ci_tools/bumpversion.sh &&
+            bash ci_tools/publish.sh "$fbn_pypi_username" "$fbn_pypi_password"
     on: master
 
 notifications:
   slack:
-    on_success: never
-    on_failure: always
-    rooms:
-      secure: "XJdZreKbLwxAtCxOEd159N6gHAFbvmuTxAf2CJA4Slfxgyy6Qtby9UilCp6rXBEabGqmf3OYcUza5CMhqvrrTrTMl140iQeOqmEjWVg8o928ZIxX1B+xfRUSgKCZY1DWaAQ6WO3jdcLm9kKavuIEObYw9GxXjoD2SCCpaNMiKT8MIiJGQA01msKL9QW3rk2oZzq89ebjzIl7Sa8www9nhihmr65UIiFHRvLRZQwVEwWi54mO9JPWWlcNmt7/68wfHPZCKDxW7D9unIjVVyVqzpZmzq75EHe3JZhenuRki8QEEh1A1CNaBSGbKgGwQMidBhm3bmF/PJZeLiYUuRBv7LsfYXYIT71zUlD8MXBfILl8+j4aHq1U2HwXU+2RdvDgZA8ac4lsI27/uXnqptheOko7O+Y7dOfpdcmmtTwioR7caJk6/jx4oXhiIb87c2YjYTHo1aAkxiR62hCbvKIsRaV95f03rYXsEosivwjmJjUOJvZX7yHHQ6jskzrAUOQZYI+fHvPKZccWWmpIo6r64eEGS6CwKrh5/rxyC31dSGdQEq1Wrsgac8rgp/XnWevPgrbf0oe2doRjGMPRrfBNeG6jqwfhShpJIexZm8tfaF+DK/filwwX5zpZNR41xTkCyCC4hJUC6CW3ksp//1IYPDVQTP6sgTmoENRvMPOYmfU="
-
-
+    - rooms:
+        - secure: "XJdZreKbLwxAtCxOEd159N6gHAFbvmuTxAf2CJA4Slfxgyy6Qtby9UilCp6rXBEabGqmf3OYcUza5CMhqvrrTrTMl140iQeOqmEjWVg8o928ZIxX1B+xfRUSgKCZY1DWaAQ6WO3jdcLm9kKavuIEObYw9GxXjoD2SCCpaNMiKT8MIiJGQA01msKL9QW3rk2oZzq89ebjzIl7Sa8www9nhihmr65UIiFHRvLRZQwVEwWi54mO9JPWWlcNmt7/68wfHPZCKDxW7D9unIjVVyVqzpZmzq75EHe3JZhenuRki8QEEh1A1CNaBSGbKgGwQMidBhm3bmF/PJZeLiYUuRBv7LsfYXYIT71zUlD8MXBfILl8+j4aHq1U2HwXU+2RdvDgZA8ac4lsI27/uXnqptheOko7O+Y7dOfpdcmmtTwioR7caJk6/jx4oXhiIb87c2YjYTHo1aAkxiR62hCbvKIsRaV95f03rYXsEosivwjmJjUOJvZX7yHHQ6jskzrAUOQZYI+fHvPKZccWWmpIo6r64eEGS6CwKrh5/rxyC31dSGdQEq1Wrsgac8rgp/XnWevPgrbf0oe2doRjGMPRrfBNeG6jqwfhShpJIexZm8tfaF+DK/filwwX5zpZNR41xTkCyCC4hJUC6CW3ksp//1IYPDVQTP6sgTmoENRvMPOYmfU="
+      on_success: never
+      on_failure: always
+      template:
+        - "%{repository_slug} (%{commit}) : %{message}"
+        - "Build details: %{build_url}"
+    - rooms:
+        - secure: "XJdZreKbLwxAtCxOEd159N6gHAFbvmuTxAf2CJA4Slfxgyy6Qtby9UilCp6rXBEabGqmf3OYcUza5CMhqvrrTrTMl140iQeOqmEjWVg8o928ZIxX1B+xfRUSgKCZY1DWaAQ6WO3jdcLm9kKavuIEObYw9GxXjoD2SCCpaNMiKT8MIiJGQA01msKL9QW3rk2oZzq89ebjzIl7Sa8www9nhihmr65UIiFHRvLRZQwVEwWi54mO9JPWWlcNmt7/68wfHPZCKDxW7D9unIjVVyVqzpZmzq75EHe3JZhenuRki8QEEh1A1CNaBSGbKgGwQMidBhm3bmF/PJZeLiYUuRBv7LsfYXYIT71zUlD8MXBfILl8+j4aHq1U2HwXU+2RdvDgZA8ac4lsI27/uXnqptheOko7O+Y7dOfpdcmmtTwioR7caJk6/jx4oXhiIb87c2YjYTHo1aAkxiR62hCbvKIsRaV95f03rYXsEosivwjmJjUOJvZX7yHHQ6jskzrAUOQZYI+fHvPKZccWWmpIo6r64eEGS6CwKrh5/rxyC31dSGdQEq1Wrsgac8rgp/XnWevPgrbf0oe2doRjGMPRrfBNeG6jqwfhShpJIexZm8tfaF+DK/filwwX5zpZNR41xTkCyCC4hJUC6CW3ksp//1IYPDVQTP6sgTmoENRvMPOYmfU="
+      on_success: always
+      on_failure: never
+      on_pull_requests: false
+      if: branch = master
+      template:
+        - "%{repository_slug} (%{commit}) : %{message}"
+        - "New version of lusidtools has been published to PyPi:"
+        - "https://pypi.org/project/lusidtools/"
+        
