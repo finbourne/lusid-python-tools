@@ -46,7 +46,9 @@ def lusid_response_to_data_frame(
         first_item_type = type(lusid_response[0])
 
         if not all(isinstance(x, first_item_type) for x in lusid_response):
-            raise TypeError("All items in list must be of the same data type")
+            raise TypeError('All items in list must be of the same data type')
+
+            
 
         if not hasattr(first_item_type, "to_dict"):
             raise TypeError("All object items in list must have a to_dict() method")
