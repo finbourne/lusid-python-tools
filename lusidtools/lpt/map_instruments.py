@@ -124,9 +124,9 @@ def map_instruments(api, df, column):
                     # No failures, kick off the next batch
                     return batch_query(instr_type, prefix, remainder)
 
-            return api.call.get_instruments(instr_type, batch[WORKING].values).bind(
-                get_success
-            )
+            return api.call.get_instruments(
+                instr_type, list(batch[WORKING].values)
+            ).bind(get_success)
         else:
             # No records remaining. Return the now-enriched dataframe
             return Either.Right(df)
