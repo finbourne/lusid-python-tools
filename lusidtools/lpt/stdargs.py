@@ -7,7 +7,7 @@ class Parser:
 
     # Create a parser and add in the standard arguments
     def __init__(self, description, sections=[]):
-        self.parser = argparse.ArgumentParser(description=description)
+        self.parser = argparse.ArgumentParser(description=description,fromfile_prefix_chars='@')    
         self.post_processors = []
         self.arguments = []
 
