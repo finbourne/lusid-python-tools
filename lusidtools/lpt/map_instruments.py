@@ -123,8 +123,9 @@ def map_instruments(api, df, column):
                 else:
                     # No failures, kick off the next batch
                     return batch_query(instr_type, prefix, remainder)
+                
 
-            return api.call.get_instruments(instr_type, batch[WORKING].values).bind(
+            return api.call.get_instruments(instr_type, list(batch[WORKING].values)).bind(
                 get_success
             )
         else:
