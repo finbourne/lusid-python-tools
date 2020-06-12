@@ -18,14 +18,19 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
     @parameterized.expand(
         [
             [
-                "Already in ISO format",
+                "Already in ISO format positive offset",
                 "2019-11-04T13:25:34+00:00",
                 "2019-11-04T13:25:34+00:00",
             ],
             [
+                "Already in ISO format negative offset",
+                "2020-04-29T09:30:00-05:00",
+                "2020-04-29T14:30:00+00:00",
+            ],
+            [
                 "Already in ISO format with microseconds",
-                "2012-05-21T00:00:00.0000000+00:00",
-                "2012-05-21T00:00:00.0000000+00:00",
+                "2012-05-21T00:00:00.1234500+00:00",
+                "2012-05-21T00:00:00.123450+00:00",
             ],
             [
                 "Already in ISO format UTC",
@@ -76,6 +81,7 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
             [
                 "pandas datetime with microseconds",
                 pd.Timestamp("2019-09-01T09:31:22.664"),
+                
                 "2019-09-01T09:31:22.664000+00:00",
             ],
             [
@@ -86,15 +92,13 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
         ]
     )
     def test_dateorcutlabel(self, test_name, datetime_value, expected_outcome):
+        # There is no handling for month first, it will assume it is day first
         ignore = ["A date with month first"]
         if test_name in ignore:
-            self.skipTest("Test not implemented ")
-        if "custom date" in test_name:
-            datetime_value, custom_format = datetime_value
-        else:
-            custom_format = None
+            self.skipTest(
+                "Test not implemented ")
 
-        date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
+        date_or_cut_label = DateOrCutLabel(datetime_value)
 
         self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))
 
@@ -104,25 +108,31 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "YYYY-mm-dd_dashes",
                 "2019-09-01",
                 "%Y-%m-%d",
-                "2019-09-01T00:00:00.000000Z",
+                "2019-09-01T00:00:00+00:00",
             ],
             [
                 "dd/mm/YYYY_ forwardslashes",
                 "01/09/2019",
                 "%d/%m/%Y",
-                "2019-09-01T00:00:00.000000Z",
+                "2019-09-01T00:00:00+00:00",
             ],
             [
                 "YYYY-mm-dd HH:MM:SS_dashes_and_colons",
                 "2019-09-01 6:30:30",
                 "%Y-%m-%d %H:%M:%S",
-                "2019-09-01T06:30:30.000000Z",
+                "2019-09-01T06:30:30+00:00",
             ],
             [
                 "YYYY-mm-dd HH:MM:SS.000001_dashes_colons_and microseconds",
                 "2019-09-01 6:30:30.005001",
                 "%Y-%m-%d %H:%M:%S.%f",
-                "2019-09-01T06:30:30.005001Z",
+                "2019-09-01T06:30:30.005001+00:00",
+            ],
+            [
+                "YYYY-mm-dd HH:MM:SS.000001_dashes_colons_and microseconds and timezone",
+                "2019-09-01 6:30:30.005001-10:00",
+                "%Y-%m-%d %H:%M:%S.%f%z",
+                "2019-09-01T16:30:30.005001+00:00",
             ],
         ]
     )
