@@ -47,23 +47,14 @@ def _process_custom_date(datetime_value: str, date_format: str) -> str:
         )
 
     try:
-        datetime_value = pd.to_datetime(datetime_value, format=date_format, utc=False)
+        datetime_value = datetime.strptime(datetime_value, date_format).isoformat()
     except ValueError:
         raise ValueError(
             f"The date format provided {date_format} was not recognised in the"
             f" datetime provided: {datetime_value}"
         )
 
-    def format_dt(dt):
-        return str(
-            np.datetime_as_string(
-                arr=np.datetime64(dt.strftime("%Y-%m-%d %H:%M:%S.%f")),
-                timezone="UTC",
-                unit="us",
-            )
-        )
-
-    return format_dt(datetime_value)
+    return datetime_value
 
 
 def _process_date_as_string(datetime_value: str):
@@ -84,16 +75,22 @@ def _process_date_as_string(datetime_value: str):
     # Cut label regular expression, no modification required
     if re.findall("\d{4}-\d{2}-\d{2}N\w+", datetime_value):
         pass
-    # Already in isoformat
+
+    # Already in isoformat and UTC timezone
     elif (
-        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d+", datetime_value,)
-        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value)
+        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value)
         or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value)
-        or re.findall(
-            "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}", datetime_value,
-        )
     ):
         pass
+
+    # Already in isoformat but not necessarily UTC timezone
+    elif (
+        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d+", datetime_value)
+        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+[\+-]\d{2}:\d{2}", datetime_value)
+    ):
+        # Convert to UTC
+        datetime_value = parser.isoparse(datetime_value).astimezone(pytz.utc).isoformat()
+
     # ISO format with no timezone
     elif re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", datetime_value):
         datetime_value = datetime_value + "+00:00"
@@ -155,6 +152,7 @@ def _process_datetime(datetime_value):
 
 
 class DateOrCutLabel(UserString):
+
     def __init__(self, datetime_value, date_format=None):
         def convert_datetime_utc(datetime_value, date_format=None):
             """
@@ -180,18 +178,18 @@ class DateOrCutLabel(UserString):
 
             # Convert strings to readable string format
             if isinstance(datetime_value, str):
-                datetime_value = _process_date_as_string(datetime_value)
+                return _process_date_as_string(datetime_value)
 
             # Convert datetime to string
-            if isinstance(datetime_value, datetime):
+            elif isinstance(datetime_value, datetime):
                 return _process_datetime(datetime_value)
 
             # Convert np.datetime to string
-            if isinstance(datetime_value, np.datetime64):
+            elif isinstance(datetime_value, np.datetime64):
                 return _process_numpy_datetime64(datetime_value)
 
             # Convert np.ndarray to string
-            if isinstance(datetime_value, np.ndarray):
+            elif isinstance(datetime_value, np.ndarray):
                 return _process_ndarray(datetime_value)
 
             return datetime_value
