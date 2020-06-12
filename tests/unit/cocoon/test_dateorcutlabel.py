@@ -81,7 +81,6 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
             [
                 "pandas datetime with microseconds",
                 pd.Timestamp("2019-09-01T09:31:22.664"),
-                
                 "2019-09-01T09:31:22.664000+00:00",
             ],
             [
@@ -95,8 +94,7 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
         # There is no handling for month first, it will assume it is day first
         ignore = ["A date with month first"]
         if test_name in ignore:
-            self.skipTest(
-                "Test not implemented ")
+            self.skipTest("Test not implemented ")
 
         date_or_cut_label = DateOrCutLabel(datetime_value)
 

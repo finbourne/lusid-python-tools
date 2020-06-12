@@ -77,19 +77,21 @@ def _process_date_as_string(datetime_value: str):
         pass
 
     # Already in isoformat and UTC timezone
-    elif (
-        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value)
-        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value)
-    ):
+    elif re.findall(
+        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", datetime_value
+    ) or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z", datetime_value):
         pass
 
     # Already in isoformat but not necessarily UTC timezone
-    elif (
-        re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d+", datetime_value)
-        or re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+[\+-]\d{2}:\d{2}", datetime_value)
+    elif re.findall(
+        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d+", datetime_value
+    ) or re.findall(
+        "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+[\+-]\d{2}:\d{2}", datetime_value
     ):
         # Convert to UTC
-        datetime_value = parser.isoparse(datetime_value).astimezone(pytz.utc).isoformat()
+        datetime_value = (
+            parser.isoparse(datetime_value).astimezone(pytz.utc).isoformat()
+        )
 
     # ISO format with no timezone
     elif re.findall("\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", datetime_value):
@@ -152,7 +154,6 @@ def _process_datetime(datetime_value):
 
 
 class DateOrCutLabel(UserString):
-
     def __init__(self, datetime_value, date_format=None):
         def convert_datetime_utc(datetime_value, date_format=None):
             """
