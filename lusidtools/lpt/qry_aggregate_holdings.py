@@ -181,7 +181,7 @@ def run_query(api, args, date):
         else api.call.get_aggregation_by_portfolio
     )
 
-    return fn(args.scope, args.portfolio, request=request).bind(success)
+    return fn(args.scope, args.portfolio, aggregation_request=request).bind(success)
 
 
 def main(parse=parse, display_df=lpt.display_df):

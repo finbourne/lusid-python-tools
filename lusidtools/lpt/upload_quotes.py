@@ -36,7 +36,7 @@ def batch_upsert_quotes(api, scope, df):
         )
         for index, row in df.iterrows()
     }
-    return api.call.upsert_quotes(scope=scope, quotes=quotes)
+    return api.call.upsert_quotes(scope=scope, request_body=quotes)
 
 
 def process_args(api, args):
