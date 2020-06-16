@@ -938,23 +938,24 @@ class CocoonTestsInstruments(unittest.TestCase):
         )
 
         self.assertEqual(
-            first=sum(
+            len(data_frame_true["client_internal"].unique()),
+            sum(
                 [
                     len(response.values)
                     for response in responses["instruments"]["success"]
                 ]
             ),
-            second=len(data_frame_true["client_internal"].unique()),
+
         )
 
         self.assertEqual(
-            first=sum(
+            0,
+            sum(
                 [
                     len(response.failed)
                     for response in responses["instruments"]["success"]
                 ]
             ),
-            second=0,
         )
 
         combined_successes = {

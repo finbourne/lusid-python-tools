@@ -86,7 +86,7 @@ class BatchLoader:
             return f"{first_unique_identifier_alphabetically}: {instrument.identifiers[first_unique_identifier_alphabetically].value}"
 
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            instruments={
+            request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
                 ): instrument
@@ -125,7 +125,7 @@ class BatchLoader:
 
         return api_factory.build(lusid.api.QuotesApi).upsert_quotes(
             scope=kwargs["scope"],
-            quotes={
+            request_body={
                 "_".join(
                     [
                         quote.quote_id.quote_series_id.instrument_id,
@@ -175,7 +175,7 @@ class BatchLoader:
         return api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).upsert_transactions(
-            scope=kwargs["scope"], code=kwargs["code"], transactions=transaction_batch
+            scope=kwargs["scope"], code=kwargs["code"], transaction_request=transaction_batch
         )
 
     @staticmethod
@@ -193,7 +193,7 @@ class BatchLoader:
         holding_batch : list[lusid.models.AdjustHoldingRequest]
             The batch of holdings
         scope : str
-            The scope to upsert holdinsg into
+            The scope to upsert holdings into
         code : str
             The code of the portfolio to upsert holdings into
         effective_at : str/Datetime/np.datetime64/np.ndarray/pd.Timestamp
@@ -233,14 +233,14 @@ class BatchLoader:
                 scope=kwargs["scope"],
                 code=kwargs["code"],
                 effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
-                holding_adjustments=holding_batch,
+                adjust_holding_request=holding_batch,
             )
 
         return api_factory.build(lusid.api.TransactionPortfoliosApi).set_holdings(
             scope=kwargs["scope"],
             code=kwargs["code"],
             effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
-            holding_adjustments=holding_batch,
+            adjust_holding_request=holding_batch,
         )
 
     @staticmethod
@@ -289,7 +289,7 @@ class BatchLoader:
                 return api_factory.build(
                     lusid.api.TransactionPortfoliosApi
                 ).create_portfolio(
-                    scope=kwargs["scope"], transaction_portfolio=portfolio_batch[0]
+                    scope=kwargs["scope"], create_transaction_portfolio_request=portfolio_batch[0]
                 )
             else:
                 return e
@@ -328,7 +328,7 @@ class BatchLoader:
             # find the matching instruments
             mastered_instruments = api_factory.build(
                 lusid.api.SearchApi
-            ).instruments_search(symbols=[search_request], mastered_only=True)
+            ).instruments_search(instrument_search_property=[search_request], mastered_only=True)
 
             # flat map the results to a list of luids
             luids = [
@@ -451,7 +451,7 @@ class BatchLoader:
                         scope=kwargs["scope"],
                         code=kwargs["code"],
                         effective_at=datetime.now(tz=pytz.UTC),
-                        portfolio_id=lusid.models.ResourceId(scope=scope, code=code),
+                        resource_id=lusid.models.ResourceId(scope=scope, code=code),
                     )
 
                 except lusid.exceptions.ApiException as e:
@@ -464,7 +464,7 @@ class BatchLoader:
             if e.status == 404:
                 return api_factory.build(
                     lusid.api.PortfolioGroupsApi
-                ).create_portfolio_group(scope=kwargs["scope"], request=updated_request)
+                ).create_portfolio_group(scope=kwargs["scope"], create_portfolio_group_request=updated_request)
             else:
                 return e
 

@@ -90,7 +90,7 @@ def create_instr(api, args, df, identifiers, prop_keys):
         lpt.display_df(df[identifiers + prop_keys + ["name"]])
         print(requests)
         exit()
-    return api.call.upsert_instruments(instruments=requests).bind(success)
+    return api.call.upsert_instruments(request_body=requests).bind(success)
 
 
 def main():

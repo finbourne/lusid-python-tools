@@ -233,7 +233,7 @@ def resolve_instruments(
             while attempts < 3:
                 try:
                     response = api_factory.build(SearchApi).instruments_search(
-                        symbols=search_requests, mastered_only=True
+                        instrument_search_property=search_requests, mastered_only=True
                     )
                     break
                 except lusid.exceptions.ApiException as error_message:
@@ -474,4 +474,4 @@ def instrument_search_single(
 
     return lusid.api.SearchApi(
         api_factory.build(lusid.api.SearchApi)
-    ).instruments_search(symbols=[search_request])
+    ).instruments_search(instrument_search_property=[search_request])
