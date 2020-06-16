@@ -45,7 +45,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                     lusid.api.TransactionPortfoliosApi
                 ).create_portfolio(
                     scope=cls.portfolio_scope,
-                    transaction_portfolio=create_portfolio_model(code),
+                    create_transaction_portfolio_request=create_portfolio_model(code),
                 )
         except lusid.exceptions.ApiException as e:
             if e.status == 404:
@@ -412,7 +412,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, request=port_group_request
+            scope=test_case_scope, create_portfolio_group_request=port_group_request
         )
 
         responses = self.cocoon_load_from_dataframe(
@@ -508,7 +508,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, request=port_group_request
+            scope=test_case_scope, create_portfolio_group_request=port_group_request
         )
 
         responses = self.cocoon_load_from_dataframe(
@@ -553,7 +553,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, request=port_group_request,
+            scope=test_case_scope, create_portfolio_group_request=port_group_request,
         )
 
         responses = self.cocoon_load_from_dataframe(
@@ -595,7 +595,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, request=port_group_request
+            scope=test_case_scope, create_portfolio_group_request=port_group_request
         )
 
         responses = self.cocoon_load_from_dataframe(
@@ -651,7 +651,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         port_scope_for_test = create_scope_id()
         self.api_factory.build(lusid.api.TransactionPortfoliosApi).create_portfolio(
             scope=port_scope_for_test,
-            transaction_portfolio=models.CreateTransactionPortfolioRequest(
+            create_transaction_portfolio_request=models.CreateTransactionPortfolioRequest(
                 display_name=data_frame["FundCode"][0],
                 code=data_frame["FundCode"][0],
                 base_currency="GBP",
@@ -669,7 +669,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, request=port_group_request,
+            scope=test_case_scope, create_portfolio_group_request=port_group_request,
         )
 
         responses = self.cocoon_load_from_dataframe(

@@ -45,7 +45,7 @@ def process_args(api, args):
     ) as iter:
         for prop in iter:
             iter.set_description(prop.display_name)
-            result = api.call.create_property_definition(definition=prop)
+            result = api.call.create_property_definition(create_property_definition_request=prop)
             if result.left is not None:
                 return result
 

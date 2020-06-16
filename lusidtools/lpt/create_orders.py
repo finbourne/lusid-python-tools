@@ -80,7 +80,7 @@ def upsert_orders(api, args, df, identifiers, prop_keys):
         print(order_request.order_requests)
         exit()
 
-    return api.call.upsert_orders(request=order_request).bind(success)
+    return api.call.upsert_orders(order_set_request=order_request).bind(success)
 
 
 def main():

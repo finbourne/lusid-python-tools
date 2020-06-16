@@ -75,7 +75,7 @@ def process_args(api, args):
                 return api.call.upsert_transactions(
                     args.scope,
                     portfolio,
-                    transactions=api.from_df(txns, api.models.TransactionRequest),
+                    transaction_request=api.from_df(txns, api.models.TransactionRequest),
                 )
 
             if args.portfolio.lower().startswith("col:"):
@@ -127,7 +127,7 @@ def process_args(api, args):
                     args.scope,
                     portfolio,
                     lpt.to_date(args.positions[1]),
-                    holding_adjustments=[
+                    adjust_holding_request=[
                         api.models.AdjustHoldingRequest(
                             instrument_identifiers=lpt.to_instrument_identifiers(
                                 i if len(keys) == 1 else i[0]
