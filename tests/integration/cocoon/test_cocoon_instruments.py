@@ -665,7 +665,7 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertTrue(
             expr=all(
-                combined_successes[key].properties == value.properties
+                sorted(combined_successes[key].properties, key=lambda p: p.key) == sorted(value.properties, key=lambda p: p.key)
                 for key, value in expected_outcome["instruments"].values.items()
             )
         )
@@ -821,7 +821,7 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertTrue(
             expr=all(
-                combined_successes[key].properties == value.properties
+                sorted(combined_successes[key].properties, key=lambda p: p.key) == sorted(value.properties, key=lambda p: p.key)
                 for key, value in expected_outcome["instruments"].values.items()
             )
         )
@@ -966,7 +966,7 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertTrue(
             expr=all(
-                combined_successes[key].properties == value.properties
+                sorted(combined_successes[key].properties, key=lambda p: p.key) == sorted(value.properties, key=lambda p: p.key)
                 for key, value in expected_outcome["instruments"].values.items()
             )
         )
