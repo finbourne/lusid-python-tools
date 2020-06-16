@@ -1,4 +1,4 @@
-lusid-sdk-preview>=0.10.975
+lusid-sdk-preview>=0.11.*
 msrest==0.6.*
 pytest==5.*
 xlrd==1.*
