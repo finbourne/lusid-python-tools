@@ -102,7 +102,7 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
             lusid.api.PortfolioGroupsApi
         ).create_portfolio_group(
             scope=cls.scope,
-            request=lusid.models.CreatePortfolioGroupRequest(
+            create_portfolio_group_request=lusid.models.CreatePortfolioGroupRequest(
                 code="SubGroups",
                 display_name="SubGroups",
                 created="2010-10-09T08:00:00Z",

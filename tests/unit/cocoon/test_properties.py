@@ -31,22 +31,22 @@ class CocoonPropertiesTests(unittest.TestCase):
             """
 
             def create_property_definition(
-                self, definition, **kwargs
+                self, create_property_definition_request, **kwargs
             ) -> lusid.models.PropertyDefinition:
                 """
                 This mocks the creation of a portfolio definition
 
-                :param lusid.models.CreatePropertyDefinitionRequest definition: The create property defintion request
+                :param lusid.models.CreatePropertyDefinitionRequest create_property_definition_request: The create property definition request
                 :param kwargs:
                 :return: lusid.models.PropertyDefinition: The property defintion of the created property
                 """
                 return lusid.models.PropertyDefinition(
                     key="{}/{}/{}".format(
-                        definition.domain, definition.scope, definition.code
+                        create_property_definition_request.domain, create_property_definition_request.scope, create_property_definition_request.code
                     ),
                     data_type_id=lusid.models.ResourceId(
-                        scope=definition.data_type_id.scope,
-                        code=definition.data_type_id.code,
+                        scope=create_property_definition_request.data_type_id.scope,
+                        code=create_property_definition_request.data_type_id.code,
                     ),
                 )
 

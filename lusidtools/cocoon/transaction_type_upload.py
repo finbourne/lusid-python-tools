@@ -52,7 +52,7 @@ def create_transaction_type_configuration(api_factory, alias, movements):
     response = api_factory.build(
         lusid.api.SystemConfigurationApi
     ).create_configuration_transaction_type(
-        type=models.TransactionConfigurationDataRequest(
+        transaction_configuration_data_request=models.TransactionConfigurationDataRequest(
             aliases=[alias], movements=movements
         )
     )

@@ -225,7 +225,7 @@ def create_property_definitions_from_file(
         # Call LUSID to create the new property
         property_response = api_factory.build(
             lusid.PropertyDefinitionsApi
-        ).create_property_definition(definition=property_request)
+        ).create_property_definition(create_property_definition_request=property_request)
 
         logging.info(
             f"Created - {property_response.key} - with datatype {property_response.data_type_id.code}"
