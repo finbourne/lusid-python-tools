@@ -75,7 +75,9 @@ def process_args(api, args):
                 return api.call.upsert_transactions(
                     args.scope,
                     portfolio,
-                    transaction_request=api.from_df(txns, api.models.TransactionRequest),
+                    transaction_request=api.from_df(
+                        txns, api.models.TransactionRequest
+                    ),
                 )
 
             if args.portfolio.lower().startswith("col:"):

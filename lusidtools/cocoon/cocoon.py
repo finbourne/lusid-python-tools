@@ -175,7 +175,9 @@ class BatchLoader:
         return api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).upsert_transactions(
-            scope=kwargs["scope"], code=kwargs["code"], transaction_request=transaction_batch
+            scope=kwargs["scope"],
+            code=kwargs["code"],
+            transaction_request=transaction_batch,
         )
 
     @staticmethod
@@ -289,7 +291,8 @@ class BatchLoader:
                 return api_factory.build(
                     lusid.api.TransactionPortfoliosApi
                 ).create_portfolio(
-                    scope=kwargs["scope"], create_transaction_portfolio_request=portfolio_batch[0]
+                    scope=kwargs["scope"],
+                    create_transaction_portfolio_request=portfolio_batch[0],
                 )
             else:
                 return e
@@ -328,7 +331,9 @@ class BatchLoader:
             # find the matching instruments
             mastered_instruments = api_factory.build(
                 lusid.api.SearchApi
-            ).instruments_search(instrument_search_property=[search_request], mastered_only=True)
+            ).instruments_search(
+                instrument_search_property=[search_request], mastered_only=True
+            )
 
             # flat map the results to a list of luids
             luids = [
@@ -464,7 +469,10 @@ class BatchLoader:
             if e.status == 404:
                 return api_factory.build(
                     lusid.api.PortfolioGroupsApi
-                ).create_portfolio_group(scope=kwargs["scope"], create_portfolio_group_request=updated_request)
+                ).create_portfolio_group(
+                    scope=kwargs["scope"],
+                    create_portfolio_group_request=updated_request,
+                )
             else:
                 return e
 
