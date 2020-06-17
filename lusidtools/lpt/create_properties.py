@@ -33,7 +33,7 @@ def process_args(api, args):
                 scope=p[1],
                 code=p[2],
                 value_required=False,
-                display_name=p[1],
+                display_name=p[2],
                 life_time="Perpetual",
                 data_type_id=api.models.ResourceId("system", res_type[args.type]),
             )
