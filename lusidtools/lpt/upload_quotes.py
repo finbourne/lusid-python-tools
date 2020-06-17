@@ -53,14 +53,14 @@ def process_args(api, args):
         results = (batch_upsert_quotes(api, args.scope, c) for c in lpt.chunk(df, 2000))
 
         # Create dict of LUSID upsert quotes failures
-        #failures = {
+        # failures = {
         #    k: v
         #    for i in results
         #    if i.is_right
         #    for k, v in i.right.content.failed.items()
-        #}
+        # }
         # Update return df with the errors from LUSID
-        #updated_failures = update_failures(failures, df)
+        # updated_failures = update_failures(failures, df)
 
         # Check no api exceptions for any of the batches
         for f in results:
@@ -68,7 +68,7 @@ def process_args(api, args):
                 return f.left
 
         # If there were any LUSID failures, return the df
-        #if len(failures) > 0:
+        # if len(failures) > 0:
         #    return Either.Right(updated_failures)
 
     return Either.Right("Success")
