@@ -84,8 +84,8 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
                 "2019-09-01T09:31:22.664000+00:00",
             ],
             [
-                "numpy datetime64 UTC false",
-                np.datetime64("2019-07-02", format="%Y%m%d", utc=False),
+                "numpy datetime64",
+                np.datetime64("2019-07-02"),
                 "2019-07-02T00:00:00.000000Z",
             ],
         ]
