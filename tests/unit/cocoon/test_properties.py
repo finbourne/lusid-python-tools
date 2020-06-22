@@ -42,7 +42,9 @@ class CocoonPropertiesTests(unittest.TestCase):
                 """
                 return lusid.models.PropertyDefinition(
                     key="{}/{}/{}".format(
-                        create_property_definition_request.domain, create_property_definition_request.scope, create_property_definition_request.code
+                        create_property_definition_request.domain,
+                        create_property_definition_request.scope,
+                        create_property_definition_request.code,
                     ),
                     data_type_id=lusid.models.ResourceId(
                         scope=create_property_definition_request.data_type_id.scope,
