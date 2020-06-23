@@ -34,7 +34,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
                     "base_currency": "base_currency",
                 },
                 [],
-                [],
             ],
             [
                 "Load a reference portfolio with required attributes AND properties",
@@ -46,7 +45,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
                     "base_currency": "base_currency",
                 },
                 ["strategy", "custodian"],
-                [],
             ],
             [
                 "Load duplicate reference portfolios",
@@ -58,7 +56,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
                     "base_currency": "base_currency",
                 },
                 [],
-                [],
             ],
         ]
     )
@@ -69,7 +66,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         mapping_required,
         mapping_optional,
         property_columns,
-        expected_outcome,
     ) -> None:
         """
         Test that a reference portfolio can be loaded successfully
