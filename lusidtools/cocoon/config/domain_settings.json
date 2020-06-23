@@ -70,5 +70,17 @@
       "full_key_format": false,
       "required_call_attributes": ["scope", "code"],
       "unique_attributes": ["code"]
+  },
+
+    "reference_portfolio": {
+      "domain": "Portfolio",
+      "batch_allowed": false,
+      "default_batch_size": 2000,
+      "top_level_model": "CreateReferencePortfolioRequest",
+      "portfolio_specific": true,
+      "full_key_format": false,
+      "required_call_attributes": ["scope", "code"],
+      "unique_attributes": ["code"]
+
   }
 }

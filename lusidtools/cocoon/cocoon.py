@@ -299,6 +299,61 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
+    def load_reference_portfolio_batch(
+        api_factory: lusid.utilities.ApiClientFactory,
+        reference_portfolio_batch: list,
+        **kwargs,
+    ) -> lusid.models.Portfolio:
+        """
+        Upserts a batch of reference portfolios to LUSID
+
+        Parameters
+        ----------
+        api_factory : lusid.utilities.ApiClientFactory
+            the api factory to use
+        portfolio_batch : list[lusid.models.CreateReferencePortfolioRequest]
+            The batch of reference portfolios to create
+        scope : str
+            The scope to create the reference portfolios in
+        code : str
+            The code of the reference portfolio to create
+        kwargs
+
+        Returns
+        -------
+        lusid.models.ReferencePortfolio
+            the response from LUSID
+        """
+
+        if "scope" not in kwargs.keys():
+            raise KeyError(
+                "You are trying to load a reference portfolio without a scope, please ensure that a scope is provided."
+            )
+
+        if "code" not in kwargs.keys():
+            raise KeyError(
+                "You are trying to load a reference portfolio without a portfolio code, please ensure that a code is provided."
+            )
+
+        try:
+            return api_factory.build(lusid.api.PortfoliosApi).get_portfolio(
+                scope=kwargs["scope"], code=kwargs["code"]
+            )
+        # TODO: Add in here upsert portfolio properties if it does exist
+
+        except lusid.exceptions.ApiException as e:
+            if e.status == 404:
+                return api_factory.build(
+                    lusid.api.ReferencePortfolioApi
+                ).create_reference_portfolio(
+                    scope=kwargs["scope"],
+                    create_reference_portfolio_request=reference_portfolio_batch[0],
+                )
+            else:
+                raise e
+
+    @staticmethod
+    @run_in_executor
     def load_instrument_property_batch(
         api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
     ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
