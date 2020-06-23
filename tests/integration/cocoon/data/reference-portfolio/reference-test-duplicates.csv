@@ -1,0 +1,7 @@
+FundCode,base_currency,display_name,description,created,custodian,strategy
+EquityModel,USD,EquityModel,An equity model portfolio,2000-01-01,Test Bank,balanced
+EquityModeUSA,USD,EquityModel,An equity model portfolio,2000-01-01,Test Bank,balanced
+EquityModelUK,GBP,EquityModel,An equity model portfolio,2000-01-01,Test Bank,UK
+EquityModel,USD,EquityModel,An equity model portfolio,2000-01-01,Test Bank,balanced
+EquityModeUSA,USD,EquityModel,An equity model portfolio,2000-01-01,Test Bank,balanced
+EquityModelUK,GBP,EquityModel,An equity model portfolio,2000-01-01,Test Bank,UK
