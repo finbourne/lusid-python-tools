@@ -59,7 +59,7 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
             ],
         ]
     )
-    def test_load_from_data_frame_a_portfolios_failure(
+    def test_load_from_data_frame_attributes_and_properties_success(
         self,
         _,
         file_name,
