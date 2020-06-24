@@ -60,12 +60,7 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_attributes_and_properties_success(
-        self,
-        _,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        property_columns,
+        self, _, file_name, mapping_required, mapping_optional, property_columns,
     ) -> None:
         """
         Test that a reference portfolio can be loaded successfully
