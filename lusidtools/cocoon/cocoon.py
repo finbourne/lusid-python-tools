@@ -350,7 +350,7 @@ class BatchLoader:
                     create_reference_portfolio_request=reference_portfolio_batch[0],
                 )
             else:
-                raise e
+                return e
 
     @staticmethod
     @run_in_executor
