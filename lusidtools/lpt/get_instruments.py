@@ -61,7 +61,7 @@ def process_args(api, args):
             args.properties = props_remaining[:MAX_PROPS]
             remaining = props_remaining[MAX_PROPS:]
             return api.call.get_instruments(
-                args.type, args.instrument, instrument_property_keys=args.properties
+                args.type, request_body=args.instrument, property_keys=args.properties
             ).bind(lambda r: step3(r, remaining, final_dataframe))
         return final_dataframe
 
@@ -77,7 +77,7 @@ def process_args(api, args):
                 next_step = lambda r: step3(r, l[MAX_PROPS:], None)
 
         return api.call.get_instruments(
-            args.type, args.instrument, instrument_property_keys=args.properties
+            args.type, request_body=args.instrument, property_keys=args.properties
         ).bind(next_step)
 
     if args.identifiers is None:

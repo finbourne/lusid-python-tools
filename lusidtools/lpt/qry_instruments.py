@@ -26,7 +26,7 @@ def process_args(api, args):
         id_columns = {"identifiers.KEY:{}".format(v): v for v in ids["Id"].values}
 
         def fetch_page(page_token):
-            return api.call.list_instruments(limit=65536, page=page_token)
+            return api.call.list_instruments(limit=3000, page=page_token)
 
         results = []
 

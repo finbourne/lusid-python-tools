@@ -43,7 +43,7 @@ def process_args(api, args):
     if len(constraints) > 0:
         elasticQuery["query"] = {"bool": {"must": constraints}}
 
-    return api.call.properties_search(request=elasticQuery).bind(success)
+    return api.call.properties_search(body=elasticQuery).bind(success)
 
 
 # Standalone tool
