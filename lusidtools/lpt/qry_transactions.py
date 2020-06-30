@@ -86,7 +86,7 @@ def process_args(api, args):
         result = api.call.build_transactions(
             scope=args.scope,
             code=args.portfolio,
-            query_parameters=api.models.TransactionQueryParameters(
+            transaction_query_parameters=api.models.TransactionQueryParameters(
                 start_date=lpt.to_date(args.start_date),
                 end_date=lpt.to_date(args.end_date),
                 query_mode="TradeDate",
