@@ -1,5 +1,6 @@
 from IPython import display
 
+
 class StopExecution(Exception):
     """
     This object is used to stop a notebook from running.
