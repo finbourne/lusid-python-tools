@@ -7,6 +7,7 @@ from lusidtools.lpt import (
     lpt,
     lse,
     qry_holdings as qh,
+    qry_aggregate_holdings as qah,
     upload_portfolio as up,
     create_instr as ci,
     create_properties as cp,
@@ -58,6 +59,7 @@ class LptTests(unittest.TestCase):
             cls.api.call.get_portfolio(scope="JLH", code="JLH1").is_right()
             and cls.api.call.get_portfolio(scope="JLH", code="JLH2").is_right()
             and cls.api.call.get_portfolio(scope="JLH", code="JLH3").is_right()
+            and cls.api.call.get_portfolio(scope="Finbourne-Examples", code="Global-Equity").is_right()
         )
 
     def test_connect_with_token(self):
@@ -154,7 +156,6 @@ class LptTests(unittest.TestCase):
             lambda right: self.assertEqual(right, "Done!"),
         )
 
-    # @unittest.skip("not implemented - need to set up portfolio")
     def test_upload_transactions(self):
 
         if not self.target_portfolios_exist():
@@ -176,7 +177,6 @@ class LptTests(unittest.TestCase):
             lambda right: self.assertEqual(right, "Done!"),
         )
 
-    # @unittest.skip("not implemented - need to set up portfolio")
     def test_upload_multiple_transaction(self):
 
         if not self.target_portfolios_exist():
@@ -198,7 +198,6 @@ class LptTests(unittest.TestCase):
             lambda right: self.assertEqual(right, "Done!"),
         )
 
-    # @unittest.skip("not implemented")
     def test_get_holdings(self):
 
         if not self.target_portfolios_exist():
@@ -206,6 +205,29 @@ class LptTests(unittest.TestCase):
 
         # Query Portfolio JLH3
         qh.process_args(self.api, qh.parse(args=["JLH", "JLH3", "-t"])).match(
+            lambda left: self.fail(lpt.display_error(left)),
+            lambda right: self.assertIsInstance(right, DataFrame),
+        )
+
+    def test_aggregate_holdings(self):
+
+        if not self.target_portfolios_exist():
+            self.skipTest("missing target portfolios")
+
+        qah.process_args(
+            self.api,
+            qah.parse(
+                args=[
+                    "Finbourne-Examples",
+                    "Global-Equity",
+                    "2020-01-01",
+                    "--pricing-scope",
+                    "Finbourne-Examples",
+                    "--recipe",
+                    "FinbourneExamplesRecipeMidThenBid",
+                ]
+            ),
+        ).match(
             lambda left: self.fail(lpt.display_error(left)),
             lambda right: self.assertIsInstance(right, DataFrame),
         )

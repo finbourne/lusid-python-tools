@@ -13,6 +13,7 @@ flatten-json==0.1.7
 humanfriendly==8.2
 idna==2.9
 importlib-metadata==1.6.1
+IPython==7.16.1
 isodate==0.6.0
 jmespath==0.9.5
 jsbeautifier==1.11.0
@@ -45,4 +46,4 @@ urllib3==1.25.8
 wcwidth==0.2.4
 xlrd==1.2.0
 zipp==3.1.0
-IPython==7.16.1
+
