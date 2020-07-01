@@ -178,7 +178,7 @@ def run_query(api, args, date):
     fn = (
         api.call.get_aggregation_by_group
         if args.group
-        else api.call.get_aggregation_by_portfolio
+        else api.call.get_aggregation
     )
 
     return fn(args.scope, args.portfolio, aggregation_request=request).bind(success)
