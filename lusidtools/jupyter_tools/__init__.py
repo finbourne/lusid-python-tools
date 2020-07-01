@@ -1,1 +1,2 @@
 from lusidtools.jupyter_tools.stop_execution import StopExecution
+from lusidtools.jupyter_tools.hide_code_button import toggle_code
