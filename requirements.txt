@@ -45,3 +45,4 @@ urllib3==1.25.8
 wcwidth==0.2.4
 xlrd==1.2.0
 zipp==3.1.0
+IPython==7.16.1
