@@ -59,7 +59,9 @@ class LptTests(unittest.TestCase):
             cls.api.call.get_portfolio(scope="JLH", code="JLH1").is_right()
             and cls.api.call.get_portfolio(scope="JLH", code="JLH2").is_right()
             and cls.api.call.get_portfolio(scope="JLH", code="JLH3").is_right()
-            and cls.api.call.get_portfolio(scope="Finbourne-Examples", code="Global-Equity").is_right()
+            and cls.api.call.get_portfolio(
+                scope="Finbourne-Examples", code="Global-Equity"
+            ).is_right()
         )
 
     def test_connect_with_token(self):
