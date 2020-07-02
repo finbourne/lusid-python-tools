@@ -175,11 +175,7 @@ def run_query(api, args, date):
             df[[UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL]],
         )
 
-    fn = (
-        api.call.get_aggregation_by_group
-        if args.group
-        else api.call.get_aggregation
-    )
+    fn = api.call.get_aggregation_by_group if args.group else api.call.get_aggregation
 
     return fn(args.scope, args.portfolio, aggregation_request=request).bind(success)
 
