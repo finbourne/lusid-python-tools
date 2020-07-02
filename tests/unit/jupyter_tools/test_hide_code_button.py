@@ -6,4 +6,4 @@ class TestHideCodeButton(unittest.TestCase):
     def test_portfolio_stopper(self) -> None:
 
         test_toggle = toggle_code()
-        self.assertEqual(test_toggle, None)
+        self.assertIsNone(test_toggle)
