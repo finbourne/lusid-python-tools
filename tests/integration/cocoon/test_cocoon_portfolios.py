@@ -6,7 +6,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
-
+from tests.integration.cocoon import ApiFactorySingleton
 
 class CocoonTestsPortfolios(unittest.TestCase):
     api_factory = None
@@ -14,9 +14,10 @@ class CocoonTestsPortfolios(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.logger = logger.LusidLogger("debug")
 
     @parameterized.expand(

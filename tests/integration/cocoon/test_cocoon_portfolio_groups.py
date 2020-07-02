@@ -9,6 +9,7 @@ from lusidtools.cocoon.utilities import create_scope_id
 import datetime
 from dateutil.tz import tzutc
 import logging
+from tests.integration.cocoon import ApiFactorySingleton
 
 logger = logging.getLogger()
 
@@ -19,9 +20,10 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
         cls.portfolio_scope = create_scope_id()
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.unique_portfolios = pd.read_csv(
             Path(__file__).parent.joinpath(
                 "data/port_group_tests/test_1_pg_create_with_portfolios.csv"

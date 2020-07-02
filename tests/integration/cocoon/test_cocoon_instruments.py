@@ -8,7 +8,7 @@ from lusidtools import logger
 from datetime import datetime
 import pytz
 from lusidtools.cocoon.utilities import create_scope_id
-
+from tests.integration.cocoon import ApiFactorySingleton
 unique_properties_scope = create_scope_id()
 
 
@@ -16,9 +16,10 @@ class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.logger = logger.LusidLogger("debug")
 
     @parameterized.expand(

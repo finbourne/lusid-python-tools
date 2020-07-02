@@ -7,6 +7,7 @@ import lusid
 from lusidtools import logger
 import numpy as np
 import concurrent.futures
+from tests.integration.cocoon import ApiFactorySingleton
 
 
 class CocoonTestsAsyncTools(unittest.TestCase):
@@ -17,9 +18,10 @@ class CocoonTestsAsyncTools(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.logger = logger.LusidLogger("debug")
 
     @parameterized.expand(
@@ -45,7 +47,7 @@ class CocoonTestsAsyncTools(unittest.TestCase):
         ]
     )
     def test_multiple_threads(
-        self, _, file_name, number_threads, thread_pool_max_workers
+            self, _, file_name, number_threads, thread_pool_max_workers
     ):
         """
         This tests different combinations of running load_from_data_frame across multiple threads and configuring

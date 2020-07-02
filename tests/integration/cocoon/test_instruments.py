@@ -1,11 +1,13 @@
+import asyncio
 import unittest
 from pathlib import Path
+
 import pandas as pd
-import lusid
-from lusidtools import cocoon as cocoon
 from parameterized import parameterized
+
+from lusidtools import cocoon as cocoon
 from lusidtools import logger
-import asyncio
+from tests.integration.cocoon import ApiFactorySingleton
 
 
 class CocoonInstrumentsTests(unittest.TestCase):
@@ -14,9 +16,10 @@ class CocoonInstrumentsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.logger = logger.LusidLogger("debug")
         cls.loop = cocoon.async_tools.start_event_loop_new_thread()
 
@@ -137,9 +140,8 @@ class CocoonInstrumentsTests(unittest.TestCase):
         ]
     )
     def test_enrich_instruments(
-        self, _, file_name, mapping_required, instrument_identifier_mapping
+            self, _, file_name, mapping_required, instrument_identifier_mapping
     ):
-
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         data_frame_updated, mapping_required = asyncio.run_coroutine_threadsafe(

@@ -1,0 +1,1 @@
+from tests.integration.cocoon.api_factory_singleton import ApiFactorySingleton

@@ -1,10 +1,12 @@
 import unittest
 from pathlib import Path
+
 import pandas as pd
-import lusid
-from lusidtools import cocoon as cocoon
 from parameterized import parameterized
+
+from lusidtools import cocoon as cocoon
 from lusidtools import logger
+from tests.integration.cocoon import ApiFactorySingleton
 
 
 class CocoonTestsFailures(unittest.TestCase):
@@ -13,9 +15,10 @@ class CocoonTestsFailures(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
         cls.logger = logger.LusidLogger("debug")
 
     @parameterized.expand(
@@ -297,18 +300,18 @@ class CocoonTestsFailures(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_failure(
-        self,
-        test_name,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        file_type,
-        sub_holding_keys,
-        expected_exception,
+            self,
+            test_name,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            file_type,
+            sub_holding_keys,
+            expected_exception,
     ) -> None:
         """
         Test for failure cases
@@ -334,7 +337,6 @@ class CocoonTestsFailures(unittest.TestCase):
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         with self.assertRaises(expected_exception):
-
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
                 scope=scope,
@@ -366,18 +368,18 @@ class CocoonTestsFailures(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_failure(
-        self,
-        test_name,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        file_type,
-        sub_holding_keys,
-        expected_exception,
+            self,
+            test_name,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            file_type,
+            sub_holding_keys,
+            expected_exception,
     ) -> None:
         """
         Test for failure cases
@@ -404,7 +406,6 @@ class CocoonTestsFailures(unittest.TestCase):
         )
 
         with self.assertRaises(expected_exception):
-
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
                 scope=scope,

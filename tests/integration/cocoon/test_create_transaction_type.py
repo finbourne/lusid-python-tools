@@ -1,12 +1,14 @@
+import logging
 import unittest
 from pathlib import Path
-import lusid
+
 import lusid.models as models
-from lusidtools.cocoon.utilities import create_scope_id
+
 from lusidtools.cocoon.transaction_type_upload import (
     create_transaction_type_configuration,
 )
-import logging
+from lusidtools.cocoon.utilities import create_scope_id
+from tests.integration.cocoon import ApiFactorySingleton
 
 logger = logging.getLogger()
 
@@ -16,9 +18,10 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
     def setUpClass(cls) -> None:
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
-        )
+        # cls.api_factory = lusid.utilities.ApiClientFactory(
+        #     api_secrets_filename=secrets_file
+        # )
+        cls.api_factory = ApiFactorySingleton.get_api_factory()
 
         cls.alias = models.TransactionConfigurationTypeAlias(
             type=create_scope_id().replace("-", ""),
