@@ -2,6 +2,8 @@ import argparse
 import copy
 import csv
 import os
+import uuid
+
 import numpy as np
 import lusid
 from collections.abc import Mapping
@@ -1364,7 +1366,11 @@ def generate_time_based_unique_id(time_generator: None):
     return uid
 
 
-def create_scope_id(time_generator=None):
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+def create_scope_id(time_generator=None, use_uuid=False):
     """
     This function creates a unique ID based on the time since epoch for use
     as a scope id.
@@ -1379,8 +1385,10 @@ def create_scope_id(time_generator=None):
     scope_id : str
         Scope identifier
     """
-
-    return generate_time_based_unique_id(time_generator)
+    if use_uuid:
+        return generate_uuid()
+    else:
+        return generate_time_based_unique_id(time_generator)
 
 
 def default_fx_forward_model(
