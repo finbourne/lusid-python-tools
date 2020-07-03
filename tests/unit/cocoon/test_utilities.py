@@ -1,4 +1,6 @@
 import copy
+import uuid
+
 import numpy
 import unittest
 from datetime import datetime
@@ -1711,9 +1713,15 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_create_scope_id_success(self, _, time_generator, expected_outcome):
 
-        scope_id = create_scope_id(time_generator)
+        scope_id = create_scope_id(time_generator=time_generator)
 
         self.assertEqual(first=expected_outcome, second=scope_id)
+
+    def test_create_scope_id_uuid_success(self):
+
+        scope_id = create_scope_id(use_uuid=True)
+
+        self.assertTrue(uuid.UUID(scope_id))
 
     @parameterized.expand(
         [
