@@ -137,7 +137,7 @@ def run_query(api, args, date):
             api.models.AggregateSpec(AGG_RATE, "Value"),
             api.models.AggregateSpec(AGG_PRC, "Value"),
         ],
-        portfolio_identifier_code = "GroupPortfolio" if args.group else "SinglePortfolio"
+        portfolio_identifier_code="GroupPortfolio" if args.group else "SinglePortfolio",
     )
 
     # Called if get_aggregtion_by_portfolio() succeeds
@@ -176,7 +176,9 @@ def run_query(api, args, date):
             df[[UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL]],
         )
 
-    return api.call.get_aggregation(args.scope, args.portfolio, aggregation_request=request).bind(success)
+    return api.call.get_aggregation(
+        args.scope, args.portfolio, aggregation_request=request
+    ).bind(success)
 
 
 def main(parse=parse, display_df=lpt.display_df):
