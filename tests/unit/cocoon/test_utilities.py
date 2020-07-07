@@ -1702,20 +1702,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         self.assertTrue(df_true.equals(df_test))
 
-    @parameterized.expand(
-        [
-            [
-                "2019-11-27T11:08:38Z",
-                MockTimeGenerator(current_datetime=1574852918),
-                "37f3-342f-823f-00",
-            ]
-        ]
-    )
-    def test_create_scope_id_success(self, _, time_generator, expected_outcome):
 
+    def test_create_scope_id_success(self):
+        time_generator = MockTimeGenerator(current_datetime=1574852918)
+        expected_outcome = "37f3-342f-823f-00"
         scope_id = create_scope_id(time_generator=time_generator)
 
         self.assertEqual(first=expected_outcome, second=scope_id)
+
 
     def test_create_scope_id_uuid_success(self):
 
