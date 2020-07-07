@@ -118,9 +118,9 @@ def process_args(api, args):
             print(txn_types)
             return None
         else:
-            return api.call.set_configuration_transaction_types(types=txn_types).bind(
-                set_success
-            )
+            return api.call.set_configuration_transaction_types(
+                        transaction_set_configuration_data_request=txn_types
+                   ).bind(set_success)
 
 
 # Standalone tool
