@@ -2,6 +2,8 @@ import argparse
 import copy
 import csv
 import os
+import uuid
+
 import numpy as np
 import lusid
 from collections.abc import Mapping
@@ -1380,7 +1382,7 @@ def create_scope_id(time_generator=None):
         Scope identifier
     """
 
-    return generate_time_based_unique_id(time_generator)
+    return generate_time_based_unique_id(time_generator) + str(uuid.uuid4())
 
 
 def default_fx_forward_model(

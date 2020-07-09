@@ -1711,7 +1711,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_create_scope_id_success(self, _, time_generator, expected_outcome):
 
-        scope_id = create_scope_id(time_generator)
+        scope_id = create_scope_id(time_generator)[:17]
 
         self.assertEqual(first=expected_outcome, second=scope_id)
 
