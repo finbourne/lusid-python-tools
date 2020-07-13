@@ -265,8 +265,6 @@ def standard_flow(parser, connector, executor, display_df=display_df):
 
     return either.match(left=display_error, right=success)
 
-    api.dump_stats()
-
 
 # Nicely display an error from LUSID
 def display_error(error, response=False):
