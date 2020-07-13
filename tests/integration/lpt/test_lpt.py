@@ -233,3 +233,27 @@ class LptTests(unittest.TestCase):
             lambda left: self.fail(lpt.display_error(left)),
             lambda right: self.assertIsInstance(right, DataFrame),
         )
+
+    def test_aggregate_group_holdings(self):
+
+        if not self.api.call.get_portfolio_group(scope="Finbourne-Examples", code="US-FI").is_right():
+            self.skipTest("missing target portfolio group")
+
+        qah.process_args(
+            self.api,
+            qah.parse(
+                args=[
+                    "Finbourne-Examples",
+                    "US-FI",
+                    "2020-01-01",
+                    "--group",
+                    "--pricing-scope",
+                    "Finbourne-Examples",
+                    "--recipe",
+                    "FinbourneExamplesRecipeMidThenBid",
+                ]
+            ),
+        ).match(
+            lambda left: self.fail(lpt.display_error(left)),
+            lambda right: self.assertIsInstance(right, DataFrame),
+        )
