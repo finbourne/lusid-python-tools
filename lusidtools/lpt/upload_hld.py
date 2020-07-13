@@ -80,8 +80,6 @@ def process_args(api, args):
         ],
     )
 
-    return Either.Right(None)
-
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
