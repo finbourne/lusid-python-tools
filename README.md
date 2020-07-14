@@ -6,6 +6,7 @@ Python tools for LUSID
 ![PyPI](https://img.shields.io/pypi/v/lusidtools?color=blue)
 [![Build Status](https://travis-ci.org/finbourne/lusid-python-tools.svg?branch=master)](https://travis-ci.org/finbourne/lusid-python-tools)
 ![](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=finbourne_lusid-python-tools&metric=alert_status)](https://sonarcloud.io/dashboard?id=finbourne_lusid-python-tools)
 
 For more details see the lusid-python-tools [wiki](https://github.com/finbourne/lusid-python-tools/wiki).
 
