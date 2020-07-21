@@ -303,7 +303,10 @@ def format_quotes_response(
         items_failed,
     )
 
-def format_reference_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
+
+def format_reference_portfolios_response(
+    response: dict,
+) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from reference portfolio requests and returns successful and errored statuses for request constituents.
 
@@ -322,7 +325,7 @@ def format_reference_portfolios_response(response: dict) -> (pd.DataFrame, pd.Da
 
     file_type = "reference_portfolios"
     check_dict_for_required_keys(
-        response[file_type], f"Response from {file_type} request", ["errors","success"]   
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
     )
 
     # get success
