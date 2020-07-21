@@ -10,6 +10,7 @@ from lusidtools.cocoon.cocoon_printer import (
     format_quotes_response,
     format_transactions_response,
     get_portfolio_from_href,
+    format_reference_portfolios_response,
 )
 from parameterized import parameterized
 
@@ -94,6 +95,17 @@ adjust_holding_success = models.AdjustHolding(
     version="1",
 )
 
+reference_portfolio_success = models.Portfolio(
+    links=[],
+    version="1",
+    type="Transaction",
+    display_name="name3",
+    description="test reference portfolio",
+    created="2019-01-01",
+    href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
+    id=models.ResourceId(code="ID00002", scope="default test"),
+)
+
 api_exception = lusid.exceptions.ApiException(status="404", reason="not found")
 
 
@@ -120,6 +132,10 @@ responses = {
         "errors": [api_exception for _ in range(2)],
         "success": [adjust_holding_success for _ in range(2)],
     },
+    "reference_portfolios": {
+        "errors": [api_exception for _ in range(2)],
+        "success": [reference_portfolio_success for _ in range(2)],
+    },
 }
 
 empty_response_with_full_shape = {
@@ -134,6 +150,7 @@ empty_response_with_full_shape = {
         "success": [models.UpsertQuotesResponse(failed={}, values={})],
     },
     "holdings": {"errors": [], "success": [],},
+    "reference_portfolios": {"errors": [], "success": [],},
 }
 
 empty_response_missing_shape = {
@@ -142,6 +159,7 @@ empty_response_missing_shape = {
     "transactions": {"errors": [], "success": [],},
     "quotes": {"errors": [], "success": []},
     "holdings": {"errors": [], "success": [],},
+    "reference_portfolios": {"errors": [], "success": [],},
 }
 
 responses_no_error_field = {
@@ -150,6 +168,7 @@ responses_no_error_field = {
     "transactions": {"success": [transaction_success],},
     "quotes": {"success": [quote_success]},
     "holdings": {"success": [adjust_holding_success],},
+    "reference_portfolios": {"success": [portfolio_success],},
 }
 responses_no_success_field = {
     "instruments": {"errors": [api_exception for _ in range(2)],},
@@ -157,6 +176,7 @@ responses_no_success_field = {
     "transactions": {"errors": [api_exception for _ in range(2)],},
     "quotes": {"errors": [api_exception for _ in range(2)],},
     "holdings": {"errors": [api_exception for _ in range(2)],},
+    "reference_portfolios": {"errors": [api_exception for _ in range(2)],},
 }
 
 
@@ -363,6 +383,34 @@ class CocoonPrinterTests(unittest.TestCase):
             for index, row in err.iterrows()
         ]
 
+    @parameterized.expand(
+        [
+            (
+                "standard_response",
+                responses,
+                2,
+                {"succ": ["ID00002","ID00002"], "err": ["not found","not found"]},
+            ),
+            ("empty_response", empty_response_with_full_shape, 0, {}),
+        ]
+    )
+    def test_format_reference_portfolios_response_success(
+        self, _, response, num_items, expected_value
+    ):
+        succ, err = format_reference_portfolios_response(response)
+        self.assertEqual(num_items, len(succ))
+        self.assertEqual(num_items, len(err))
+
+        [
+            self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
+            for index, row in succ.iterrows()
+        ]
+        [
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
+            for index, row in err.iterrows()
+        ]
+
+
     # Test failure cases
 
     @parameterized.expand(
@@ -422,3 +470,15 @@ class CocoonPrinterTests(unittest.TestCase):
     ):
         with self.assertRaises(expected_error):
             succ, err, failed = format_holdings_response(response)
+
+    @parameterized.expand(
+        [
+            ("no_error_field", responses_no_error_field, ValueError),
+            ("no_success_field", responses_no_success_field, ValueError),
+        ]
+    )
+    def test_format_reference_portfolios_response_fail_no_error_field(
+        self, _, response, expected_error
+    ):
+        with self.assertRaises(expected_error):
+            succ, err, failed = format_reference_portfolios_response(response)
