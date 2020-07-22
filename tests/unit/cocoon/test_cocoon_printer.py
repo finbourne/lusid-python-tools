@@ -401,7 +401,7 @@ class CocoonPrinterTests(unittest.TestCase):
                 "standard_response",
                 responses,
                 2,
-                {"succ": ["ID00002","ID00002"], "err": ["not found","not found"]},
+                {"succ": ["ID00002", "ID00002"], "err": ["not found", "not found"]},
             ),
             ("empty_response", empty_response_with_full_shape, 0, {}),
         ]
@@ -422,7 +422,6 @@ class CocoonPrinterTests(unittest.TestCase):
         #     self.assertEqual(expected_value["err"][index], row[err.columns[0]])
         #     for index, row in err.iterrows()
         # ]
-
 
     # Test failure cases
 
