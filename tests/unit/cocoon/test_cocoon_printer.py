@@ -320,9 +320,16 @@ class CocoonPrinterTests(unittest.TestCase):
         self, _, response, num_items, expected_value
     ):
         succ, err, failed = format_quotes_response(response)
-        self.assert_responses(
-            num_items, expected_value, succ=succ, err=err, failed=failed
-        )
+        self.assertEqual(num_items, len(succ))
+        self.assertEqual(num_items, len(err))
+        self.assertEqual(num_items, len(failed))
+
+        for index, row in succ.iterrows():
+            self.assertEqual(expected_value["succ"][index], row["quote_id.quote_series_id.instrument_id"])
+        for index, row in err.iterrows():
+            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
+        for index, row in failed.iterrows():
+            self.assertEqual(expected_value["failed"][index], row["quote_id.quote_series_id.instrument_id"])
 
     @parameterized.expand(
         [
