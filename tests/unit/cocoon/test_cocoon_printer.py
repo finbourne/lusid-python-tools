@@ -179,14 +179,17 @@ responses_no_success_field = {
     "reference_portfolios": {"errors": [api_exception for _ in range(2)],},
 }
 
+
 class CocoonPrinterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
 
         cls.logger = logger.LusidLogger("debug")
-        
-    def assert_responses(self, num_items, expected_value, succ=None, err=None, failed=None):
+
+    def assert_responses(
+        self, num_items, expected_value, succ=None, err=None, failed=None
+    ):
         if succ is not None:
             self.assertEqual(num_items, len(succ))
             for index, row in succ.iterrows():
@@ -200,7 +203,9 @@ class CocoonPrinterTests(unittest.TestCase):
         if failed is not None:
             self.assertEqual(num_items, len(failed))
             for index, row in failed.iterrows():
-                self.assertEqual(expected_value["failed"][index], row[failed.columns[0]])
+                self.assertEqual(
+                    expected_value["failed"][index], row[failed.columns[0]]
+                )
 
     @parameterized.expand(
         [
@@ -257,7 +262,9 @@ class CocoonPrinterTests(unittest.TestCase):
         self, _, response, num_items, expected_value
     ):
         succ, err, failed = format_instruments_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err, failed=failed)
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, failed=failed
+        )
 
     @parameterized.expand(
         [
@@ -313,7 +320,9 @@ class CocoonPrinterTests(unittest.TestCase):
         self, _, response, num_items, expected_value
     ):
         succ, err, failed = format_quotes_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err, failed=failed)
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, failed=failed
+        )
 
     @parameterized.expand(
         [
