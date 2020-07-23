@@ -325,11 +325,17 @@ class CocoonPrinterTests(unittest.TestCase):
         self.assertEqual(num_items, len(failed))
 
         for index, row in succ.iterrows():
-            self.assertEqual(expected_value["succ"][index], row["quote_id.quote_series_id.instrument_id"])
+            self.assertEqual(
+                expected_value["succ"][index],
+                row["quote_id.quote_series_id.instrument_id"],
+            )
         for index, row in err.iterrows():
             self.assertEqual(expected_value["err"][index], row[err.columns[0]])
         for index, row in failed.iterrows():
-            self.assertEqual(expected_value["failed"][index], row["quote_id.quote_series_id.instrument_id"])
+            self.assertEqual(
+                expected_value["failed"][index],
+                row["quote_id.quote_series_id.instrument_id"],
+            )
 
     @parameterized.expand(
         [
