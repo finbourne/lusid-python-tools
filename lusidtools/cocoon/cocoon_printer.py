@@ -302,3 +302,35 @@ def format_quotes_response(
         get_errors_from_response(response[file_type]["errors"]),
         items_failed,
     )
+
+
+def format_reference_portfolios_response(
+    response: dict,
+) -> (pd.DataFrame, pd.DataFrame):
+    """
+    This function unpacks a response from reference portfolio requests and returns successful and errored statuses for request constituents.
+
+    Parameters
+    ----------
+    response : dict
+        response from Lusid-python-tools
+
+    Returns
+    -------
+    success : pd.DataFrame
+        successful calls from request
+    error : pd.DataFrame
+        Error responses from rquest that fail (APIExceptions: 400 errors)
+    """
+
+    file_type = "reference_portfolios"
+    check_dict_for_required_keys(
+        response[file_type], f"Response from {file_type} request", ["errors", "success"]
+    )
+
+    # get success
+    items_success = [batch.id.code for batch in response[file_type]["success"]]
+
+    errors = get_errors_from_response(response[file_type]["errors"])
+
+    return (pd.DataFrame(items_success, columns=["successful items"]), errors)
