@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger()
 
-mappings = dict(load_json_file("config/seed_sample_data.json"))
+default_mappings = dict(load_json_file("config/seed_sample_data.json"))
 
 
 def seed_data(
@@ -15,7 +15,7 @@ def seed_data(
     scope: str,
     transaction_file: str,
     file_type: str,
-    mappings: dict = mappings,
+    mappings: dict = default_mappings,
     sub_holding_keys=[],
 ):
     """
@@ -66,6 +66,34 @@ def seed_data(
 
         data_frame = getattr(pd, f"read_{supported_files[file_type]}")(transaction_file)
 
+    def default_optional_mappings(mappings):
+        """
+        This function check whether a custom mappings file is provided and if so it makes sure that optional
+        mappings are included, even if the value of the keys are an empty dictionary.
+
+        Parameters
+        ----------
+        mappings : dict
+            a file containing mapping of DataFrame headers to LUSID headers.
+
+        Returns
+        -------
+        mappings : dict
+            a file containing mapping of DataFrame headers to LUSID headers.
+
+        """
+
+        if mappings == default_mappings:
+            return mappings
+
+        else:
+            for key, value in mappings.items():
+                if "optional" in value.keys():
+                    pass
+                else:
+                    value.update({"optional": {}})
+            return mappings
+
     def generic_load_from_data_frame(file_type):
 
         return (
@@ -84,6 +112,8 @@ def seed_data(
         )
 
     overall_results = {}
+
+    mappings = default_optional_mappings(mappings)
 
     for domain in domains:
 
