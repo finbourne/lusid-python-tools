@@ -41,7 +41,8 @@ def seed_data(
 
     Returns
     -------
-    None
+    overall_results : dict
+        An object containing the responses for each domain upload.
 
     """
 
