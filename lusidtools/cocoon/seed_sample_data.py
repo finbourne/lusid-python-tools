@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger()
 
-mappings = dict(load_json_file("config/seed_sample_data.json"))
+default_mappings = dict(load_json_file("config/seed_sample_data.json"))
 
 
 def seed_data(
@@ -15,7 +15,7 @@ def seed_data(
     scope: str,
     transaction_file: str,
     file_type: str,
-    mappings: dict = mappings,
+    mappings: dict = default_mappings,
     sub_holding_keys=[],
 ):
     """
@@ -41,7 +41,8 @@ def seed_data(
 
     Returns
     -------
-    None
+    overall_results : dict
+        An object containing the responses for each domain upload.
 
     """
 
@@ -66,6 +67,35 @@ def seed_data(
 
         data_frame = getattr(pd, f"read_{supported_files[file_type]}")(transaction_file)
 
+    def check_or_set_default_value(mapping, check_key, default_value):
+        """
+        This function check whether the mappings variables have the required default values to be uploaded
+        via the load_from_data_frame function.
+
+        Parameters
+        ----------
+        mapping : dict
+            a file containing mapping of DataFrame headers to LUSID headers.
+
+        check_key : str
+            a string that represents the key to be checked
+
+        default_value : obj
+            an object such as an empty dictionary or list
+
+        Returns
+        -------
+        mapping : dict
+            a file containing mapping of DataFrame headers to LUSID headers.
+
+        """
+
+        for value in mapping.values():
+            if isinstance(value, dict) and check_key not in value.keys():
+                value.update({check_key: default_value})
+
+        return mapping
+
     def generic_load_from_data_frame(file_type):
 
         return (
@@ -84,6 +114,10 @@ def seed_data(
         )
 
     overall_results = {}
+
+    mappings = check_or_set_default_value(mappings, "optional", {})
+    mappings = check_or_set_default_value(mappings, "identifier_mapping", {})
+    mappings = check_or_set_default_value(mappings, "properties", [])
 
     for domain in domains:
 
