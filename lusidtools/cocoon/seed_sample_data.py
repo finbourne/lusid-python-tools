@@ -90,8 +90,8 @@ def seed_data(
 
         """
 
-        for key, value in mapping.items():
-            if check_key not in value.keys():
+        for value in mapping.values():
+            if isinstance(value, dict) and check_key not in value.keys():
                 value.update({check_key: default_value})
 
         return mapping
