@@ -67,7 +67,7 @@ def seed_data(
 
         data_frame = getattr(pd, f"read_{supported_files[file_type]}")(transaction_file)
 
-    def check_or_set_default_value(mapping, key, default_value):
+    def check_or_set_default_value(mapping, check_key, default_value):
         """
         This function check whether the mappings variables have the required default values to be uploaded
         via the load_from_data_frame function.
@@ -77,7 +77,7 @@ def seed_data(
         mapping : dict
             a file containing mapping of DataFrame headers to LUSID headers.
 
-        key : str
+        check_key : str
             a string that represents the key to be checked
 
         default_value : obj
@@ -90,8 +90,9 @@ def seed_data(
 
         """
 
-        if key not in mapping:
-            mapping.update(default_value)
+        for key, value in mapping.items():
+            if check_key not in value.keys():
+                value.update({check_key: default_value})
 
         return mapping
 
@@ -115,6 +116,7 @@ def seed_data(
     overall_results = {}
 
     mappings = check_or_set_default_value(mappings, "optional", {})
+    mappings = check_or_set_default_value(mappings, "identifier_mapping", {})
     mappings = check_or_set_default_value(mappings, "properties", [])
 
     for domain in domains:
