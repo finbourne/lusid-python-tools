@@ -165,10 +165,11 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
 
         cls.sample_data = pd.read_csv(seed_sample_data_override_csv)
 
-        seed_data(
-            cls.api_factory,
+    def test_override_with_custom_mapping(self):
+        result = seed_data(
+            self.api_factory,
             ["portfolios", "instruments", "transactions"],
-            cls.scope,
+            self.scope,
             seed_sample_data_override_csv,
             mappings=dict(
                 load_json_file(
@@ -181,9 +182,12 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
                     )
                 )
             ),
-            sub_holding_keys=[f"Transaction/{cls.scope}/strategy"],
+            sub_holding_keys=[f"Transaction/{self.scope}/strategy"],
             file_type="csv",
         )
+        self.assertEqual(len(result["portfolios"][0]["portfolios"]["success"]), 1)
+        self.assertEqual(len(result["instruments"][0]["instruments"]["success"]), 1)
+        self.assertEqual(len(result["transactions"][0]["transactions"]["success"]), 1)
 
 
 class CocoonTestSeedDataNoMappingOverrideExcel(
