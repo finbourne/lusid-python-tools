@@ -60,23 +60,17 @@ def create_transaction_type_configuration(api_factory, alias, movements):
     return response
 
 
-def replace_current_transaction_alias(
-    api_factory, updated_alias, movements, properties=None
-):
-
+def upsert_transaction_type_alias(api_factory, new_transaction_config):
     """
-    This function overrides the current transaction types alias with a new configuration
+    This function overrides the current transaction types alias with a new configuration.
+    The alias will be created if it does not already exist.
 
     Parameters
     ----------
     api_factory: lusid.utilities.ClientApiFactory
         The LUSID api factory to use.
-    updated_alias: lusid.models.TransactionConfigurationTypeAlias
-        The alias which we want to update.
-    movements: list[lusid.models.TransactionConfigurationMovementDataRequest]
-        The movements to use for transaction type
-    properties: dict[str, lusid.PerpetualProperty]
-        The custom properties to assign to the transaction type
+    new_transaction_config: list[lusid.models.TransactionConfigurationDataRequest]
+        A list of new transaction type configurations
 
     Returns
     -------
@@ -92,49 +86,45 @@ def replace_current_transaction_alias(
 
     transaction_configs_list = current_transaction_types.transaction_configs
 
-    # Build the new transaction type you want to upload
+    # Define function to delete current alias if it already exists
 
-    new_transaction_request = models.TransactionConfigurationDataRequest(
-        aliases=[updated_alias], movements=movements, properties=properties,
-    )
+    def delete_current_alias(updated_alias):
 
-    # Delete the current configuration assigned to your replacement alias
+        for txn_index, trans_type in enumerate(transaction_configs_list):
 
-    for txn_index, trans_type in enumerate(transaction_configs_list):
+            for alias_index, alias in enumerate(trans_type.aliases):
 
-        find_new_alias = False
+                if (
+                    alias.type == updated_alias.type
+                    and alias.transaction_group == updated_alias.transaction_group
+                ):
+                    del trans_type.aliases[alias_index]
 
-        for alias_index, alias in enumerate(trans_type.aliases):
+                    break
 
-            if (
-                alias.type == updated_alias.type
-                and alias.transaction_group == updated_alias.transaction_group
-            ):
+            else:
+                continue
 
-                del trans_type.aliases[alias_index]
+            # If there are no aliases assigned against the old movement, delete the transaction type configuration from LUSID
+            # We don't want to leave unassigned movements in LUSID
 
-                find_new_alias = True
+            if len(trans_type.aliases) == 0:
+                del transaction_configs_list[txn_index]
 
-                break
+            break
 
-        else:
-            continue
+    # Loop over list of new aliases and delete them if they already exist
 
-        # If there are no aliases assigned against the old movement, delete the transaction type configuration from LUSID
-        # We don't want to leave unassigned movements in LUSID
+    new_aliases_nested = [item.aliases for item in new_transaction_config]
+    new_aliases = [item for sublist in new_aliases_nested for item in sublist]
 
-        if len(trans_type.aliases) == 0:
-            del transaction_configs_list[txn_index]
+    for item in new_aliases:
+        delete_current_alias(item)
 
-        break
+    # Then set the new aliases with new config
 
-    if find_new_alias is False:
-
-        raise Warning(
-            "The requested alias is not available in LUSID. No updates have been made."
-        )
-
-    transaction_configs_list.append(new_transaction_request)
+    for new_trans_type in new_transaction_config:
+        transaction_configs_list.append(new_trans_type)
 
     set_response = api_factory.build(
         lusid.api.SystemConfigurationApi
