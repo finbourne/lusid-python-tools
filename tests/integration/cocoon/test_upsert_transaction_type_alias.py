@@ -6,6 +6,7 @@ from lusidtools.cocoon.utilities import create_scope_id
 from lusidtools.cocoon.transaction_type_upload import upsert_transaction_type_alias
 import logging
 import json
+from copy import deepcopy
 
 logger = logging.getLogger()
 new_buy_transaction_type = "BUY-LPT-TEST"
@@ -27,7 +28,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         )
 
         cls.class_transaction_type_config = [
-            models.TransactionConfigurationDataRequest(
+            models.TransactionConfigurationData(
                 aliases=[
                     models.TransactionConfigurationTypeAlias(
                         type=new_buy_transaction_type,
@@ -38,14 +39,14 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                     )
                 ],
                 movements=[
-                    models.TransactionConfigurationMovementDataRequest(
+                    models.TransactionConfigurationMovementData(
                         movement_types="StockMovement",
                         side="Side1",
                         direction=1,
                         properties={},
                         mappings=[],
                     ),
-                    models.TransactionConfigurationMovementDataRequest(
+                    models.TransactionConfigurationMovementData(
                         movement_types="CashCommitment",
                         side="Side2",
                         direction=1,
@@ -55,7 +56,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 ],
                 properties={},
             ),
-            models.TransactionConfigurationDataRequest(
+            models.TransactionConfigurationData(
                 aliases=[
                     models.TransactionConfigurationTypeAlias(
                         type=new_sell_transaction_type,
@@ -66,14 +67,14 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                     )
                 ],
                 movements=[
-                    models.TransactionConfigurationMovementDataRequest(
+                    models.TransactionConfigurationMovementData(
                         movement_types="StockMovement",
                         side="Side1",
                         direction=-1,
                         properties={},
                         mappings=[],
                     ),
-                    models.TransactionConfigurationMovementDataRequest(
+                    models.TransactionConfigurationMovementData(
                         movement_types="CashCommitment",
                         side="Side2",
                         direction=-1,
@@ -99,38 +100,11 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
     def test_update_current_alias_with_new_movements(self):
 
-        new_movements_alias = [
-            models.TransactionConfigurationData(
-                aliases=[
-                    models.TransactionConfigurationTypeAlias(
-                        type=new_buy_transaction_type,
-                        description="TESTBUY1",
-                        transaction_class="TESTBUY1",
-                        transaction_group="SYSTEM1",
-                        transaction_roles="AllRoles",
-                    )
-                ],
-                movements=[
-                    models.TransactionConfigurationMovementData(
-                        movement_types="StockMovement",
-                        side="Side1",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                    models.TransactionConfigurationMovementData(
-                        movement_types="CashCommitment",
-                        side="Side2",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                ],
-                properties={},
-            )
-        ]
+        new_movements_alias = deepcopy(self.class_transaction_type_config)[0]
+        new_movements_alias.movements[0].direction = -1
+        new_movements_alias.movements[1].direction = -1
 
-        upsert_transaction_type_alias(self.api_factory, new_movements_alias)
+        upsert_transaction_type_alias(self.api_factory, [new_movements_alias])
 
         get_transaction_types = (
             self.system_configuration_api.list_configuration_transaction_types()
@@ -140,45 +114,17 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == new_movements_alias[0].aliases[0].type:
+                if alias.type == new_movements_alias.aliases[0].type:
                     uploaded_alias.append(trans_type)
 
-        self.assertEqual(uploaded_alias[0], new_movements_alias[0])
+        self.assertEqual(uploaded_alias[0], new_movements_alias)
 
     def test_update_alias_which_does_not_exist(self):
 
-        alias_which_does_not_exist = [
-            models.TransactionConfigurationData(
-                aliases=[
-                    models.TransactionConfigurationTypeAlias(
-                        type=new_buy_transaction_type,
-                        description="TESTBUY1",
-                        transaction_class="TESTBUY1",
-                        transaction_group="SYSTEM1",
-                        transaction_roles="AllRoles",
-                    )
-                ],
-                movements=[
-                    models.TransactionConfigurationMovementData(
-                        movement_types="StockMovement",
-                        side="Side1",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                    models.TransactionConfigurationMovementData(
-                        movement_types="CashCommitment",
-                        side="Side2",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                ],
-                properties={},
-            )
-        ]
+        alias_which_does_not_exist = deepcopy(self.class_transaction_type_config)[0]
+        alias_which_does_not_exist.aliases[0].type = create_scope_id()
 
-        upsert_transaction_type_alias(self.api_factory, alias_which_does_not_exist)
+        upsert_transaction_type_alias(self.api_factory, [alias_which_does_not_exist])
 
         get_transaction_types = (
             self.system_configuration_api.list_configuration_transaction_types()
@@ -188,71 +134,22 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == alias_which_does_not_exist[0].aliases[0].type:
+                if alias.type == alias_which_does_not_exist.aliases[0].type:
                     uploaded_alias.append(trans_type)
 
-        self.assertEqual(uploaded_alias[0], alias_which_does_not_exist[0])
+        self.assertEqual(uploaded_alias[0], alias_which_does_not_exist)
 
     def test_update_multiple_current_alias_with_new_movements(self):
 
-        trans_type_with_multiple_alias = [
-            models.TransactionConfigurationData(
-                aliases=[
-                    models.TransactionConfigurationTypeAlias(
-                        type=new_buy_transaction_type,
-                        description="TESTBUY1",
-                        transaction_class="TESTBUY1",
-                        transaction_group="SYSTEM1",
-                        transaction_roles="AllRoles",
-                    )
-                ],
-                movements=[
-                    models.TransactionConfigurationMovementData(
-                        movement_types="StockMovement",
-                        side="Side2",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                    models.TransactionConfigurationMovementData(
-                        movement_types="CashCommitment",
-                        side="Side1",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                ],
-                properties={},
-            ),
-            models.TransactionConfigurationData(
-                aliases=[
-                    models.TransactionConfigurationTypeAlias(
-                        type=new_sell_transaction_type,
-                        description="TESTSELL1",
-                        transaction_class="TESTSELL1",
-                        transaction_group="SYSTEM1",
-                        transaction_roles="AllRoles",
-                    )
-                ],
-                movements=[
-                    models.TransactionConfigurationMovementData(
-                        movement_types="StockMovement",
-                        side="Side2",
-                        direction=-1,
-                        properties={},
-                        mappings=[],
-                    ),
-                    models.TransactionConfigurationMovementData(
-                        movement_types="StockMovement",
-                        side="Side2",
-                        direction=1,
-                        properties={},
-                        mappings=[],
-                    ),
-                ],
-                properties={},
-            ),
-        ]
+        trans_type_with_multiple_alias = self.class_transaction_type_config.copy()
+
+        trans_type_with_multiple_alias_1 = trans_type_with_multiple_alias[0]
+        trans_type_with_multiple_alias_1.movements[0].movement_types = "CashAccrual"
+        trans_type_with_multiple_alias_1.movements[1].movement_types = "CashAccrual"
+
+        trans_type_with_multiple_alias_1 = trans_type_with_multiple_alias[1]
+        trans_type_with_multiple_alias_1.movements[0].movement_types = "CashAccrual"
+        trans_type_with_multiple_alias_1.movements[1].movement_types = "CashAccrual"
 
         upsert_transaction_type_alias(self.api_factory, trans_type_with_multiple_alias)
 
