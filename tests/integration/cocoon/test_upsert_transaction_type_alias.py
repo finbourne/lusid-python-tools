@@ -95,7 +95,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
             except lusid.exceptions.ApiException as e:
                 if json.loads(e.body)["code"] == 231:
-                    pass
+                    logger.info(json.loads(e.body)["title"])
 
     def test_update_current_alias_with_new_movements(self):
 

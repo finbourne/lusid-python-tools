@@ -123,8 +123,7 @@ def upsert_transaction_type_alias(api_factory, new_transaction_config):
 
     # Then set the new aliases with new config
 
-    for new_trans_type in new_transaction_config:
-        transaction_configs_list.append(new_trans_type)
+    transaction_configs_list = transaction_configs_list + new_transaction_config
 
     set_response = api_factory.build(
         lusid.api.SystemConfigurationApi
