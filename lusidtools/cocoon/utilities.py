@@ -850,6 +850,10 @@ def handle_nested_default_and_column_mapping(
                 mapping_updated[key] = f"LUSID.{key}"
                 data_frame[mapping_updated[key]] = value[1:]
 
+        elif isinstance(value, int):
+            mapping_updated[key] = f"LUSID.{key}"
+            data_frame[mapping_updated[key]] = value
+
         else:
             raise ValueError(
                 f"""You have passed in a value with type {type(value)} for the mapping for {key}, this is
