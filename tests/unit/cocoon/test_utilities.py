@@ -284,26 +284,18 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "look_through_portfolio_id": {
                         "scope": "lookthrough_scope",
                         "code": "lookthrough_code",
-                    },
-                    "definition": {
-                        "instrument_format": "format",
-                        "content": "contract",
-                    },
+                    }
                 },
                 pd.Series(
                     data=[
                         "GlobalCreditFund",
                         "SingaporeBranch",
                         "PORT_12490FKS9",
-                        "json",
-                        "{asset_type: 'fund', term_sheet: 'GlobalCreditFundConstituents.pdf'}",
                     ],
                     index=[
                         "instrument_name",
                         "lookthrough_scope",
                         "lookthrough_code",
-                        "format",
-                        "contract",
                     ],
                 ),
                 lusid.models.InstrumentDefinition(
@@ -328,11 +320,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     },
                     look_through_portfolio_id=lusid.models.ResourceId(
                         scope="SingaporeBranch", code="PORT_12490FKS9"
-                    ),
-                    definition=lusid.models.InstrumentEconomicDefinition(
-                        instrument_format="json",
-                        content="{asset_type: 'fund', term_sheet: 'GlobalCreditFundConstituents.pdf'}",
-                    ),
+                    )
                 ),
             ],
             # Test building a CreateTransactionPortfolioRequest
