@@ -79,12 +79,12 @@ class AppTests(unittest.TestCase):
                         base_currency="GBP",
                         created="2018-03-05T12:00:00+00:00",
                         sub_holding_keys=[
-                            "currency"
+                            f"Transaction/{cls.testscope}/currency"
                         ]
                     )
                     transactions_portfolio_response1 = transactions_portfolio_api.create_portfolio(
                         scope=cls.testscope,
-                        transaction_portfolio=transaction_portfolio_request1,
+                        create_transaction_portfolio_request=transaction_portfolio_request1,
                     )
                     logging.info(f"created portfolio: {portfolio}")
 
