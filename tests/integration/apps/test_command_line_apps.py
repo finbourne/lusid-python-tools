@@ -67,7 +67,7 @@ class AppTests(unittest.TestCase):
         existing_portfolios = [
             portfolio.id.code for portfolio in portfolios_response.values
         ]
-        test_list = ["Global-Strategies", "GlobalCreditFund"]
+        test_list = ["Global-Strategies-SHK", "GlobalCreditFund"]
 
         if not all(x in existing_portfolios for x in test_list):
             transactions_portfolio_api = factory.build(TransactionPortfoliosApi)
@@ -78,6 +78,9 @@ class AppTests(unittest.TestCase):
                         code=portfolio,
                         base_currency="GBP",
                         created="2018-03-05T12:00:00+00:00",
+                        sub_holding_keys=[
+                            "currency"
+                        ]
                     )
                     transactions_portfolio_response1 = transactions_portfolio_api.create_portfolio(
                         scope=cls.testscope,

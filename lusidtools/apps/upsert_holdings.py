@@ -41,12 +41,14 @@ def load_holdings(args):
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         mapping_required=mappings[file_type]["required"],
         mapping_optional=mappings[file_type]["optional"]
-        if "optional" in mappings[file_type].keys()
-        else {},
+        if "optional" in mappings[file_type].keys() else {},
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type]["property_columns"]
         if "property_columns" in mappings[file_type].keys()
+        else [],
+        sub_holding_keys=mappings[file_type]["sub_holding_keys"]
+        if "sub_holding_keys" in mappings[file_type].keys()
         else [],
     )
 

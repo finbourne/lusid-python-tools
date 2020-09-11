@@ -10,7 +10,8 @@
     },
     "optional": {
     },
-    "property_columns": ["quantity", "price", "currency"]
+    "property_columns": ["quantity", "price", "currency"],
+    "sub_holding_keys": ["currency"]
 
   }
 }
