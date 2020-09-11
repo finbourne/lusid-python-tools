@@ -16,6 +16,9 @@
       "Figi": "figi",
       "ClientInternal": "client_internal"
     },
+    "porperty_columns": [
+      "currency"
+    ],
     "optional": {
     }
   },
