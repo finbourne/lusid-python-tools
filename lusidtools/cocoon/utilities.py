@@ -1010,6 +1010,9 @@ def parse_args(args: dict):
     )
     ap.add_argument("-s", "--scope", help=r"LUSID scope to act in")
     ap.add_argument(
+        "-ps", "--property_scope", help=r"LUSID scope to load properties into"
+    )
+    ap.add_argument(
         "-dl",
         "--delimiter",
         help=r"explicitly specify delimiter for data file and disable automatic delimiter detection",

@@ -32,6 +32,7 @@ setup(
     python_requires=">=3.7",
     entry_points={
         "console_scripts": [
+            "upsert_portfolios=lusidtools.apps.upsert_portfolios:main",
             "lusidtools=lusidtools.commands.commands:main",
             "upsert_instruments=lusidtools.apps.upsert_instruments:main",
             "upsert_holdings=lusidtools.apps.upsert_holdings:main",

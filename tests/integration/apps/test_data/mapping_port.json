@@ -1,0 +1,10 @@
+{
+  "portfolios": {
+        "required": {
+            "code": "$temp_upsert_portfolios_lpt",
+            "display_name":  "$temp_portfolio for lpt tests - should be deleted by test",
+            "base_currency": "$GBP",
+            "created": "$2018-01-01T00:00:00+00:00"
+        }
+    }
+}
