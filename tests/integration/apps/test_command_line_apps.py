@@ -5,11 +5,13 @@ from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
+
 from lusidtools.apps import (
     load_instruments,
     load_holdings,
     load_transactions,
     load_quotes,
+    load_portfolios,
 )
 from lusidtools.cocoon import cocoon_printer
 from lusidtools.logger import LusidLogger
@@ -25,6 +27,7 @@ class AppTests(unittest.TestCase):
         cls.cur_dir = os.path.dirname(__file__)
         cls.secrets = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.testscope = "testscope0001"
+        cls.proptestscope = "testscope0001"
 
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
@@ -32,6 +35,7 @@ class AppTests(unittest.TestCase):
             "mapping": os.path.join(cls.cur_dir, cls.mapping_valid),
             "delimiter": None,
             "scope": cls.testscope,
+            "property_scope": cls.proptestscope,
             "num_header": 0,
             "num_footer": 0,
             "debug": "debug",
@@ -85,6 +89,27 @@ class AppTests(unittest.TestCase):
                         create_transaction_portfolio_request=transaction_portfolio_request1,
                     )
                     logging.info(f"created portfolio: {portfolio}")
+
+    def test_upsert_portfolios_withvalid_mapping(self):
+        args = self.valid_args.copy()
+        test_data_root = Path(__file__).parent.joinpath("test_data")
+        args["file_path"] = test_data_root.joinpath(
+            "holdings.csv"
+        )  # details are specified in the mapping as literal values
+        args["mapping"] = test_data_root.joinpath("mapping_port.json")
+
+        # Check portfolios loaded correctly
+        responses = load_portfolios(args)
+        self.assertEqual(1, len(responses["portfolios"]["success"]))
+
+        # delete test portfolio before next test
+        factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=args["secrets_file"]
+        )
+        portfolios_api = factory.build(PortfoliosApi)
+        response = portfolios_api.delete_portfolio(
+            self.testscope, "temp_upsert_portfolios_lpt"
+        )
 
     def test_upsert_instruments_with_valid_mapping(self):
 
