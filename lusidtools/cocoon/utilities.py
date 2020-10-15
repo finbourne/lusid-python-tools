@@ -1047,6 +1047,12 @@ def parse_args(args: dict):
         help="specifies the batch size for async requests",
     )
     ap.add_argument(
+        "-rm",
+        "--remove_whitespace",
+        default=False,
+        help=r"remove whitespace from data",
+    )
+    ap.add_argument(
         "-disp",
         "--display_response_head",
         help="Displays the first 40 successful and unsuccessful items",

@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from lusid.utilities import ApiClientFactory
 
 from lusidtools.logger import LusidLogger
@@ -10,18 +11,24 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     load_json_file,
     cocoon_printer,
+    strip_whitespace
 )
 
 
 def load_portfolios(args):
     file_type = "portfolios"
 
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    if not args["secrets_file"]:
+        args["secrets_file"] = os.environ.get("FBN_SECRETS_PATH")
+
+    factory = ApiClientFactory(api_secrets_filename=args.get("secrets_file"))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
     portfolios = load_data_to_df_and_detect_delimiter(args)
+
+    portfolios =strip_whitespace(portfolios, portfolios.columns)
 
     mappings = load_json_file(args["mapping"])
 
@@ -42,6 +49,7 @@ def load_portfolios(args):
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
         sub_holding_keys=mappings[file_type].get("sub_holding_keys", []),
+        remove_white_space=args["remove_whitespace"]
     )
 
     succ, errors = cocoon_printer.format_portfolios_response(portfolios_response)

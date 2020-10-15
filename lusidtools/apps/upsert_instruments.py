@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from lusid.utilities import ApiClientFactory
 from lusidtools.cocoon import (
     load_from_data_frame,
@@ -10,6 +11,7 @@ from lusidtools.cocoon import (
     identify_cash_items,
     load_json_file,
     cocoon_printer,
+    strip_whitespace
 )
 from lusidtools.logger import LusidLogger
 
@@ -18,13 +20,18 @@ def load_instruments(args):
     file_type = "instruments"
 
     # create ApiFactory
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    if not args["secrets_file"]:
+        args["secrets_file"] = os.environ.get("FBN_SECRETS_PATH")
+
+    factory = ApiClientFactory(api_secrets_filename=args.get("secrets_file"))
 
     # get data
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
     instruments = load_data_to_df_and_detect_delimiter(args)
+
+    instruments =strip_whitespace(instruments, instruments.columns)
 
     # get mappings
     mappings = load_json_file(args["mapping"])
@@ -58,6 +65,7 @@ def load_instruments(args):
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
+        remove_white_space=args["remove_whitespace"]
     )
 
     succ, errors, failed = cocoon_printer.format_instruments_response(

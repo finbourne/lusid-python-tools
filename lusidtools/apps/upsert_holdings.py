@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from lusid.utilities import ApiClientFactory
 
 from lusidtools.logger import LusidLogger
@@ -11,18 +12,25 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     load_json_file,
     cocoon_printer,
+    strip_whitespace
 )
+import pdb
 
 
 def load_holdings(args):
     file_type = "holdings"
 
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    if not args["secrets_file"]:
+        args["secrets_file"] = os.environ.get("FBN_SECRETS_PATH")
+
+    factory = ApiClientFactory(api_secrets_filename=args.get("secrets_file"))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
     holdings = load_data_to_df_and_detect_delimiter(args)
+
+    holdings =strip_whitespace(holdings, holdings.columns)
 
     mappings = load_json_file(args["mapping"])
     if "cash_flag" in mappings.keys():
@@ -33,6 +41,7 @@ def load_holdings(args):
     if args["dryrun"]:
         logging.info("--dryrun specified as True, exiting before upsert call is made")
         return 0
+    
 
     holdings_response = load_from_data_frame(
         api_factory=factory,
@@ -46,6 +55,7 @@ def load_holdings(args):
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
         sub_holding_keys=mappings[file_type].get("sub_holding_keys", []),
+        remove_white_space=args["remove_whitespace"]
     )
 
     succ, errors = cocoon_printer.format_holdings_response(holdings_response)
@@ -54,6 +64,7 @@ def load_holdings(args):
     logging.info(f"number of errors            : {len(errors)}")
 
     if args["display_response_head"]:
+        print("helloooo")
         logging.info(succ.head(40))
         logging.info(errors.head(40))
 

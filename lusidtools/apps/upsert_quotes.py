@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 import lusid
 from lusid.utilities import ApiClientFactory
 from lusidtools.cocoon import (
@@ -12,6 +13,7 @@ from lusidtools.cocoon import (
     load_json_file,
     scale_quote_of_type,
     cocoon_printer,
+    strip_whitespace
 )
 from lusidtools.logger import LusidLogger
 
@@ -19,14 +21,19 @@ from lusidtools.logger import LusidLogger
 def load_quotes(args):
     file_type = "quotes"
 
-    # create ApiFactory
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    # create ApiFactory        
+    if not args["secrets_file"]:
+        args["secrets_file"] = os.environ.get("FBN_SECRETS_PATH")
+        
+    factory = ApiClientFactory(api_secrets_filename=args.get("secrets_file"))
 
     # get data
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
     quotes = load_data_to_df_and_detect_delimiter(args)
+
+    quotes=strip_whitespace(quotes, quotes.columns)
 
     # get mappings
     mappings = load_json_file(args["mapping"])
@@ -43,6 +50,11 @@ def load_quotes(args):
     quotes, mappings = identify_cash_items(quotes, mappings, "quotes", True)
 
     validate_mapping_file_structure(mappings, quotes.columns, file_type)
+
+    if "cash_flag" in mappings.keys():
+        quotes, mappings = identify_cash_items(
+            quotes, mappings, file_type, True
+        )
 
     if "quote_scalar" in mappings[file_type].keys():
         quotes, mappings = scale_quote_of_type(quotes, mappings)
@@ -61,6 +73,7 @@ def load_quotes(args):
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
+        remove_white_space=args["remove_whitespace"]
     )
     succ, errors, failed = cocoon_printer.format_quotes_response(quotes_response)
     logging.info(f"number of successful upserts: {len(succ)}")

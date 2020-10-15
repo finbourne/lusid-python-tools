@@ -1,5 +1,6 @@
 import sys
 import logging
+import os
 from lusid.utilities import ApiClientFactory
 
 from lusidtools.cocoon import (
@@ -10,6 +11,7 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     load_json_file,
     cocoon_printer,
+    strip_whitespace
 )
 from lusidtools.logger import LusidLogger
 
@@ -17,12 +19,17 @@ from lusidtools.logger import LusidLogger
 def load_transactions(args):
     file_type = "transactions"
 
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    if not args["secrets_file"]:
+        args["secrets_file"] = os.environ.get("FBN_SECRETS_PATH")
+
+    factory = ApiClientFactory(api_secrets_filename=args.get("secrets_file"))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")
     logging.debug("Getting data")
     transactions = load_data_to_df_and_detect_delimiter(args)
+
+    transactions =strip_whitespace(transactions, transactions.columns)
 
     mappings = load_json_file(args["mapping"])
 
@@ -46,6 +53,7 @@ def load_transactions(args):
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
+        remove_white_space=args["remove_whitespace"]
     )
 
     # print_response(transactions_response, file_type)
