@@ -43,7 +43,7 @@ class AppTests(unittest.TestCase):
             "dryrun": False,
             "line_terminator": r"\n",
             "display_response_head": True,
-            "remove_whitespace": True
+            "remove_whitespace": True,
         }
 
         cls.invalid_args = {
@@ -59,7 +59,7 @@ class AppTests(unittest.TestCase):
             "dryrun": False,
             "line_terminator": r"\n",
             "display_response_head": True,
-            "remove_whitespace": True
+            "remove_whitespace": True,
         }
 
         LusidLogger("debug")

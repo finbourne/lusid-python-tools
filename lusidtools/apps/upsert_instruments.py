@@ -11,7 +11,7 @@ from lusidtools.cocoon import (
     identify_cash_items,
     load_json_file,
     cocoon_printer,
-    strip_whitespace
+    strip_whitespace,
 )
 from lusidtools.logger import LusidLogger
 
@@ -31,7 +31,7 @@ def load_instruments(args):
     logging.debug("Getting data")
     instruments = load_data_to_df_and_detect_delimiter(args)
 
-    instruments =strip_whitespace(instruments, instruments.columns)
+    instruments = strip_whitespace(instruments, instruments.columns)
 
     # get mappings
     mappings = load_json_file(args["mapping"])
@@ -65,7 +65,7 @@ def load_instruments(args):
         identifier_mapping=mappings[file_type]["identifier_mapping"],
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
-        remove_white_space=args["remove_whitespace"]
+        remove_white_space=args["remove_whitespace"],
     )
 
     succ, errors, failed = cocoon_printer.format_instruments_response(

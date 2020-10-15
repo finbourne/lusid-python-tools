@@ -11,7 +11,7 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     load_json_file,
     cocoon_printer,
-    strip_whitespace
+    strip_whitespace,
 )
 
 
@@ -28,7 +28,7 @@ def load_portfolios(args):
     logging.debug("Getting data")
     portfolios = load_data_to_df_and_detect_delimiter(args)
 
-    portfolios =strip_whitespace(portfolios, portfolios.columns)
+    portfolios = strip_whitespace(portfolios, portfolios.columns)
 
     mappings = load_json_file(args["mapping"])
 
@@ -49,7 +49,7 @@ def load_portfolios(args):
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
         sub_holding_keys=mappings[file_type].get("sub_holding_keys", []),
-        remove_white_space=args["remove_whitespace"]
+        remove_white_space=args["remove_whitespace"],
     )
 
     succ, errors = cocoon_printer.format_portfolios_response(portfolios_response)

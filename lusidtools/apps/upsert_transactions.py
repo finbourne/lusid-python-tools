@@ -11,7 +11,7 @@ from lusidtools.cocoon import (
     validate_mapping_file_structure,
     load_json_file,
     cocoon_printer,
-    strip_whitespace
+    strip_whitespace,
 )
 from lusidtools.logger import LusidLogger
 
@@ -29,7 +29,7 @@ def load_transactions(args):
     logging.debug("Getting data")
     transactions = load_data_to_df_and_detect_delimiter(args)
 
-    transactions =strip_whitespace(transactions, transactions.columns)
+    transactions = strip_whitespace(transactions, transactions.columns)
 
     mappings = load_json_file(args["mapping"])
 
@@ -53,7 +53,7 @@ def load_transactions(args):
         file_type=file_type,
         batch_size=args["batch_size"],
         property_columns=mappings[file_type].get("property_columns", []),
-        remove_white_space=args["remove_whitespace"]
+        remove_white_space=args["remove_whitespace"],
     )
 
     # print_response(transactions_response, file_type)
