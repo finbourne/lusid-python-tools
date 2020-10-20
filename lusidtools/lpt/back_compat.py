@@ -1,8 +1,5 @@
 # Make backwards compatibility adjustments
 # When reading old files
-from lusidfeature import lusid_feature
-
-
 def convert(frame_type, df):
 
     # Security is now known as instrument_id
