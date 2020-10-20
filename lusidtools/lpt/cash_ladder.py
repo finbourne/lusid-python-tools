@@ -4,8 +4,6 @@ import dateutil
 import sys
 import argparse
 
-from lusidfeature import lusid_feature
-
 SDATE = "settlement_date"
 CCY = "security_uid"
 QTY = "units"
@@ -15,6 +13,7 @@ ORDER = "sort"
 JOIN = "join"
 
 TOOLTIP = "Demo Cash-Ladder report"
+
 
 def cash_ladder(api, scope, portfolio, date):
 
