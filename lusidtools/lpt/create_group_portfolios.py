@@ -61,7 +61,7 @@ def process_args(api, args):
                 scope=args.scope,
                 create_portfolio_group_request=api.models.CreatePortfolioGroupRequest(
                     code=row[GROUP_NAME],
-                    created=row[CREATED_DATE],
+                    created=row.get(CREATED_DATE, None),
                     values=group_dict[row[GROUP_NAME]][PORTFOLIOS],
                     sub_groups=group_dict[row[GROUP_NAME]][SUB_GROUPS],
                     display_name=row[DISPLAY_NAME],
