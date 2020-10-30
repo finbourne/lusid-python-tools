@@ -71,6 +71,7 @@ class CommandsTests(unittest.TestCase):
     def validate_success_string(self, response):
         self.assertTrue(response, "Done!")
 
+    @unittest.skip("Calling list scopes in CI will be a very lengthy test.")
     def test_scopes(self):
 
         result = scopes.main(
@@ -191,6 +192,7 @@ class CommandsTests(unittest.TestCase):
         )
         self.validate_results_df(result)
 
+    @unittest.skip("Listing all instruments in CI may be a very lengthy process")
     def test_list_instruments(self):
 
         result = list_instruments.main(
@@ -259,7 +261,6 @@ class CommandsTests(unittest.TestCase):
 
         self.validate_results_df(result)
 
-    @unittest.skip("not implemented")
     def test_create_group_portfolios(self):
 
         data_file = (
@@ -298,7 +299,6 @@ class CommandsTests(unittest.TestCase):
             display_df=self.display_df,
         )
 
-    @unittest.skip("not implemented")
     def test_upload_quotes(self):
 
         data_file = (
@@ -324,10 +324,10 @@ class CommandsTests(unittest.TestCase):
         :return:
         """
 
-        data_dir = f"{self.test_data_path.joinpath('.data')}"
+        data_dir = f"{self.test_data_path.joinpath('data')}"
         os.makedirs(data_dir, exist_ok=True)
         file_path = (
-            f"{self.test_data_path.joinpath('.data').joinpath('transaction_types.yml')}"
+            f"{self.test_data_path.joinpath('data').joinpath('transaction_types.yml')}"
         )
 
         os.chdir(data_dir)
