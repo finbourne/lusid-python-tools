@@ -53,7 +53,7 @@ def process_args(api, args):
         if args.create:
             return api.call.create_portfolio(
                 args.scope,
-                transaction_portfolio=api.models.CreateTransactionPortfolioRequest(
+                create_transaction_portfolio_request=api.models.CreateTransactionPortfolioRequest(
                     code=args.portfolio,
                     display_name=args.create[0],
                     base_currency=args.create[1],
