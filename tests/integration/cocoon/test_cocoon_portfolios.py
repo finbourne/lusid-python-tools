@@ -220,7 +220,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
     @parameterized.expand(
         [
             [
-                "400 bad request due to an invalid scope",
+                "ApiValueError due to invalid scope",
                 "p rime_broker_test",
                 "data/metamorph_portfolios-unique.csv",
                 {
@@ -233,8 +233,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 "operations001",
-                None,
-                {400},
+                None
             ],
         ]
     )
@@ -249,7 +248,6 @@ class CocoonTestsPortfolios(unittest.TestCase):
         property_columns,
         properties_scope,
         sub_holding_keys,
-        expected_outcome,
     ) -> None:
         """
         Test that portfolios can be loaded successfully
@@ -266,31 +264,19 @@ class CocoonTestsPortfolios(unittest.TestCase):
         :return: None
         """
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+        from lusid.exceptions import ApiValueError
 
-        responses = cocoon.cocoon.load_from_data_frame(
-            api_factory=self.api_factory,
-            scope=scope,
-            data_frame=data_frame,
-            mapping_required=mapping_required,
-            mapping_optional=mapping_optional,
-            file_type="portfolios",
-            identifier_mapping=identifier_mapping,
-            property_columns=property_columns,
-            properties_scope=properties_scope,
-            sub_holding_keys=sub_holding_keys,
-        )
+        with self.assertRaises(ApiValueError):
 
-        self.assertEqual(
-            first=len(responses["portfolios"]["errors"]), second=len(data_frame)
-        )
-
-        self.assertEqual(first=len(responses["portfolios"]["success"]), second=0)
-
-        response_codes = set(
-            [
-                api_exception.status
-                for api_exception in responses["portfolios"]["errors"]
-            ]
-        )
-
-        self.assertEqual(first=response_codes, second=expected_outcome)
+            responses = cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                file_type="portfolios",
+                identifier_mapping=identifier_mapping,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+                sub_holding_keys=sub_holding_keys,
+            ),
