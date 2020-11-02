@@ -1074,3 +1074,59 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertEqual(len(errors), 0)
         self.assertEqual(len(successes), 0)
+
+    def test_load_instrument_lookthrough_portfolio(self):
+        code = create_scope_id()
+        scope = "test-lookthrough"
+
+        data_frame = pd.DataFrame(
+            {
+                "instrument_name": [
+                    "Portfolio",
+                ],
+                "client_internal": [code],
+                "lookthrough_code": [code]
+            }
+        )
+
+        mapping = {
+            "identifier_mapping": {
+                "ClientInternal": "client_internal",
+            },
+            "required": {
+                "name": "instrument_name"
+            },
+            "optional": {
+                "look_through_portfolio_id.scope": f"${scope}",
+                "look_through_portfolio_id.code": "lookthrough_code"
+            }
+        }
+
+        # create portfolio
+        port_response = self.api_factory.build(lusid.api.TransactionPortfoliosApi).create_portfolio(
+            scope=scope,
+            create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
+                display_name=code,
+                description=code,
+                code=code,
+                base_currency="USD"
+            )
+        )
+
+        # Upsert lookthrough instrument of portfolio
+        instr_response = cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping["required"],
+            mapping_optional=mapping["optional"],
+            file_type="instruments",
+            identifier_mapping=mapping["identifier_mapping"],
+            property_columns=[]
+        )
+
+        self.assertEqual(len(instr_response["instruments"]["success"]), 1)
+        self.assertEqual(len(instr_response["instruments"]["errors"]), 0)
+        self.assertEqual(instr_response["instruments"]["success"][0].values[f"ClientInternal: {code}"].lookthrough_portfolio.code, code)
+
+
