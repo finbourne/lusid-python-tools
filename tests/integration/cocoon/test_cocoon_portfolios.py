@@ -233,7 +233,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {},
                 ["base_currency"],
                 "operations001",
-                None
+                None,
             ],
         ]
     )
@@ -268,15 +268,17 @@ class CocoonTestsPortfolios(unittest.TestCase):
 
         with self.assertRaises(ApiValueError):
 
-            responses = cocoon.cocoon.load_from_data_frame(
-                api_factory=self.api_factory,
-                scope=scope,
-                data_frame=data_frame,
-                mapping_required=mapping_required,
-                mapping_optional=mapping_optional,
-                file_type="portfolios",
-                identifier_mapping=identifier_mapping,
-                property_columns=property_columns,
-                properties_scope=properties_scope,
-                sub_holding_keys=sub_holding_keys,
-            ),
+            responses = (
+                cocoon.cocoon.load_from_data_frame(
+                    api_factory=self.api_factory,
+                    scope=scope,
+                    data_frame=data_frame,
+                    mapping_required=mapping_required,
+                    mapping_optional=mapping_optional,
+                    file_type="portfolios",
+                    identifier_mapping=identifier_mapping,
+                    property_columns=property_columns,
+                    properties_scope=properties_scope,
+                    sub_holding_keys=sub_holding_keys,
+                ),
+            )
