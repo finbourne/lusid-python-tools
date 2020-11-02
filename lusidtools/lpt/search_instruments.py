@@ -35,9 +35,9 @@ def process_args(api, args):
         api.models.InstrumentSearchProperty(s[0], s[1])
         for s in [p.split("=") for p in args.properties]
     ]
-    return api.call.instruments_search(instrument_search_property=request, mastered_only=True).bind(
-        success
-    )
+    return api.call.instruments_search(
+        instrument_search_property=request, mastered_only=True
+    ).bind(success)
 
 
 # Standalone tool

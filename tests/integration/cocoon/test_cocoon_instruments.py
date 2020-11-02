@@ -1081,36 +1081,29 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         data_frame = pd.DataFrame(
             {
-                "instrument_name": [
-                    "Portfolio",
-                ],
+                "instrument_name": ["Portfolio",],
                 "client_internal": [code],
-                "lookthrough_code": [code]
+                "lookthrough_code": [code],
             }
         )
 
         mapping = {
-            "identifier_mapping": {
-                "ClientInternal": "client_internal",
-            },
-            "required": {
-                "name": "instrument_name"
-            },
+            "identifier_mapping": {"ClientInternal": "client_internal",},
+            "required": {"name": "instrument_name"},
             "optional": {
                 "look_through_portfolio_id.scope": f"${scope}",
-                "look_through_portfolio_id.code": "lookthrough_code"
-            }
+                "look_through_portfolio_id.code": "lookthrough_code",
+            },
         }
 
         # create portfolio
-        port_response = self.api_factory.build(lusid.api.TransactionPortfoliosApi).create_portfolio(
+        port_response = self.api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).create_portfolio(
             scope=scope,
             create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
-                display_name=code,
-                description=code,
-                code=code,
-                base_currency="USD"
-            )
+                display_name=code, description=code, code=code, base_currency="USD"
+            ),
         )
 
         # Upsert lookthrough instrument of portfolio
@@ -1122,11 +1115,14 @@ class CocoonTestsInstruments(unittest.TestCase):
             mapping_optional=mapping["optional"],
             file_type="instruments",
             identifier_mapping=mapping["identifier_mapping"],
-            property_columns=[]
+            property_columns=[],
         )
 
         self.assertEqual(len(instr_response["instruments"]["success"]), 1)
         self.assertEqual(len(instr_response["instruments"]["errors"]), 0)
-        self.assertEqual(instr_response["instruments"]["success"][0].values[f"ClientInternal: {code}"].lookthrough_portfolio.code, code)
-
-
+        self.assertEqual(
+            instr_response["instruments"]["success"][0]
+            .values[f"ClientInternal: {code}"]
+            .lookthrough_portfolio.code,
+            code,
+        )
