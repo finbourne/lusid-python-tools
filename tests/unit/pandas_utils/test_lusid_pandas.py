@@ -364,7 +364,7 @@ class TestResponseToPandasObject(unittest.TestCase):
             lusid_response_to_data_frame(list_response)
 
         self.assertEqual(
-            error.exception.args[0], "All items in list must be of same data type",
+            error.exception.args[0], 'All items in list must be of the same data type',
         )
 
     def test_list_of_same_lusid_objects_no_to_dict(self):
