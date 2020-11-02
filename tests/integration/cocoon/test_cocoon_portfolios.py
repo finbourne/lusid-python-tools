@@ -221,7 +221,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         [
             [
                 "400 bad request due to an invalid scope",
-                "p rime_broker_test",
+                "prime_broker_test",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
