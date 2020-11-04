@@ -283,6 +283,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             ]
         ]
     )
+    @unittest.skip("--")
     def test_load_from_data_frame_instruments_enrichment_success(
         self,
         _,
@@ -563,54 +564,203 @@ class CocoonTestsInstruments(unittest.TestCase):
         self.assertEqual(len(errors), 0)
         self.assertEqual(len(successes), 0)
 
-    def test_load_instrument_lookthrough_portfolio(self):
-        code = create_scope_id()
-        scope = "test-lookthrough"
 
-        data_frame = pd.DataFrame(
-            {
-                "instrument_name": ["Portfolio",],
-                "client_internal": [code],
-                "lookthrough_code": [code],
-            }
-        )
+    @parameterized.expand(
+        [
+            [
+                "load only lookthrough instruments",
+                pd.DataFrame(
+                    {
+                        "instrument_name": [
+                            "Portfolio001",
+                        ],
+                        "client_internal": [
+                            "replace_code",
+                        ],
+                        "lookthrough_code": [
+                            "replace_code",
+                        ],
+                        "lookthrough_scope": [
+                            "replace_scope",
+                        ]
+                    }
+                ),
+                {
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
+                    "required": {
+                        "name": "instrument_name"
+                    },
+                    "optional": {
+                        "look_through_portfolio_id.scope": "lookthrough_scope",
+                        "look_through_portfolio_id.code": "lookthrough_code"
+                    }
+                }
+            ],
+            [
+                "load mixed lookthrough instruments",
+                pd.DataFrame(
+                    {
+                        "instrument_name": [
+                            "Portfolio001",
+                            "instr_0001",
+                        ],
+                        "client_internal": [
+                            "replace_code",
+                            "id_0001"
+                        ],
+                        "lookthrough_code": [
+                            "replace_code",
+                            None
+                        ],
+                        "lookthrough_scope": [
+                            "replace_scope",
+                            None
+                        ]
+                    }
+                ),
+                {
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
+                    "required": {
+                        "name": "instrument_name"
+                    },
+                    "optional": {
+                        "look_through_portfolio_id.scope": "lookthrough_scope",
+                        "look_through_portfolio_id.code": "lookthrough_code"
+                    }
+                }
+            ],
+            [
+                "load mixed lookthrough instruments with default scope",
+                pd.DataFrame(
+                    {
+                        "instrument_name": [
+                            "Portfolio001",
+                            "instr_0001",
+                        ],
+                        "client_internal": [
+                            "replace_code",
+                            "id_0001"
+                        ],
+                        "lookthrough_code": [
+                            "replace_code",
+                            None
+                        ]
+                    }
+                ),
+                {
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
+                    "required": {
+                        "name": "instrument_name"
+                    },
+                    "optional": {
+                        "look_through_portfolio_id.scope": "$test-mixed-lookthrough",
+                        "look_through_portfolio_id.code": "lookthrough_code"
+                    }
+                }
+            ],
+            [
+                "load mixed lookthrough instruments with default scope with multiple portfolios",
+                pd.DataFrame(
+                    {
+                        "instrument_name": [
+                            "Portfolio001",
+                            "Portfolio002",
+                            "instr_0001",
+                            "instr_0002",
+                        ],
+                        "client_internal": [
+                            "replace_code",
+                            "replace_code2",
+                            "id_0001",
+                            "id_0002"
+                        ],
+                        "lookthrough_code": [
+                            "replace_code",
+                            "replace_code2",
+                            None,
+                            None
+                        ]
+                    }
+                ),
+                {
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
+                    "required": {
+                        "name": "instrument_name"
+                    },
+                    "optional": {
+                        "look_through_portfolio_id.scope": "$test-mixed-lookthrough",
+                        "look_through_portfolio_id.code": "lookthrough_code"
+                    }
+                }
+            ]
+        ]
+    )
+    def test_load_instrument_lookthrough(self, _, df, mapping):
 
-        mapping = {
-            "identifier_mapping": {"ClientInternal": "client_internal",},
-            "required": {"name": "instrument_name"},
-            "optional": {
-                "look_through_portfolio_id.scope": f"${scope}",
-                "look_through_portfolio_id.code": "lookthrough_code",
-            },
+        scope = "test-mixed-lookthrough"
+        df = df.replace({"replace_scope": scope})
+
+        # populate portfolio ids with random codes
+        codes = {
+            row["client_internal"]: create_scope_id(use_uuid=True) if "Portfolio" in row["instrument_name"] else row["client_internal"]
+            for index, row in df.iterrows()
         }
+        df = df.replace(codes)
 
-        # create portfolio
-        port_response = self.api_factory.build(
-            lusid.api.TransactionPortfoliosApi
-        ).create_portfolio(
-            scope=scope,
-            create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
-                display_name=code, description=code, code=code, base_currency="USD"
-            ),
-        )
+        # create portfolios
+        [
+            self.api_factory.build(lusid.api.TransactionPortfoliosApi).create_portfolio(
+                scope=scope,
+                create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
+                    display_name=row["client_internal"],
+                    description=row["client_internal"],
+                    code=row["client_internal"],
+                    base_currency="USD"
+                )
+            )
+            if "Portfolio" in row["instrument_name"] else None
+            for index, row in df.iterrows()
+        ]
 
         # Upsert lookthrough instrument of portfolio
         instr_response = cocoon.load_from_data_frame(
             api_factory=self.api_factory,
             scope=scope,
-            data_frame=data_frame,
+            data_frame=df,
             mapping_required=mapping["required"],
             mapping_optional=mapping["optional"],
             file_type="instruments",
             identifier_mapping=mapping["identifier_mapping"],
-            property_columns=[],
+            property_columns=[]
         )
 
-        self.assertEqual(len(instr_response["instruments"]["success"]), 1)
+        # check successes, errors and instrument lookthrough codes
+        self.assertEqual(len(instr_response["instruments"]["success"][0].values.values()), len(df))
         self.assertEqual(len(instr_response["instruments"]["errors"]), 0)
-        self.assertEqual(
-            instr_response["instruments"]["success"][0]
-            .values[f"ClientInternal: {code}"]
-            .lookthrough_portfolio.code,
-            code,
-        )
+        [
+            self.assertEqual(
+                instr_response["instruments"]["success"][0].values[
+                    f"ClientInternal: {code}"].lookthrough_portfolio.code,
+                code
+            ) if "id" not in code else None
+            for code in codes.values()
+        ]
+
+        # tear down this test
+        [
+            self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(scope=scope, code=code) if "id" not in code else None
+            for code in list(codes.values())
+        ]
+        [
+            self.api_factory.build(lusid.api.InstrumentsApi).delete_instrument("ClientInternal", CI)
+            for CI in list(df["client_internal"])
+        ]
+
