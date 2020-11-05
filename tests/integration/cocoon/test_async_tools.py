@@ -44,6 +44,7 @@ class CocoonTestsAsyncTools(unittest.TestCase):
             ],
         ]
     )
+    @unittest.skip("Skipping async tests")
     def test_multiple_threads(
         self, _, file_name, number_threads, thread_pool_max_workers
     ):
