@@ -266,8 +266,6 @@ def set_attributes_recursive(
         # This block keeps track of the number of missing (non-additional) attributes
         else:
             total_count += 1
-            if mapping[key] is None:
-                none_count += 1
 
         # Get the attribute type
         attribute_type = obj_attr[key]
@@ -281,6 +279,8 @@ def set_attributes_recursive(
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
+            else:
+                none_count += 1
 
         # if there is more nesting call the function recursively
         else:
