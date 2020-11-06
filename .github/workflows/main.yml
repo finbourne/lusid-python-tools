@@ -21,6 +21,15 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.7"
+          
+      - name: Install dependancies
+        run: |
+          apt-get update && apt-get -y install jq
+          pip install --no-cache-dir -r requirements.txt
+          pip --no-cache-dir install --upgrade awscli
 
       - name: Run tests on MASTER branch
         if: ${{ github.base_ref == 'master' }}
@@ -33,16 +42,5 @@ jobs:
           FBN_LUSID_API_URL: ${{ secrets.MASTER_FBN_LUSID_API_URL }}
           FBN_APP_NAME: ${{ secrets.MASTER_FBN_CLIENT_ID }}
         run: | 
-          echo "env variables for MASTER have been set"
-          docker build -t finbourne/lusid-python-tools-test .
-          docker run \
-            -e FBN_TOKEN_URL="$FBN_TOKEN_URL" \
-            -e FBN_USERNAME="$FBN_USERNAME" \
-            -e FBN_PASSWORD="$FBN_PASSWORD" \
-            -e FBN_CLIENT_ID="$FBN_CLIENT_ID" \
-            -e FBN_CLIENT_SECRET="$FBN_CLIENT_SECRET" \
-            -e FBN_LUSID_API_URL="$FBN_LUSID_API_URL" \
-            -e FBN_APP_NAME="$FBN_APP_NAME" \
-            -v $(pwd):/usr/src/ \
-            finbourne/lusid-python-tools-test
+          python -m unittest discover -v
             
