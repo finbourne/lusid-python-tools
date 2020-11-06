@@ -6,9 +6,9 @@ name: run-lusid-python-tools-tests
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master ]
 
 jobs:
   # This workflow contains a single job called "build"
