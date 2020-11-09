@@ -20,8 +20,6 @@ else
     # Bump the version in project and make commit back to master
 
     bump2version patch --message "Bump version in Travis CI: {current_version} to {new_version} [ci skip]"
-	git config --local user.email "engineering@finbourne.com"
-	git config --local user.name "finbourne-bot-public"
-	git push https://finbourne-bot-public:${gh_token}@github.com/finbourne/lusid-python-tools.git HEAD:$TRAVIS_BRANCH
+	git push https://finbourne-bot-public:${gh_token}@github.com/finbourne/lusid-python-tools.git HEAD:master
 	echo "Commit with incremented version completed"
 fi
