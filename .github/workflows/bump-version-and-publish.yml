@@ -1,11 +1,11 @@
 # This job runs the project tests
 
-name: run-lusid-python-tools-tests
+name: bump-version-and-publish
 
 # Trigger the workflow on push or pull request to master or develop
 
 on:
-  pu:
+  push:
     branches: [ master ]
 
 jobs:
@@ -20,3 +20,20 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: "actions/setup-python@v2"
+    
+      - name: Bump version of package
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "bumping version"
+          git config --global user.email "engineering@finbourne.com"
+          git config --global user.name "finbourne-bot-public"
+          bash ci_tools/bumpversion.sh
+          
+      - name: Publish package to PyPi
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}    
+        run: |
+          bash ci_tools/publish.sh "$PYPI_USERNAME" "$PYPI_PASSWORD"
+    
