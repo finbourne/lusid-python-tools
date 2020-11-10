@@ -28,7 +28,7 @@ jobs:
           
       - name: Run formatter check
         env: 
-          GH_BRANCH: ${{ github.base_ref }}
+          GH_BRANCH: ${{ github.head_ref }}
         run: |
           echo "Running format check on branch $GH_BRANCH"
           git config --global user.email "engineering@finbourne.com" 
