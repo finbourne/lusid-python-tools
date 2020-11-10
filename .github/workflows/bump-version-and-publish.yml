@@ -1,0 +1,40 @@
+# This job runs the project tests
+
+name: bump-version-and-publish
+
+# Trigger the workflow on push or pull request to master or develop
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    timeout-minutes: 30
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: "actions/setup-python@v2"
+    
+      - name: Bump version of package
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "bumping version"
+          git config --global user.email "engineering@finbourne.com"
+          git config --global user.name "finbourne-bot-public"
+          bash ci_tools/bumpversion.sh
+          
+      - name: Publish package to PyPi
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}    
+        run: |
+          bash ci_tools/publish.sh "$PYPI_USERNAME" "$PYPI_PASSWORD"
+    

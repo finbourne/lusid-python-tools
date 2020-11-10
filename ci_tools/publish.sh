@@ -29,6 +29,7 @@ if [[ "$status_code" -eq 200 ]] ; then
 fi
 
 # packages to install
+pip install wheel
 python setup.py sdist bdist_wheel
 
 # upload

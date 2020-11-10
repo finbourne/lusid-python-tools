@@ -21,10 +21,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         self.assertTrue(expr=isinstance(swagger_dict, dict))
 
-    @parameterized.expand(
-        [["Base URL with missing /api path", "https://fbn-prd.lusid.com", ValueError]]
-    )
-    def test_get_swagger_dict_fail(self, _, api_url, expected_exception):
+    def test_get_swagger_dict_fail(self):
 
-        with self.assertRaises(expected_exception):
-            cocoon.utilities.get_swagger_dict(api_url=api_url)
+        with self.assertRaises(ValueError):
+            cocoon.utilities.get_swagger_dict(api_url="https://fbn-prd.lusid.com")

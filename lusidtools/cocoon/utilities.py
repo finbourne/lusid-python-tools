@@ -430,7 +430,13 @@ def get_swagger_dict(api_url: str) -> dict:
     swagger_file = requests.get(swagger_url)
 
     if swagger_file.status_code == 200:
-        return json.loads(swagger_file.text)
+        swagger = json.loads(swagger_file.text)
+
+        app_name = swagger.get("info", {}).get("title", {})
+        if app_name is None or app_name != "LUSID API":
+            raise ValueError(f"Invalid LUSID OpenAPI file: {swagger_url}")
+
+        return swagger
     else:
         raise ValueError(
             f"""Received a {swagger_file.status_code} response from the provided url, please double check
