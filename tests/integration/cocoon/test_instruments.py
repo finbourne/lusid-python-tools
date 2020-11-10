@@ -136,6 +136,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
             ],
         ]
     )
+    @unittest.skip
     def test_enrich_instruments(
         self, _, file_name, mapping_required, instrument_identifier_mapping
     ):
