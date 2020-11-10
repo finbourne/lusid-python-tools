@@ -9,9 +9,35 @@ on:
     branches: [ master ]
 
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  
+  run-black-formatter:
+    strategy:
+      max-parallel: 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.7"
+          
+      - name: Install dependancies
+        run: |
+          pip install black==19.10b0
+          
+      - name: Run formatter check
+        env: 
+          GH_BRANCH: ${{ github.head_ref }}
+        run: |
+          echo "Running format check on branch $GH_BRANCH"
+          git config --global user.email "engineering@finbourne.com" 
+          git config --global user.name "finbourne-bot-public" 
+          bash ci_tools/new_commit_with_black.sh
+  
+  run-lpt-tests:
+    strategy: 
+      max-parallel: 1
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -41,4 +67,3 @@ jobs:
           FBN_APP_NAME: ${{ secrets.MASTER_FBN_CLIENT_ID }}
         run: | 
           python -m unittest discover -v
-          
