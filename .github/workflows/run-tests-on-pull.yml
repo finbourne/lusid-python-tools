@@ -27,7 +27,10 @@ jobs:
           pip install black==19.10b0
           
       - name: Run formatter check
+        env: 
+          GH_BRANCH: ${{ github.head_ref }}
         run: |
+          echo "Running format check on branch $GH_BRANCH"
           git config --global user.email "engineering@finbourne.com" 
           git config --global user.name "finbourne-bot-public" 
           bash ci_tools/new_commit_with_black.sh
