@@ -24,7 +24,7 @@ jobs:
       
       - name: Install dependancies
         run: |
-          pip install bump2version==1.0.0
+          pip install bump2version==1.0.0 twine
     
       - name: Bump version of package
         env:
