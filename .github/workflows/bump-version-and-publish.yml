@@ -24,7 +24,7 @@ jobs:
       
       - name: Install dependancies
         run: |
-          pip install -r requirements.txt
+          pip install bump2version==1.0.0
     
       - name: Bump version of package
         env:
