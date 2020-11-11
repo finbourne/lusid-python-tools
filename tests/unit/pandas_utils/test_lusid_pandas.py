@@ -17,8 +17,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         cls.holding_no_props_1 = lusid.models.portfolio_holding.PortfolioHolding(
             cost={"amount": 549997.05, "currency": "GBP"},
-            cost_portfolio_ccy={"amount": 0.0,
-            "currency": "GBP"},
+            cost_portfolio_ccy={"amount": 0.0, "currency": "GBP"},
             holding_type="P",
             instrument_uid="LUID_XQ6VSO8F",
             properties={},
