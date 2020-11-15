@@ -41,4 +41,26 @@ jobs:
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}    
         run: |
           bash ci_tools/publish.sh "$PYPI_USERNAME" "$PYPI_PASSWORD"
+          
+      - name: Get new package version
+        run: |
+         curl https://raw.githubusercontent.com/finbourne/lusid-python-tools/master/__version__.py | grep __version__ |  awk '{split($0, a, "="); print a[2]}' | tr -d ' "' >> $PYPI_VERSION
+          
+      - name: Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: workflow,job,commit,repo,ref,author,took
+          custom_payload: |
+            {
+            username: 'github-actions-tests',
+            icon_emoji: ':octocat:',
+            attachments: [{
+              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+              text: `${process.env.AS_REPO} version ${process.env.PYPI_VERSION} has been published to PyPi`
+            }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: success()
     
