@@ -12,6 +12,44 @@ from lusidtools.cocoon.utilities import create_scope_id
 unique_properties_scope = create_scope_id()
 
 
+def expected_response(property_scope="TestPropertiesScope1"):
+    return {
+        "instruments": lusid.models.UpsertInstrumentsResponse(
+            values={
+                "ClientInternal: imd_34534539": lusid.models.Instrument(
+                    lusid_instrument_id="LUIDUnknown",
+                    version=lusid.models.Version(
+                        as_at_date=datetime.now(pytz.UTC),
+                        effective_from=datetime.now(pytz.UTC),
+                    ),
+                    name="USTreasury_6.875_2025",
+                    identifiers={
+                        "ClientInternal": "imd_34534539",
+                        "Figi": "BBG000DQQNJ8",
+                        "Isin": "US912810EV62",
+                    },
+                    state="Active",
+                    properties=[
+                        lusid.models.ModelProperty(
+                            effective_from=datetime.min.replace(tzinfo=pytz.UTC),
+                            effective_until=datetime.max.replace(tzinfo=pytz.UTC),
+                            key=f"Instrument/{property_scope}/currency",
+                            value=lusid.models.PropertyValue(label_value="USD"),
+                        ),
+                        lusid.models.ModelProperty(
+                            effective_from=datetime.min.replace(tzinfo=pytz.UTC),
+                            effective_until=datetime.max.replace(tzinfo=pytz.UTC),
+                            key=f"Instrument/{property_scope}/moodys_rating",
+                            value=lusid.models.PropertyValue(label_value="Aa2"),
+                        ),
+                    ],
+                )
+            },
+            failed={},
+        )
+    }
+
+
 class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -32,57 +70,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "A standard successful load of instruments with string index",
@@ -93,57 +81,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "A standard successful load of instruments with duplicates in index",
@@ -154,57 +92,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "A standard successful load of instruments with unique properties scope",
@@ -215,57 +103,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 f"TestPropertiesScope1_{unique_properties_scope}",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key=f"Instrument/TestPropertiesScope1_{unique_properties_scope}/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key=f"Instrument/TestPropertiesScope1_{unique_properties_scope}/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(f"TestPropertiesScope1_{unique_properties_scope}"),
             ],
             [
                 "Additional attributes in the both required and optional mapping that don't exist in LUSID but are in the dataframe",
@@ -276,57 +114,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "A different way of specifying the identifiers",
@@ -341,57 +129,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "Providing a default for a required field which has some missing values",
@@ -411,57 +149,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "Providing a default for a required field which has some missing values",
@@ -481,57 +169,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
             [
                 "Loading instruments with duplicate rows for the same instrument",
@@ -542,71 +180,21 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ],
         ]
     )
     def test_load_from_data_frame_instruments_success(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        expected_outcome,
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully
@@ -691,71 +279,21 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ]
         ]
     )
     def test_load_from_data_frame_instruments_enrichment_success(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        expected_outcome,
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully
@@ -799,8 +337,8 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertEqual(
             first=responses["instruments"]["success"][0]
-            .values["ClientInternal: imd_43535553"]
-            .name,
+                .values["ClientInternal: imd_43535553"]
+                .name,
             second="BP PLC",
         )
 
@@ -840,72 +378,22 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
-                {
-                    "instruments": lusid.models.UpsertInstrumentsResponse(
-                        values={
-                            "ClientInternal: imd_34534539": lusid.models.Instrument(
-                                lusid_instrument_id="LUIDUnknown",
-                                version=lusid.models.Version(
-                                    as_at_date=datetime.now(pytz.UTC),
-                                    effective_from=datetime.now(pytz.UTC),
-                                ),
-                                name="USTreasury_6.875_2025",
-                                identifiers={
-                                    "ClientInternal": "imd_34534539",
-                                    "Figi": "BBG000DQQNJ8",
-                                    "Isin": "US912810EV62",
-                                },
-                                state="Active",
-                                properties=[
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/currency",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="USD"
-                                        ),
-                                    ),
-                                    lusid.models.ModelProperty(
-                                        effective_from=datetime(
-                                            year=1,
-                                            month=1,
-                                            day=1,
-                                            hour=0,
-                                            minute=0,
-                                            tzinfo=pytz.UTC,
-                                        ),
-                                        key="Instrument/TestPropertiesScope1/moodys_rating",
-                                        value=lusid.models.PropertyValue(
-                                            label_value="Aa2"
-                                        ),
-                                    ),
-                                ],
-                            )
-                        },
-                        failed={},
-                    )
-                },
+                expected_response(),
             ]
         ]
     )
     def test_load_from_data_frame_instruments_with_strip(
-        self,
-        _,
-        scope,
-        file_name_with_whitespace,
-        file_name_clean,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        expected_outcome,
+            self,
+            _,
+            scope,
+            file_name_with_whitespace,
+            file_name_clean,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully with whitespace, and validates that the
@@ -973,7 +461,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    def test_load_instrument_properties(self,):
+    def test_load_instrument_properties(self, ):
         data_frame = pd.DataFrame(
             {
                 "instrument_name": [
@@ -1081,14 +569,14 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         data_frame = pd.DataFrame(
             {
-                "instrument_name": ["Portfolio",],
+                "instrument_name": ["Portfolio", ],
                 "client_internal": [code],
                 "lookthrough_code": [code],
             }
         )
 
         mapping = {
-            "identifier_mapping": {"ClientInternal": "client_internal",},
+            "identifier_mapping": {"ClientInternal": "client_internal", },
             "required": {"name": "instrument_name"},
             "optional": {
                 "look_through_portfolio_id.scope": f"${scope}",
@@ -1122,7 +610,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         self.assertEqual(len(instr_response["instruments"]["errors"]), 0)
         self.assertEqual(
             instr_response["instruments"]["success"][0]
-            .values[f"ClientInternal: {code}"]
-            .lookthrough_portfolio.code,
+                .values[f"ClientInternal: {code}"]
+                .lookthrough_portfolio.code,
             code,
         )
