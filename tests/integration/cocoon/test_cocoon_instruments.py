@@ -185,16 +185,16 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_instruments_success(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            expected_outcome,
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully
@@ -284,16 +284,16 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_instruments_enrichment_success(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            expected_outcome,
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully
@@ -337,8 +337,8 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertEqual(
             first=responses["instruments"]["success"][0]
-                .values["ClientInternal: imd_43535553"]
-                .name,
+            .values["ClientInternal: imd_43535553"]
+            .name,
             second="BP PLC",
         )
 
@@ -383,17 +383,17 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_instruments_with_strip(
-            self,
-            _,
-            scope,
-            file_name_with_whitespace,
-            file_name_clean,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            expected_outcome,
+        self,
+        _,
+        scope,
+        file_name_with_whitespace,
+        file_name_clean,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        expected_outcome,
     ) -> None:
         """
         Test that instruments can be loaded successfully with whitespace, and validates that the
@@ -461,7 +461,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    def test_load_instrument_properties(self, ):
+    def test_load_instrument_properties(self,):
         data_frame = pd.DataFrame(
             {
                 "instrument_name": [
@@ -569,14 +569,14 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         data_frame = pd.DataFrame(
             {
-                "instrument_name": ["Portfolio", ],
+                "instrument_name": ["Portfolio",],
                 "client_internal": [code],
                 "lookthrough_code": [code],
             }
         )
 
         mapping = {
-            "identifier_mapping": {"ClientInternal": "client_internal", },
+            "identifier_mapping": {"ClientInternal": "client_internal",},
             "required": {"name": "instrument_name"},
             "optional": {
                 "look_through_portfolio_id.scope": f"${scope}",
@@ -610,7 +610,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         self.assertEqual(len(instr_response["instruments"]["errors"]), 0)
         self.assertEqual(
             instr_response["instruments"]["success"][0]
-                .values[f"ClientInternal: {code}"]
-                .lookthrough_portfolio.code,
+            .values[f"ClientInternal: {code}"]
+            .lookthrough_portfolio.code,
             code,
         )

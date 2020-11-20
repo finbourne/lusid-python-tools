@@ -471,7 +471,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                     key="PortfolioGroup/" + test_case_scope + "/location",
                     value=lusid.models.PropertyValue(label_value="UK"),
                     effective_from=datetime.datetime.min.replace(tzinfo=tzutc()),
-                    effective_until=datetime.datetime.max.replace(tzinfo=tzutc())
+                    effective_until=datetime.datetime.max.replace(tzinfo=tzutc()),
                 ),
                 "PortfolioGroup/"
                 + test_case_scope
@@ -479,7 +479,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                     key="PortfolioGroup/" + test_case_scope + "/MifidFlag",
                     value=lusid.models.PropertyValue(label_value="Y"),
                     effective_from=datetime.datetime.min.replace(tzinfo=tzutc()),
-                    effective_until=datetime.datetime.max.replace(tzinfo=tzutc())
+                    effective_until=datetime.datetime.max.replace(tzinfo=tzutc()),
                 ),
             },
             response_with_properties.properties,
