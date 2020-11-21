@@ -22,7 +22,7 @@ jobs:
         pip --no-cache-dir install --upgrade awscli
 
     - name: Run tests on MASTER branch
-      if: ${{ github.base_ref == 'master' }}
+      if: ${{ github.ref == 'refs/heads/master' }}
       env: 
         FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}
         FBN_USERNAME: ${{ secrets.MASTER_FBN_USERNAME }}
