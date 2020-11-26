@@ -1,4 +1,5 @@
 ![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffinbourne%2Flusid-python-tools.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffinbourne%2Flusid-python-tools?ref=badge_shield)
 
 # lusid-python-tools
 Python tools for LUSID
@@ -62,3 +63,7 @@ or
 ```sh
 $ pip install lusidtools -U --user
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffinbourne%2Flusid-python-tools.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffinbourne%2Flusid-python-tools?ref=badge_large)
