@@ -259,6 +259,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         [
             # Test building an InstrumentDefinition
             [
+                "Test building an InstrumentDefinition",
                 lusid.models.InstrumentDefinition,
                 {
                     "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
@@ -317,6 +318,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test building a CreateTransactionPortfolioRequest
             [
+                "Test building a CreateTransactionPortfolioRequest",
                 lusid.models.CreateTransactionPortfolioRequest,
                 {
                     "Portfolio/Manager/Id": lusid.models.PerpetualProperty(
@@ -388,6 +390,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test building a TransactionRequest
             [
+                "Test building a TransactionRequest",
                 lusid.models.TransactionRequest,
                 {
                     "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
@@ -490,6 +493,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test building an AdjustHoldingRequest
             [
+                "Test building an AdjustHoldingRequest",
                 lusid.models.AdjustHoldingRequest,
                 {
                     "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
@@ -583,6 +587,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_set_attributes(
         self,
+        _,
         model_object,
         properties,
         identifiers,
@@ -603,6 +608,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
+        if _ == "Test building a TransactionRequest" or _ == "Test building an AdjustHoldingRequest":
+            print("Debug")
 
         populated_model = cocoon.utilities.set_attributes_recursive(
             model_object=model_object,
