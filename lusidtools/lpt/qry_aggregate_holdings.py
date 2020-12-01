@@ -28,7 +28,7 @@ PVAL = "Mkt Val"
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Get Aggregate Holdings", ["filename", "limit"])
+        stdargs.Parser("Get Aggregate Holdings", ["filename", "limit", "properties"])
         .add("scope", help="Scope")
         .add("portfolio", help="Portfolio id")
         .add("dates", nargs="+", metavar="YYYY-MM_DD")
@@ -123,24 +123,31 @@ def process_args(api, args):
 
 
 def run_query(api, args, date):
+    metrics = [
+        api.models.AggregateSpec(AGG_INSTR, "Value"),
+        api.models.AggregateSpec(AGG_UID, "Value"),
+        api.models.AggregateSpec(AGG_TYPE, "Value"),
+        api.models.AggregateSpec(AGG_PV, "Value"),
+        api.models.AggregateSpec(AGG_UNITS, "Value"),
+        api.models.AggregateSpec(AGG_COST, "Value"),
+        api.models.AggregateSpec(AGG_RATE, "Value"),
+        api.models.AggregateSpec(AGG_PRC, "Value"),
+    ]
+    metrics.extend(
+        [
+            api.models.AggregateSpec(v, "Value") for v in args.properties
+        ]
+    )
 
     request = api.models.AggregationRequest(
         recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
         effective_at=lpt.to_date(date),
-        metrics=[
-            api.models.AggregateSpec(AGG_INSTR, "Value"),
-            api.models.AggregateSpec(AGG_UID, "Value"),
-            api.models.AggregateSpec(AGG_TYPE, "Value"),
-            api.models.AggregateSpec(AGG_PV, "Value"),
-            api.models.AggregateSpec(AGG_UNITS, "Value"),
-            api.models.AggregateSpec(AGG_COST, "Value"),
-            api.models.AggregateSpec(AGG_RATE, "Value"),
-            api.models.AggregateSpec(AGG_PRC, "Value"),
-        ],
+        metrics=metrics,
         portfolio_identifier_code="GroupPortfolio" if args.group else "SinglePortfolio",
     )
 
     # Called if get_aggregtion_by_portfolio() succeeds
+
     def success(result):
         df = pd.DataFrame.from_records(result.content.data)[
             [
@@ -152,7 +159,7 @@ def run_query(api, args, date):
                 AGG_PRC,
                 AGG_RATE,
                 AGG_PV,
-            ]
+            ] + args.properties
         ]
 
         df[LVAL] = df[AGG_PV] / df[AGG_RATE]
@@ -173,7 +180,7 @@ def run_query(api, args, date):
 
         return (
             result.stats,
-            df[[UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL]],
+            df[[UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL] + args.properties],
         )
 
     return api.call.get_aggregation(
