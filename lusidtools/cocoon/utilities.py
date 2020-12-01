@@ -282,7 +282,7 @@ def set_attributes_recursive(
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
-            else:
+            elif mapping[key]:
                 missing_value = True
 
         # if there is more nesting call the function recursively

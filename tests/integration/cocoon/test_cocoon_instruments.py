@@ -569,22 +569,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             [
                 "load only lookthrough instruments",
                 Path(__file__).parent.joinpath("data/lookthrough_instr_tests/load_lookthrough_instrument.csv"),
-                # pd.DataFrame(
-                #     {
-                #         "instrument_name": [
-                #             "Portfolio001",
-                #         ],
-                #         "client_internal": [
-                #             "replace_code",
-                #         ],
-                #         "lookthrough_code": [
-                #             "replace_code",
-                #         ],
-                #         "lookthrough_scope": [
-                #             "replace_scope",
-                #         ]
-                #     }
-                # ),
                 {
                     "identifier_mapping": {
                         "ClientInternal": "client_internal",
@@ -601,26 +585,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             [
                 "load mixed lookthrough instruments",
                 Path(__file__).parent.joinpath("data/lookthrough_instr_tests/mixed_lookthrough_instruments.csv"),
-                # pd.DataFrame(
-                #     {
-                #         "instrument_name": [
-                #             "Portfolio001",
-                #             "instr_0001",
-                #         ],
-                #         "client_internal": [
-                #             "replace_code",
-                #             "id_0001"
-                #         ],
-                #         "lookthrough_code": [
-                #             "replace_code",
-                #             None
-                #         ],
-                #         "lookthrough_scope": [
-                #             "replace_scope",
-                #             None
-                #         ]
-                #     }
-                # ),
                 {
                     "identifier_mapping": {
                         "ClientInternal": "client_internal",
@@ -637,22 +601,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             [
                 "load mixed lookthrough instruments with default scope",
                 Path(__file__).parent.joinpath("data/lookthrough_instr_tests/mixed_instruments_default_scope.csv"),
-                # pd.DataFrame(
-                #     {
-                #         "instrument_name": [
-                #             "Portfolio001",
-                #             "instr_0001",
-                #         ],
-                #         "client_internal": [
-                #             "replace_code",
-                #             "id_0001"
-                #         ],
-                #         "lookthrough_code": [
-                #             "replace_code",
-                #             None
-                #         ]
-                #     }
-                # ),
                 {
                     "identifier_mapping": {
                         "ClientInternal": "client_internal",
@@ -669,28 +617,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             [
                 "load mixed lookthrough instruments with default scope with multiple portfolios",
                 Path(__file__).parent.joinpath("data/lookthrough_instr_tests/mixed_lookthrough_instruments_multiple portfolios.csv"),
-                # pd.DataFrame(
-                #     {
-                #         "instrument_name": [
-                #             "Portfolio001",
-                #             "Portfolio002",
-                #             "instr_0001",
-                #             "instr_0002",
-                #         ],
-                #         "client_internal": [
-                #             "replace_code",
-                #             "replace_code2",
-                #             "id_0001",
-                #             "id_0002"
-                #         ],
-                #         "lookthrough_code": [
-                #             "replace_code",
-                #             "replace_code2",
-                #             None,
-                #             None
-                #         ]
-                #     }
-                # ),
                 {
                     "identifier_mapping": {
                         "ClientInternal": "client_internal",
@@ -707,22 +633,6 @@ class CocoonTestsInstruments(unittest.TestCase):
             [
                 "multiple_instruments_with_same_portfolio",
                 Path(__file__).parent.joinpath("data/lookthrough_instr_tests/multiple_instruments_with_same_portfolio.csv"),
-                # pd.DataFrame(
-                #     {
-                #         "instrument_name": [
-                #             "Portfolio001",
-                #             "Portfolio001"
-                #         ],
-                #         "client_internal": [
-                #             "replace_code",
-                #             "replace_code"
-                #         ],
-                #         "lookthrough_code": [
-                #             "replace_code",
-                #             "replace_code"
-                #         ]
-                #     }
-                # ),
                 {
                     "identifier_mapping": {
                         "ClientInternal": "client_internal",
@@ -739,8 +649,6 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_instrument_lookthrough(self, _, df, mapping):
-        if _ == "multiple_instruments_with_same_portfolio":
-            print("debug")
         scope = "test-lookthrough-loading-lusidtools"
         df = pd.read_csv(df)
 

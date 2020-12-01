@@ -608,8 +608,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         :return: None
         """
-        if _ == "Test building a TransactionRequest" or _ == "Test building an AdjustHoldingRequest":
-            print("Debug")
 
         populated_model = cocoon.utilities.set_attributes_recursive(
             model_object=model_object,
