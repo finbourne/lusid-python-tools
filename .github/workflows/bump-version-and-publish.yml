@@ -1,6 +1,6 @@
 # This job runs the project tests
 
-name: bump-version-and-publish
+name: Bump package version and publish
 
 # Trigger the workflow on push or pull request to master or develop
 
