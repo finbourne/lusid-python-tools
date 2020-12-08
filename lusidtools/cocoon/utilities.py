@@ -254,6 +254,7 @@ def set_attributes_recursive(
     # Used to check if all attributes are none
     total_count = 0
     none_count = 0
+    missing_value = False
 
     # For each of the attributes to populate
     for key in list(populate_attributes):
@@ -281,6 +282,8 @@ def set_attributes_recursive(
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
+            elif mapping[key]:
+                missing_value = True
 
         # if there is more nesting call the function recursively
         else:
@@ -302,8 +305,9 @@ def set_attributes_recursive(
     If all attributes are None propagate None rather than a model filled with Nones. For example if a CorporateActionSourceId
     has no scope or code return build a model with CorporateActionSourceId = None rather than CorporateActionSourceId = 
     lusid.models.ResourceId(scope=None, code=None)
+    
     """
-    if total_count == none_count:
+    if total_count == none_count or missing_value:
         return None
 
     # Create an instance of and populate the model object
