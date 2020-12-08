@@ -47,6 +47,29 @@ def checkargs_tuple(a_tuple: tuple):
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
+def instr_def(look_through_portfolio_id=None):
+    return lusid.models.InstrumentDefinition(
+        name="GlobalCreditFund",
+        identifiers={
+            "Instrument/default/Figi": lusid.models.InstrumentIdValue(
+                value="BBG000BLNNH6"
+            ),
+            "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
+                value="IBM"
+            ),
+        },
+        properties={
+            "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                key="Instrument/CreditRatings/Moodys",
+                value=lusid.models.PropertyValue(label_value="A2"),
+            ),
+            "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                key="Instrument/CreditRatings/SandP",
+                value=lusid.models.PropertyValue(label_value="A-"),
+            ),
+        },
+        look_through_portfolio_id=look_through_portfolio_id
+    )
 
 class ReturnBytes:
     """
@@ -255,10 +278,12 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 msg="The key of a nested dictionary does not match the expected outcome",
             )
 
+
     @parameterized.expand(
         [
             # Test building an InstrumentDefinition
             [
+                "Test building an InstrumentDefinition",
                 lusid.models.InstrumentDefinition,
                 {
                     "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
@@ -290,33 +315,45 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     data=["GlobalCreditFund", "SingaporeBranch", "PORT_12490FKS9",],
                     index=["instrument_name", "lookthrough_scope", "lookthrough_code",],
                 ),
-                lusid.models.InstrumentDefinition(
-                    name="GlobalCreditFund",
-                    identifiers={
-                        "Instrument/default/Figi": lusid.models.InstrumentIdValue(
-                            value="BBG000BLNNH6"
-                        ),
-                        "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
-                            value="IBM"
-                        ),
-                    },
-                    properties={
-                        "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
-                            key="Instrument/CreditRatings/Moodys",
-                            value=lusid.models.PropertyValue(label_value="A2"),
-                        ),
-                        "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
-                            key="Instrument/CreditRatings/SandP",
-                            value=lusid.models.PropertyValue(label_value="A-"),
-                        ),
-                    },
-                    look_through_portfolio_id=lusid.models.ResourceId(
-                        scope="SingaporeBranch", code="PORT_12490FKS9"
+                instr_def(lusid.models.ResourceId(
+                    scope="SingaporeBranch", code="PORT_12490FKS9"
+                )),
+            ],
+            # Test building an InstrumentDefinition with no lookthrough instrument
+            [
+                "Test building an InstrumentDefinition with no lookthrough instrument",
+                lusid.models.InstrumentDefinition,
+                {
+                    "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                        key="Instrument/CreditRatings/Moodys",
+                        value=lusid.models.PropertyValue(label_value="A2"),
                     ),
+                    "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                        key="Instrument/CreditRatings/SandP",
+                        value=lusid.models.PropertyValue(label_value="A-"),
+                    ),
+                },
+                {
+                    "Instrument/default/Figi": lusid.models.InstrumentIdValue(
+                        value="BBG000BLNNH6"
+                    ),
+                    "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
+                        value="IBM"
+                    ),
+                },
+                [],
+                {
+                    "name": "instrument_name",
+                },
+                pd.Series(
+                    data=["GlobalCreditFund"],
+                    index=["instrument_name"],
                 ),
+                instr_def(),
             ],
             # Test building a CreateTransactionPortfolioRequest
             [
+                "Test building a CreateTransactionPortfolioRequest",
                 lusid.models.CreateTransactionPortfolioRequest,
                 {
                     "Portfolio/Manager/Id": lusid.models.PerpetualProperty(
@@ -388,6 +425,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test building a TransactionRequest
             [
+                "Test building a TransactionRequest",
                 lusid.models.TransactionRequest,
                 {
                     "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
@@ -490,6 +528,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             # Test building an AdjustHoldingRequest
             [
+                "Test building an AdjustHoldingRequest",
                 lusid.models.AdjustHoldingRequest,
                 {
                     "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
@@ -583,6 +622,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_set_attributes(
         self,
+        _,
         model_object,
         properties,
         identifiers,
@@ -620,9 +660,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
         )
 
     def test_populate_model(self):
+        """Not implemented yet"""
         pass
 
     def test_file_type_checks(self):
+        """Not implemented yet"""
         pass
 
     @parameterized.expand(
@@ -778,7 +820,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
         self.assertListEqual(required_attributes, expected_outcome)
 
+    @unittest.skip("Not implemented yet")
     def test_gen_dict_extract(self):
+        """Not implemented yet"""
         pass
 
     @parameterized.expand(
@@ -2394,11 +2438,11 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
         cls.logger = logger.LusidLogger("debug")
 
     def test_group_request_into_one_portfolio_group(self):
-
+        port_group = "Portfolio Group 1"
         requests = [
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[models.ResourceId(scope="TEST1", code="PORT1")],
                 properties={
                     "test": models.ModelProperty(key="test", value="prop1"),
@@ -2410,7 +2454,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[models.ResourceId(scope="TEST1", code="PORT2")],
                 sub_groups=None,
                 properties={
@@ -2422,7 +2466,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[models.ResourceId(scope="TEST1", code="PORT3")],
                 sub_groups=None,
                 description=None,
@@ -2430,7 +2474,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[models.ResourceId(scope="TEST1", code="PORT4")],
                 sub_groups=None,
                 description=None,
@@ -2449,7 +2493,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
             list_grouped_request,
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[
                     lusid.models.ResourceId(code="PORT1", scope="TEST1"),
                     lusid.models.ResourceId(code="PORT2", scope="TEST1"),
@@ -2475,7 +2519,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
             dict_grouped_request,
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
-                display_name="Portfolio Group 1",
+                display_name=port_group,
                 values=[
                     lusid.models.ResourceId(code="PORT1", scope="TEST1"),
                     lusid.models.ResourceId(code="PORT2", scope="TEST1"),
