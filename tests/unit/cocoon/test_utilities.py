@@ -47,6 +47,7 @@ def checkargs_tuple(a_tuple: tuple):
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
+
 def instr_def(look_through_portfolio_id=None):
     return lusid.models.InstrumentDefinition(
         name="GlobalCreditFund",
@@ -54,9 +55,7 @@ def instr_def(look_through_portfolio_id=None):
             "Instrument/default/Figi": lusid.models.InstrumentIdValue(
                 value="BBG000BLNNH6"
             ),
-            "Instrument/default/Ticker": lusid.models.InstrumentIdValue(
-                value="IBM"
-            ),
+            "Instrument/default/Ticker": lusid.models.InstrumentIdValue(value="IBM"),
         },
         properties={
             "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
@@ -68,8 +67,9 @@ def instr_def(look_through_portfolio_id=None):
                 value=lusid.models.PropertyValue(label_value="A-"),
             ),
         },
-        look_through_portfolio_id=look_through_portfolio_id
+        look_through_portfolio_id=look_through_portfolio_id,
     )
+
 
 class ReturnBytes:
     """
@@ -278,7 +278,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 msg="The key of a nested dictionary does not match the expected outcome",
             )
 
-
     @parameterized.expand(
         [
             # Test building an InstrumentDefinition
@@ -315,9 +314,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     data=["GlobalCreditFund", "SingaporeBranch", "PORT_12490FKS9",],
                     index=["instrument_name", "lookthrough_scope", "lookthrough_code",],
                 ),
-                instr_def(lusid.models.ResourceId(
-                    scope="SingaporeBranch", code="PORT_12490FKS9"
-                )),
+                instr_def(
+                    lusid.models.ResourceId(
+                        scope="SingaporeBranch", code="PORT_12490FKS9"
+                    )
+                ),
             ],
             # Test building an InstrumentDefinition with no lookthrough instrument
             [
@@ -342,13 +343,8 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     ),
                 },
                 [],
-                {
-                    "name": "instrument_name",
-                },
-                pd.Series(
-                    data=["GlobalCreditFund"],
-                    index=["instrument_name"],
-                ),
+                {"name": "instrument_name",},
+                pd.Series(data=["GlobalCreditFund"], index=["instrument_name"],),
                 instr_def(),
             ],
             # Test building a CreateTransactionPortfolioRequest
