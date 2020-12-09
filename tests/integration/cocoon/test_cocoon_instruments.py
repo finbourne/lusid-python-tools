@@ -61,7 +61,9 @@ class CocoonTestsInstruments(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
-    @lusid_feature("T4-1", "T4-2", "T4-3", "T4-4", "T4-5", "T4-6", "T4-7", "T4-8", "T4-9")
+    @lusid_feature(
+        "T4-1", "T4-2", "T4-3", "T4-4", "T4-5", "T4-6", "T4-7", "T4-8", "T4-9"
+    )
     @parameterized.expand(
         [
             [
