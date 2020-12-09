@@ -570,6 +570,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         self.assertEqual(len(errors), 0)
         self.assertEqual(len(successes), 0)
 
+    @lusid_feature("T4-15", "T4-16", "T4-17", "T4-18", "T4-19")
     @parameterized.expand(
         [
             [
