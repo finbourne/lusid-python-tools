@@ -385,9 +385,9 @@ class CocoonTestsFailures(unittest.TestCase):
             ]
         ]
     )
-    def test_load_from_data_frame_failure2(
+    def test_load_from_data_frame_failure_multi_index_dataframe(
         self,
-        test_name,
+        _,
         scope,
         file_name,
         mapping_required,
