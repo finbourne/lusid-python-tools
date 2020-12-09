@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 import pandas as pd
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
@@ -17,6 +19,8 @@ class CocoonTestsHoldings(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature("T3-1", "T3-2", "T3-3", "T3-4", "T3-5", "T3-6", "T3-7", "T3-8", "T3-9", "T3-10", "T3-11", "T3-12",
+                   "T3-13", "T3-14", "T3-15", "T3-16", "T3-17", "T3-18", "T3-19")
     @parameterized.expand(
         [
             [

@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 import pandas as pd
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
@@ -59,6 +61,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature("T4-1", "T4-2", "T4-3", "T4-4", "T4-5", "T4-6", "T4-7", "T4-8", "T4-9")
     @parameterized.expand(
         [
             [
@@ -259,6 +262,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
+    @lusid_feature("T4-10")
     @parameterized.expand(
         [
             [
@@ -366,6 +370,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
+    @lusid_feature("T4-11")
     @parameterized.expand(
         [
             [
@@ -461,6 +466,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
+    @lusid_feature("T4-12")
     def test_load_instrument_properties(self,):
         data_frame = pd.DataFrame(
             {
@@ -531,6 +537,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         self.assertEqual(len(errors), 0)
         self.assertGreater(len(successes), 0)
 
+    @lusid_feature("T4-13")
     def test_load_instrument_properties_with_missing_instruments(self):
         properties_df = pd.DataFrame({"isin": ["blah"], "category": ["Oil & Gas"]})
 

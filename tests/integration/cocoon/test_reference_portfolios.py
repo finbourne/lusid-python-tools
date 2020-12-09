@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
@@ -22,6 +24,7 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         cls.scope = "ModelFundTest"
         cls.file_name = "data/reference-portfolio/reference-test.csv"
 
+    @lusid_feature("T11-1", "T11-2", "T11-3")
     @parameterized.expand(
         [
             [
@@ -136,6 +139,7 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
                 [prop for prop in get_portfolio.properties], property_keys_from_params,
             )
 
+    @lusid_feature("T11-4")
     def test_portfolio_missing_attribute(self):
 
         unique_id = create_scope_id()

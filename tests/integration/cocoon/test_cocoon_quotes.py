@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import numpy as np
 import pandas as pd
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
@@ -17,6 +19,7 @@ class CocoonTestsQuotes(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature("T7-1", "T7-2", "T7-3")
     @parameterized.expand(
         [
             (
@@ -115,6 +118,7 @@ class CocoonTestsQuotes(unittest.TestCase):
             second=0,
         )
 
+    @lusid_feature("T7-4")
     @parameterized.expand(
         [
             (

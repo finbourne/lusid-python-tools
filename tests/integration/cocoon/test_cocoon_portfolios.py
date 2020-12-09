@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
@@ -19,6 +21,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature("T6-1", "T6-2", "T6-3", "T6-4", "T6-5", "T6-6", "T6-7", "T6-8")
     @parameterized.expand(
         [
             [
@@ -217,6 +220,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
             second=list(data_frame[mapping_required["code"]].values),
         )
 
+    @lusid_feature("T6-9")
     @parameterized.expand(
         [
             [

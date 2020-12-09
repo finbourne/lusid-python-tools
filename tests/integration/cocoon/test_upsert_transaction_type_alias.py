@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import lusid
 import lusid.models as models
+from lusidfeature import lusid_feature
+
 from lusidtools.cocoon.utilities import create_scope_id
 from lusidtools.cocoon.transaction_type_upload import upsert_transaction_type_alias
 import logging
@@ -98,6 +100,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 if json.loads(e.body)["code"] == 231:
                     logger.info(json.loads(e.body)["title"])
 
+    @lusid_feature("T13-1")
     def test_update_current_alias_with_new_movements(self):
 
         new_movements_alias = deepcopy(self.class_transaction_type_config)[0]
@@ -119,6 +122,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         self.assertEqual(uploaded_alias[0], new_movements_alias)
 
+    @lusid_feature("T13-2")
     def test_update_alias_which_does_not_exist(self):
 
         alias_which_does_not_exist = deepcopy(self.class_transaction_type_config)[0]
@@ -139,6 +143,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         self.assertEqual(uploaded_alias[0], alias_which_does_not_exist)
 
+    @lusid_feature("T13-3")
     def test_update_multiple_current_alias_with_new_movements(self):
 
         trans_type_with_multiple_alias = self.class_transaction_type_config.copy()

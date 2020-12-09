@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
@@ -24,6 +26,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.loop.stop()
 
+    @lusid_feature("T10-1")
     def test_resolve_valid_instruments(self):
         source_ids = ["BBG000C6K6G9", "BBG000C04D57"]
         names = ["Inst1", "Inst2"]
@@ -66,6 +69,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
         for i in source_ids:
             validate_luid(result.loc[i]["LusidInstrumentId"])
 
+    @lusid_feature("T10-2")
     def test_resolve_invalid_instrument(self):
         data = {"ids": ["blah"], "is_cash": [False]}
 
@@ -79,6 +83,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
 
         self.assertFalse(result.iloc[0]["LusidInstrumentId"])
 
+    @lusid_feature("T10-3")
     @parameterized.expand(
         [
             [
@@ -108,6 +113,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
 
         self.assertListEqual(unique_identifiers, expected_outcome)
 
+    @lusid_feature("T10-4", "T10-5", "T10-6", "T10-7")
     @parameterized.expand(
         [
             [
