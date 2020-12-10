@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import lusid
 import lusid.models as models
+from lusidfeature import lusid_feature
+
 from lusidtools.cocoon.utilities import create_scope_id
 from lusidtools.cocoon.transaction_type_upload import (
     create_transaction_type_configuration,
@@ -49,6 +51,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             cls.api_factory, cls.alias, cls.movements
         )
 
+    @lusid_feature("T9-1")
     def test_create_new_txn_type(self):
 
         """
@@ -75,6 +78,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T9-2")
     def test_create_duplication_txn_type_throws_error(self):
 
         """

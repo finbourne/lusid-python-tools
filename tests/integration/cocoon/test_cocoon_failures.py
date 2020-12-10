@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
@@ -18,6 +20,23 @@ class CocoonTestsFailures(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature(
+        "T2-1",
+        "T2-2",
+        "T2-3",
+        "T2-4",
+        "T2-5",
+        "T2-6",
+        "T2-7",
+        "T2-8",
+        "T2-9",
+        "T2-10",
+        "T2-11",
+        "T2-12",
+        "T2-13",
+        "T2-14",
+        "T2-15",
+    )
     @parameterized.expand(
         [
             [
@@ -348,6 +367,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 sub_holding_keys=sub_holding_keys,
             )
 
+    @lusid_feature("T2-16")
     @parameterized.expand(
         [
             [
@@ -365,9 +385,9 @@ class CocoonTestsFailures(unittest.TestCase):
             ]
         ]
     )
-    def test_load_from_data_frame_failure(
+    def test_load_from_data_frame_failure_multi_index_dataframe(
         self,
-        test_name,
+        _,
         scope,
         file_name,
         mapping_required,

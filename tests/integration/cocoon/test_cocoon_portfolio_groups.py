@@ -4,6 +4,8 @@ import pandas as pd
 import json
 import lusid
 import lusid.models as models
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from lusidtools.cocoon.utilities import create_scope_id
 import datetime
@@ -84,6 +86,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             properties_scope=properties_scope,
         )
 
+    @lusid_feature("T5-1")
     def test_01_pg_create_with_portfolios(self) -> None:
 
         """
@@ -154,6 +157,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ],
         )
 
+    @lusid_feature("T5-2")
     def test_02_pg_create_with_no_portfolio(self) -> None:
 
         """
@@ -204,6 +208,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             len(responses["portfolio_groups"]["success"][0].portfolios) == 0
         )
 
+    @lusid_feature("T5-3")
     def test_03_pg_create_multiple_groups_no_portfolio(self) -> None:
 
         """
@@ -249,6 +254,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T5-4")
     def test_04_pg_create_with_portfolio_not_exist(self):
 
         """
@@ -284,6 +290,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
         self.assertEqual(len(responses["portfolio_groups"]["success"]), 0)
 
+    @lusid_feature("T5-5")
     def test_05_pg_create_with_duplicate_portfolios(self):
 
         """
@@ -349,6 +356,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T5-6")
     def test_06_pg_create_duplicate_port_group(self):
 
         """
@@ -387,49 +395,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
-    def test_08_pg_add_bad_portfolio(self):
-
-        """
-        Description:
-        ------------
-        Here we test add a portfolio which does not exist to a current portfolio group.
-
-        Expected results:
-        -----------------
-        The portfolio group is returned without the portfolios added.
-        """
-
-        test_case_scope = create_scope_id()
-        data_frame = self.csv_to_data_frame_with_scope(
-            "data/port_group_tests/test_8_pg_add_bad_portfolio.csv",
-            self.portfolio_scope,
-        )
-
-        # Create the portfolio group as a seperate request
-        port_group_request = lusid.models.CreatePortfolioGroupRequest(
-            code=data_frame["PortGroupCode"][0],
-            display_name=data_frame["PortGroupCode"][0],
-        )
-
-        self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, create_portfolio_group_request=port_group_request
-        )
-
-        responses = self.cocoon_load_from_dataframe(
-            scope=test_case_scope, data_frame=data_frame
-        )
-
-        self.log_error_requests_title("portfolio_groups", responses)
-
-        self.assertTrue(len(responses["portfolio_groups"]["errors"]) == 0)
-
-        self.assertEqual(
-            first=responses["portfolio_groups"]["success"][0].id,
-            second=lusid.models.ResourceId(
-                scope=test_case_scope, code=data_frame["PortGroupCode"].tolist()[0]
-            ),
-        )
-
+    @lusid_feature("T5-7")
     def test_07_pg_create_with_properties(self) -> None:
 
         """
@@ -485,6 +451,51 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             response_with_properties.properties,
         )
 
+    @lusid_feature("T5-8")
+    def test_08_pg_add_bad_portfolio(self):
+
+        """
+        Description:
+        ------------
+        Here we test add a portfolio which does not exist to a current portfolio group.
+
+        Expected results:
+        -----------------
+        The portfolio group is returned without the portfolios added.
+        """
+
+        test_case_scope = create_scope_id()
+        data_frame = self.csv_to_data_frame_with_scope(
+            "data/port_group_tests/test_8_pg_add_bad_portfolio.csv",
+            self.portfolio_scope,
+        )
+
+        # Create the portfolio group as a seperate request
+        port_group_request = lusid.models.CreatePortfolioGroupRequest(
+            code=data_frame["PortGroupCode"][0],
+            display_name=data_frame["PortGroupCode"][0],
+        )
+
+        self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
+            scope=test_case_scope, create_portfolio_group_request=port_group_request
+        )
+
+        responses = self.cocoon_load_from_dataframe(
+            scope=test_case_scope, data_frame=data_frame
+        )
+
+        self.log_error_requests_title("portfolio_groups", responses)
+
+        self.assertTrue(len(responses["portfolio_groups"]["errors"]) == 0)
+
+        self.assertEqual(
+            first=responses["portfolio_groups"]["success"][0].id,
+            second=lusid.models.ResourceId(
+                scope=test_case_scope, code=data_frame["PortGroupCode"].tolist()[0]
+            ),
+        )
+
+    @lusid_feature("T5-9")
     def test_09_pg_add_duplicate_portfolio(self) -> None:
 
         """
@@ -526,6 +537,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T5-10")
     def test_10_pg_add_no_new_portfolio(self) -> None:
 
         """
@@ -571,6 +583,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T5-11")
     def test_11_pg_add_bad_and_good_portfolios(self):
 
         """
@@ -631,6 +644,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ),
         )
 
+    @lusid_feature("T5-12")
     def test_12_pg_add_portfolios_different_scopes(self) -> None:
 
         """
