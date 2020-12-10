@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 import pandas as pd
+from lusidfeature import lusid_feature
+
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
@@ -22,6 +24,7 @@ class CocoonTestsAsyncTools(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
+    @lusid_feature("T1-1", "T1-2", "T1-3")
     @parameterized.expand(
         [
             [

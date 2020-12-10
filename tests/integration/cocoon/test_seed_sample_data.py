@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import lusid
+from lusidfeature import lusid_feature
+
 from lusidtools.cocoon.seed_sample_data import seed_data
 from lusidtools.cocoon.utilities import load_json_file
 from lusidtools.cocoon.utilities import create_scope_id
@@ -35,6 +37,7 @@ class CocoonSeedDataTestsBase(object):
     (3) Run tests against new data.
     """
 
+    @lusid_feature("T12-1")
     def test_transactions_from_response(self):
         transactions_from_response = self.api_factory.build(
             lusid.api.TransactionPortfoliosApi
@@ -51,6 +54,7 @@ class CocoonSeedDataTestsBase(object):
             set(self.sample_data["txn_id"].to_list()),
         )
 
+    @lusid_feature("T12-2")
     def test_portfolio_from_response(self):
         portfolio_from_response = self.api_factory.build(
             lusid.api.PortfoliosApi
@@ -63,6 +67,7 @@ class CocoonSeedDataTestsBase(object):
             self.sample_data["portfolio_code"].to_list()[0],
         )
 
+    @lusid_feature("T12-3")
     def test_bad_file_type(self):
         with self.assertRaises(ValueError) as error:
             seed_data(
@@ -78,6 +83,7 @@ class CocoonSeedDataTestsBase(object):
             "The provided file_type of bad_file_type has no associated mapping",
         )
 
+    @lusid_feature("T12-4")
     def test_instruments_from_response(self):
         # In this test we take a random sample from the dataframe.
         # We need to make a seperate get_instrument request for each item in the sample, so the test might become
@@ -103,6 +109,7 @@ class CocoonSeedDataTestsBase(object):
 
         self.assertEqual(random_10_ids, response_from_random_10)
 
+    @lusid_feature("T12-5")
     def test_sub_holding_keys(self):
         holdings_response = self.api_factory.build(
             lusid.api.TransactionPortfoliosApi
@@ -145,6 +152,7 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
             file_type="csv",
         )
 
+    @lusid_feature("T12-6")
     def test_return_dict(self):
 
         seed_data = self.seed_data
@@ -165,6 +173,7 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
 
         cls.sample_data = pd.read_csv(seed_sample_data_override_csv)
 
+    @lusid_feature("T12-7")
     def test_override_with_custom_mapping(self):
         result = seed_data(
             self.api_factory,
@@ -224,6 +233,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
         cls.scope = create_scope_id().replace("-", "_")
         cls.api_factory = Mock()
 
+    @lusid_feature("T12-8")
     def test_bad_file_type(self):
         with self.assertRaises(ValueError) as error:
             seed_data(
@@ -239,6 +249,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
             "Unsupported file type, please upload one of the following: ['csv', 'xlsx']",
         )
 
+    @lusid_feature("T12-9")
     def test_inconsistent_file_extensions(self):
 
         self.file_extension = "xlsx"
@@ -257,6 +268,7 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
             f"""Inconsistent file and file extensions passed: {seed_sample_data_override_csv} does not have file extension {self.file_extension}""",
         )
 
+    @lusid_feature("T12-10")
     def test_file_not_exist(self):
 
         self.transaction_file = "data/seed_sample_data/file_not_exist.csv"
