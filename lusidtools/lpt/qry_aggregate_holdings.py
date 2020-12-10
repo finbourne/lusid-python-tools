@@ -133,11 +133,7 @@ def run_query(api, args, date):
         api.models.AggregateSpec(AGG_RATE, "Value"),
         api.models.AggregateSpec(AGG_PRC, "Value"),
     ]
-    metrics.extend(
-        [
-            api.models.AggregateSpec(v, "Value") for v in args.properties
-        ]
-    )
+    metrics.extend([api.models.AggregateSpec(v, "Value") for v in args.properties])
 
     request = api.models.AggregationRequest(
         recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
@@ -159,7 +155,8 @@ def run_query(api, args, date):
                 AGG_PRC,
                 AGG_RATE,
                 AGG_PV,
-            ] + args.properties
+            ]
+            + args.properties
         ]
 
         df[LVAL] = df[AGG_PV] / df[AGG_RATE]
@@ -180,7 +177,10 @@ def run_query(api, args, date):
 
         return (
             result.stats,
-            df[[UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL] + args.properties],
+            df[
+                [UID, TYPE, INSTR, UNITS, COST, PRICE, LVAL, RATE, PVAL]
+                + args.properties
+            ],
         )
 
     return api.call.get_aggregation(
