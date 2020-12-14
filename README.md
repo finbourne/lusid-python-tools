@@ -4,8 +4,9 @@
 Python tools for LUSID
 
 ![PyPI](https://img.shields.io/pypi/v/lusidtools?color=blue)
-![run-lusid-python-tools-tests](https://github.com/finbourne/lusid-python-tools/workflows/run-lusid-python-tools-tests/badge.svg)
-![](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
+![Daily build](https://github.com/finbourne/lusid-python-tools/workflows/Daily%20build/badge.svg) 
+![Build and test](https://github.com/finbourne/lusid-python-tools/workflows/Build%20and%20test/badge.svg)
+![Commit hook](https://github.com/finbourne/lusid-python-tools/workflows/commit-hook/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=finbourne_lusid-python-tools&metric=alert_status)](https://sonarcloud.io/dashboard?id=finbourne_lusid-python-tools)
 
 For more details see the lusid-python-tools [wiki](https://github.com/finbourne/lusid-python-tools/wiki).
