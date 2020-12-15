@@ -2,7 +2,6 @@ name: Slack for Issues
 
 on:
   issues:
-  push:
     types: [opened, edited, milestoned]
   issue_comment:
     types: [created, deleted, edited]
