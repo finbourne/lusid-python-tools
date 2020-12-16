@@ -26,10 +26,10 @@ jobs:
             icon_emoji: ':octocat:',
             attachments: [{
               color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-              text: `New issue #${{ github.event.issue.number }} (${{github.event.issue.title }}) has been created or modified in ${process.env.AS_REPO} by ${{github.actor }}. Click here for more details: ${{github.event.issue.html_url }}`
+              text: `GitHub Issue #${{ github.event.issue.number }} (${{github.event.issue.title }}) has been created or modified in ${process.env.AS_REPO} by ${{github.actor }}. Click here for more details: ${{github.event.issue.html_url }}`
             }]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_FOR_GITHUB_ACTIVITY_CHANNEL }}
           GITHUB_ACTOR: ${{ env.GITHUB_ACTOR }}
         if: always()
