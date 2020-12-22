@@ -230,7 +230,7 @@ class LptTests(unittest.TestCase):
                     "--properties",
                     "Instrument/JLH/AssetClass",
                     "Instrument/JLH/Sector",
-                    "Instrument/JLH/AssetType"
+                    "Instrument/JLH/AssetType",
                 ]
             ),
         ).match(
