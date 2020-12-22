@@ -227,6 +227,10 @@ class LptTests(unittest.TestCase):
                     "Finbourne-Examples",
                     "--recipe",
                     "FinbourneExamplesRecipeMidThenBid",
+                    "--properties",
+                    "Instrument/JLH/AssetClass",
+                    "Instrument/JLH/Sector",
+                    "Instrument/JLH/AssetType"
                 ]
             ),
         ).match(
