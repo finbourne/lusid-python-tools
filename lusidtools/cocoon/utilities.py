@@ -311,7 +311,20 @@ def set_attributes_recursive(
         return None
 
     # Create an instance of and populate the model object
-    return model_object(**obj_init_values)
+    instance = model_object(**obj_init_values)
+
+    # Support for polymorphism, we can identify these `abstract` classes by the existence of the below
+    if getattr(instance, "discriminator") is not None:
+
+        actual_class = model_object.discriminator_value_class_map[getattr(instance, getattr(instance, "discriminator"))]
+
+        return set_attributes_recursive(
+                model_object=getattr(lusid.models, actual_class),
+                mapping=mapping,
+                row=row,
+            )
+
+    return instance
 
 
 @checkargs
