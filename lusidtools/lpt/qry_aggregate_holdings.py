@@ -117,7 +117,7 @@ def process_args(api, args):
             for col in other_cols:
                 df[col] = df[col].fillna(0).astype(int)
 
-            return lpt.trim(df[leading_cols + other_cols], args.limit)
+            return lpt.trim_df(df[leading_cols + other_cols], args.limit)
 
     return get_daily_record()
 
