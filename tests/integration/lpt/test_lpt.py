@@ -12,6 +12,7 @@ from lusidtools.lpt import (
     create_instr as ci,
     create_properties as cp,
     create_orders as co,
+    qry_reconcile_holdings as qrh,
 )
 
 
@@ -233,6 +234,18 @@ class LptTests(unittest.TestCase):
                     "Instrument/JLH/AssetType",
                 ]
             ),
+        ).match(
+            lambda left: self.fail(lpt.display_error(left)),
+            lambda right: self.assertIsInstance(right, DataFrame),
+        )
+
+    def test_reconcile_holdings(self):
+        if not self.target_portfolios_exist():
+            self.skipTest("missing target portfolios")
+
+        qrh.process_args(
+            self.api,
+            qrh.parse(args=["JLH", "JLH1", "2020-01-01", "JLH", "JLH3", "2020-01-01"]),
         ).match(
             lambda left: self.fail(lpt.display_error(left)),
             lambda right: self.assertIsInstance(right, DataFrame),
