@@ -54,9 +54,7 @@ def run_query(
 
     # form reconciliation request
     request = api.models.PortfoliosReconciliationRequest(
-        left=left,
-        right=right,
-        instrument_property_keys=instr_props + [AGG_INSTR],
+        left=left, right=right, instrument_property_keys=instr_props + [AGG_INSTR],
     )
 
     def success(result):
@@ -69,9 +67,7 @@ def run_query(
                 row = {
                     "LUID": item.instrument_uid,
                     "Name": [
-                        i.value.label_value
-                        if i.key == AGG_INSTR
-                        else None
+                        i.value.label_value if i.key == AGG_INSTR else None
                         for i in item.instrument_properties
                     ][0],
                     "diff_cost": item.difference_cost.amount,
