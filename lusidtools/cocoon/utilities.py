@@ -236,6 +236,7 @@ def set_attributes_recursive(
 
     # Get the object attributes
     obj_attr = model_object.openapi_types
+    obj_attr_required_map = model_object.required_map
     obj_init_values = {}
 
     # Additional attributes which are used on most models but will be populated outside the provided mapping
@@ -254,6 +255,7 @@ def set_attributes_recursive(
     # Used to check if all attributes are none
     total_count = 0
     none_count = 0
+    missing_value = False
 
     # For each of the attributes to populate
     for key in list(populate_attributes):
@@ -281,6 +283,8 @@ def set_attributes_recursive(
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
+            elif obj_attr_required_map[key] == "required":
+                missing_value = True
             elif mapping[key]:
                 none_count += 1
 
@@ -306,7 +310,7 @@ def set_attributes_recursive(
     lusid.models.ResourceId(scope=None, code=None)
     
     """
-    if total_count == none_count:
+    if total_count == none_count or missing_value:
         return None
 
     # Create an instance of and populate the model object
