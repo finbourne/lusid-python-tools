@@ -651,7 +651,7 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         print(_)
 
-        if "default scope" in _ :
+        if "default scope" in _:
             self.skipTest("Default parameter using '$' is not supported")
 
         scope = "test-lookthrough-loading-lusidtools"
