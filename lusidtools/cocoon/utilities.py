@@ -254,7 +254,6 @@ def set_attributes_recursive(
     # Used to check if all attributes are none
     total_count = 0
     none_count = 0
-    missing_value = False
 
     # For each of the attributes to populate
     for key in list(populate_attributes):
@@ -283,7 +282,7 @@ def set_attributes_recursive(
                 else:
                     obj_init_values[key] = row[mapping[key]]
             elif mapping[key]:
-                missing_value = True
+                none_count += 1
 
         # if there is more nesting call the function recursively
         else:
@@ -307,7 +306,7 @@ def set_attributes_recursive(
     lusid.models.ResourceId(scope=None, code=None)
     
     """
-    if total_count == none_count or missing_value:
+    if total_count == none_count:
         return None
 
     # Create an instance of and populate the model object
