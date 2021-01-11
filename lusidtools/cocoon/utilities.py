@@ -236,6 +236,7 @@ def set_attributes_recursive(
 
     # Get the object attributes
     obj_attr = model_object.openapi_types
+    obj_attr_required_map = model_object.required_map
     obj_init_values = {}
 
     # Additional attributes which are used on most models but will be populated outside the provided mapping
@@ -282,8 +283,10 @@ def set_attributes_recursive(
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 else:
                     obj_init_values[key] = row[mapping[key]]
-            elif mapping[key]:
+            elif obj_attr_required_map[key] == "required":
                 missing_value = True
+            elif mapping[key]:
+                none_count += 1
 
         # if there is more nesting call the function recursively
         else:
