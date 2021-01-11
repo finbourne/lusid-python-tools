@@ -649,8 +649,6 @@ class CocoonTestsInstruments(unittest.TestCase):
     )
     def test_load_instrument_lookthrough(self, _, df, mapping):
 
-        print(_)
-
         if "default scope" in _:
             self.skipTest("Default parameter using '$' is not supported")
 
