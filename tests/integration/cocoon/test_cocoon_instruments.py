@@ -648,6 +648,10 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_instrument_lookthrough(self, _, df, mapping):
+
+        if "default scope" in _:
+            self.skipTest("Default parameter using '$' is not supported")
+
         scope = "test-lookthrough-loading-lusidtools"
         df = pd.read_csv(df)
 
