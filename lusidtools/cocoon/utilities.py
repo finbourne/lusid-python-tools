@@ -260,9 +260,21 @@ def set_attributes_recursive(
     # For each of the attributes to populate
     for key in list(populate_attributes):
 
+        # Get the attribute type
+        attribute_type = obj_attr[key]
+
         # If it is an additional attribute, populate it with the provided values and move to the next attribute
         if key in list(additional_attributes.keys()):
-            obj_init_values[key] = additional_attributes[key]
+            # Handle identifiers provided within instrument definition (e.g. 'Bond', 'Future', etc.)
+            if (key, attribute_type) == ("identifiers", "dict(str, str)"):
+                obj_init_values[key] = {
+                    str_key: row[str_value]
+                    for str_key, str_value in mapping[key].items()
+                    if not pd.isna(row[str_value])
+                }
+            else:
+                obj_init_values[key] = additional_attributes[key]
+
             continue
 
         # This block keeps track of the number of missing (non-additional) attributes
@@ -271,9 +283,6 @@ def set_attributes_recursive(
             if mapping[key] is None:
                 none_count += 1
 
-        # Get the attribute type
-        attribute_type = obj_attr[key]
-
         # If this is the last object and there is no more nesting set the value from the row
         if not isinstance(mapping[key], dict):
             # If this exists in the mapping with a value and there is a value in the row for it
@@ -281,6 +290,11 @@ def set_attributes_recursive(
                 # Converts to a date if it is a date field
                 if "date" in key or "created" in key or "effective_at" in key:
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
+                # Converts to a list element if it is a list field
+                elif "list" in attribute_type and not isinstance(
+                    row[mapping[key]], list
+                ):
+                    obj_init_values[key] = [row[mapping[key]]]
                 else:
                     obj_init_values[key] = row[mapping[key]]
             elif obj_attr_required_map[key] == "required":
@@ -314,7 +328,19 @@ def set_attributes_recursive(
         return None
 
     # Create an instance of and populate the model object
-    return model_object(**obj_init_values)
+    instance = model_object(**obj_init_values)
+
+    # Support for polymorphism, we can identify these `abstract` classes by the existence of the below
+    if getattr(instance, "discriminator"):
+        discriminator = getattr(instance, getattr(instance, "discriminator"))
+
+        actual_class = model_object.discriminator_value_class_map[discriminator]
+
+        return set_attributes_recursive(
+            model_object=getattr(lusid.models, actual_class), mapping=mapping, row=row,
+        )
+
+    return instance
 
 
 @checkargs
@@ -795,7 +821,6 @@ def handle_nested_default_and_column_mapping(
     This function handles when a mapping is provided which contains as a value a dictionary with a column and/or default
     key rather than just a string with the column name. It populates the DataFrame with the default value as appropriate
     and removes the nesting so that the model can be populated later.
-
     Parameters
     ----------
     data_frame : pd.DataFrame
@@ -804,7 +829,6 @@ def handle_nested_default_and_column_mapping(
         The original mapping (can be required or optional)
     constant_prefix : str
         The prefix that can be used to specify a constant
-
     Returns
     -------
     dataframe : pd.DataFrame
