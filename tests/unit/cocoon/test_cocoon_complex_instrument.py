@@ -40,7 +40,7 @@ class ComplexInstrumentTests(unittest.TestCase):
             "definition.flow_conventions.payment_calendars": "Payment Calendars",
             "definition.flow_conventions.reset_calendars": "Reset Calendars",
             "definition.flow_conventions.settle_days": "Settlement Days",
-            "definition.flow_conventions.reset_days": "Reset Days"
+            "definition.flow_conventions.reset_days": "Reset Days",
         }
         cls.mapping_optional = {}
         cls.identifier_mapping = {"Isin": "ISIN", "ClientInternal": "Client Internal"}
@@ -69,20 +69,22 @@ class ComplexInstrumentTests(unittest.TestCase):
                 settle_days=2,
                 reset_days=2,
             ),
-            identifiers={'clientInternal': 'imd_34534538'},
-            instrument_type="Bond"
+            identifiers={"clientInternal": "imd_34534538"},
+            instrument_type="Bond",
         )
 
-        instrument_request = {"ClientInternal: imd_34534538": models.InstrumentDefinition(
-            # instrument display name
-            name="DISNEY_7_2032",
-            # unique instrument identifier
-            identifiers={
-                "ClientInternal": models.InstrumentIdValue("imd_34534538"),
-                "Isin": models.InstrumentIdValue("US25468PBW59")},
-            # instrument definition
-            definition=instrument_definition
-        )
+        instrument_request = {
+            "ClientInternal: imd_34534538": models.InstrumentDefinition(
+                # instrument display name
+                name="DISNEY_7_2032",
+                # unique instrument identifier
+                identifiers={
+                    "ClientInternal": models.InstrumentIdValue("imd_34534538"),
+                    "Isin": models.InstrumentIdValue("US25468PBW59"),
+                },
+                # instrument definition
+                definition=instrument_definition,
+            )
         }
 
         return self.instruments_api.upsert_instruments(instrument_request)
@@ -154,7 +156,10 @@ class ComplexInstrumentTests(unittest.TestCase):
         # Check instrument definition in response matches expected outcome
         for key in expected_outcome.values.keys():
             response_obj = combined_successes[key]
-            self.assertEqual(response_obj.instrument_definition, expected_outcome.values[key].instrument_definition)
+            self.assertEqual(
+                response_obj.instrument_definition,
+                expected_outcome.values[key].instrument_definition,
+            )
 
     def test_load_from_dataframe_with_unsupported_inst_type(self) -> None:
         """
@@ -181,7 +186,7 @@ class ComplexInstrumentTests(unittest.TestCase):
         # Load data frame with instrument data
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
         # Overwrite "Instrument Type" to an unsupported value
-        data_frame["Instrument Type"].replace('Bond', 'Foo', inplace=True)
+        data_frame["Instrument Type"].replace("Bond", "Foo", inplace=True)
 
         # Check that ValueError is raised
         with self.assertRaises(ValueError):
@@ -197,5 +202,5 @@ class ComplexInstrumentTests(unittest.TestCase):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

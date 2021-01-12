@@ -269,7 +269,8 @@ def set_attributes_recursive(
             if (key, attribute_type) == ("identifiers", "dict(str, str)"):
                 obj_init_values[key] = {
                     str_key: row[str_value]
-                    for str_key, str_value in mapping[key].items() if not pd.isna(row[str_value])
+                    for str_key, str_value in mapping[key].items()
+                    if not pd.isna(row[str_value])
                 }
             else:
                 obj_init_values[key] = additional_attributes[key]
@@ -290,7 +291,9 @@ def set_attributes_recursive(
                 if "date" in key or "created" in key or "effective_at" in key:
                     obj_init_values[key] = str(DateOrCutLabel(row[mapping[key]]))
                 # Converts to a list element if it is a list field
-                elif 'list' in attribute_type and not isinstance(row[mapping[key]], list):
+                elif "list" in attribute_type and not isinstance(
+                    row[mapping[key]], list
+                ):
                     obj_init_values[key] = [row[mapping[key]]]
                 else:
                     obj_init_values[key] = row[mapping[key]]
@@ -315,7 +318,6 @@ def set_attributes_recursive(
 
             obj_init_values[key] = [value] if nested_type == "list" else value
 
-
     """
     If all attributes are None propagate None rather than a model filled with Nones. For example if a CorporateActionSourceId
     has no scope or code return build a model with CorporateActionSourceId = None rather than CorporateActionSourceId = 
@@ -327,7 +329,7 @@ def set_attributes_recursive(
 
     # Create an instance of and populate the model object
     instance = model_object(**obj_init_values)
-    
+
     # Support for polymorphism, we can identify these `abstract` classes by the existence of the below
     if getattr(instance, "discriminator"):
         discriminator = getattr(instance, getattr(instance, "discriminator"))
@@ -335,9 +337,7 @@ def set_attributes_recursive(
         actual_class = model_object.discriminator_value_class_map[discriminator]
 
         return set_attributes_recursive(
-            model_object=getattr(lusid.models, actual_class),
-            mapping=mapping,
-            row=row,
+            model_object=getattr(lusid.models, actual_class), mapping=mapping, row=row,
         )
 
     return instance
