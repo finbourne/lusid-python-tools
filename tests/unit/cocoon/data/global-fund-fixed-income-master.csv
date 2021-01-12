@@ -1,0 +1,5 @@
+Name,ISIN,Client Internal,Issue Date,Maturity Date,Currency,Payment Frequency,Day Count Convention,Roll Convention,Payment Calendars,Reset Calendars,Settlement Days,Reset Days,Principal,Coupon,Instrument Type
+DISNEY 7 2032,US25468PBW59,imd_34534538,28/02/2002,01/03/2032,USD,6M,Thirty360,MF,US,US,2,2,500000000,0.07,Bond
+IBM 7 2025,US459200AM34,imd_34534539,10/30/1995,30/10/2025,USD,6M,Thirty360,MF,US,US,2,2,600000000,0.07,Bond
+USTreasury 6.875 2025,US912810EV62,imd_34534540,15/08/1995,13/08/2025,USD,6M,ActAct,MF,US,US,2,2,128000000,0.06875,Bond
+USTreasury 0.875 2030,US91282CAV37,imd_34534541,13/08/2018,15/11/2030,USD,6M,ActAct,MF,US,US,2,2,372000000,0.00875,Bond
