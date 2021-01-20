@@ -72,19 +72,23 @@ class AppTests(unittest.TestCase):
         else:
             self.assertEqual(data.tail(1).values[0][0], "USTreasury_6.875_2025")
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "test_xlsx_file",
-            {
-                "file_path": os.path.join(cur_dir, test_data_root.joinpath("instruments.xlsx")),
-                "num_header": 0,
-                "num_footer": 0,
-                "delimiter": None,
-                "scale_quotes": False,
-                "line_terminator": None,
-            }
+            [
+                "test_xlsx_file",
+                {
+                    "file_path": os.path.join(
+                        cur_dir, test_data_root.joinpath("instruments.xlsx")
+                    ),
+                    "num_header": 0,
+                    "num_footer": 0,
+                    "delimiter": None,
+                    "scale_quotes": False,
+                    "line_terminator": None,
+                },
+            ]
         ]
-    ])
+    )
     def test_get_instruments_data_excel(self, _, args_list):
         data = load_data_to_df_and_detect_delimiter(args_list)
         if args_list["num_header"] == 0:

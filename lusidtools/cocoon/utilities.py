@@ -950,7 +950,7 @@ def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
             delimiter=args["delimiter"],
             header=args["num_header"],
             skipfooter=args["num_footer"],
-            index_col=None
+            index_col=None,
         )
 
     with open(args["file_path"], "r") as read_file:
@@ -984,7 +984,7 @@ def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
             header=args["num_header"],
             skipfooter=args["num_footer"],
             engine="python",
-            index_col=None
+            index_col=None,
         )
 
 
