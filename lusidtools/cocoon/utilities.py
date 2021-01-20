@@ -944,6 +944,15 @@ def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
     if not os.path.exists(args["file_path"]):
         raise OSError(f"file path {args['file_path']} does not exist")
 
+    if "xls" in args["file_path"].split(".")[-1]:
+        return pd.read_excel(
+            args["file_path"],
+            delimiter=args["delimiter"],
+            header=args["num_header"],
+            skipfooter=args["num_footer"],
+            index_col=None
+        )
+
     with open(args["file_path"], "r") as read_file:
         logging.info(f"loading data from {args['file_path']}")
         data = csv.reader(read_file, lineterminator=args["line_terminator"])
@@ -975,6 +984,7 @@ def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
             header=args["num_header"],
             skipfooter=args["num_footer"],
             engine="python",
+            index_col=None
         )
 
 

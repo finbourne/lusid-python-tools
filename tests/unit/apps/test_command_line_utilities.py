@@ -49,7 +49,7 @@ class AppTests(unittest.TestCase):
                             "num_header": num_h,
                             "num_footer": num_f,
                             "delimiter": delim,
-                            "scale_suotes": True,
+                            "scale_quotes": True,
                             "line_terminator": r"\n",
                         },
                     )
@@ -62,6 +62,30 @@ class AppTests(unittest.TestCase):
 
     @parameterized.expand(args_list)
     def test_get_instruments_data(self, _, args_list):
+        data = load_data_to_df_and_detect_delimiter(args_list)
+        if args_list["num_header"] == 0:
+            self.assertEqual(data[data.columns[0]][0], "Amazon_Nasdaq_AMZN")
+        else:
+            self.assertEqual(data[data.columns[0]][0], "BP_LondonStockEx_BP")
+        if args_list["num_footer"] == 0:
+            self.assertEqual(data.tail(1).values[0][0], "Whitebread_LondonStockEx_WTB")
+        else:
+            self.assertEqual(data.tail(1).values[0][0], "USTreasury_6.875_2025")
+
+    @parameterized.expand([
+        [
+            "test_xlsx_file",
+            {
+                "file_path": os.path.join(cur_dir, test_data_root.joinpath("instruments.xlsx")),
+                "num_header": 0,
+                "num_footer": 0,
+                "delimiter": None,
+                "scale_quotes": False,
+                "line_terminator": None,
+            }
+        ]
+    ])
+    def test_get_instruments_data_excel(self, _, args_list):
         data = load_data_to_df_and_detect_delimiter(args_list)
         if args_list["num_header"] == 0:
             self.assertEqual(data[data.columns[0]][0], "Amazon_Nasdaq_AMZN")
