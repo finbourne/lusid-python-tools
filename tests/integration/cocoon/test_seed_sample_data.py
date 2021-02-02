@@ -31,7 +31,7 @@ class CocoonSeedDataTestsBase(object):
     ------------------
     This class creates the tests we use in other classes below.
     We split the the file loading and tests into separate classes to improve readability and reuse.
-    This can class be extended to your own tests as follows:
+    This class can be extended to your own tests as follows:
     (1) Create a new class with this class as a subclass.
     (2) Load data into LUSID via the setup of new class.
     (3) Run tests against new data.
@@ -44,8 +44,6 @@ class CocoonSeedDataTestsBase(object):
         ).get_transactions(
             scope=self.scope,
             code=self.sample_data["portfolio_code"].to_list()[0],
-            from_transaction_date=datetime.datetime.now(tz=pytz.UTC)
-            - datetime.timedelta(weeks=52),
             property_keys=[f"Transaction/{self.scope}/strategy"],
         )
 
@@ -114,7 +112,8 @@ class CocoonSeedDataTestsBase(object):
         holdings_response = self.api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).get_holdings(
-            scope=self.scope, code=self.sample_data["portfolio_code"].to_list()[0],
+            scope=self.scope,
+            code=self.sample_data["portfolio_code"].to_list()[0],
         )
 
         list_of_prop_values = [
@@ -152,6 +151,13 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
             file_type="csv",
         )
 
+    @classmethod
+    def tearDownClass(cls) -> None:
+        # Delete portfolio once tests are concluded
+        cls.api_factory.build(lusid.PortfoliosApi).delete_portfolio(
+            cls.scope, cls.sample_data["portfolio_code"].to_list()[0]
+        )
+
     @lusid_feature("T12-6")
     def test_return_dict(self):
 
@@ -172,6 +178,13 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
         )
 
         cls.sample_data = pd.read_csv(seed_sample_data_override_csv)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        # Delete portfolio once tests are concluded
+        cls.api_factory.build(lusid.PortfoliosApi).delete_portfolio(
+            cls.scope, cls.sample_data["portfolio_code"].to_list()[0]
+        )
 
     @lusid_feature("T12-7")
     def test_override_with_custom_mapping(self):
@@ -224,6 +237,13 @@ class CocoonTestSeedDataNoMappingOverrideExcel(
             ),
             sub_holding_keys=[f"Transaction/{cls.scope}/strategy"],
             file_type="xlsx",
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        # Delete portfolio once tests are concluded
+        cls.api_factory.build(lusid.PortfoliosApi).delete_portfolio(
+            cls.scope, cls.sample_data["portfolio_code"].to_list()[0]
         )
 
 
@@ -302,4 +322,11 @@ class CocoonTestSeedDataPassDataFrame(unittest.TestCase, CocoonSeedDataTestsBase
             cls.test_dataframe,
             sub_holding_keys=[f"Transaction/{cls.scope}/strategy"],
             file_type="DataFrame",
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        # Delete portfolio once tests are concluded
+        cls.api_factory.build(lusid.PortfoliosApi).delete_portfolio(
+            cls.scope, cls.sample_data["portfolio_code"].to_list()[0]
         )
