@@ -112,8 +112,7 @@ class CocoonSeedDataTestsBase(object):
         holdings_response = self.api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).get_holdings(
-            scope=self.scope,
-            code=self.sample_data["portfolio_code"].to_list()[0],
+            scope=self.scope, code=self.sample_data["portfolio_code"].to_list()[0],
         )
 
         list_of_prop_values = [
