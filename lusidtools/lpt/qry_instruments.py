@@ -15,9 +15,9 @@ TOOLTIP = "List all instruments"
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Query Instruments", ["filename", "limit","properties"])
-        .add('--batch',type=int,default=2000)
-        .add('--filter')
+        stdargs.Parser("Query Instruments", ["filename", "limit", "properties"])
+        .add("--batch", type=int, default=2000)
+        .add("--filter")
         .extend(extend)
         .parse(args)
     )
@@ -29,10 +29,11 @@ def process_args(api, args):
 
         def fetch_page(page_token):
             return api.call.list_instruments(
-                    limit=args.batch, 
-                    page=page_token,
-                    instrument_property_keys=args.properties,
-                    filter=args.filter)
+                limit=args.batch,
+                page=page_token,
+                instrument_property_keys=args.properties,
+                filter=args.filter,
+            )
 
         results = []
 

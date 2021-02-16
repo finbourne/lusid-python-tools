@@ -281,7 +281,7 @@ class TxnConfigYaml:
         :return dict(str, models.PerpetualProperty) properties: The property in a dictionary
         """
         if len(properties_node_list) > 0:
-            single_property = {n.key : n for n in properties_node_list}
+            single_property = {n.key: n for n in properties_node_list}
         else:
             single_property = {}
 

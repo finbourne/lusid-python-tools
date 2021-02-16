@@ -37,9 +37,9 @@ def process_args(api, args):
         for s in [p.split("=") for p in args.properties]
     ]
     return api.call.instruments_search(
-        instrument_search_property=request, 
+        instrument_search_property=request,
         mastered_only=True,
-        mastered_effective_at=lpt.to_date(args.date)
+        mastered_effective_at=lpt.to_date(args.date),
     ).bind(success)
 
 

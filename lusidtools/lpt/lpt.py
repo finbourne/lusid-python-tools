@@ -269,6 +269,7 @@ def standard_flow(parser, connector, executor, display_df=display_df):
 
     return rv
 
+
 # Nicely display an error from LUSID
 def display_error(error, response=False):
     try:
