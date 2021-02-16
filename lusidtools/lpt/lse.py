@@ -97,7 +97,7 @@ class Caller:
             startTime = datetime.datetime.now()
             try:
                 result = fn(*args, **(adjKwargs))
-                request_id = (result[2].get("lusid-meta-requestId", "n/a"),)
+                request_id = result[2].get("lusid-meta-requestId", "n/a")
             except self.exceptionClass as err:
                 data = {} if err.body == "" else json.loads(err.body)
 

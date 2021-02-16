@@ -3,12 +3,9 @@ import dateutil
 from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
-from .either import Either
-import re
-import urllib.parse
+from lusidtools.lpt.either import Either
+from lusidtools.lpt.pager import page_all_results
 import datetime
-
-rexp = re.compile(r".*page=([^=']{10,}).*")
 
 TOOLNAME = "scopes"
 TOOLTIP = "List scopes"
@@ -19,16 +16,17 @@ def parse(extend=None, args=None):
         stdargs.Parser("Get Scopes", ["filename", "limit"])
         .add("--portfolios", action="store_true")
         .add("--batch", type=int, default=1000)
+        .add("--monitor", action='store_true')
         .extend(extend)
         .parse(args)
     )
 
 
 def process_args(api, args):
-    results = []
 
     def fetch_page(page_token):
-        print("Fetching page:", page_token, str(datetime.datetime.now()))
+        if args.monitor:
+            print("Fetching page:", page_token, str(datetime.datetime.now()))
         return api.call.list_portfolios(page=page_token, limit=args.batch)
 
     def got_page(result):
@@ -45,26 +43,15 @@ def process_args(api, args):
                 .size()
                 .reset_index()
             )
-        results.append(df)
+        return df
 
-        links = [l for l in result.content.links if l.relation == "NextPage"]
+    df = page_all_results(fetch_page,got_page)
 
-        if len(links) > 0:
-            match = rexp.match(links[0].href)
-            if match:
-                return urllib.parse.unquote(match.group(1))
-        return None
-
-    page = Either(None)
-    while True:
-        page = fetch_page(page.right).bind(got_page)
-        if page.is_left():
-            return page
-        if page.right == None:
-            break
+    if not args.portfolios:
+       df = df.groupby('Scopes',as_index=False).sum()
 
     return lpt.trim_df(
-        pd.concat(results, ignore_index=True, sort=False),
+        df,
         args.limit,
         sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
     )
