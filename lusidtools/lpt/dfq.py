@@ -186,7 +186,7 @@ def dfq(args, given_df=None):
                 else:
                     dflt = ""
                     v = kv[1]
-                    if v.endswith(' as int'):
+                    if v.endswith(" as int"):
                         v = int(v[:-7])
                         dflt = 0
                     elif df[col].dtype == int:

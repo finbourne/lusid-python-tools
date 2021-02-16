@@ -18,7 +18,7 @@ def parse(extend=None, args=None):
     return (
         stdargs.Parser("Get Scopes", ["filename", "limit"])
         .add("--portfolios", action="store_true")
-        .add("--batch", type=int,default=1000)
+        .add("--batch", type=int, default=1000)
         .extend(extend)
         .parse(args)
     )
@@ -28,8 +28,8 @@ def process_args(api, args):
     results = []
 
     def fetch_page(page_token):
-        print("Fetching page:",page_token, str(datetime.datetime.now()))
-        return api.call.list_portfolios(page=page_token,limit=args.batch)
+        print("Fetching page:", page_token, str(datetime.datetime.now()))
+        return api.call.list_portfolios(page=page_token, limit=args.batch)
 
     def got_page(result):
         if args.portfolios:
