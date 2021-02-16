@@ -3,9 +3,11 @@ import re
 import urllib.parse
 
 from lusidtools.lpt.either import Either
+
 rexp = re.compile(r".*page=([^=']{10,}).*")
 
-def page_all_results(fetch_page,page_handler):
+
+def page_all_results(fetch_page, page_handler):
     results = []
 
     def got_page(result):
