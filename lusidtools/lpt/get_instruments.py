@@ -22,6 +22,7 @@ def parse(extend=None, args=None):
             metavar=("filename.csv", "column"),
             help="load values from file",
         )
+        .add('--effective_at')
         .extend(extend)
         .parse(args)
     )
@@ -77,7 +78,8 @@ def process_args(api, args):
                 next_step = lambda r: step3(r, l[MAX_PROPS:], None)
 
         return api.call.get_instruments(
-            args.type, request_body=args.instrument, property_keys=args.properties
+            args.type, request_body=args.instrument, property_keys=args.properties,
+            effective_at=lpt.to_date(args.effective_at)
         ).bind(next_step)
 
     if args.identifiers is None:

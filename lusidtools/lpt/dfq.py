@@ -186,10 +186,13 @@ def dfq(args, given_df=None):
                 else:
                     dflt = ""
                     v = kv[1]
-                    if df[col].dtype == int:
+                    if v.endswith(' as int'):
+                        v = int(v[:-7])
+                        dflt = 0
+                    elif df[col].dtype == int:
                         v = int(v)
                         dflt = 0
-                    if df[col].dtype == float:
+                    elif df[col].dtype == float:
                         v = float(v)
                         dflt = 0.0
 
