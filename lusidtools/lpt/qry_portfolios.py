@@ -11,6 +11,7 @@ TOOLTIP = "List portfolios for a scope"
 
 ID_CODE = "id.code"
 
+
 def parse(extend=None, args=None):
     return (
         stdargs.Parser(
@@ -44,9 +45,7 @@ def process_args(api, args):
             + list(colmap.keys()),
         ).rename(columns=colmap)
 
-    return lpt.trim_df(
-        page_all_results(fetch_page,got_page), args.limit, sort=ID_CODE
-    )
+    return lpt.trim_df(page_all_results(fetch_page, got_page), args.limit, sort=ID_CODE)
 
 
 # Standalone tool

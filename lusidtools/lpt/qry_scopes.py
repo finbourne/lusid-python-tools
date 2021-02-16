@@ -16,14 +16,13 @@ def parse(extend=None, args=None):
         stdargs.Parser("Get Scopes", ["filename", "limit"])
         .add("--portfolios", action="store_true")
         .add("--batch", type=int, default=1000)
-        .add("--monitor", action='store_true')
+        .add("--monitor", action="store_true")
         .extend(extend)
         .parse(args)
     )
 
 
 def process_args(api, args):
-
     def fetch_page(page_token):
         if args.monitor:
             print("Fetching page:", page_token, str(datetime.datetime.now()))
@@ -45,15 +44,13 @@ def process_args(api, args):
             )
         return df
 
-    df = page_all_results(fetch_page,got_page)
+    df = page_all_results(fetch_page, got_page)
 
     if not args.portfolios:
-       df = df.groupby('Scopes',as_index=False).sum()
+        df = df.groupby("Scopes", as_index=False).sum()
 
     return lpt.trim_df(
-        df,
-        args.limit,
-        sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
+        df, args.limit, sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
     )
 
 
