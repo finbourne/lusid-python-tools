@@ -58,7 +58,7 @@ def process_args(api, args):
 
     def list_success(result):
         return lpt.trim_df(
-            lpt.to_df(result, ["effective_at", "unmatched_holding_method"]),
+            lpt.to_df(result, ["effective_at", "unmatched_holding_method","version.as_at_date"]),
             args.limit,
             sort="effective_at",
         )
