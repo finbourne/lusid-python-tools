@@ -12,6 +12,7 @@ def parse(extend=None, args=None):
     return (
         stdargs.Parser("Search Instruments", ["filename", "limit"])
         .add("--properties", nargs="*", help="properties to search")
+        .add("--date")
         .extend(extend)
         .parse(args)
     )
@@ -36,7 +37,9 @@ def process_args(api, args):
         for s in [p.split("=") for p in args.properties]
     ]
     return api.call.instruments_search(
-        instrument_search_property=request, mastered_only=True
+        instrument_search_property=request, 
+        mastered_only=True,
+        mastered_effective_at=lpt.to_date(args.date)
     ).bind(success)
 
 

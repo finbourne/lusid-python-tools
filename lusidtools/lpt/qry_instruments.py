@@ -15,7 +15,9 @@ TOOLTIP = "List all instruments"
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Query Instruments", ["filename", "limit"])
+        stdargs.Parser("Query Instruments", ["filename", "limit","properties"])
+        .add('--batch',type=int,default=2000)
+        .add('--filter')
         .extend(extend)
         .parse(args)
     )
@@ -26,13 +28,18 @@ def process_args(api, args):
         id_columns = {"identifiers.KEY:{}".format(v): v for v in ids["Id"].values}
 
         def fetch_page(page_token):
-            return api.call.list_instruments(limit=3000, page=page_token)
+            return api.call.list_instruments(
+                    limit=args.batch, 
+                    page=page_token,
+                    instrument_property_keys=args.properties,
+                    filter=args.filter)
 
         results = []
 
         def got_page(result):
             columns = ["lusid_instrument_id", "name"]
             columns.extend(sorted(id_columns.keys()))
+            columns.extend(f"P:{c}" for c in args.properties)
             df = lpt.to_df(result, columns).dropna(axis=1, how="all")
             df.rename(columns=id_columns, inplace=True)
 

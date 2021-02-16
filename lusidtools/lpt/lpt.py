@@ -263,8 +263,11 @@ def standard_flow(parser, connector, executor, display_df=display_df):
                 else:
                     return display_df(df)
 
-    return either.match(left=display_error, right=success)
+    rv = either.match(left=display_error, right=success)
 
+    api.dump_stats()
+
+    return rv
 
 # Nicely display an error from LUSID
 def display_error(error, response=False):
@@ -276,6 +279,7 @@ def display_error(error, response=False):
         )
         print("MESSAGE: {}\n".format(error.message))
         print("DETAILS: {}\n".format(error.detailed_message))
+        print("Instance: {}\n".format(error.instance))
 
         if len(error.items) > 0:
             df = records_to_df(
