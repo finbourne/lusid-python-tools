@@ -12,9 +12,12 @@ TOOLTIP = "List portfolios for a scope"
 
 rexp = re.compile(r".*page=([^=']{10,}).*")
 
+
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Get Portfolios", ["filename", "limit", "scope", "properties","asat"])
+        stdargs.Parser(
+            "Get Portfolios", ["filename", "limit", "scope", "properties", "asat"]
+        )
         .extend(extend)
         .parse(args)
     )
@@ -27,15 +30,20 @@ def process_args(api, args):
 
     def fetch_page(page_token):
         return api.call.list_portfolios_for_scope(
-                 args.scope, 
-                 property_keys=args.properties,
-                 limit=2000,
-                 page=page_token)
-    
+            args.scope, property_keys=args.properties, limit=2000, page=page_token
+        )
+
     def got_page(result):
         df = lpt.to_df(
             result.content,
-            ["id.code", "display_name","base_currency","description", "created", "parent_portfolio_id"]
+            [
+                "id.code",
+                "display_name",
+                "base_currency",
+                "description",
+                "created",
+                "parent_portfolio_id",
+            ]
             + list(colmap.keys()),
         ).rename(columns=colmap)
         results.append(df)
@@ -48,7 +56,6 @@ def process_args(api, args):
                 return urllib.parse.unquote(match.group(1))
         return None
 
-
         return lpt.trim_df(df, args.limit, sort="id.code")
 
     page = Either(None)
@@ -60,10 +67,9 @@ def process_args(api, args):
             break
 
     return lpt.trim_df(
-        pd.concat(results, ignore_index=True, sort=False),
-        args.limit,
-        sort='id.code'
+        pd.concat(results, ignore_index=True, sort=False), args.limit, sort="id.code"
     )
+
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
