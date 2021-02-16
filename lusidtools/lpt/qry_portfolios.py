@@ -10,6 +10,8 @@ from lusidtools.lpt.either import Either
 TOOLNAME = "portfolios"
 TOOLTIP = "List portfolios for a scope"
 
+ID_CODE = "id.code"
+
 rexp = re.compile(r".*page=([^=']{10,}).*")
 
 
@@ -37,7 +39,7 @@ def process_args(api, args):
         df = lpt.to_df(
             result.content,
             [
-                "id.code",
+                ID_CODE,
                 "display_name",
                 "base_currency",
                 "description",
@@ -56,8 +58,6 @@ def process_args(api, args):
                 return urllib.parse.unquote(match.group(1))
         return None
 
-        return lpt.trim_df(df, args.limit, sort="id.code")
-
     page = Either(None)
     while True:
         page = fetch_page(page.right).bind(got_page)
@@ -67,7 +67,7 @@ def process_args(api, args):
             break
 
     return lpt.trim_df(
-        pd.concat(results, ignore_index=True, sort=False), args.limit, sort="id.code"
+        pd.concat(results, ignore_index=True, sort=False), args.limit, sort=ID_CODE
     )
 
 

@@ -97,13 +97,13 @@ class Caller:
             startTime = datetime.datetime.now()
             try:
                 result = fn(*args, **(adjKwargs))
-                requestId = (result[2].get("lusid-meta-requestId", "n/a"),)
+                request_id = (result[2].get("lusid-meta-requestId", "n/a"),)
             except self.exceptionClass as err:
                 data = {} if err.body == "" else json.loads(err.body)
 
                 instance = data.get("instance", "n/a")
                 s = instance.split("insights/logs/")
-                requestId = "n/a" if len(s) != 2 else s[1]
+                request_id = "n/a" if len(s) != 2 else s[1]
 
                 result = [
                     Rec(
@@ -114,7 +114,7 @@ class Caller:
                         detailed_message=data.get("detail", "n/a"),
                         items=data.get("errorDetails", []),
                         instance=instance,
-                        requestId=requestId,
+                        requestId=request_id,
                     ),
                     err.status,
                     {},
@@ -129,7 +129,7 @@ class Caller:
                 duration=(endTime - startTime).total_seconds(),
                 elapsed=float(result[2].get("lusid-meta-duration", 0)) / 1000,
                 status=result[1],
-                requestId=requestId,
+                requestId=request_id,
             )
 
             if self.stats != None:
