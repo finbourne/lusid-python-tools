@@ -577,6 +577,7 @@ def _convert_batch_to_models(
     file_type: str,
     domain_lookup: dict,
     sub_holding_keys: list,
+    sub_holding_keys_scope: str,
     **kwargs,
 ):
     """
@@ -602,6 +603,8 @@ def _convert_batch_to_models(
         The domain lookup
     sub_holding_keys : list
         The sub holding keys to use
+    sub_holding_keys_scope : str
+        The scope to use for the sub holding keys
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
 
@@ -630,7 +633,7 @@ def _convert_batch_to_models(
     elif len(sub_holding_keys) > 0:
         sub_holding_keys_row = cocoon.properties._infer_full_property_keys(
             partial_keys=sub_holding_keys,
-            properties_scope=properties_scope,
+            properties_scope=sub_holding_keys_scope,
             domain="Transaction",
         )
     # If no keys
@@ -661,7 +664,7 @@ def _convert_batch_to_models(
         ):
             sub_holding_keys_row = cocoon.properties.create_property_values(
                 row=row,
-                scope=properties_scope,
+                scope=sub_holding_keys_scope,
                 domain="Transaction",
                 dtypes=sub_holding_key_dtypes,
             )
@@ -709,6 +712,7 @@ async def _construct_batches(
     file_type: str,
     domain_lookup: dict,
     sub_holding_keys: list,
+    sub_holding_keys_scope: str,
     **kwargs,
 ):
     """
@@ -738,6 +742,8 @@ async def _construct_batches(
         The domain lookup
     sub_holding_keys : list
         The sub holding keys to use
+    sub_holding_keys_scope : str
+        The scope to use for the sub-holding keys
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
 
@@ -863,6 +869,7 @@ async def _construct_batches(
                         file_type=file_type,
                         domain_lookup=domain_lookup,
                         sub_holding_keys=sub_holding_keys,
+                        sub_holding_keys_scope=sub_holding_keys_scope,
                         **kwargs,
                     ),
                     file_type=file_type,
@@ -917,6 +924,7 @@ def load_from_data_frame(
     sub_holding_keys: list = None,
     holdings_adjustment_only: bool = False,
     thread_pool_max_workers: int = 5,
+    sub_holding_keys_scope: str = None
 ):
     """
 
@@ -953,7 +961,8 @@ def load_from_data_frame(
         Whether to use the adjust_holdings api call rather than set_holdings when working with holdings
     thread_pool_max_workers : int
         The maximum number of workers to use in the thread pool used by the function
-
+    sub_holding_keys_scope : str
+        The scope to add the sub-holding keys to
     Returns
     -------
     responses: dict
@@ -1078,6 +1087,12 @@ def load_from_data_frame(
     properties_scope = (
         Validator(properties_scope, "properties_scope")
         .set_default_value_if_none(default=scope)
+        .value
+    )
+
+    sub_holding_keys_scope = (
+        Validator(sub_holding_keys_scope, "sub_holding_keys_scope")
+        .set_default_value_if_none(default=properties_scope)
         .value
     )
 
@@ -1240,7 +1255,7 @@ def load_from_data_frame(
         # Check for and create missing property definitions for the sub-holding-keys
         data_frame = cocoon.properties.create_missing_property_definitions_from_file(
             api_factory=api_factory,
-            properties_scope=properties_scope,
+            properties_scope=sub_holding_keys_scope,
             domain="Transaction",
             data_frame=data_frame,
             property_columns=sub_holding_keys,
@@ -1287,6 +1302,7 @@ def load_from_data_frame(
             file_type=file_type,
             domain_lookup=domain_lookup,
             sub_holding_keys=sub_holding_keys,
+            sub_holding_keys_scope=sub_holding_keys_scope,
             **keyword_arguments,
         ),
         loop,
