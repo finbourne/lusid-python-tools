@@ -39,7 +39,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 ["base_currency"],
                 "operations001",
                 None,
-                [],
+                None,
+                None
             ],
             [
                 "Standard load with ~700 portfolios",
@@ -56,7 +57,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 ["base_currency"],
                 "operations001",
                 None,
-                [],
+                None,
+                None
             ],
             [
                 "Add in some constants",
@@ -73,7 +75,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 ["base_currency"],
                 "operations001",
                 None,
-                [],
+                None,
+                None
             ],
             [
                 "Standard load with unique properties scope to ensure property creation",
@@ -90,11 +93,12 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 ["base_currency"],
                 f"operations001_{create_scope_id()}",
                 None,
-                [],
+                None,
+                None
             ],
             [
                 "Standard load with a single sub-holding-key",
-                "prime_broker_test",
+                f"prime_broker_test_{create_scope_id(use_uuid=True)}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -107,11 +111,12 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 ["base_currency"],
                 "operations001",
                 ["Strategy"],
-                [],
+                None,
+                ["Transaction/operations001/Strategy"]
             ],
             [
                 "Standard load with a multiple sub-holding-keys in a unique scope",
-                "prime_broker_test",
+                f"prime_broker_test_{create_scope_id(use_uuid=True)}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -122,13 +127,14 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001",
                 ["Strategy", "Broker"],
-                [],
+                None,
+                ["Transaction/operations001/Strategy", "Transaction/operations001/Broker"]
             ],
             [
                 "Standard load with a sub-holding-key with scope specified",
-                "prime_broker_test",
+                 f"prime_broker_test_{create_scope_id(use_uuid=True)}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -139,13 +145,14 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{create_scope_id(use_uuid=True)}",
                 ["Trader/Strategy"],
-                [],
+                None,
+                ["Transaction/Trader/Strategy"]
             ],
             [
                 "Standard load with a sub-holding-key with domain and scope specified",
-                "prime_broker_test",
+                 f"prime_broker_test_{create_scope_id(use_uuid=True)}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -156,9 +163,28 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"description": "description", "accounting_method": None},
                 {},
                 ["base_currency"],
-                f"operations001_{create_scope_id()}",
+                f"operations001_{create_scope_id(use_uuid=True)}",
                 ["Transaction/Trader/Strategy"],
-                [],
+                None,
+                ["Transaction/Trader/Strategy"]
+            ],
+            [
+                "Standard load with a single sub-holding-key in a different scope",
+                 f"prime_broker_test_{create_scope_id(use_uuid=True)}",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {"description": "description", "accounting_method": None},
+                {},
+                ["base_currency"],
+                "operations001",
+                ["Strategy"],
+                f"accountview007",
+                ["Transaction/accountview007/Strategy"]
             ],
         ]
     )
@@ -173,7 +199,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
         property_columns,
         properties_scope,
         sub_holding_keys,
-        expected_outcome,
+        sub_holdings_key_scope,
+        expected_sub_holdings_keys
     ) -> None:
         """
         Test that portfolios can be loaded successfully
@@ -185,7 +212,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
         :param dict(str, str) identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
         :param list(str) property_columns: The columns to create properties for
         :param str properties_scope: The scope to add the properties to
-        :param any expected_outcome: The expected outcome
+        :param str sub_holdings_key_scope: The scope of the sub holding keys
+        :param list(str): Expected sub holding keys
 
         :return: None
         """
@@ -202,6 +230,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             sub_holding_keys=sub_holding_keys,
+            sub_holding_keys_scope=sub_holdings_key_scope
         )
 
         self.assertEqual(
@@ -219,6 +248,18 @@ class CocoonTestsPortfolios(unittest.TestCase):
             first=response_codes,
             second=list(data_frame[mapping_required["code"]].values),
         )
+
+        if expected_sub_holdings_keys is None:
+            return
+
+        for portfolio_code in response_codes:
+
+            portfolio_details = self.api_factory.build(lusid.api.TransactionPortfoliosApi).get_details(
+                scope=scope,
+                code=portfolio_code
+            )
+
+            self.assertSetEqual(set(portfolio_details.sub_holding_keys), set(expected_sub_holdings_keys))
 
     @lusid_feature("T6-9")
     @parameterized.expand(

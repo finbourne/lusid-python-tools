@@ -269,7 +269,7 @@ def create_missing_property_definitions_from_file(
         # If there are missing property definitions
         if len(missing_property_columns) > 0:
             logging.info(
-                f"The {domain} properties {str(missing_property_columns)} will be added"
+                f"The {domain} properties {str(missing_property_columns)} will be added in the scope {properties_scope}"
             )
 
             # Create property definitions for all of the columns in the file that have missing definitions
