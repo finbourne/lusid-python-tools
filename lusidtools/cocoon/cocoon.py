@@ -924,7 +924,7 @@ def load_from_data_frame(
     sub_holding_keys: list = None,
     holdings_adjustment_only: bool = False,
     thread_pool_max_workers: int = 5,
-    sub_holding_keys_scope: str = None
+    sub_holding_keys_scope: str = None,
 ):
     """
 
