@@ -1,3 +1,4 @@
+import os
 import unittest
 from lusidtools import logger
 from datetime import datetime
@@ -18,7 +19,7 @@ now = datetime.now(pytz.UTC)
 class CocoonExtractGroupHoldingsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     class PortfolioHoldingTemplate(PortfolioHolding):
         """
