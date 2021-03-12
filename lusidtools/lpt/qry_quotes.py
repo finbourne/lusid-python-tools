@@ -65,7 +65,7 @@ def process_args(api, args):
 
     return api.call.get_quotes(
         scope=args.scope,
-        quote_ids={
+        request_body={
             i: api.models.QuoteSeriesId(
                 provider=args.provider,
                 price_source=args.source,
