@@ -139,11 +139,15 @@ def run_query(api, args, date):
         recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
         effective_at=lpt.to_date(date),
         metrics=metrics,
-        portfolio_entity_ids=[api.models.PortfolioEntityId(
-            scope=args.scope,
-            code=args.code,
-            portfolio_entity_type="GroupPortfolio" if args.group else "SinglePortfolio"
-        )],
+        portfolio_entity_ids=[
+            api.models.PortfolioEntityId(
+                scope=args.scope,
+                code=args.code,
+                portfolio_entity_type="GroupPortfolio"
+                if args.group
+                else "SinglePortfolio",
+            )
+        ],
     )
 
     # Called if get_valuation_by_portfolio() succeeds
@@ -187,9 +191,7 @@ def run_query(api, args, date):
             ],
         )
 
-    return api.call.get_valuation(
-        valuation_request=request
-    ).bind(success)
+    return api.call.get_valuation(valuation_request=request).bind(success)
 
 
 def main(parse=parse, display_df=lpt.display_df):
