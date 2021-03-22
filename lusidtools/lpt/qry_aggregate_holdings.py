@@ -135,14 +135,18 @@ def run_query(api, args, date):
     ]
     metrics.extend([api.models.AggregateSpec(v, "Value") for v in args.properties])
 
-    request = api.models.AggregationRequest(
+    request = api.models.ValuationRequest(
         recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
         effective_at=lpt.to_date(date),
         metrics=metrics,
-        portfolio_identifier_code="GroupPortfolio" if args.group else "SinglePortfolio",
+        portfolio_entity_ids=[api.models.PortfolioEntityId(
+            scope=args.scope,
+            code=args.code,
+            portfolio_entity_type="GroupPortfolio" if args.group else "SinglePortfolio"
+        )],
     )
 
-    # Called if get_aggregtion_by_portfolio() succeeds
+    # Called if get_valuation_by_portfolio() succeeds
 
     def success(result):
         df = pd.DataFrame.from_records(result.content.data)[
@@ -183,8 +187,8 @@ def run_query(api, args, date):
             ],
         )
 
-    return api.call.get_aggregation(
-        args.scope, args.portfolio, aggregation_request=request
+    return api.call.get_valuation(
+        valuation_request=request
     ).bind(success)
 
 
