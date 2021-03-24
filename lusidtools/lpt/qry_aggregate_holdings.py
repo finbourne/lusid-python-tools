@@ -142,7 +142,7 @@ def run_query(api, args, date):
         portfolio_entity_ids=[
             api.models.PortfolioEntityId(
                 scope=args.scope,
-                code=args.code,
+                code=args.portfolio,
                 portfolio_entity_type="GroupPortfolio"
                 if args.group
                 else "SinglePortfolio",
