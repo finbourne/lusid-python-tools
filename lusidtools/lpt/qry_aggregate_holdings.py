@@ -137,7 +137,9 @@ def run_query(api, args, date):
 
     request = api.models.ValuationRequest(
         recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
-        effective_at=lpt.to_date(date),
+        valuation_schedule=api.models.ValuationSchedule(
+            effective_at=lpt.to_date(date)
+        ),
         metrics=metrics,
         portfolio_entity_ids=[
             api.models.PortfolioEntityId(
