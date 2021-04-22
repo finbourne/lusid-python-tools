@@ -60,7 +60,7 @@ class AppTests(unittest.TestCase):
             "display_response_head": True,
         }
 
-        LusidLogger("debug")
+        LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         portfolios_api = factory.build(PortfoliosApi)
@@ -170,7 +170,7 @@ class AppTests(unittest.TestCase):
             ),
         )
 
-        LusidLogger("debug")
+        LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     def test_upsert_holdings_with_valid_mapping(self):
 

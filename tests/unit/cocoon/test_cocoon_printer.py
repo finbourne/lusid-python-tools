@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import lusid
 import lusid.models as models
@@ -185,7 +186,7 @@ class CocoonPrinterTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
 
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     def assert_responses(
         self, num_items, expected_value, succ=None, err=None, failed=None
