@@ -680,9 +680,291 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(responses["holdings"]["errors"]), 0)
 
+        # Assert that by default no unmatched_identifiers are returned in the response
+        self.assertFalse(responses["holdings"].get("unmatched_identifiers", False))
+
         self.assertTrue(
             expr=all(
-                isinstance(succcess_response.version, expected_outcome)
-                for succcess_response in responses["holdings"]["success"]
+                isinstance(success_response.version, expected_outcome)
+                for success_response in responses["holdings"]["success"]
             )
         )
+
+    @parameterized.expand(
+        [
+            [
+                "Standard successful load with no unmatched instruments",
+                "unmatched_holdings_test",
+                "data/holdings-example-unique-date.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                True,
+                False,
+                lusid.models.Version,
+                []
+            ],
+            [
+                "Standard successful load with one unmatched instrument",
+                "unmatched_holdings_test",
+                "data/holdings-example-unique-date-one-unmatched-instrument.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                True,
+                False,
+                lusid.models.Version,
+                [{
+                    'Instrument/default/Sedol': 'BFAKE712',
+                    'Instrument/default/Isin': 'USFAHHDAR1014',
+                }]
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two separate adjustments",
+                "unmatched_holdings_test",
+                "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                True,
+                False,
+                lusid.models.Version,
+                [{
+                    'Instrument/default/Sedol': 'BFAKE712',
+                    'Instrument/default/Isin': 'USFAHHDAR1014',
+                }]
+            ],
+            [
+                "Standard successful load with two unmatched instrument in two separate adjustments",
+                "unmatched_holdings_test",
+                "data/holdings-example-unique-date-two-unmatched-instruments-separate-adjustments.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                True,
+                False,
+                lusid.models.Version,
+                [
+                    {
+                        'Instrument/default/Sedol': '9088840066',
+                        'Instrument/default/Isin': 'US02HF9234H67',
+                    },
+                    {
+                        'Instrument/default/Sedol': 'BFAKE712',
+                        'Instrument/default/Isin': 'USFAHHDAR1014',
+                    },
+                ]
+            ],
+            [
+                "Standard successful load with two unmatched instrument in one single adjustment",
+                "unmatched_holdings_test",
+                "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                True,
+                False,
+                lusid.models.Version,
+                [
+                    {
+                        'Instrument/default/Sedol': '9088840066',
+                        'Instrument/default/Isin': 'US02HF9234H67',
+                    },
+                    {
+                        'Instrument/default/Sedol': 'BFAKE712',
+                        'Instrument/default/Isin': 'USFAHHDAR1014',
+                    },
+                ]
+            ],
+        ]
+    )
+    def test_load_from_data_frame_holdings_success_with_unmatched_identifiers(
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        sub_holding_keys,
+        sub_holding_key_scope,
+        return_unmatched_identifiers,
+        holdings_adjustment_only,
+        expected_outcome,
+        expected_unmatched_identifiers
+    ) -> None:
+        """
+        Test that holdings can be loaded successfully
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+        :param list sub_holding_keys: The sub holding keys to populate on the adjustments as transaction properties
+        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
+        :param bool holdings_adjustment_only: Whether to use the adjust_holdings api call rather than set_holdings when
+               working with holdings
+        :param any expected_outcome: The expected outcome
+        :param list[instrument_identifiers] expected_unmatched_identifiers: A list of expected instrument_identifiers
+
+        :return: None
+        """
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        # Create the portfolios
+        portfolio_response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "FundCode",
+                "display_name": "FundCode",
+                "base_currency": "Local Currency Code"
+            },
+            file_type="portfolio",
+            mapping_optional={
+                "created": "Effective Date"
+            }
+        )
+
+        # Assert that all portfolios were created without any issues
+        self.assertEqual(len(portfolio_response.get("portfolios").get("errors")), 0)
+
+        # Load in the holdings adjustments
+        holding_responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="holdings",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            sub_holding_keys=sub_holding_keys,
+            holdings_adjustment_only=holdings_adjustment_only,
+            sub_holding_keys_scope=sub_holding_key_scope,
+            return_unmatched_identifiers=return_unmatched_identifiers,
+        )
+
+        self.assertGreater(len(holding_responses["holdings"]["success"]), 0)
+
+        self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
+
+        # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True
+        self.assertEqual(holding_responses["holdings"].get("unmatched_identifiers", False),
+                         expected_unmatched_identifiers)
+
+        self.assertTrue(
+            expr=all(
+                isinstance(success_response.version, expected_outcome)
+                for success_response in holding_responses["holdings"]["success"]
+            )
+        )
+
+        # Delete the portfolios at the end of the test
+        for portfolio in portfolio_response.get("portfolios").get("success"):
+            self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+                scope=scope,
+                code=portfolio.id.code
+            )

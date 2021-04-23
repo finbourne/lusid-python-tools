@@ -250,6 +250,9 @@ class CocoonTestsInstruments(unittest.TestCase):
             second=0,
         )
 
+        # Assert that by no unmatched_identifiers are returned in the response for instruments
+        self.assertFalse(responses["instruments"].get("unmatched_identifiers", False))
+
         combined_successes = {
             correlation_id: instrument
             for response in responses["instruments"]["success"]
@@ -538,6 +541,9 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         self.assertEqual(len(errors), 0)
         self.assertGreater(len(successes), 0)
+
+        # Assert that by no unmatched_identifiers are returned in the response for instrument_propertys
+        self.assertFalse(result["instrument_propertys"].get("unmatched_identifiers", False))
 
     @lusid_feature("T4-13")
     def test_load_instrument_properties_with_missing_instruments(self):

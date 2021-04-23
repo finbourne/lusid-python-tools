@@ -713,6 +713,7 @@ async def _construct_batches(
     domain_lookup: dict,
     sub_holding_keys: list,
     sub_holding_keys_scope: str,
+    return_unmatched_identifiers: bool,
     **kwargs,
 ):
     """
@@ -744,6 +745,8 @@ async def _construct_batches(
         The sub holding keys to use
     sub_holding_keys_scope : str
         The scope to use for the sub-holding keys
+    return_unmatched_identifiers : bool
+        Whether unmatched identifiers should be returned for transaction or holding upserts
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
 
@@ -901,10 +904,354 @@ async def _construct_batches(
             raise response
 
     # Collects the exceptions as failures and successful calls as values
-    return {
+    returned_response = {
         "errors": [r for r in responses_flattened if isinstance(r, Exception)],
         "success": [r for r in responses_flattened if not isinstance(r, Exception)],
     }
+
+    # For transactions or holdings file types, optionally return unmatched identifiers with the responses
+    if return_unmatched_identifiers is True and file_type in ["transaction", "holding"]:
+        returned_response["unmatched_identifiers"] = unmatched_identifiers(
+            api_factory=api_factory,
+            scope=kwargs.get("scope", None),
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            file_type=file_type,
+            sync_batches=sync_batches,
+        )
+
+    return returned_response
+
+
+@checkargs
+def unmatched_identifiers(
+    api_factory: lusid.utilities.ApiClientFactory,
+    scope: str,
+    data_frame: pd.DataFrame,
+    mapping_required: dict,
+    file_type: str,
+    sync_batches: list = None,
+):
+    """
+    This method orchestrates the identification of unresolved identifiers that were part of the holdings or transactions
+    upload (i.e. where the instrument_uid is LUID_ZZZZZZ)
+
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    data_frame : pd.DataFrame
+        The DataFrame containing the data
+    mapping_required : dict
+        The required mapping
+    file_type : str
+        The type of file e.g. transactions, instruments, holdings, quotes, portfolios
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    responses: list
+        A list to be appended to the ultimate response for load_from_data_frame.
+
+        Where data_type == "transaction", the returned list will contain objects with the structure:
+            {transaction_id: instrument_identifiers}
+
+        Where data_type == "holding", the returned list will be a unique list of instrument_identifiers.
+    """
+    if file_type == "transaction":
+        return _unmatched_ids_transactions(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            sync_batches=sync_batches,
+        )
+    elif file_type == "holding":
+        return _unmatched_ids_holdings(
+            api_factory=api_factory,
+            scope=scope,
+            sync_batches=sync_batches,
+        )
+
+
+def _unmatched_ids_transactions(
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        sync_batches: list = None,
+):
+    """
+    This method identifies which instruments were not resolved with a transaction upload using load_from_data_frame.
+
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    data_frame : pd.DataFrame
+        The DataFrame containing the data
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    responses: list
+        A list to be appended to the ultimate response for load_from_data_frame.
+
+        The returned list will contain objects with the structure:
+            {transaction_id: instrument_identifiers}
+
+    """
+    # Extract a list of portfolio codes from the sync_batches
+    portfolio_codes = _extract_unique_portfolio_codes(sync_batches)
+
+    # Create empty list to hold transaction ids and instruments
+    unmatched_transactions = []
+
+    # For each portfolio, request the unmatched transactions from LUSID and append to the instantiated list
+    for portfolio_code in portfolio_codes:
+        unmatched_transactions.extend(return_unmatched_transactions(
+            api_factory=api_factory,
+            scope=scope,
+            code=portfolio_code,
+        ))
+
+    # With the upload dataframe, filter out any transactions from the list that were not part of this upload and return
+    return filter_unmatched_transactions(
+        data_frame=data_frame,
+        mapping_required=mapping_required,
+        unmatched_transactions=unmatched_transactions
+    )
+
+
+def _extract_unique_portfolio_codes(
+        sync_batches: list
+):
+    """
+    Extract a unique list of portfolio codes from the sync_batches
+
+    Parameters
+    ----------
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    A list of all the unique portfolio codes in the sync batches
+    """
+    codes_list = []
+    for sync_batch in sync_batches:
+        for key, value in sync_batch.items():
+            if key == "codes":
+                codes_list.extend(value)
+    return list(set(codes_list))
+
+
+def _extract_unique_portfolio_codes_effective_at_tuples(
+        sync_batches: list
+):
+    """
+    Extract a unique list of tuples containing portfolio codes and effective_at times
+
+    Parameters
+    ----------
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    A list of all the unique tuples of portfolio codes and effective at times in the sync batches
+    """
+    code_tuples = []
+    for sync_batch in sync_batches:
+        for code, effective_at in zip(
+                sync_batch["codes"],
+                sync_batch["effective_at"],
+        ):
+            # Append a tuple of (code, effective_at) to the code_tuples list
+            code_tuples.append((code, effective_at))
+    return list(set(code_tuples))
+
+
+def return_unmatched_transactions(
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        code: str
+):
+    """
+    Call the get transactions api and only return those transactions with unresolved identifiers.
+
+    Multiple pages of responses for the get_transactions api call are handled.
+
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    code : str
+        The code of the portfolio containing the transactions we want to return
+
+    Returns
+    -------
+    A list of objects with the structure { transaction_id: instrument_identifiers }.
+    """
+    transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+    done = False
+    next_page = None
+    unmatched_transactions = []
+
+    # We need to handle the possibility of paginated results
+    while not done:
+
+        # There must be a filter included so only transactions with unmatched instruments are returned
+        kwargs = {
+            "scope": scope,
+            "code": code,
+            "filter": "instrumentUid eq'LUID_ZZZZZZZZ'"
+        }
+
+        if next_page is not None:
+            kwargs["page"] = next_page
+
+        response = transactions_api.get_transactions(**kwargs)
+
+        unmatched_transactions.extend([
+            {
+                response.transaction_id: response.instrument_identifiers
+            }
+            for response in response.values
+        ])
+
+        next_page = response.next_page
+        done = response.next_page is None
+
+    return unmatched_transactions
+
+
+def filter_unmatched_transactions(
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        unmatched_transactions: list,
+):
+    """
+    This method will take the full list of unmatched transactions and remove any transactions that were not
+    part of the current upload with load_from_data_frame.
+
+    Parameters
+    ----------
+    data_frame : pd.DataFrame
+        The DataFrame containing the data
+    mapping_required : dict
+        The required mapping from load_from_data_frame that helps identify the transaction_id column in the DataFrame
+    unmatched_transactions : list
+         A list of objects with the structure { transaction_id: instrument_identifiers }
+
+    Returns
+    -------
+    A filtered list of unmatched_transactions.
+    """
+    # Create a list var to hold the filtered transactions to be returned
+    filtered_unmatched_transactions = []
+
+    # Create a unique list of transaction_ids from the dataframe
+    valid_txids = data_frame[mapping_required.get("transaction_id")].unique()
+
+    # Iterate through the transactions and if the transaction_id is in the dataframe, add it to the list to be returned
+    for unmatched_transaction in unmatched_transactions:
+        for key in unmatched_transaction.keys():
+            if key in valid_txids:
+                filtered_unmatched_transactions.append(unmatched_transaction)
+
+    return filtered_unmatched_transactions
+
+
+def _unmatched_ids_holdings(
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        sync_batches: list = None,
+):
+    """
+    This method identifies which instruments were not resolved with a holdings upload using load_from_data_frame.
+
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID
+
+    Returns
+    -------
+    responses: list
+        A list to be appended to the ultimate response for load_from_data_frame.
+
+        The returned list will be a unique list of instrument_identifiers.
+
+    """
+    # Extract a list of tuples of portfolio codes and effective at times from sync_batches
+    code_tuples = _extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
+
+    # Create empty list to hold instrument identifiers that have not been resolved
+    unmatched_instruments = []
+
+    # For each holding adjustment in the upload, check whether any contained unresolved instruments and append to list
+    for code_tuple in code_tuples:
+        unmatched_instruments.extend(return_unmatched_instruments_from_holdings(
+            api_factory=api_factory,
+            scope=scope,
+            code_tuple=code_tuple,
+        ))
+
+    # Return a unique list of instrument_identifier dictionaries
+    return list(map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments)))
+
+
+def return_unmatched_instruments_from_holdings(
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        code_tuple: (str, str),
+):
+    """
+    Call the get holdings adjustments api and return a list of instruments that have unresolved identifiers.
+
+    Parameters
+    ----------
+    api_factory : lusid.utilities.ApiClientFactory api_factory
+        The api factory to use
+    scope : str
+        The scope of the resource to load the data into
+    code_tuple : (str, str)
+        A tuple of format (portfolio_code, effective_at) which represents the combination of values
+        used when upserting holdings during load_from_data_frame for file_type 'holding'
+
+    Returns
+    -------
+    A unique list of instrument identifier objects
+
+    """
+    transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+    unmatched_instruments = []
+
+    response = transactions_api.get_holdings_adjustment(
+        scope=scope,
+        code=code_tuple[0],
+        effective_at=str(DateOrCutLabel(code_tuple[1]))
+    )
+
+    for adjustment in response.adjustments:
+        if adjustment.instrument_uid == "LUID_ZZZZZZZZ":
+            unmatched_instruments.append(adjustment.instrument_identifiers)
+
+    # Return a unique list of instrument_identifier dictionaries
+    return list(map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments)))
 
 
 @checkargs
@@ -925,6 +1272,7 @@ def load_from_data_frame(
     holdings_adjustment_only: bool = False,
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
+    return_unmatched_identifiers: bool = False,
 ):
     """
 
@@ -963,6 +1311,10 @@ def load_from_data_frame(
         The maximum number of workers to use in the thread pool used by the function
     sub_holding_keys_scope : str
         The scope to add the sub-holding keys to
+    return_unmatched_identifiers : bool
+        When loading transactions or holdings, a 'True' flag will return a list of identifiers that were
+        unmatched at the time of the upsert (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter
+        will be ignored for file types other than transactions or holdings
     Returns
     -------
     responses: dict
@@ -1303,6 +1655,7 @@ def load_from_data_frame(
             domain_lookup=domain_lookup,
             sub_holding_keys=sub_holding_keys,
             sub_holding_keys_scope=sub_holding_keys_scope,
+            return_unmatched_identifiers=return_unmatched_identifiers,
             **keyword_arguments,
         ),
         loop,

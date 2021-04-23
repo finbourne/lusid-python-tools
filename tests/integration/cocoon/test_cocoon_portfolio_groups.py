@@ -157,6 +157,9 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             ],
         )
 
+        # Assert that by no unmatched_identifiers are returned in the response for portfolio_groups
+        self.assertFalse(responses["portfolio_groups"].get("unmatched_identifiers", False))
+
     @lusid_feature("T5-2")
     def test_02_pg_create_with_no_portfolio(self) -> None:
 

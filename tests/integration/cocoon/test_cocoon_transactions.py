@@ -266,9 +266,307 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
+        # Assert that by default no unmatched_identifiers are returned in the response
+        self.assertFalse(responses["transactions"].get("unmatched_identifiers", False))
+
         self.assertTrue(
             expr=all(
                 isinstance(success_response.version, expected_outcome)
                 for success_response in responses["transactions"]["success"]
             )
         )
+
+    @parameterized.expand(
+        [
+            [
+                "Test standard transaction load",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                "operations001",
+                None,
+                True,
+                lusid.models.Version,
+                [],
+            ],
+            [
+                "Test standard transaction load with two unresolved instruments",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions-unresolved-instruments.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                "operations001",
+                None,
+                True,
+                lusid.models.Version,
+                [{
+                    "unresolved_tx01": {'Instrument/default/ClientInternal': 'imd_83481644',
+                                        'Instrument/default/Figi': 'BBGFOFAKE1HF',
+                                        'Instrument/default/Isin': 'FISIN244'}},
+                    {"unresolved_tx02": {'Instrument/default/ClientInternal': 'imd_23489844',
+                                         'Instrument/default/Figi': 'BBGFSFAKEI363',
+                                         'Instrument/default/Isin': 'FISIN412'}
+                     }],
+            ],
+        ]
+    )
+    def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        batch_size,
+        return_unmatched_identifiers,
+        expected_outcome,
+        expected_unmatched_transactions,
+    ) -> None:
+        """
+        Test that transactions are uploaded and have the expected response from load_from_data_frame
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
+        :param any expected_outcome: The expected outcome
+        :param expected_unmatched_transactions: The expected unmatched transactions appended to the response
+
+        :return: None
+        """
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            batch_size=batch_size,
+            return_unmatched_identifiers=return_unmatched_identifiers,
+        )
+
+        self.assertGreater(len(responses["transactions"]["success"]), 0)
+
+        self.assertEqual(len(responses["transactions"]["errors"]), 0)
+
+        # Assert that the unmatched_identifiers returned are as expected for each case
+        self.assertEqual(responses["transactions"].get("unmatched_identifiers", False), expected_unmatched_transactions)
+
+        self.assertTrue(
+            expr=all(
+                isinstance(success_response.version, expected_outcome)
+                for success_response in responses["transactions"]["success"]
+            )
+        )
+
+    def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(self):
+        scope = "unmatched_transactions_test"
+        code = "MIS_INST_FUND"
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath("data/transactions_unmatched_instruments.csv"))
+
+        # Create a test portfolio
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "display_name": "portfolio_name",
+                "base_currency": "base_currency"
+            },
+            file_type="portfolio",
+            mapping_optional={
+                "created": "txn_trade_date"
+            }
+        )
+
+        # Upsert some transactions; one with known id, two with unknown ids
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "transaction_id": "txn_id",
+                "type": "txn_type",
+                "transaction_date": "txn_trade_date",
+                "settlement_date": "txn_settle_date",
+                "units": "txn_units",
+                "transaction_price.price": "txn_price",
+                "transaction_price.type": "$Price",
+                "total_consideration.amount": "txn_consideration",
+                "total_consideration.currency": "currency",
+            },
+            file_type="transaction",
+            identifier_mapping={
+                "ClientInternal": "instrument_id",
+                "Sedol": "sedol",
+                "Ticker": "ticker",
+                "Name": "name"
+            },
+            mapping_optional={}
+        )
+
+        # Call the return_unmatched_transactions method
+        response = cocoon.cocoon.return_unmatched_transactions(self.api_factory, scope, code)
+
+        # Assert that there are only two values returned and that the transaction ids and instrument details match
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0].get("trd_0003"),
+                         {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                          'Instrument/default/Sedol': 'B0SSM4N1',
+                          'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'})
+        self.assertEqual(response[1].get("trd_0004"),
+                         {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
+                          'Instrument/default/Sedol': 'B0SSM4N2',
+                          'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'})
+
+        # Delete the portfolio at the end of the test
+        self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+            scope=scope,
+            code=code
+        )
+
+    @parameterized.expand(
+        [
+            [
+                "All returned unmatched transactions were in the upload",
+                "data/transactions_unmatched_instruments_all_in_upload.csv",
+                {
+                    "transaction_id": "txn_id",
+                },
+                [{
+                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                                 'Instrument/default/Sedol': 'B0SSM4N1',
+                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
+                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
+                                  'Instrument/default/Sedol': 'B0SSM4N2',
+                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
+                     }],
+                [{
+                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                                 'Instrument/default/Sedol': 'B0SSM4N1',
+                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
+                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
+                                  'Instrument/default/Sedol': 'B0SSM4N2',
+                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
+                     }]
+            ],
+            [
+                "No returned unmatched transactions were in the upload",
+                "data/transactions_unmatched_instruments_none_in_upload.csv",
+                {
+                    "transaction_id": "txn_id",
+                },
+                [{
+                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                                 'Instrument/default/Sedol': 'B0SSM4N1',
+                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
+                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
+                                  'Instrument/default/Sedol': 'B0SSM4N2',
+                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
+                     }],
+                []
+            ],
+            [
+                "Some of the returned unmatched transactions were in the upload",
+                "data/transactions_unmatched_instruments_some_in_upload.csv",
+                {
+                    "transaction_id": "txn_id",
+                },
+                [{
+                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                                 'Instrument/default/Sedol': 'B0SSM4N1',
+                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
+                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
+                                  'Instrument/default/Sedol': 'B0SSM4N2',
+                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
+                     }],
+                [{
+                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
+                                 'Instrument/default/Sedol': 'B0SSM4N1',
+                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'},
+                }]
+            ],
+        ]
+    )
+    def test_filter_unmatched_transactions_only_returns_transaction_ids_present_in_dataframe(
+            self,
+            _,
+            data_frame_path,
+            mapping,
+            unmatched_transactions,
+            expected_filtered_unmatched_transactions,
+    ):
+        """
+        Test that unmatched transactions that were not part of the current load_from_data_frame operation are
+        filtered out of the final list.
+
+        :param str _: The name of the test
+        :param str data_frame_path: The name of the test data file
+        :param dict{str, str} mapping: The dictionary mapping the dataframe fields to LUSID's required schema
+        :param list unmatched_transactions: The raw list of unmatched transactions to be filtered
+        :param expected_filtered_unmatched_transactions: The expected unmatched transactions appended to the response
+
+        :return: None
+        """
+        # Load the dataframe
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(data_frame_path))
+
+        # Filter the transactions to remove ones that were not part of the upload
+        filtered_unmatched_transactions = cocoon.cocoon.filter_unmatched_transactions(
+            data_frame=data_frame,
+            mapping_required=mapping,
+            unmatched_transactions=unmatched_transactions
+        )
+
+        self.assertEqual(filtered_unmatched_transactions, expected_filtered_unmatched_transactions)
