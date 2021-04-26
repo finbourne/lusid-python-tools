@@ -103,7 +103,9 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         )
 
         # Assert that by no unmatched_identifiers are returned in the response for reference_portfolios
-        self.assertFalse(responses["reference_portfolios"].get("unmatched_identifiers", False))
+        self.assertFalse(
+            responses["reference_portfolios"].get("unmatched_identifiers", False)
+        )
 
         # Check that the portfolio IDs of porfolios uploaded matches the IDs of portfolios in DataFrame
 

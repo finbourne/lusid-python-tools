@@ -336,14 +336,22 @@ class CocoonTestsTransactions(unittest.TestCase):
                 None,
                 True,
                 lusid.models.Version,
-                [{
-                    "unresolved_tx01": {'Instrument/default/ClientInternal': 'imd_83481644',
-                                        'Instrument/default/Figi': 'BBGFOFAKE1HF',
-                                        'Instrument/default/Isin': 'FISIN244'}},
-                    {"unresolved_tx02": {'Instrument/default/ClientInternal': 'imd_23489844',
-                                         'Instrument/default/Figi': 'BBGFSFAKEI363',
-                                         'Instrument/default/Isin': 'FISIN412'}
-                     }],
+                [
+                    {
+                        "unresolved_tx01": {
+                            "Instrument/default/ClientInternal": "imd_83481644",
+                            "Instrument/default/Figi": "BBGFOFAKE1HF",
+                            "Instrument/default/Isin": "FISIN244",
+                        }
+                    },
+                    {
+                        "unresolved_tx02": {
+                            "Instrument/default/ClientInternal": "imd_23489844",
+                            "Instrument/default/Figi": "BBGFSFAKEI363",
+                            "Instrument/default/Isin": "FISIN412",
+                        }
+                    },
+                ],
             ],
         ]
     )
@@ -399,7 +407,10 @@ class CocoonTestsTransactions(unittest.TestCase):
         self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
         # Assert that the unmatched_identifiers returned are as expected for each case
-        self.assertEqual(responses["transactions"].get("unmatched_identifiers", False), expected_unmatched_transactions)
+        self.assertEqual(
+            responses["transactions"].get("unmatched_identifiers", False),
+            expected_unmatched_transactions,
+        )
 
         self.assertTrue(
             expr=all(
@@ -408,10 +419,16 @@ class CocoonTestsTransactions(unittest.TestCase):
             )
         )
 
-    def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(self):
+    def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(
+        self,
+    ):
         scope = "unmatched_transactions_test"
         code = "MIS_INST_FUND"
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath("data/transactions_unmatched_instruments.csv"))
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath(
+                "data/transactions_unmatched_instruments.csv"
+            )
+        )
 
         # Create a test portfolio
         cocoon.cocoon.load_from_data_frame(
@@ -421,12 +438,10 @@ class CocoonTestsTransactions(unittest.TestCase):
             mapping_required={
                 "code": "portfolio_code",
                 "display_name": "portfolio_name",
-                "base_currency": "base_currency"
+                "base_currency": "base_currency",
             },
             file_type="portfolio",
-            mapping_optional={
-                "created": "txn_trade_date"
-            }
+            mapping_optional={"created": "txn_trade_date"},
         )
 
         # Upsert some transactions; one with known id, two with unknown ids
@@ -451,29 +466,38 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "ClientInternal": "instrument_id",
                 "Sedol": "sedol",
                 "Ticker": "ticker",
-                "Name": "name"
+                "Name": "name",
             },
-            mapping_optional={}
+            mapping_optional={},
         )
 
         # Call the return_unmatched_transactions method
-        response = cocoon.cocoon.return_unmatched_transactions(self.api_factory, scope, code)
+        response = cocoon.cocoon.return_unmatched_transactions(
+            self.api_factory, scope, code
+        )
 
         # Assert that there are only two values returned and that the transaction ids and instrument details match
         self.assertEqual(len(response), 2)
-        self.assertEqual(response[0].get("trd_0003"),
-                         {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                          'Instrument/default/Sedol': 'B0SSM4N1',
-                          'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'})
-        self.assertEqual(response[1].get("trd_0004"),
-                         {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
-                          'Instrument/default/Sedol': 'B0SSM4N2',
-                          'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'})
+        self.assertEqual(
+            response[0].get("trd_0003"),
+            {
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                "Instrument/default/Sedol": "B0SSM4N1",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+            },
+        )
+        self.assertEqual(
+            response[1].get("trd_0004"),
+            {
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                "Instrument/default/Sedol": "B0SSM4N2",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+            },
+        )
 
         # Delete the portfolio at the end of the test
         self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
-            scope=scope,
-            code=code
+            scope=scope, code=code
         )
 
     @parameterized.expand(
@@ -481,71 +505,101 @@ class CocoonTestsTransactions(unittest.TestCase):
             [
                 "All returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_all_in_upload.csv",
-                {
-                    "transaction_id": "txn_id",
-                },
-                [{
-                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                                 'Instrument/default/Sedol': 'B0SSM4N1',
-                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
-                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
-                                  'Instrument/default/Sedol': 'B0SSM4N2',
-                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
-                     }],
-                [{
-                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                                 'Instrument/default/Sedol': 'B0SSM4N1',
-                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
-                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
-                                  'Instrument/default/Sedol': 'B0SSM4N2',
-                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
-                     }]
+                {"transaction_id": "txn_id",},
+                [
+                    {
+                        "trd_0003": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                            "Instrument/default/Sedol": "B0SSM4N1",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                        }
+                    },
+                    {
+                        "trd_0004": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                            "Instrument/default/Sedol": "B0SSM4N2",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                        },
+                    },
+                ],
+                [
+                    {
+                        "trd_0003": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                            "Instrument/default/Sedol": "B0SSM4N1",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                        }
+                    },
+                    {
+                        "trd_0004": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                            "Instrument/default/Sedol": "B0SSM4N2",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                        },
+                    },
+                ],
             ],
             [
                 "No returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_none_in_upload.csv",
-                {
-                    "transaction_id": "txn_id",
-                },
-                [{
-                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                                 'Instrument/default/Sedol': 'B0SSM4N1',
-                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
-                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
-                                  'Instrument/default/Sedol': 'B0SSM4N2',
-                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
-                     }],
-                []
+                {"transaction_id": "txn_id",},
+                [
+                    {
+                        "trd_0003": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                            "Instrument/default/Sedol": "B0SSM4N1",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                        }
+                    },
+                    {
+                        "trd_0004": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                            "Instrument/default/Sedol": "B0SSM4N2",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                        },
+                    },
+                ],
+                [],
             ],
             [
                 "Some of the returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_some_in_upload.csv",
-                {
-                    "transaction_id": "txn_id",
-                },
-                [{
-                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                                 'Instrument/default/Sedol': 'B0SSM4N1',
-                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'}},
-                    {"trd_0004": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_2',
-                                  'Instrument/default/Sedol': 'B0SSM4N2',
-                                  'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_2'},
-                     }],
-                [{
-                    "trd_0003": {'Instrument/default/ClientInternal': 'THIS_WILL_NOT_RESOLVE_1',
-                                 'Instrument/default/Sedol': 'B0SSM4N1',
-                                 'Instrument/default/Name': 'THIS_WILL_NOT_RESOLVE_1'},
-                }]
+                {"transaction_id": "txn_id",},
+                [
+                    {
+                        "trd_0003": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                            "Instrument/default/Sedol": "B0SSM4N1",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                        }
+                    },
+                    {
+                        "trd_0004": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                            "Instrument/default/Sedol": "B0SSM4N2",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                        },
+                    },
+                ],
+                [
+                    {
+                        "trd_0003": {
+                            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                            "Instrument/default/Sedol": "B0SSM4N1",
+                            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                        },
+                    }
+                ],
             ],
         ]
     )
     def test_filter_unmatched_transactions_only_returns_transaction_ids_present_in_dataframe(
-            self,
-            _,
-            data_frame_path,
-            mapping,
-            unmatched_transactions,
-            expected_filtered_unmatched_transactions,
+        self,
+        _,
+        data_frame_path,
+        mapping,
+        unmatched_transactions,
+        expected_filtered_unmatched_transactions,
     ):
         """
         Test that unmatched transactions that were not part of the current load_from_data_frame operation are
@@ -566,7 +620,9 @@ class CocoonTestsTransactions(unittest.TestCase):
         filtered_unmatched_transactions = cocoon.cocoon.filter_unmatched_transactions(
             data_frame=data_frame,
             mapping_required=mapping,
-            unmatched_transactions=unmatched_transactions
+            unmatched_transactions=unmatched_transactions,
         )
 
-        self.assertEqual(filtered_unmatched_transactions, expected_filtered_unmatched_transactions)
+        self.assertEqual(
+            filtered_unmatched_transactions, expected_filtered_unmatched_transactions
+        )

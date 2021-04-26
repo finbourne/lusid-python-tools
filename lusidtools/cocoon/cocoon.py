@@ -971,18 +971,16 @@ def unmatched_identifiers(
         )
     elif file_type == "holding":
         return _unmatched_ids_holdings(
-            api_factory=api_factory,
-            scope=scope,
-            sync_batches=sync_batches,
+            api_factory=api_factory, scope=scope, sync_batches=sync_batches,
         )
 
 
 def _unmatched_ids_transactions(
-        api_factory: lusid.utilities.ApiClientFactory,
-        scope: str,
-        data_frame: pd.DataFrame,
-        mapping_required: dict,
-        sync_batches: list = None,
+    api_factory: lusid.utilities.ApiClientFactory,
+    scope: str,
+    data_frame: pd.DataFrame,
+    mapping_required: dict,
+    sync_batches: list = None,
 ):
     """
     This method identifies which instruments were not resolved with a transaction upload using load_from_data_frame.
@@ -1015,23 +1013,21 @@ def _unmatched_ids_transactions(
 
     # For each portfolio, request the unmatched transactions from LUSID and append to the instantiated list
     for portfolio_code in portfolio_codes:
-        unmatched_transactions.extend(return_unmatched_transactions(
-            api_factory=api_factory,
-            scope=scope,
-            code=portfolio_code,
-        ))
+        unmatched_transactions.extend(
+            return_unmatched_transactions(
+                api_factory=api_factory, scope=scope, code=portfolio_code,
+            )
+        )
 
     # With the upload dataframe, filter out any transactions from the list that were not part of this upload and return
     return filter_unmatched_transactions(
         data_frame=data_frame,
         mapping_required=mapping_required,
-        unmatched_transactions=unmatched_transactions
+        unmatched_transactions=unmatched_transactions,
     )
 
 
-def _extract_unique_portfolio_codes(
-        sync_batches: list
-):
+def _extract_unique_portfolio_codes(sync_batches: list):
     """
     Extract a unique list of portfolio codes from the sync_batches
 
@@ -1052,9 +1048,7 @@ def _extract_unique_portfolio_codes(
     return list(set(codes_list))
 
 
-def _extract_unique_portfolio_codes_effective_at_tuples(
-        sync_batches: list
-):
+def _extract_unique_portfolio_codes_effective_at_tuples(sync_batches: list):
     """
     Extract a unique list of tuples containing portfolio codes and effective_at times
 
@@ -1069,19 +1063,14 @@ def _extract_unique_portfolio_codes_effective_at_tuples(
     """
     code_tuples = []
     for sync_batch in sync_batches:
-        for code, effective_at in zip(
-                sync_batch["codes"],
-                sync_batch["effective_at"],
-        ):
+        for code, effective_at in zip(sync_batch["codes"], sync_batch["effective_at"],):
             # Append a tuple of (code, effective_at) to the code_tuples list
             code_tuples.append((code, effective_at))
     return list(set(code_tuples))
 
 
 def return_unmatched_transactions(
-        api_factory: lusid.utilities.ApiClientFactory,
-        scope: str,
-        code: str
+    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str
 ):
     """
     Call the get transactions api and only return those transactions with unresolved identifiers.
@@ -1113,7 +1102,7 @@ def return_unmatched_transactions(
         kwargs = {
             "scope": scope,
             "code": code,
-            "filter": "instrumentUid eq'LUID_ZZZZZZZZ'"
+            "filter": "instrumentUid eq'LUID_ZZZZZZZZ'",
         }
 
         if next_page is not None:
@@ -1121,12 +1110,12 @@ def return_unmatched_transactions(
 
         response = transactions_api.get_transactions(**kwargs)
 
-        unmatched_transactions.extend([
-            {
-                response.transaction_id: response.instrument_identifiers
-            }
-            for response in response.values
-        ])
+        unmatched_transactions.extend(
+            [
+                {response.transaction_id: response.instrument_identifiers}
+                for response in response.values
+            ]
+        )
 
         next_page = response.next_page
         done = response.next_page is None
@@ -1135,9 +1124,7 @@ def return_unmatched_transactions(
 
 
 def filter_unmatched_transactions(
-        data_frame: pd.DataFrame,
-        mapping_required: dict,
-        unmatched_transactions: list,
+    data_frame: pd.DataFrame, mapping_required: dict, unmatched_transactions: list,
 ):
     """
     This method will take the full list of unmatched transactions and remove any transactions that were not
@@ -1172,9 +1159,9 @@ def filter_unmatched_transactions(
 
 
 def _unmatched_ids_holdings(
-        api_factory: lusid.utilities.ApiClientFactory,
-        scope: str,
-        sync_batches: list = None,
+    api_factory: lusid.utilities.ApiClientFactory,
+    scope: str,
+    sync_batches: list = None,
 ):
     """
     This method identifies which instruments were not resolved with a holdings upload using load_from_data_frame.
@@ -1204,20 +1191,20 @@ def _unmatched_ids_holdings(
 
     # For each holding adjustment in the upload, check whether any contained unresolved instruments and append to list
     for code_tuple in code_tuples:
-        unmatched_instruments.extend(return_unmatched_instruments_from_holdings(
-            api_factory=api_factory,
-            scope=scope,
-            code_tuple=code_tuple,
-        ))
+        unmatched_instruments.extend(
+            return_unmatched_instruments_from_holdings(
+                api_factory=api_factory, scope=scope, code_tuple=code_tuple,
+            )
+        )
 
     # Return a unique list of instrument_identifier dictionaries
-    return list(map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments)))
+    return list(
+        map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments))
+    )
 
 
 def return_unmatched_instruments_from_holdings(
-        api_factory: lusid.utilities.ApiClientFactory,
-        scope: str,
-        code_tuple: (str, str),
+    api_factory: lusid.utilities.ApiClientFactory, scope: str, code_tuple: (str, str),
 ):
     """
     Call the get holdings adjustments api and return a list of instruments that have unresolved identifiers.
@@ -1241,9 +1228,7 @@ def return_unmatched_instruments_from_holdings(
     unmatched_instruments = []
 
     response = transactions_api.get_holdings_adjustment(
-        scope=scope,
-        code=code_tuple[0],
-        effective_at=str(DateOrCutLabel(code_tuple[1]))
+        scope=scope, code=code_tuple[0], effective_at=str(DateOrCutLabel(code_tuple[1]))
     )
 
     for adjustment in response.adjustments:
@@ -1251,7 +1236,9 @@ def return_unmatched_instruments_from_holdings(
             unmatched_instruments.append(adjustment.instrument_identifiers)
 
     # Return a unique list of instrument_identifier dictionaries
-    return list(map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments)))
+    return list(
+        map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments))
+    )
 
 
 @checkargs

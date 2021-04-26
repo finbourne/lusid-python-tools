@@ -721,7 +721,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 True,
                 False,
                 lusid.models.Version,
-                []
+                [],
             ],
             [
                 "Standard successful load with one unmatched instrument",
@@ -752,10 +752,12 @@ class CocoonTestsHoldings(unittest.TestCase):
                 True,
                 False,
                 lusid.models.Version,
-                [{
-                    'Instrument/default/Sedol': 'BFAKE712',
-                    'Instrument/default/Isin': 'USFAHHDAR1014',
-                }]
+                [
+                    {
+                        "Instrument/default/Sedol": "BFAKE712",
+                        "Instrument/default/Isin": "USFAHHDAR1014",
+                    }
+                ],
             ],
             [
                 "Standard successful load with one unmatched instrument in two separate adjustments",
@@ -786,10 +788,12 @@ class CocoonTestsHoldings(unittest.TestCase):
                 True,
                 False,
                 lusid.models.Version,
-                [{
-                    'Instrument/default/Sedol': 'BFAKE712',
-                    'Instrument/default/Isin': 'USFAHHDAR1014',
-                }]
+                [
+                    {
+                        "Instrument/default/Sedol": "BFAKE712",
+                        "Instrument/default/Isin": "USFAHHDAR1014",
+                    }
+                ],
             ],
             [
                 "Standard successful load with two unmatched instrument in two separate adjustments",
@@ -822,14 +826,14 @@ class CocoonTestsHoldings(unittest.TestCase):
                 lusid.models.Version,
                 [
                     {
-                        'Instrument/default/Sedol': '9088840066',
-                        'Instrument/default/Isin': 'US02HF9234H67',
+                        "Instrument/default/Sedol": "9088840066",
+                        "Instrument/default/Isin": "US02HF9234H67",
                     },
                     {
-                        'Instrument/default/Sedol': 'BFAKE712',
-                        'Instrument/default/Isin': 'USFAHHDAR1014',
+                        "Instrument/default/Sedol": "BFAKE712",
+                        "Instrument/default/Isin": "USFAHHDAR1014",
                     },
-                ]
+                ],
             ],
             [
                 "Standard successful load with two unmatched instrument in one single adjustment",
@@ -862,14 +866,14 @@ class CocoonTestsHoldings(unittest.TestCase):
                 lusid.models.Version,
                 [
                     {
-                        'Instrument/default/Sedol': '9088840066',
-                        'Instrument/default/Isin': 'US02HF9234H67',
+                        "Instrument/default/Sedol": "9088840066",
+                        "Instrument/default/Isin": "US02HF9234H67",
                     },
                     {
-                        'Instrument/default/Sedol': 'BFAKE712',
-                        'Instrument/default/Isin': 'USFAHHDAR1014',
+                        "Instrument/default/Sedol": "BFAKE712",
+                        "Instrument/default/Isin": "USFAHHDAR1014",
                     },
-                ]
+                ],
             ],
         ]
     )
@@ -888,7 +892,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         return_unmatched_identifiers,
         holdings_adjustment_only,
         expected_outcome,
-        expected_unmatched_identifiers
+        expected_unmatched_identifiers,
     ) -> None:
         """
         Test that holdings can be loaded successfully
@@ -919,12 +923,10 @@ class CocoonTestsHoldings(unittest.TestCase):
             mapping_required={
                 "code": "FundCode",
                 "display_name": "FundCode",
-                "base_currency": "Local Currency Code"
+                "base_currency": "Local Currency Code",
             },
             file_type="portfolio",
-            mapping_optional={
-                "created": "Effective Date"
-            }
+            mapping_optional={"created": "Effective Date"},
         )
 
         # Assert that all portfolios were created without any issues
@@ -952,8 +954,10 @@ class CocoonTestsHoldings(unittest.TestCase):
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
 
         # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True
-        self.assertEqual(holding_responses["holdings"].get("unmatched_identifiers", False),
-                         expected_unmatched_identifiers)
+        self.assertEqual(
+            holding_responses["holdings"].get("unmatched_identifiers", False),
+            expected_unmatched_identifiers,
+        )
 
         self.assertTrue(
             expr=all(
@@ -965,6 +969,5 @@ class CocoonTestsHoldings(unittest.TestCase):
         # Delete the portfolios at the end of the test
         for portfolio in portfolio_response.get("portfolios").get("success"):
             self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
-                scope=scope,
-                code=portfolio.id.code
+                scope=scope, code=portfolio.id.code
             )
