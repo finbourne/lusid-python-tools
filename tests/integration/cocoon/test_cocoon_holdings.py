@@ -19,7 +19,6 @@ class CocoonTestsHoldings(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
-
     @lusid_feature(
         "T3-1",
         "T3-2",
