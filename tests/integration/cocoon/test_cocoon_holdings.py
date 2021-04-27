@@ -18,6 +18,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             api_secrets_filename=secrets_file
         )
         cls.logger = logger.LusidLogger("debug")
+
     #
     # @lusid_feature(
     #     "T3-1",
@@ -772,18 +773,16 @@ class CocoonTestsHoldings(unittest.TestCase):
         # Unchanged vars that have no need to be passed via param (they would count as duplicate lines)
         scope = "unmatched_holdings_test"
         mapping_required = {
-                    "code": "FundCode",
-                    "effective_at": "Effective Date",
-                    "tax_lots.units": "Quantity",
-                }
-        mapping_optional = {
-                    "tax_lots.cost.currency": "Local Currency Code"
-                }
+            "code": "FundCode",
+            "effective_at": "Effective Date",
+            "tax_lots.units": "Quantity",
+        }
+        mapping_optional = {"tax_lots.cost.currency": "Local Currency Code"}
         identifier_mapping = {
-                    "Isin": "ISIN Security Identifier",
-                    "Sedol": "SEDOL Security Identifier",
-                    "Currency": "is_cash_with_currency",
-                }
+            "Isin": "ISIN Security Identifier",
+            "Sedol": "SEDOL Security Identifier",
+            "Currency": "is_cash_with_currency",
+        }
         property_columns = ["Prime Broker"]
         properties_scope = "operations001"
         sub_holding_keys = None

@@ -1778,5 +1778,3 @@ def extract_unique_portfolio_codes_effective_at_tuples(sync_batches: list):
             # Append a tuple of (code, effective_at) to the code_tuples list
             code_tuples.append((code, effective_at))
     return list(set(code_tuples))
-
-
