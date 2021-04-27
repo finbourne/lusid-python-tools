@@ -280,62 +280,14 @@ class CocoonTestsTransactions(unittest.TestCase):
         [
             [
                 "Test standard transaction load",
-                "prime_broker_test",
                 "data/global-fund-combined-transactions.csv",
-                {
-                    "code": "portfolio_code",
-                    "transaction_id": "id",
-                    "type": "transaction_type",
-                    "transaction_date": "transaction_date",
-                    "settlement_date": "settlement_date",
-                    "units": "units",
-                    "transaction_price.price": "transaction_price",
-                    "transaction_price.type": "price_type",
-                    "total_consideration.amount": "amount",
-                    "total_consideration.currency": "trade_currency",
-                },
-                {"transaction_currency": "trade_currency"},
-                {
-                    "Isin": "isin",
-                    "Figi": "figi",
-                    "ClientInternal": "client_internal",
-                    "Currency": "currency_transaction",
-                },
-                ["exposure_counterparty", "compls", "val", "location_region"],
-                "operations001",
-                None,
                 True,
-                lusid.models.Version,
                 [],
             ],
             [
                 "Test standard transaction load with two unresolved instruments",
-                "prime_broker_test",
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
-                {
-                    "code": "portfolio_code",
-                    "transaction_id": "id",
-                    "type": "transaction_type",
-                    "transaction_date": "transaction_date",
-                    "settlement_date": "settlement_date",
-                    "units": "units",
-                    "transaction_price.price": "transaction_price",
-                    "transaction_price.type": "price_type",
-                    "total_consideration.amount": "amount",
-                    "total_consideration.currency": "trade_currency",
-                },
-                {"transaction_currency": "trade_currency"},
-                {
-                    "Isin": "isin",
-                    "Figi": "figi",
-                    "ClientInternal": "client_internal",
-                    "Currency": "currency_transaction",
-                },
-                ["exposure_counterparty", "compls", "val", "location_region"],
-                "operations001",
-                None,
                 True,
-                lusid.models.Version,
                 [
                     {
                         "unresolved_tx01": {
@@ -358,34 +310,45 @@ class CocoonTestsTransactions(unittest.TestCase):
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
         self,
         _,
-        scope,
         file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
         return_unmatched_identifiers,
-        expected_outcome,
         expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
 
-        :param str scope: The scope of the portfolios to load the transactions into
         :param str file_name: The name of the test data file
-        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
-        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
-        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
-        :param list[str] property_columns: The columns to create properties for
-        :param str properties_scope: The scope to add the properties to
         :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
-        :param any expected_outcome: The expected outcome
         :param expected_unmatched_transactions: The expected unmatched transactions appended to the response
 
         :return: None
         """
+        # Unchanged vars that have no need to be passed via param (they would count as duplicate lines)
+        scope = "prime_broker_test"
+        mapping_required = {
+            "code": "portfolio_code",
+            "transaction_id": "id",
+            "type": "transaction_type",
+            "transaction_date": "transaction_date",
+            "settlement_date": "settlement_date",
+            "units": "units",
+            "transaction_price.price": "transaction_price",
+            "transaction_price.type": "price_type",
+            "total_consideration.amount": "amount",
+            "total_consideration.currency": "trade_currency",
+        }
+        mapping_optional = {"transaction_currency": "trade_currency"}
+        identifier_mapping = {
+            "Isin": "isin",
+            "Figi": "figi",
+            "ClientInternal": "client_internal",
+            "Currency": "currency_transaction",
+        }
+        property_columns = ["exposure_counterparty", "compls", "val", "location_region"]
+        properties_scope = "operations001"
+        batch_size = None
+        expected_outcome = lusid.models.Version
+
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         responses = cocoon.cocoon.load_from_data_frame(
@@ -505,7 +468,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             [
                 "All returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_all_in_upload.csv",
-                {"transaction_id": "txn_id",},
+                {"transaction_id": "txn_id"},
                 [
                     {
                         "trd_0003": {
@@ -542,7 +505,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             [
                 "No returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_none_in_upload.csv",
-                {"transaction_id": "txn_id",},
+                {"transaction_id": "txn_id"},
                 [
                     {
                         "trd_0003": {
@@ -564,7 +527,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             [
                 "Some of the returned unmatched transactions were in the upload",
                 "data/transactions_unmatched_instruments_some_in_upload.csv",
-                {"transaction_id": "txn_id",},
+                {"transaction_id": "txn_id"},
                 [
                     {
                         "trd_0003": {

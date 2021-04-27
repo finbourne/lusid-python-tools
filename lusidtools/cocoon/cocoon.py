@@ -10,6 +10,8 @@ from lusidtools.cocoon.utilities import (
     checkargs,
     strip_whitespace,
     group_request_into_one,
+    extract_unique_portfolio_codes,
+    extract_unique_portfolio_codes_effective_at_tuples,
 )
 from lusidtools.cocoon.validator import Validator
 from datetime import datetime
@@ -1006,7 +1008,7 @@ def _unmatched_ids_transactions(
 
     """
     # Extract a list of portfolio codes from the sync_batches
-    portfolio_codes = _extract_unique_portfolio_codes(sync_batches)
+    portfolio_codes = extract_unique_portfolio_codes(sync_batches)
 
     # Create empty list to hold transaction ids and instruments
     unmatched_transactions = []
@@ -1025,48 +1027,6 @@ def _unmatched_ids_transactions(
         mapping_required=mapping_required,
         unmatched_transactions=unmatched_transactions,
     )
-
-
-def _extract_unique_portfolio_codes(sync_batches: list):
-    """
-    Extract a unique list of portfolio codes from the sync_batches
-
-    Parameters
-    ----------
-    sync_batches : list
-        A list of the batches used to upload the data into LUSID.
-
-    Returns
-    -------
-    A list of all the unique portfolio codes in the sync batches
-    """
-    codes_list = []
-    for sync_batch in sync_batches:
-        for key, value in sync_batch.items():
-            if key == "codes":
-                codes_list.extend(value)
-    return list(set(codes_list))
-
-
-def _extract_unique_portfolio_codes_effective_at_tuples(sync_batches: list):
-    """
-    Extract a unique list of tuples containing portfolio codes and effective_at times
-
-    Parameters
-    ----------
-    sync_batches : list
-        A list of the batches used to upload the data into LUSID.
-
-    Returns
-    -------
-    A list of all the unique tuples of portfolio codes and effective at times in the sync batches
-    """
-    code_tuples = []
-    for sync_batch in sync_batches:
-        for code, effective_at in zip(sync_batch["codes"], sync_batch["effective_at"],):
-            # Append a tuple of (code, effective_at) to the code_tuples list
-            code_tuples.append((code, effective_at))
-    return list(set(code_tuples))
 
 
 def return_unmatched_transactions(
@@ -1147,9 +1107,9 @@ def filter_unmatched_transactions(
     filtered_unmatched_transactions = []
 
     # Create a unique list of transaction_ids from the dataframe
-    valid_txids = data_frame[mapping_required.get("transaction_id")].unique()
+    valid_txids = set(data_frame[mapping_required.get("transaction_id")])
 
-    # Iterate through the transactions and if the transaction_id is in the dataframe, add it to the list to be returned
+    # # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
     for unmatched_transaction in unmatched_transactions:
         for key in unmatched_transaction.keys():
             if key in valid_txids:
@@ -1184,7 +1144,7 @@ def _unmatched_ids_holdings(
 
     """
     # Extract a list of tuples of portfolio codes and effective at times from sync_batches
-    code_tuples = _extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
+    code_tuples = extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
 
     # Create empty list to hold instrument identifiers that have not been resolved
     unmatched_instruments = []
@@ -1225,15 +1185,17 @@ def return_unmatched_instruments_from_holdings(
 
     """
     transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
-    unmatched_instruments = []
 
     response = transactions_api.get_holdings_adjustment(
         scope=scope, code=code_tuple[0], effective_at=str(DateOrCutLabel(code_tuple[1]))
     )
 
-    for adjustment in response.adjustments:
-        if adjustment.instrument_uid == "LUID_ZZZZZZZZ":
-            unmatched_instruments.append(adjustment.instrument_identifiers)
+    # Create a list of instrument identifiers (with LUID_ZZZZZZZZ) from the response
+    unmatched_instruments = [
+        adjustment.instrument_identifiers
+        for adjustment in response.adjustments
+        if adjustment.instrument_uid == "LUID_ZZZZZZZZ"
+    ]
 
     # Return a unique list of instrument_identifier dictionaries
     return list(

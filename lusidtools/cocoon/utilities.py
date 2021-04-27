@@ -1736,3 +1736,47 @@ def group_request_into_one(
     # Return base request with collated attributes
 
     return base_request
+
+
+def extract_unique_portfolio_codes(sync_batches: list):
+    """
+    Extract a unique list of portfolio codes from the sync_batches
+
+    Parameters
+    ----------
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    A list of all the unique portfolio codes in the sync batches
+    """
+    codes_list = []
+    for sync_batch in sync_batches:
+        for key, value in sync_batch.items():
+            if key == "codes":
+                codes_list.extend(value)
+    return list(set(codes_list))
+
+
+def extract_unique_portfolio_codes_effective_at_tuples(sync_batches: list):
+    """
+    Extract a unique list of tuples containing portfolio codes and effective_at times
+
+    Parameters
+    ----------
+    sync_batches : list
+        A list of the batches used to upload the data into LUSID.
+
+    Returns
+    -------
+    A list of all the unique tuples of portfolio codes and effective at times in the sync batches
+    """
+    code_tuples = []
+    for sync_batch in sync_batches:
+        for code, effective_at in zip(sync_batch["codes"], sync_batch["effective_at"],):
+            # Append a tuple of (code, effective_at) to the code_tuples list
+            code_tuples.append((code, effective_at))
+    return list(set(code_tuples))
+
+
