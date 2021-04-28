@@ -867,8 +867,9 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
 
-        # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True
-        self.assertEqual(
+        # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True and
+        # Check that the lists contain the same elements, in any order (the assert name is misleading)
+        self.assertCountEqual(
             holding_responses["holdings"].get("unmatched_identifiers", False),
             expected_unmatched_identifiers,
         )
