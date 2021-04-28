@@ -625,6 +625,36 @@ class CocoonTestsHoldings(unittest.TestCase):
                 False,
                 lusid.models.Version,
             ],
+            [
+                "Standard successful load but with one unmatched identifier. No flag for return_unmatched_identifiers"
+                "means that we should not get that unmatched_identifier returned.",
+                "prime_broker_test",
+                "data/holdings-example-unique-date-one-unmatched-instrument.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                False,
+                lusid.models.Version,
+            ],
         ]
     )
     def test_load_from_data_frame_holdings_success(
@@ -710,6 +740,13 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ],
             ],
             [
+                "Standard successful load with one instrument that has a correct Isin and ClientInternal "
+                "but fake Sedol so it should still resolve and return no unmatched identifiers",
+                "data/holdings-example-unique-date-incorrect-sedol-correct_isin_clientInternal_should_resolve.csv",
+                True,
+                [],
+            ],
+            [
                 "Standard successful load with one unmatched instrument in two separate adjustments",
                 "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
                 True,
@@ -781,6 +818,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             "Isin": "ISIN Security Identifier",
             "Sedol": "SEDOL Security Identifier",
             "Currency": "is_cash_with_currency",
+            "ClientInternal": "Client Internal",
         }
         property_columns = ["Prime Broker"]
         properties_scope = "operations001"
