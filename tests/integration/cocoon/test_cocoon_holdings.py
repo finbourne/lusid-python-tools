@@ -10,6 +10,28 @@ from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 
 
+def holding_instrument_identifiers(fake1=False, fake2=False):
+    if fake1:
+        fake1 = {
+            "Instrument/default/Sedol": "FAKESEDOL1",
+            "Instrument/default/Isin": "FAKEISIN1",
+        }
+    else:
+        fake1 = None
+
+    if fake2:
+        fake2 = {
+            "Instrument/default/Sedol": "FAKESEDOL2",
+            "Instrument/default/Isin": "FAKEISIN2",
+        }
+    else:
+        fake2 = None
+
+    return [
+        instrument for instrument in [fake1, fake2] if instrument
+    ]
+
+
 class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -726,66 +748,56 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "Standard successful load with no unmatched instruments",
                 "data/holdings-example-unique-date.csv",
                 True,
-                [],
+                holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
                 "Standard successful load with one unmatched instrument",
                 "data/holdings-example-unique-date-one-unmatched-instrument.csv",
                 True,
-                [
-                    {
-                        "Instrument/default/Sedol": "BFAKE712",
-                        "Instrument/default/Isin": "USFAHHDAR1014",
-                    }
-                ],
+                holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
                 "Standard successful load with one instrument that has a correct Isin and ClientInternal "
                 "but fake Sedol so it should still resolve and return no unmatched identifiers",
                 "data/holdings-example-unique-date-incorrect-sedol-correct_isin_clientInternal_should_resolve.csv",
                 True,
-                [],
+                holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
-                "Standard successful load with one unmatched instrument in two separate adjustments",
+                "Standard successful load with one unmatched instrument in two separate adjustments (two portfolios)",
                 "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
                 True,
-                [
-                    {
-                        "Instrument/default/Sedol": "BFAKE712",
-                        "Instrument/default/Isin": "USFAHHDAR1014",
-                    }
-                ],
+                holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
-                "Standard successful load with two unmatched instrument in two separate adjustments",
+                "Standard successful load with two unmatched instrument in two separate adjustments (two portfolios)",
                 "data/holdings-example-unique-date-two-unmatched-instruments-separate-adjustments.csv",
                 True,
-                [
-                    {
-                        "Instrument/default/Sedol": "9088840066",
-                        "Instrument/default/Isin": "US02HF9234H67",
-                    },
-                    {
-                        "Instrument/default/Sedol": "BFAKE712",
-                        "Instrument/default/Isin": "USFAHHDAR1014",
-                    },
-                ],
+                holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                "Standard successful load with two unmatched instrument in one single adjustment",
+                "Standard successful load with two unmatched instrument in one single adjustment (one portfolio)",
                 "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
                 True,
-                [
-                    {
-                        "Instrument/default/Sedol": "9088840066",
-                        "Instrument/default/Isin": "US02HF9234H67",
-                    },
-                    {
-                        "Instrument/default/Sedol": "BFAKE712",
-                        "Instrument/default/Isin": "USFAHHDAR1014",
-                    },
-                ],
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two adjustments across two dates (one portfolio)",
+                "data/holdings-example-one-unmatched-instrument-in-two-adjustments-one-portfolio-two-dates.csv",
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two adjustments one date (two portfolios)",
+                "data/holdings-example-same-date-one-unmatched-instrument-duplicated-in-two-adjustments-two-portfolios.csv",
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with two unmatched instrument in two adjustments two dates (two portfolios)",
+                "data/holdings-example-two-dates-two-unmatched-instruments-separate-adjustments-two-portfolios.csv",
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=True),
             ],
         ]
     )
@@ -840,7 +852,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "base_currency": "Local Currency Code",
             },
             file_type="portfolio",
-            mapping_optional={"created": "Effective Date"},
+            mapping_optional={"created": "Created Date"},
         )
 
         # Assert that all portfolios were created without any issues
