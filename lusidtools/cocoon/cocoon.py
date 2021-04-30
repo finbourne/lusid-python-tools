@@ -1103,17 +1103,16 @@ def filter_unmatched_transactions(
     -------
     A filtered list of unmatched_transactions.
     """
-    # Create a list var to hold the filtered transactions to be returned
-    filtered_unmatched_transactions = []
-
     # Create a unique list of transaction_ids from the dataframe
     valid_txids = set(data_frame[mapping_required.get("transaction_id")])
 
-    # # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
-    for unmatched_transaction in unmatched_transactions:
-        for key in unmatched_transaction.keys():
-            if key in valid_txids:
-                filtered_unmatched_transactions.append(unmatched_transaction)
+    # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
+    filtered_unmatched_transactions = [
+        unmatched_transaction
+        for unmatched_transaction in unmatched_transactions
+        for key in unmatched_transaction.keys()
+        if key in valid_txids
+    ]
 
     return filtered_unmatched_transactions
 
@@ -1146,7 +1145,7 @@ def _unmatched_ids_holdings(
     # Extract a list of tuples of portfolio codes and effective at times from sync_batches
     code_tuples = extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
 
-    # Create empty list to hold instrument identifiers that have not been resolved
+    # Create empty list to hold instrument identifiers dictionaries that have not been resolved
     unmatched_instruments = []
 
     # For each holding adjustment in the upload, check whether any contained unresolved instruments and append to list
@@ -1158,9 +1157,7 @@ def _unmatched_ids_holdings(
         )
 
     # Return a unique list of instrument_identifier dictionaries
-    return list(
-        map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments))
-    )
+    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
 
 
 def return_unmatched_instruments_from_holdings(
@@ -1181,7 +1178,7 @@ def return_unmatched_instruments_from_holdings(
 
     Returns
     -------
-    A unique list of instrument identifier objects
+    A unique list of instrument identifier dictionaries
 
     """
     transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
@@ -1198,8 +1195,39 @@ def return_unmatched_instruments_from_holdings(
     ]
 
     # Return a unique list of instrument_identifier dictionaries
+    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
+
+
+def _unique_instrument_identifier_dictionaries(unmatched_instruments: list):
+    """
+    The unmatched_identifier list may contain duplicate instrument_identifier dictionaries. This method
+    will remove any duplicates from that list with the following logic:
+
+    For each dictionary of instrument identifiers:
+        Sort the identifier and its values (for cases where the same identifiers exist but in a different order)
+        Store the identifier and values as a tuple
+    Create a set from the list of tuples to remove duplicate values
+    Map each of the tuples back into a dictionary and return them as a list.
+
+    Parameters
+    ----------
+    unmatched_instruments: list
+        A list of instrument_identifiers
+
+    Returns
+    -------
+    A unique list of instrument identifier dictionaries
+
+    """
     return list(
-        map(dict, set(tuple(sorted(sub.items())) for sub in unmatched_instruments))
+        map(
+            dict,
+            set(
+                tuple(sorted(identifiers.items()))
+                for identifiers
+                in unmatched_instruments
+            )
+        )
     )
 
 
