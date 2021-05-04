@@ -12,26 +12,28 @@ from lusidtools.cocoon.utilities import create_scope_id
 
 def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
     if trd_0003:
-        trd_0003 = {"trd_0003": {
-            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
-            "Instrument/default/Sedol": "FAKESEDOL1",
-            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
-        }}
+        trd_0003 = {
+            "trd_0003": {
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                "Instrument/default/Sedol": "FAKESEDOL1",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+            }
+        }
     else:
         trd_0003 = None
 
     if trd_0004:
-        trd_0004 = {"trd_0004": {
-            "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
-            "Instrument/default/Sedol": "FAKESEDOL2",
-            "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
-        }}
+        trd_0004 = {
+            "trd_0004": {
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                "Instrument/default/Sedol": "FAKESEDOL2",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+            }
+        }
     else:
         trd_0004 = None
 
-    return [
-        transaction for transaction in [trd_0003, trd_0004] if transaction
-    ]
+    return [transaction for transaction in [trd_0003, trd_0004] if transaction]
 
 
 class CocoonTestsTransactions(unittest.TestCase):
@@ -541,7 +543,9 @@ class CocoonTestsTransactions(unittest.TestCase):
             filtered_unmatched_transactions, expected_filtered_unmatched_transactions
         )
 
-    def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(self):
+    def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(
+        self,
+    ):
         """
         The GetTransactions API will only return up to 2,000 transactions per request. This test is to verify that
         LPT can handle responses of greater length, expected to be split across multiple pages.
@@ -572,7 +576,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         mapping_optional = {"transaction_currency": "trade_currency"}
 
         # Load the dataframe
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath("data/global-fund-combined-transaction_2001.csv"))
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath(
+                "data/global-fund-combined-transaction_2001.csv"
+            )
+        )
 
         # Create the portfolio
         portfolio_response = cocoon.cocoon.load_from_data_frame(
@@ -610,7 +618,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Assert that the unmatched_identifiers returned are as expected
         self.assertEqual(
             len(transactions_response["transactions"].get("unmatched_identifiers", [])),
-            2001
+            2001,
         )
 
         # Delete the portfolio at the end of the test
@@ -618,6 +626,3 @@ class CocoonTestsTransactions(unittest.TestCase):
             self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
                 scope=scope, code=portfolio.id.code
             )
-
-
-

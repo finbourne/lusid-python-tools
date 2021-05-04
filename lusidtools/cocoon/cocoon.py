@@ -1224,9 +1224,8 @@ def _unique_instrument_identifier_dictionaries(unmatched_instruments: list):
             dict,
             set(
                 tuple(sorted(identifiers.items()))
-                for identifiers
-                in unmatched_instruments
-            )
+                for identifiers in unmatched_instruments
+            ),
         )
     )
 

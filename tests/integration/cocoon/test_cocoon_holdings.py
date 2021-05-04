@@ -27,9 +27,7 @@ def holding_instrument_identifiers(fake1=False, fake2=False):
     else:
         fake2 = None
 
-    return [
-        instrument for instrument in [fake1, fake2] if instrument
-    ]
+    return [instrument for instrument in [fake1, fake2] if instrument]
 
 
 class CocoonTestsHoldings(unittest.TestCase):
