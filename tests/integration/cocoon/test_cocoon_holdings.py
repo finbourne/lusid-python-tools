@@ -13,16 +13,20 @@ from lusidtools.cocoon.utilities import create_scope_id
 def holding_instrument_identifiers(fake1=False, fake2=False):
     instrument_identifiers = []
     if fake1:
-        instrument_identifiers.extend([
-            {"Instrument/default/Sedol": "FAKESEDOL1"},
-            {"Instrument/default/Isin": "FAKEISIN1"},
-        ])
+        instrument_identifiers.extend(
+            [
+                {"Instrument/default/Sedol": "FAKESEDOL1"},
+                {"Instrument/default/Isin": "FAKEISIN1"},
+            ]
+        )
 
     if fake2:
-        instrument_identifiers.extend([
-            {"Instrument/default/Sedol": "FAKESEDOL2"},
-            {"Instrument/default/Isin": "FAKEISIN2"},
-        ])
+        instrument_identifiers.extend(
+            [
+                {"Instrument/default/Sedol": "FAKESEDOL2"},
+                {"Instrument/default/Isin": "FAKEISIN2"},
+            ]
+        )
 
     return instrument_identifiers
 
@@ -846,15 +850,15 @@ class CocoonTestsHoldings(unittest.TestCase):
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
-                'One portfolio, two sub-holding-keys, two dates, same instrument - AdjustHolding',
-                'data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv',
+                "One portfolio, two sub-holding-keys, two dates, same instrument - AdjustHolding",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
                 ["Security Description"],
                 True,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
-                'One portfolio, one sub-holding-key, two dates, two instruments - AdjustHolding',
-                'data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv',
+                "One portfolio, one sub-holding-key, two dates, two instruments - AdjustHolding",
+                "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
                 ["Security Description"],
                 True,
                 holding_instrument_identifiers(fake1=True, fake2=True),
