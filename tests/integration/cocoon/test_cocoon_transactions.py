@@ -45,7 +45,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
-    @lusid_feature("T8-1", "T8-2", "T8-3", "T8-4", "T8-5", "T8-6")
+    @lusid_feature("T8-1", "T8-2", "T8-3", "T8-4", "T8-5", "T8-6", "T8-7")
     @parameterized.expand(
         [
             [
@@ -65,34 +65,6 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "total_consideration.currency": "trade_currency",
                 },
                 {"transaction_currency": "trade_currency"},
-                {
-                    "Isin": "isin",
-                    "Figi": "figi",
-                    "ClientInternal": "client_internal",
-                    "Currency": "currency_transaction",
-                },
-                ["exposure_counterparty", "compls", "val", "location_region"],
-                "operations001",
-                None,
-                lusid.models.Version,
-            ],
-            [
-                "Test standard transaction load with nulls for optional parameters",
-                "prime_broker_test",
-                "data/global-fund-combined-transactions-with-nulls.csv",
-                {
-                    "code": "portfolio_code",
-                    "transaction_id": "id",
-                    "type": "transaction_type",
-                    "transaction_date": "transaction_date",
-                    "settlement_date": "settlement_date",
-                    "units": "units",
-                    "transaction_price.price": "transaction_price",
-                    "transaction_price.type": "price_type",
-                    "total_consideration.amount": "amount",
-                    "total_consideration.currency": "trade_currency",
-                },
-                {"transaction_currency": "trans_currency"},
                 {
                     "Isin": "isin",
                     "Figi": "figi",
@@ -244,6 +216,34 @@ class CocoonTestsTransactions(unittest.TestCase):
                 2,
                 lusid.models.Version,
             ],
+            [
+                "Test standard transaction load with nulls for optional parameters",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions-with-nulls.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trans_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                "operations001",
+                None,
+                lusid.models.Version,
+            ],
         ]
     )
     def test_load_from_data_frame_transactions_success(
@@ -302,6 +302,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             )
         )
 
+    @lusid_feature("T8-8", "T8-9")
     @parameterized.expand(
         [
             [
@@ -408,6 +409,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             )
         )
 
+    @lusid_feature("T8-10")
     def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(
         self,
     ):
@@ -489,6 +491,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             scope=scope, code=code
         )
 
+    @lusid_feature("T8-11", "T8-12", "T8-13")
     @parameterized.expand(
         [
             [
@@ -543,6 +546,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             filtered_unmatched_transactions, expected_filtered_unmatched_transactions
         )
 
+    @lusid_feature("T8-14")
     def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(
         self,
     ):
