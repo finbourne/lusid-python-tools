@@ -1188,11 +1188,11 @@ def return_unmatched_instruments_from_holdings(
     )
 
     # Create a list of instrument identifiers (with LUID_ZZZZZZZZ) from the response
-    unmatched_instruments = [
-        adjustment.instrument_identifiers
-        for adjustment in response.adjustments
-        if adjustment.instrument_uid == "LUID_ZZZZZZZZ"
-    ]
+    unmatched_instruments = []
+    for adjustment in response.adjustments:
+        if adjustment.instrument_uid == "LUID_ZZZZZZZZ":
+            for identifier, value in adjustment.instrument_identifiers.items():
+                unmatched_instruments.append({identifier: value})
 
     # Return a unique list of instrument_identifier dictionaries
     return _unique_instrument_identifier_dictionaries(unmatched_instruments)
