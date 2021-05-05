@@ -745,57 +745,93 @@ class CocoonTestsHoldings(unittest.TestCase):
             [
                 "Standard successful load with no unmatched instruments",
                 "data/holdings-example-unique-date.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
                 "Standard successful load with one unmatched instrument",
                 "data/holdings-example-unique-date-one-unmatched-instrument.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
                 "Standard successful load with one instrument that has a correct Isin and ClientInternal "
                 "but fake Sedol so it should still resolve and return no unmatched identifiers",
                 "data/holdings-example-unique-date-incorrect-sedol-correct_isin_clientInternal_should_resolve.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
                 "Standard successful load with one unmatched instrument in two separate adjustments (two portfolios)",
                 "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
                 "Standard successful load with two unmatched instrument in two separate adjustments (two portfolios)",
                 "data/holdings-example-unique-date-two-unmatched-instruments-separate-adjustments.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
                 "Standard successful load with two unmatched instrument in one single adjustment (one portfolio)",
                 "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
                 "Standard successful load with one unmatched instrument in two adjustments across two dates (one portfolio)",
                 "data/holdings-example-one-unmatched-instrument-in-two-adjustments-one-portfolio-two-dates.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
                 "Standard successful load with one unmatched instrument in two adjustments one date (two portfolios)",
                 "data/holdings-example-same-date-one-unmatched-instrument-duplicated-in-two-adjustments-two-portfolios.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
                 "Standard successful load with two unmatched instrument in two adjustments two dates (two portfolios)",
                 "data/holdings-example-two-dates-two-unmatched-instruments-separate-adjustments-two-portfolios.csv",
-                True,
+                None,
                 holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                'One portfolio, one sub-holding-key, one date, two instruments',
+                'data/holdings-example-one-portfolio-one-shk-one-date-two-instruments.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                'One portfolio, one sub-holding-key, two dates, two instruments',
+                'data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                'One portfolio, two sub-holding-keys, one date, same instrument',
+                'data/holdings-example-one-portfolio-two-shks-one-date-one-instrument.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                'One portfolio, two sub-holding-keys, one date, two instruments',
+                'data/holdings-example-one-portfolio-two-shks-one-date-two-instruments.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                'One portfolio, two sub-holding-keys, two dates, two instruments',
+                'data/holdings-example-one-portfolio-two-shks-two-dates-two-instruments.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                'One portfolio, two sub-holding-keys, two dates, same instrument',
+                'data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv',
+                ["Security Description"],
+                holding_instrument_identifiers(fake1=True, fake2=False),
             ],
         ]
     )
@@ -803,15 +839,14 @@ class CocoonTestsHoldings(unittest.TestCase):
         self,
         _,
         file_name,
-        return_unmatched_identifiers,
+        sub_holding_keys,
         expected_unmatched_identifiers,
     ) -> None:
         """
         Test that holdings can be loaded successfully
 
         :param str file_name: The name of the test data file
-        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
-               working with holdings
+        :sub_holding_keys
         :param list[instrument_identifiers] expected_unmatched_identifiers: A list of expected instrument_identifiers
 
         :return: None
@@ -832,9 +867,9 @@ class CocoonTestsHoldings(unittest.TestCase):
         }
         property_columns = ["Prime Broker"]
         properties_scope = "operations001"
-        sub_holding_keys = None
         sub_holding_key_scope = None
         holdings_adjustment_only = False
+        return_unmatched_identifiers = True
         expected_outcome = lusid.models.Version
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
