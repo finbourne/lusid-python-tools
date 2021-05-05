@@ -798,49 +798,45 @@ class CocoonTestsHoldings(unittest.TestCase):
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                'One portfolio, one sub-holding-key, one date, two instruments',
-                'data/holdings-example-one-portfolio-one-shk-one-date-two-instruments.csv',
+                "One portfolio, one sub-holding-key, one date, two instruments",
+                "data/holdings-example-one-portfolio-one-shk-one-date-two-instruments.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                'One portfolio, one sub-holding-key, two dates, two instruments',
-                'data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv',
+                "One portfolio, one sub-holding-key, two dates, two instruments",
+                "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                'One portfolio, two sub-holding-keys, one date, same instrument',
-                'data/holdings-example-one-portfolio-two-shks-one-date-one-instrument.csv',
+                "One portfolio, two sub-holding-keys, one date, same instrument",
+                "data/holdings-example-one-portfolio-two-shks-one-date-one-instrument.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
-                'One portfolio, two sub-holding-keys, one date, two instruments',
-                'data/holdings-example-one-portfolio-two-shks-one-date-two-instruments.csv',
+                "One portfolio, two sub-holding-keys, one date, two instruments",
+                "data/holdings-example-one-portfolio-two-shks-one-date-two-instruments.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                'One portfolio, two sub-holding-keys, two dates, two instruments',
-                'data/holdings-example-one-portfolio-two-shks-two-dates-two-instruments.csv',
+                "One portfolio, two sub-holding-keys, two dates, two instruments",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-two-instruments.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
-                'One portfolio, two sub-holding-keys, two dates, same instrument',
-                'data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv',
+                "One portfolio, two sub-holding-keys, two dates, same instrument",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
                 ["Security Description"],
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
         ]
     )
     def test_load_from_data_frame_holdings_success_with_unmatched_identifiers(
-        self,
-        _,
-        file_name,
-        sub_holding_keys,
-        expected_unmatched_identifiers,
+        self, _, file_name, sub_holding_keys, expected_unmatched_identifiers,
     ) -> None:
         """
         Test that holdings can be loaded successfully
