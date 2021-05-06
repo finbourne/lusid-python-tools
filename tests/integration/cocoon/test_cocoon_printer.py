@@ -24,23 +24,27 @@ class CocoonPrinterIntegrationTests(unittest.TestCase):
         Test that the cocoon printer also returns the RequestID and ErrorDetails for any errors in the response.
         """
         # Load a portfolio that will contain an error using load_from_data_frame
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath("data/cocoon_format_portfolio_errors.csv"))
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath("data/cocoon_format_portfolio_errors.csv")
+        )
         portfolio_response = load_from_data_frame(
             api_factory=self.api_factory,
             scope="cocoon_format_errors",
             data_frame=data_frame,
             mapping_required={
-                    "code": "FundCode",
-                    "display_name": "display_name",
-                    "created": "created",
-                    "base_currency": "base_currency",
-                },
+                "code": "FundCode",
+                "display_name": "display_name",
+                "created": "created",
+                "base_currency": "base_currency",
+            },
             mapping_optional={"description": "description", "accounting_method": None},
-            file_type="portfolios"
+            file_type="portfolios",
         )
 
         # Pass the response into the cocoon printer formatter
-        succ, err = format_portfolios_response(portfolio_response, extended_error_details=True)
+        succ, err = format_portfolios_response(
+            portfolio_response, extended_error_details=True
+        )
 
         # Assert that the error part includes RequestID details and ErrorDetails
         self.assertEqual(2, len(succ))
@@ -50,7 +54,9 @@ class CocoonPrinterIntegrationTests(unittest.TestCase):
             # Regex for request id patterns
             self.assertRegex(row[err.columns[2]], r"[A-Z0-9]{13}:[0-9]{8}")
             # Deserialise the ErrorDetails field and check one of the values
-            self.assertEqual(json.loads(row[err.columns[3]]).get("name"), "UndefinedCurrencyFailure")
+            self.assertEqual(
+                json.loads(row[err.columns[3]]).get("name"), "UndefinedCurrencyFailure"
+            )
 
         # Delete the portfolios at the end of the test
         for portfolio in portfolio_response.get("portfolios").get("success"):
@@ -59,5 +65,5 @@ class CocoonPrinterIntegrationTests(unittest.TestCase):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
