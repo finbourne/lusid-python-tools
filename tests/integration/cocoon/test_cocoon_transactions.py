@@ -10,13 +10,18 @@ from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 
 
+client_internal = "Instrument/default/ClientInternal"
+sedol = "Instrument/default/Sedol"
+name = "Instrument/default/Name"
+
+
 def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
     if trd_0003:
         trd_0003 = {
             "trd_0003": {
-                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
-                "Instrument/default/Sedol": "FAKESEDOL1",
-                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                client_internal: "THIS_WILL_NOT_RESOLVE_1",
+                sedol: "FAKESEDOL1",
+                name: "THIS_WILL_NOT_RESOLVE_1",
             }
         }
     else:
@@ -25,9 +30,9 @@ def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
     if trd_0004:
         trd_0004 = {
             "trd_0004": {
-                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
-                "Instrument/default/Sedol": "FAKESEDOL2",
-                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                client_internal: "THIS_WILL_NOT_RESOLVE_2",
+                sedol: "FAKESEDOL2",
+                name: "THIS_WILL_NOT_RESOLVE_2",
             }
         }
     else:
@@ -318,14 +323,14 @@ class CocoonTestsTransactions(unittest.TestCase):
                 [
                     {
                         "unresolved_tx01": {
-                            "Instrument/default/ClientInternal": "FAKECLIENTINTERNAL1",
+                            client_internal: "FAKECLIENTINTERNAL1",
                             "Instrument/default/Figi": "FAKEFIGI1",
                             "Instrument/default/Isin": "FAKEISIN1",
                         }
                     },
                     {
                         "unresolved_tx02": {
-                            "Instrument/default/ClientInternal": "FAKECLIENTINTERNAL2",
+                            client_internal: "FAKECLIENTINTERNAL2",
                             "Instrument/default/Figi": "FAKEFIGI2",
                             "Instrument/default/Isin": "FAKEISIN2",
                         }
@@ -472,17 +477,17 @@ class CocoonTestsTransactions(unittest.TestCase):
         self.assertEqual(
             response[0].get("trd_0003"),
             {
-                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
-                "Instrument/default/Sedol": "FAKESEDOL1",
-                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
+                client_internal: "THIS_WILL_NOT_RESOLVE_1",
+                sedol: "FAKESEDOL1",
+                name: "THIS_WILL_NOT_RESOLVE_1",
             },
         )
         self.assertEqual(
             response[1].get("trd_0004"),
             {
-                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
-                "Instrument/default/Sedol": "FAKESEDOL2",
-                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
+                client_internal: "THIS_WILL_NOT_RESOLVE_2",
+                sedol: "FAKESEDOL2",
+                name: "THIS_WILL_NOT_RESOLVE_2",
             },
         )
 
