@@ -252,6 +252,9 @@ class CocoonTestsPortfolios(unittest.TestCase):
             second=list(data_frame[mapping_required["code"]].values),
         )
 
+        # Assert that by no unmatched_identifiers are returned in the response for portfolios
+        self.assertFalse(responses["portfolios"].get("unmatched_identifiers", False))
+
         if expected_sub_holdings_keys is None:
             return
 

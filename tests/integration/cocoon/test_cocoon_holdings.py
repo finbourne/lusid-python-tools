@@ -10,6 +10,27 @@ from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 
 
+def holding_instrument_identifiers(fake1=False, fake2=False):
+    instrument_identifiers = []
+    if fake1:
+        instrument_identifiers.extend(
+            [
+                {"Instrument/default/Sedol": "FAKESEDOL1"},
+                {"Instrument/default/Isin": "FAKEISIN1"},
+            ]
+        )
+
+    if fake2:
+        instrument_identifiers.extend(
+            [
+                {"Instrument/default/Sedol": "FAKESEDOL2"},
+                {"Instrument/default/Isin": "FAKEISIN2"},
+            ]
+        )
+
+    return instrument_identifiers
+
+
 class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -39,6 +60,8 @@ class CocoonTestsHoldings(unittest.TestCase):
         "T3-17",
         "T3-18",
         "T3-19",
+        "T3-20",
+        "T3-21",
     )
     @parameterized.expand(
         [
@@ -625,6 +648,36 @@ class CocoonTestsHoldings(unittest.TestCase):
                 False,
                 lusid.models.Version,
             ],
+            [
+                "Standard successful load but with one unmatched identifier. No flag for return_unmatched_identifiers"
+                "means that we should not get that unmatched_identifier returned.",
+                "prime_broker_test",
+                "data/holdings-example-unique-date-one-unmatched-instrument.csv",
+                {
+                    "code": "FundCode",
+                    "effective_at": "Effective Date",
+                    "tax_lots.units": "Quantity",
+                },
+                {
+                    "tax_lots.cost.amount": None,
+                    "tax_lots.cost.currency": "Local Currency Code",
+                    "tax_lots.portfolio_cost": None,
+                    "tax_lots.price": None,
+                    "tax_lots.purchase_date": None,
+                    "tax_lots.settlement_date": None,
+                },
+                {
+                    "Isin": "ISIN Security Identifier",
+                    "Sedol": "SEDOL Security Identifier",
+                    "Currency": "is_cash_with_currency",
+                },
+                ["Prime Broker"],
+                "operations001",
+                None,
+                None,
+                False,
+                lusid.models.Version,
+            ],
         ]
     )
     def test_load_from_data_frame_holdings_success(
@@ -680,9 +733,280 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(responses["holdings"]["errors"]), 0)
 
+        # Assert that by default no unmatched_identifiers are returned in the response
+        self.assertFalse(responses["holdings"].get("unmatched_identifiers", False))
+
         self.assertTrue(
             expr=all(
-                isinstance(succcess_response.version, expected_outcome)
-                for succcess_response in responses["holdings"]["success"]
+                isinstance(success_response.version, expected_outcome)
+                for success_response in responses["holdings"]["success"]
             )
         )
+
+    @lusid_feature(
+        "T3-22",
+        "T3-23",
+        "T3-24",
+        "T3-25",
+        "T3-26",
+        "T3-27",
+        "T3-28",
+        "T3-29",
+        "T3-30",
+        "T3-31",
+        "T3-32",
+        "T3-33",
+        "T3-34",
+        "T3-35",
+        "T3-36",
+        "T3-37",
+        "T3-38",
+        "T3-39",
+        "T3-40",
+        "T3-41",
+    )
+    @parameterized.expand(
+        [
+            [
+                "Standard successful load with no unmatched instruments - SetHolding",
+                "data/holdings-example-unique-date.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=False, fake2=False),
+            ],
+            [
+                "Standard successful load with one unmatched instrument - SetHolding",
+                "data/holdings-example-unique-date-one-unmatched-instrument.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with one instrument that has a correct Isin and ClientInternal "
+                "but fake Sedol so it should still resolve and return no unmatched identifiers - SetHolding",
+                "data/holdings-example-unique-date-incorrect-sedol-correct_isin_clientInternal_should_resolve.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=False, fake2=False),
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two separate adjustments (two portfolios) - SetHolding",
+                "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with two unmatched instrument in two separate adjustments (two portfolios) - SetHolding",
+                "data/holdings-example-unique-date-two-unmatched-instruments-separate-adjustments.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "Standard successful load with two unmatched instrument in one single adjustment (one portfolio) - SetHolding",
+                "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two adjustments across two dates (one portfolio) - SetHolding",
+                "data/holdings-example-one-unmatched-instrument-in-two-adjustments-one-portfolio-two-dates.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with one unmatched instrument in two adjustments one date (two portfolios) - SetHolding",
+                "data/holdings-example-same-date-one-unmatched-instrument-duplicated-in-two-adjustments-two-portfolios.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with two unmatched instrument in two adjustments two dates (two portfolios) - SetHolding",
+                "data/holdings-example-two-dates-two-unmatched-instruments-separate-adjustments-two-portfolios.csv",
+                None,
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "One portfolio, one sub-holding-key, one date, two instruments - SetHolding",
+                "data/holdings-example-one-portfolio-one-shk-one-date-two-instruments.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "One portfolio, one sub-holding-key, two dates, two instruments - SetHolding",
+                "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "One portfolio, two sub-holding-keys, one date, same instrument - SetHolding",
+                "data/holdings-example-one-portfolio-two-shks-one-date-one-instrument.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "One portfolio, two sub-holding-keys, one date, two instruments - SetHolding",
+                "data/holdings-example-one-portfolio-two-shks-one-date-two-instruments.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "One portfolio, two sub-holding-keys, two dates, two instruments - SetHolding",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-two-instruments.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "One portfolio, two sub-holding-keys, two dates, same instrument - SetHolding",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
+                ["Security Description"],
+                False,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "One portfolio, two sub-holding-keys, two dates, same instrument - AdjustHolding",
+                "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
+                ["Security Description"],
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "One portfolio, one sub-holding-key, two dates, two instruments - AdjustHolding",
+                "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
+                ["Security Description"],
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "Standard successful load with two unmatched instrument in one single adjustment (one portfolio) - AdjustHolding",
+                "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
+                None,
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=True),
+            ],
+            [
+                "Standard successful load with one unmatched instrument - AdjustHolding",
+                "data/holdings-example-unique-date-one-unmatched-instrument.csv",
+                None,
+                True,
+                holding_instrument_identifiers(fake1=True, fake2=False),
+            ],
+            [
+                "Standard successful load with two unmatched instruments across 3 unique identifiers - AdjustHolding",
+                "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment_three_unique_ids.csv",
+                None,
+                True,
+                [
+                    {"Instrument/default/Sedol": "FAKESEDOL1"},
+                    {"Instrument/default/Isin": "FAKEISIN1"},
+                    {"Instrument/default/Isin": "FAKEISIN2"},
+                ],
+            ],
+        ]
+    )
+    def test_load_from_data_frame_holdings_success_with_unmatched_identifiers(
+        self,
+        _,
+        file_name,
+        sub_holding_keys,
+        holdings_adjustment_only,
+        expected_unmatched_identifiers,
+    ) -> None:
+        """
+        Test that holdings can be loaded successfully
+
+        :param str file_name: The name of the test data file
+        :sub_holding_keys
+        :param list[instrument_identifiers] expected_unmatched_identifiers: A list of expected instrument_identifiers
+
+        :return: None
+        """
+        # Unchanged vars that have no need to be passed via param (they would count as duplicate lines)
+        scope = "unmatched_holdings_test"
+        mapping_required = {
+            "code": "FundCode",
+            "effective_at": "Effective Date",
+            "tax_lots.units": "Quantity",
+        }
+        mapping_optional = {"tax_lots.cost.currency": "Local Currency Code"}
+        identifier_mapping = {
+            "Isin": "ISIN Security Identifier",
+            "Sedol": "SEDOL Security Identifier",
+            "Currency": "is_cash_with_currency",
+            "ClientInternal": "Client Internal",
+        }
+        property_columns = ["Prime Broker"]
+        properties_scope = "operations001"
+        sub_holding_key_scope = None
+        return_unmatched_identifiers = True
+        expected_outcome = lusid.models.Version
+
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        # Create the portfolios
+        portfolio_response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "FundCode",
+                "display_name": "FundCode",
+                "base_currency": "Local Currency Code",
+            },
+            file_type="portfolio",
+            mapping_optional={"created": "Created Date"},
+        )
+
+        # Assert that all portfolios were created without any issues
+        self.assertEqual(len(portfolio_response.get("portfolios").get("errors")), 0)
+
+        # Load in the holdings adjustments
+        holding_responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="holdings",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            sub_holding_keys=sub_holding_keys,
+            holdings_adjustment_only=holdings_adjustment_only,
+            sub_holding_keys_scope=sub_holding_key_scope,
+            return_unmatched_identifiers=return_unmatched_identifiers,
+        )
+
+        self.assertGreater(len(holding_responses["holdings"]["success"]), 0)
+
+        self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
+
+        # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True and
+        # Check that the lists contain the same elements, in any order (the assert name is misleading)
+        self.assertCountEqual(
+            holding_responses["holdings"].get("unmatched_identifiers", False),
+            expected_unmatched_identifiers,
+        )
+
+        self.assertTrue(
+            expr=all(
+                isinstance(success_response.version, expected_outcome)
+                for success_response in holding_responses["holdings"]["success"]
+            )
+        )
+
+        # Delete the portfolios at the end of the test
+        for portfolio in portfolio_response.get("portfolios").get("success"):
+            self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+                scope=scope, code=portfolio.id.code
+            )

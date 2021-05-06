@@ -23,6 +23,8 @@ from lusidtools.cocoon.utilities import (
     default_fx_forward_model,
     update_dict_value,
     group_request_into_one,
+    extract_unique_portfolio_codes,
+    extract_unique_portfolio_codes_effective_at_tuples,
 )
 from lusidtools import logger
 import lusid.models as models
@@ -2426,6 +2428,178 @@ class CocoonUtilitiesTests(unittest.TestCase):
         )
 
         self.assertEqual(gt, dict_test)
+
+    @parameterized.expand(
+        [
+            [
+                "No codes in one sync_batch",
+                [{"async_batches": [], "codes": [None], "effective_at": [None]}],
+                [None],
+            ],
+            [
+                "One code in one sync batch",
+                [{"async_batches": [], "codes": ["one_code"], "effective_at": [None]}],
+                ["one_code"],
+            ],
+            [
+                "Two codes in one sync batch",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code"],
+                        "effective_at": [None],
+                    }
+                ],
+                ["one_code", "two_code"],
+            ],
+            [
+                "Two codes in two sync batches",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code"],
+                        "effective_at": [None],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["two_code"],
+                        "effective_at": [None],
+                    },
+                ],
+                ["one_code", "two_code"],
+            ],
+            [
+                "Four codes in two sync batches",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code"],
+                        "effective_at": [None],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["three_code", "four_code"],
+                        "effective_at": [None],
+                    },
+                ],
+                ["one_code", "two_code", "three_code", "four_code"],
+            ],
+            [
+                "Four codes in two sync batches, with some multiples",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code", "three_code"],
+                        "effective_at": [None],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["three_code", "four_code", "one_code"],
+                        "effective_at": [None],
+                    },
+                ],
+                ["one_code", "two_code", "three_code", "four_code"],
+            ],
+        ]
+    )
+    def test_extract_unique_portfolio_codes(self, _, sync_batches, expected_result):
+        actual_result = extract_unique_portfolio_codes(sync_batches)
+        self.assertEqual(set(expected_result), set(actual_result))
+
+    @parameterized.expand(
+        [
+            [
+                "No codes or effective at in one sync_batch",
+                [{"async_batches": [], "codes": [None], "effective_at": [None]}],
+                [(None, None)],
+            ],
+            [
+                "One code and effective at in one sync batch",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code"],
+                        "effective_at": ["13/11/90"],
+                    }
+                ],
+                [("one_code", "13/11/90")],
+            ],
+            [
+                "Two code and effective at in one sync batch",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code"],
+                        "effective_at": ["13/11/90", "13/11/90"],
+                    }
+                ],
+                [("one_code", "13/11/90"), ("two_code", "13/11/90")],
+            ],
+            [
+                "Two code and effective at in two sync batches",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code"],
+                        "effective_at": ["13/11/90"],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["two_code"],
+                        "effective_at": ["13/11/90"],
+                    },
+                ],
+                [("one_code", "13/11/90"), ("two_code", "13/11/90")],
+            ],
+            [
+                "Four code and effective at in two sync batches",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code"],
+                        "effective_at": ["13/11/90", "13/11/90"],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["three_code", "four_code"],
+                        "effective_at": ["13/11/90", "13/11/90"],
+                    },
+                ],
+                [
+                    ("one_code", "13/11/90"),
+                    ("two_code", "13/11/90"),
+                    ("three_code", "13/11/90"),
+                    ("four_code", "13/11/90"),
+                ],
+            ],
+            [
+                "Four code and effective at in two sync batches, with some multiples",
+                [
+                    {
+                        "async_batches": [],
+                        "codes": ["one_code", "two_code", "three_code"],
+                        "effective_at": ["13/11/90", "13/11/90", "13/11/90"],
+                    },
+                    {
+                        "async_batches": [],
+                        "codes": ["three_code", "four_code", "one_code"],
+                        "effective_at": ["13/11/90", "13/11/90", "13/11/90"],
+                    },
+                ],
+                [
+                    ("one_code", "13/11/90"),
+                    ("two_code", "13/11/90"),
+                    ("three_code", "13/11/90"),
+                    ("four_code", "13/11/90"),
+                ],
+            ],
+        ]
+    )
+    def test_extract_unique_portfolio_codes_effective_at_tuples(
+        self, _, sync_batches, expected_result
+    ):
+        actual_result = extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
+        self.assertEqual(set(expected_result), set(actual_result))
 
 
 class GroupRequestUtilitiesTests(unittest.TestCase):
