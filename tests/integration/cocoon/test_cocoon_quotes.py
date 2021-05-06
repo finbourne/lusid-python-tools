@@ -111,6 +111,9 @@ class CocoonTestsQuotes(unittest.TestCase):
             second=len(data_frame),
         )
 
+        # Assert that by no unmatched_identifiers are returned in the response for quotes
+        self.assertFalse(responses["quotes"].get("unmatched_identifiers", False))
+
         self.assertEqual(
             first=sum(
                 [len(response.failed) for response in responses["quotes"]["success"]]
