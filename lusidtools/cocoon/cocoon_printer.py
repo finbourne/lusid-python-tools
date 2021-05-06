@@ -34,7 +34,7 @@ def check_dict_for_required_keys(
             )
 
 
-def get_errors_from_response(list_of_API_exceptions: list):
+def get_errors_from_response(list_of_API_exceptions: list, extended_error_details: bool = False):
     """
     This function gets the status code and reason from API exception
 
@@ -42,11 +42,13 @@ def get_errors_from_response(list_of_API_exceptions: list):
     ----------
     list_of_API_exceptions : list
         A list of ApiExceptions
-
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
     Returns
     -------
     pd.DataFrame
-        a Pandas DataFrame containing the reasons and status codes for ApiExceptions from a request
+        A Pandas DataFrame containing the reasons and status codes for ApiExceptions from a request.
+        If the extended_error_details bool is True, the RequestID and error body will also be returned.
     """
 
     # check all items are ApiExceptions
@@ -60,10 +62,19 @@ def get_errors_from_response(list_of_API_exceptions: list):
     status = [item.status for item in list_of_API_exceptions]
     reason = [item.reason for item in list_of_API_exceptions]
 
-    # transpose list of lists for insertion to dataframe
-    items_error = np.array([reason, status]).T.tolist()
+    items_list = [reason, status]
+    column_names = ["error_items", "status"]
 
-    return pd.DataFrame(items_error, columns=["error_items", "status"])
+    if extended_error_details:
+        request_id = [item.headers.get("lusid-meta-requestId") for item in list_of_API_exceptions]
+        error_body = [item.body for item in list_of_API_exceptions]
+        items_list.extend([request_id, error_body])
+        column_names.extend(["request_id", "error_body"])
+
+    # transpose list of lists for insertion to dataframe
+    items_error = np.array(items_list).T.tolist()
+
+    return pd.DataFrame(items_error, columns=column_names)
 
 
 def get_portfolio_from_href(href: list, file_type: str):
@@ -126,6 +137,7 @@ def get_non_href_response(response: dict, file_type: str, data_entity_details=Fa
 
 def format_instruments_response(
     response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
@@ -134,6 +146,8 @@ def format_instruments_response(
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -155,12 +169,15 @@ def format_instruments_response(
 
     return (
         items_success,
-        get_errors_from_response(response[file_type]["errors"]),
+        get_errors_from_response(response[file_type]["errors"], extended_error_details),
         items_failed,
     )
 
 
-def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
+def format_portfolios_response(
+        response: dict,
+        extended_error_details: bool = False,
+) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from portfolio requests and returns successful and errored statuses for
     request constituents.
@@ -169,6 +186,8 @@ def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -185,12 +204,15 @@ def format_portfolios_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     # get success
     items_success = [batch.id.code for batch in response[file_type]["success"]]
 
-    errors = get_errors_from_response(response[file_type]["errors"])
+    errors = get_errors_from_response(response[file_type]["errors"], extended_error_details)
 
     return (pd.DataFrame(items_success, columns=["successful items"]), errors)
 
 
-def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
+def format_transactions_response(
+        response: dict,
+        extended_error_details: bool = False,
+) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from transaction requests and returns successful and errored statuses for
     request constituents.
@@ -199,6 +221,8 @@ def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame)
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -217,7 +241,7 @@ def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame)
     # get success
     items_success = [batch.href for batch in response[file_type]["success"]]
 
-    errors = get_errors_from_response(response[file_type]["errors"])
+    errors = get_errors_from_response(response[file_type]["errors"], extended_error_details)
 
     return (
         pd.DataFrame(
@@ -228,7 +252,10 @@ def format_transactions_response(response: dict) -> (pd.DataFrame, pd.DataFrame)
     )
 
 
-def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
+def format_holdings_response(
+        response: dict,
+        extended_error_details: bool = False,
+) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from holding requests and returns successful and errored statuses for
     request constituents.
@@ -237,6 +264,8 @@ def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -255,7 +284,7 @@ def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
     # get success
     items_success = [batch.href for batch in response[file_type]["success"]]
 
-    errors = get_errors_from_response(response[file_type]["errors"])
+    errors = get_errors_from_response(response[file_type]["errors"], extended_error_details)
 
     return (
         pd.DataFrame(
@@ -268,6 +297,7 @@ def format_holdings_response(response: dict) -> (pd.DataFrame, pd.DataFrame):
 
 def format_quotes_response(
     response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from quotes requests and returns successful, failed and errored statuses for
@@ -277,6 +307,8 @@ def format_quotes_response(
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -299,13 +331,14 @@ def format_quotes_response(
 
     return (
         items_success,
-        get_errors_from_response(response[file_type]["errors"]),
+        get_errors_from_response(response[file_type]["errors"], extended_error_details),
         items_failed,
     )
 
 
 def format_reference_portfolios_response(
     response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from reference portfolio requests and returns successful and errored statuses for request constituents.
@@ -314,6 +347,8 @@ def format_reference_portfolios_response(
     ----------
     response : dict
         response from Lusid-python-tools
+    extended_error_details : bool
+        A flag that determines whether the errors returned will have extended details (request id, error body)
 
     Returns
     -------
@@ -331,6 +366,6 @@ def format_reference_portfolios_response(
     # get success
     items_success = [batch.id.code for batch in response[file_type]["success"]]
 
-    errors = get_errors_from_response(response[file_type]["errors"])
+    errors = get_errors_from_response(response[file_type]["errors"], extended_error_details)
 
     return (pd.DataFrame(items_success, columns=["successful items"]), errors)
