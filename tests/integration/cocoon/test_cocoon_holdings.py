@@ -913,7 +913,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     {
                         "Instrument/default/Sedol": "FAKESEDOL1",
                         "Instrument/default/Isin": "FAKEISIN2",
-                    }
+                    },
                 ],
             ],
         ]
