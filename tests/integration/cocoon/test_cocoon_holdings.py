@@ -11,24 +11,23 @@ from lusidtools.cocoon.utilities import create_scope_id
 
 
 def holding_instrument_identifiers(fake1=False, fake2=False):
-    instrument_identifiers = []
     if fake1:
-        instrument_identifiers.extend(
-            [
-                {"Instrument/default/Sedol": "FAKESEDOL1"},
-                {"Instrument/default/Isin": "FAKEISIN1"},
-            ]
-        )
+        fake1 = {
+            "Instrument/default/Sedol": "FAKESEDOL1",
+            "Instrument/default/Isin": "FAKEISIN1",
+        }
+    else:
+        fake1 = None
 
     if fake2:
-        instrument_identifiers.extend(
-            [
-                {"Instrument/default/Sedol": "FAKESEDOL2"},
-                {"Instrument/default/Isin": "FAKEISIN2"},
-            ]
-        )
+        fake2 = {
+            "Instrument/default/Sedol": "FAKESEDOL2",
+            "Instrument/default/Isin": "FAKEISIN2",
+        }
+    else:
+        fake2 = None
 
-    return instrument_identifiers
+    return [instrument for instrument in [fake1, fake2] if instrument]
 
 
 class CocoonTestsHoldings(unittest.TestCase):
@@ -907,9 +906,14 @@ class CocoonTestsHoldings(unittest.TestCase):
                 None,
                 True,
                 [
-                    {"Instrument/default/Sedol": "FAKESEDOL1"},
-                    {"Instrument/default/Isin": "FAKEISIN1"},
-                    {"Instrument/default/Isin": "FAKEISIN2"},
+                    {
+                        "Instrument/default/Sedol": "FAKESEDOL1",
+                        "Instrument/default/Isin": "FAKEISIN1",
+                    },
+                    {
+                        "Instrument/default/Sedol": "FAKESEDOL1",
+                        "Instrument/default/Isin": "FAKEISIN2",
+                    }
                 ],
             ],
         ]
