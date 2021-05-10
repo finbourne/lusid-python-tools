@@ -1,4 +1,3 @@
-from pathlib import Path
 import lusid
 import lusid.models as models
 import unittest
@@ -106,7 +105,18 @@ reference_portfolio_success = models.Portfolio(
     id=models.ResourceId(code="ID00002", scope="default test"),
 )
 
-api_exception = lusid.exceptions.ApiException(status="404", reason="not found")
+
+class MockHttpResp:
+    status = "404"
+    reason = "not found"
+    data = b'{"name":"TestFailure","errorDetails":[],"code":404,"type":"https://docs.lusid.com/#section/Error-Codes/404","title":"This is a test error title","status":404,"detail":"Test detail","instance":"https://test.lusid.com/app/insights/logs/TestRequestID-0001","extensions":{}}'
+
+    @classmethod
+    def getheaders(cls):
+        return {"lusid-meta-requestId": "TestRequestID-0001"}
+
+
+api_exception = lusid.exceptions.ApiException(http_resp=MockHttpResp())
 
 
 # build lusidtools responses
@@ -179,26 +189,41 @@ responses_no_success_field = {
     "reference_portfolios": {"errors": [api_exception for _ in range(2)],},
 }
 
+extended_error_expected = [
+    ["not found", "TestRequestID-0001"],
+    ["not found", "TestRequestID-0001"],
+]
+
 
 class CocoonPrinterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-
         cls.logger = logger.LusidLogger("debug")
 
     def assert_responses(
-        self, num_items, expected_value, succ=None, err=None, failed=None
+        self,
+        num_items,
+        expected_value,
+        succ=None,
+        err=None,
+        failed=None,
+        err_extended=False,
     ):
         if succ is not None:
             self.assertEqual(num_items, len(succ))
             for index, row in succ.iterrows():
                 self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
 
-        if err is not None:
+        if err is not None and not err_extended:
             self.assertEqual(num_items, len(err))
             for index, row in err.iterrows():
                 self.assertEqual(expected_value["err"][index], row[err.columns[0]])
+
+        if err is not None and err_extended:
+            self.assertEqual(num_items, len(err))
+            for index, row in err.iterrows():
+                self.assertEqual(expected_value["err"][index][0], row[err.columns[0]])
+                self.assertEqual(expected_value["err"][index][1], row[err.columns[2]])
 
         if failed is not None:
             self.assertEqual(num_items, len(failed))
@@ -253,17 +278,48 @@ class CocoonPrinterTests(unittest.TestCase):
                     ],
                     "err": ["not found", "not found"],
                 },
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
-            ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "empty_response_missing_shape",
+                empty_response_missing_shape,
+                0,
+                {},
+                False,
+            ),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {
+                    "succ": [
+                        "ClientInternal: imd_00001234",
+                        "ClientInternal: imd_00001234",
+                    ],
+                    "failed": [
+                        "ClientInternal: imd_00001234",
+                        "ClientInternal: imd_00001234",
+                    ],
+                    "err": extended_error_expected,
+                },
+                True,
+            ),
         ]
     )
     def test_format_instruments_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors,
     ):
-        succ, err, failed = format_instruments_response(response)
+        succ, err, failed = format_instruments_response(
+            response, extended_error_details=extended_errors
+        )
         self.assert_responses(
-            num_items, expected_value, succ=succ, err=err, failed=failed
+            num_items,
+            expected_value,
+            succ=succ,
+            err=err,
+            failed=failed,
+            err_extended=extended_errors,
         )
 
     @parameterized.expand(
@@ -273,15 +329,27 @@ class CocoonPrinterTests(unittest.TestCase):
                 responses,
                 2,
                 {"succ": ["ID00001", "ID00001"], "err": ["not found", "not found"]},
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {"succ": ["ID00001", "ID00001"], "err": extended_error_expected},
+                True,
+            ),
         ]
     )
     def test_format_portfolios_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors,
     ):
-        succ, err = format_portfolios_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err)
+        succ, err = format_portfolios_response(
+            response, extended_error_details=extended_errors
+        )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
 
     @parameterized.expand(
         [
@@ -290,15 +358,27 @@ class CocoonPrinterTests(unittest.TestCase):
                 responses,
                 2,
                 {"succ": ["code", "code"], "err": ["not found", "not found"]},
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {"succ": ["code", "code"], "err": extended_error_expected},
+                True,
+            ),
         ]
     )
     def test_format_transactions_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors
     ):
-        succ, err = format_transactions_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err)
+        succ, err = format_transactions_response(
+            response, extended_error_details=extended_errors
+        )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
 
     @parameterized.expand(
         [
@@ -311,15 +391,35 @@ class CocoonPrinterTests(unittest.TestCase):
                     "failed": ["BBG001MM1KV4", "BBG001MM1KV4"],
                     "err": ["not found", "not found"],
                 },
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
-            ("empty_response_missing_shape", empty_response_missing_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "empty_response_missing_shape",
+                empty_response_missing_shape,
+                0,
+                {},
+                False,
+            ),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {
+                    "succ": ["BBG001MM1KV4", "BBG001MM1KV4"],
+                    "failed": ["BBG001MM1KV4", "BBG001MM1KV4"],
+                    "err": extended_error_expected,
+                },
+                True,
+            ),
         ]
     )
     def test_format_quotes_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors
     ):
-        succ, err, failed = format_quotes_response(response)
+        succ, err, failed = format_quotes_response(
+            response, extended_error_details=extended_errors
+        )
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
         self.assertEqual(num_items, len(failed))
@@ -329,8 +429,9 @@ class CocoonPrinterTests(unittest.TestCase):
                 expected_value["succ"][index],
                 row["quote_id.quote_series_id.instrument_id"],
             )
-        for index, row in err.iterrows():
-            self.assertEqual(expected_value["err"][index], row[err.columns[0]])
+        self.assert_responses(
+            num_items, expected_value, err=err, err_extended=extended_errors
+        )
         for index, row in failed.iterrows():
             self.assertEqual(
                 expected_value["failed"][index],
@@ -344,15 +445,27 @@ class CocoonPrinterTests(unittest.TestCase):
                 responses,
                 2,
                 {"succ": ["code", "code"], "err": ["not found", "not found"]},
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {"succ": ["code", "code"], "err": extended_error_expected},
+                True,
+            ),
         ]
     )
     def test_format_holdings_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors
     ):
-        succ, err = format_holdings_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err)
+        succ, err = format_holdings_response(
+            response, extended_error_details=extended_errors
+        )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
 
     @parameterized.expand(
         [
@@ -361,15 +474,27 @@ class CocoonPrinterTests(unittest.TestCase):
                 responses,
                 2,
                 {"succ": ["ID00002", "ID00002"], "err": ["not found", "not found"]},
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "standard_response_with_extended_errors",
+                responses,
+                2,
+                {"succ": ["ID00002", "ID00002"], "err": extended_error_expected},
+                True,
+            ),
         ]
     )
     def test_format_reference_portfolios_response_success(
-        self, _, response, num_items, expected_value
+        self, _, response, num_items, expected_value, extended_errors
     ):
-        succ, err = format_reference_portfolios_response(response)
-        self.assert_responses(num_items, expected_value, succ=succ, err=err)
+        succ, err = format_reference_portfolios_response(
+            response, extended_error_details=extended_errors
+        )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
 
     # Test failure cases
 
