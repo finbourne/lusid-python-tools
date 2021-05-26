@@ -715,7 +715,7 @@ async def _construct_batches(
     domain_lookup: dict,
     sub_holding_keys: list,
     sub_holding_keys_scope: str,
-    return_unmatched_identifiers: bool,
+    return_unmatched_items: bool,
     **kwargs,
 ):
     """
@@ -747,8 +747,8 @@ async def _construct_batches(
         The sub holding keys to use
     sub_holding_keys_scope : str
         The scope to use for the sub-holding keys
-    return_unmatched_identifiers : bool
-        Whether unmatched identifiers should be returned for transaction or holding upserts
+     return_unmatched_items: bool
+        Whether response objects for unmatched items should be returned
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
 
@@ -912,7 +912,7 @@ async def _construct_batches(
     }
 
     # For transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if return_unmatched_identifiers is True and file_type in ["transaction", "holding"]:
+    if return_unmatched_items is True and file_type in ["transaction", "holding"]:
         returned_response["unmatched_identifiers"] = unmatched_identifiers(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
@@ -1248,7 +1248,7 @@ def load_from_data_frame(
     holdings_adjustment_only: bool = False,
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
-    return_unmatched_identifiers: bool = False,
+    return_unmatched_items: bool = False,
 ):
     """
 
@@ -1287,9 +1287,9 @@ def load_from_data_frame(
         The maximum number of workers to use in the thread pool used by the function
     sub_holding_keys_scope : str
         The scope to add the sub-holding keys to
-    return_unmatched_identifiers : bool
-        When loading transactions or holdings, a 'True' flag will return a list of identifiers that were
-        unmatched at the time of the upsert (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter
+    return_unmatched_items : bool
+        When loading transactions or holdings, a 'True' flag will return a list of response objects for the items that were
+        unmatched at the time of the upsert. This parameter
         will be ignored for file types other than transactions or holdings
     Returns
     -------
@@ -1631,7 +1631,7 @@ def load_from_data_frame(
             domain_lookup=domain_lookup,
             sub_holding_keys=sub_holding_keys,
             sub_holding_keys_scope=sub_holding_keys_scope,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
             **keyword_arguments,
         ),
         loop,
