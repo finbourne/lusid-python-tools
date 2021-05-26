@@ -1072,7 +1072,7 @@ def return_unmatched_transactions(
 
         unmatched_transactions.extend(
             [
-                {response.transaction_id: response.instrument_identifiers}
+                response
                 for response in response.values
             ]
         )
@@ -1108,7 +1108,7 @@ def filter_unmatched_transactions(
 
     # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
     filtered_unmatched_transactions = [
-        unmatched_transaction
+        unmatched_transaction.instrument_identifiers
         for unmatched_transaction in unmatched_transactions
         for key in unmatched_transaction.keys()
         if key in valid_txids
