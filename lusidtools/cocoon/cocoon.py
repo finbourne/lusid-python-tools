@@ -1070,12 +1070,7 @@ def return_unmatched_transactions(
 
         response = transactions_api.get_transactions(**kwargs)
 
-        unmatched_transactions.extend(
-            [
-                response
-                for response in response.values
-            ]
-        )
+        unmatched_transactions.extend([response for response in response.values])
 
         next_page = response.next_page
         done = response.next_page is None
