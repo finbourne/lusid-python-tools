@@ -343,14 +343,14 @@ class CocoonTestsTransactions(unittest.TestCase):
         self,
         _,
         file_name,
-        return_unmatched_identifiers,
+        return_unmatched_items,
         expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
 
         :param str file_name: The name of the test data file
-        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
+        :param bool return_unmatched_items: A flag to request the return of all unmatched instrument identifiers
         :param expected_unmatched_transactions: The expected unmatched transactions appended to the response
 
         :return: None
@@ -394,7 +394,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             batch_size=batch_size,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
         )
 
         self.assertGreater(len(responses["transactions"]["success"]), 0)
@@ -403,7 +403,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Assert that the unmatched_identifiers returned are as expected for each case
         self.assertEqual(
-            responses["transactions"].get("unmatched_identifiers", False),
+            responses["transactions"].get("unmatched_items", False),
             expected_unmatched_transactions,
         )
 
@@ -618,7 +618,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             file_type="transactions",
             identifier_mapping=identifier_mapping,
             batch_size=None,
-            return_unmatched_identifiers=True,
+            return_unmatched_items=True,
         )
 
         self.assertGreater(len(transactions_response["transactions"]["success"]), 0)

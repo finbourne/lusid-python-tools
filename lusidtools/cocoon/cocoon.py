@@ -913,7 +913,7 @@ async def _construct_batches(
 
     # For transactions or holdings file types, optionally return unmatched identifiers with the responses
     if return_unmatched_items is True and file_type in ["transaction", "holding"]:
-        returned_response["unmatched_identifiers"] = unmatched_identifiers(
+        returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
             data_frame=data_frame,
@@ -926,7 +926,7 @@ async def _construct_batches(
 
 
 @checkargs
-def unmatched_identifiers(
+def unmatched_items(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
