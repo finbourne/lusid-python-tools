@@ -1070,7 +1070,7 @@ def return_unmatched_transactions(
 
         response = transactions_api.get_transactions(**kwargs)
 
-        unmatched_transactions.extend([response for response in response.values])
+        unmatched_transactions.extend([response])
 
         next_page = response.next_page
         done = response.next_page is None
@@ -1102,12 +1102,13 @@ def filter_unmatched_transactions(
     valid_txids = set(data_frame[mapping_required.get("transaction_id")])
 
     # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
+
     filtered_unmatched_transactions = [
-        unmatched_transaction.instrument_identifiers
-        for unmatched_transaction in unmatched_transactions
-        for key in unmatched_transaction.keys()
-        if key in valid_txids
+        unmatched_transaction for unmatched_transaction
+        in unmatched_transactions[0].values
+        if unmatched_transaction.transaction_id in valid_txids
     ]
+
 
     return filtered_unmatched_transactions
 
