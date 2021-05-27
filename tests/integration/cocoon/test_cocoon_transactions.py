@@ -340,11 +340,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-        self,
-        _,
-        file_name,
-        return_unmatched_items,
-        expected_unmatched_transactions,
+        self, _, file_name, return_unmatched_items, expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
