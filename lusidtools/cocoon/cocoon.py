@@ -1104,11 +1104,10 @@ def filter_unmatched_transactions(
     # Iterate through the transactions and if the transaction_id is in the set, add it to the list to be returned
 
     filtered_unmatched_transactions = [
-        unmatched_transaction for unmatched_transaction
-        in unmatched_transactions[0].values
+        unmatched_transaction
+        for unmatched_transaction in unmatched_transactions[0].values
         if unmatched_transaction.transaction_id in valid_txids
     ]
-
 
     return filtered_unmatched_transactions
 
