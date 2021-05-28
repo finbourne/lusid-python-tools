@@ -510,7 +510,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             ],
         ]
     )
-    
+
     @lusid_feature("T8-8", "T8-9")
     @parameterized.expand(
         [
@@ -671,22 +671,22 @@ class CocoonTestsTransactions(unittest.TestCase):
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].values[0].transaction_id,'trd_0003')
 
-        Client_internal_key='Instrument/default/ClientInternal'
-        Sedol_key= 'Instrument/default/Sedol'
+        client_internal_key='Instrument/default/ClientInternal'
+        sedol_key= 'Instrument/default/Sedol'
         name_key= 'Instrument/default/Name'
         self.assertEqual(
             response[0].values[0].instrument_identifiers,
             {
-                Client_internal_key: "THIS_WILL_NOT_RESOLVE_1",
-                Sedol_key: "FAKESEDOL1",
+                client_internal_key: "THIS_WILL_NOT_RESOLVE_1",
+                sedol_key: "FAKESEDOL1",
                 name_key : "THIS_WILL_NOT_RESOLVE_1",
             },
         )
         self.assertEqual(
             response[0].values[1].instrument_identifiers,
             {
-                Client_internal_key : "THIS_WILL_NOT_RESOLVE_2",
-                Sedol_key: "FAKESEDOL2",
+                client_internal_key : "THIS_WILL_NOT_RESOLVE_2",
+                sedol_key: "FAKESEDOL2",
                 name_key: "THIS_WILL_NOT_RESOLVE_2",
             },
         )
@@ -740,7 +740,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Load the dataframe
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(data_frame_path))
 
-        self.assertEqual(1,1)
+
 
         # # Filter the transactions to remove ones that were not part of the upload
         # filtered_unmatched_transactions = cocoon.cocoon.filter_unmatched_transactions(
