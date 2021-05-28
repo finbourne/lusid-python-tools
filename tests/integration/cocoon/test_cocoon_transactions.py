@@ -50,7 +50,6 @@ class CocoonTestsTransactions(unittest.TestCase):
         )
         cls.logger = logger.LusidLogger("debug")
 
-
     @lusid_feature("T8-1", "T8-2", "T8-3", "T8-4", "T8-5", "T8-6", "T8-7")
     @parameterized.expand(
         [
@@ -308,7 +307,6 @@ class CocoonTestsTransactions(unittest.TestCase):
             )
         )
 
-
     @lusid_feature("T8-1", "T8-2", "T8-3", "T8-4", "T8-5", "T8-6", "T8-7")
     @parameterized.expand(
         [
@@ -565,7 +563,6 @@ class CocoonTestsTransactions(unittest.TestCase):
                 for success_response in responses["transactions"]["success"]
             )
         )
-
 
     @lusid_feature("T8-8", "T8-9")
     @parameterized.expand(
@@ -574,21 +571,16 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "Test standard transaction load",
                 "data/global-fund-combined-transactions.csv",
                 True,
-                {
-                    'number_of_transactions': 0
-                },
+                {"number_of_transactions": 0},
             ],
             [
                 "Test standard transaction load with two unresolved instruments",
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
                 True,
                 {
-                    'number_of_transactions': 2,
-                    'transaction_ids': [
-                        'unresolved_tx01',
-                        'unresolved_tx02'
-                    ],
-                    'isins': ['FAKEISIN1', 'FAKEISIN2']
+                    "number_of_transactions": 2,
+                    "transaction_ids": ["unresolved_tx01", "unresolved_tx02"],
+                    "isins": ["FAKEISIN1", "FAKEISIN2"],
                 },
             ],
         ]
@@ -651,12 +643,21 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
-
-        self.assertEqual(len(responses['transactions']['unmatched_items']),expected_unmatched_response['number_of_transactions'])
-        for i in range(len(responses['transactions']['unmatched_items'])):
-            self.assertEqual(responses['transactions']['unmatched_items'][i].transaction_id, expected_unmatched_response['transaction_ids'][i])
-            self.assertEqual(responses['transactions']['unmatched_items'][i].instrument_identifiers['Instrument/default/Isin'],expected_unmatched_response['isins'][i])
-
+        self.assertEqual(
+            len(responses["transactions"]["unmatched_items"]),
+            expected_unmatched_response["number_of_transactions"],
+        )
+        for i in range(len(responses["transactions"]["unmatched_items"])):
+            self.assertEqual(
+                responses["transactions"]["unmatched_items"][i].transaction_id,
+                expected_unmatched_response["transaction_ids"][i],
+            )
+            self.assertEqual(
+                responses["transactions"]["unmatched_items"][i].instrument_identifiers[
+                    "Instrument/default/Isin"
+                ],
+                expected_unmatched_response["isins"][i],
+            )
 
         self.assertTrue(
             expr=all(
@@ -725,23 +726,22 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Assert that there are only two values returned and that the transaction ids and instrument details match
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0].values[0].transaction_id,'trd_0003')
-
+        self.assertEqual(response[0].values[0].transaction_id, "trd_0003")
 
         self.assertEqual(
             response[0].values[0].instrument_identifiers,
             {
-                'Instrument/default/ClientInternal': "THIS_WILL_NOT_RESOLVE_1",
-                'Instrument/default/Sedol': "FAKESEDOL1",
-                'Instrument/default/Name' : "THIS_WILL_NOT_RESOLVE_1",
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_1",
+                "Instrument/default/Sedol": "FAKESEDOL1",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_1",
             },
         )
         self.assertEqual(
             response[0].values[1].instrument_identifiers,
             {
-                'Instrument/default/ClientInternal': "THIS_WILL_NOT_RESOLVE_2",
-                'Instrument/default/Sedol': "FAKESEDOL2",
-                'Instrument/default/Name': "THIS_WILL_NOT_RESOLVE_2",
+                "Instrument/default/ClientInternal": "THIS_WILL_NOT_RESOLVE_2",
+                "Instrument/default/Sedol": "FAKESEDOL2",
+                "Instrument/default/Name": "THIS_WILL_NOT_RESOLVE_2",
             },
         )
 
@@ -794,7 +794,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Load the dataframe
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(data_frame_path))
 
-        self.assertEqual(1,1)
+        self.assertEqual(1, 1)
 
         # # Filter the transactions to remove ones that were not part of the upload
         # filtered_unmatched_transactions = cocoon.cocoon.filter_unmatched_transactions(
@@ -882,8 +882,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Assert that the unmatched_identifiers returned are as expected
         self.assertEqual(
-            len(transactions_response["transactions"].get("unmatched_items", [])),
-            2001,
+            len(transactions_response["transactions"].get("unmatched_items", [])), 2001,
         )
 
         # Delete the portfolio at the end of the test
