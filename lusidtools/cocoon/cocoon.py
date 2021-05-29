@@ -1155,8 +1155,7 @@ def _unmatched_ids_holdings(
             )
         )
 
-    # Return a unique list of instrument_identifier dictionaries
-    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
+    return unmatched_instruments
 
 
 def return_unmatched_instruments_from_holdings(
@@ -1187,46 +1186,11 @@ def return_unmatched_instruments_from_holdings(
     )
 
     # Create a list of instrument identifiers (with LUID_ZZZZZZZZ) from the response
-    unmatched_instruments = [
-        adjustment.instrument_identifiers
+    return [
+        adjustment
         for adjustment in response.adjustments
         if adjustment.instrument_uid == "LUID_ZZZZZZZZ"
     ]
-
-    # Return a unique list of instrument_identifier dictionaries
-    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
-
-
-def _unique_instrument_identifier_dictionaries(unmatched_instruments: list):
-    """
-    The unmatched_identifier list may contain duplicate instrument_identifier dictionaries. This method
-    will remove any duplicates from that list with the following logic:
-
-    For each dictionary of instrument identifiers:
-        Sort the identifier and its values (for cases where the same identifiers exist but in a different order)
-        Store the identifier and values as a tuple
-    Create a set from the list of tuples to remove duplicate values
-    Map each of the tuples back into a dictionary and return them as a list.
-
-    Parameters
-    ----------
-    unmatched_instruments: list
-        A list of instrument_identifiers
-
-    Returns
-    -------
-    A unique list of instrument identifier dictionaries
-
-    """
-    return list(
-        map(
-            dict,
-            set(
-                tuple(sorted(identifiers.items()))
-                for identifiers in unmatched_instruments
-            ),
-        )
-    )
 
 
 @checkargs

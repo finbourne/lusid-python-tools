@@ -30,6 +30,24 @@ def holding_instrument_identifiers(fake1=False, fake2=False):
     return [instrument for instrument in [fake1, fake2] if instrument]
 
 
+def extract_unique_identifiers_from_holdings_response(response):
+    unmatched_instruments = [
+        holding_adjustment.instrument_identifiers for
+        holding_adjustment in
+        response["holdings"].get("unmatched_identifiers", [])
+    ]
+
+    return list(
+        map(
+            dict,
+            set(
+                tuple(sorted(identifiers.items()))
+                for identifiers in unmatched_instruments
+            ),
+        )
+    )
+
+
 class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -771,6 +789,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date.csv",
                 None,
                 False,
+                0,
                 holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
@@ -778,6 +797,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-one-unmatched-instrument.csv",
                 None,
                 False,
+                1,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -786,6 +806,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-incorrect-sedol-correct_isin_clientInternal_should_resolve.csv",
                 None,
                 False,
+                0,
                 holding_instrument_identifiers(fake1=False, fake2=False),
             ],
             [
@@ -793,6 +814,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-one-unmatched-instrument-duplicated-in-two-adjustments.csv",
                 None,
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -800,6 +822,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-two-unmatched-instruments-separate-adjustments.csv",
                 None,
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -807,6 +830,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
                 None,
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -814,6 +838,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-unmatched-instrument-in-two-adjustments-one-portfolio-two-dates.csv",
                 None,
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -821,6 +846,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-same-date-one-unmatched-instrument-duplicated-in-two-adjustments-two-portfolios.csv",
                 None,
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -828,6 +854,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-two-dates-two-unmatched-instruments-separate-adjustments-two-portfolios.csv",
                 None,
                 False,
+                4,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -835,6 +862,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-one-shk-one-date-two-instruments.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -842,6 +870,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -849,6 +878,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-two-shks-one-date-one-instrument.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -856,6 +886,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-two-shks-one-date-two-instruments.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -863,6 +894,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-two-shks-two-dates-two-instruments.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -870,6 +902,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
                 ["Security Description"],
                 False,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -877,6 +910,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-two-shks-two-dates-one-instrument.csv",
                 ["Security Description"],
                 True,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -884,6 +918,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-one-portfolio-one-shk-two-dates-two-instruments.csv",
                 ["Security Description"],
                 True,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -891,6 +926,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment.csv",
                 None,
                 True,
+                2,
                 holding_instrument_identifiers(fake1=True, fake2=True),
             ],
             [
@@ -898,6 +934,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-one-unmatched-instrument.csv",
                 None,
                 True,
+                1,
                 holding_instrument_identifiers(fake1=True, fake2=False),
             ],
             [
@@ -905,6 +942,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 "data/holdings-example-unique-date-two-unmatched-instruments-single-adjustment_three_unique_ids.csv",
                 None,
                 True,
+                2,
                 [
                     {
                         "Instrument/default/Sedol": "FAKESEDOL1",
@@ -924,6 +962,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         file_name,
         sub_holding_keys,
         holdings_adjustment_only,
+        expected_holdings_in_response,
         expected_unmatched_identifiers,
     ) -> None:
         """
@@ -995,10 +1034,12 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
 
+        self.assertEqual(len(holding_responses["holdings"]["unmatched_identifiers"]), expected_holdings_in_response)
+
         # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True and
         # Check that the lists contain the same elements, in any order (the assert name is misleading)
         self.assertCountEqual(
-            holding_responses["holdings"].get("unmatched_identifiers", False),
+            extract_unique_identifiers_from_holdings_response(holding_responses),
             expected_unmatched_identifiers,
         )
 
