@@ -1,7 +1,6 @@
 import asyncio
 import lusid
 import pandas as pd
-import numpy as np
 import json
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
@@ -16,7 +15,6 @@ from lusidtools.cocoon.utilities import (
 from lusidtools.cocoon.validator import Validator
 from datetime import datetime
 import pytz
-from lusidtools.logger import LusidLogger
 import logging
 
 
@@ -715,7 +713,7 @@ async def _construct_batches(
     domain_lookup: dict,
     sub_holding_keys: list,
     sub_holding_keys_scope: str,
-    return_unmatched_identifiers: bool,
+    return_unmatched_items: bool,
     **kwargs,
 ):
     """
@@ -747,8 +745,8 @@ async def _construct_batches(
         The sub holding keys to use
     sub_holding_keys_scope : str
         The scope to use for the sub-holding keys
-    return_unmatched_identifiers : bool
-        Whether unmatched identifiers should be returned for transaction or holding upserts
+    return_unmatched_items : bool
+        Whether items with unmatched identifiers should be returned for transaction or holding upserts
     kwargs
         Arguments specific to each call e.g. effective_at for holdings
 
@@ -912,8 +910,8 @@ async def _construct_batches(
     }
 
     # For transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if return_unmatched_identifiers is True and file_type in ["transaction", "holding"]:
-        returned_response["unmatched_identifiers"] = unmatched_identifiers(
+    if return_unmatched_items is True and file_type in ["transaction", "holding"]:
+        returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
             data_frame=data_frame,
@@ -926,7 +924,7 @@ async def _construct_batches(
 
 
 @checkargs
-def unmatched_identifiers(
+def unmatched_items(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
@@ -935,8 +933,8 @@ def unmatched_identifiers(
     sync_batches: list = None,
 ):
     """
-    This method orchestrates the identification of unresolved identifiers that were part of the holdings or transactions
-    upload (i.e. where the instrument_uid is LUID_ZZZZZZ)
+    This method orchestrates the identification of holdings or transactions objects that were successfully uploaded
+    but did not resolve to known identifiers (i.e. where the instrument_uid is LUID_ZZZZZZ)
 
     Parameters
     ----------
@@ -956,15 +954,10 @@ def unmatched_identifiers(
     Returns
     -------
     responses: list
-        A list to be appended to the ultimate response for load_from_data_frame.
-
-        Where data_type == "transaction", the returned list will contain objects with the structure:
-            {transaction_id: instrument_identifiers}
-
-        Where data_type == "holding", the returned list will be a unique list of instrument_identifiers.
+        A list of objects to be appended to the ultimate response for load_from_data_frame.
     """
     if file_type == "transaction":
-        return _unmatched_ids_transactions(
+        return _unmatched_transactions(
             api_factory=api_factory,
             scope=scope,
             data_frame=data_frame,
@@ -972,12 +965,12 @@ def unmatched_identifiers(
             sync_batches=sync_batches,
         )
     elif file_type == "holding":
-        return _unmatched_ids_holdings(
+        return _unmatched_holdings(
             api_factory=api_factory, scope=scope, sync_batches=sync_batches,
         )
 
 
-def _unmatched_ids_transactions(
+def _unmatched_transactions(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
@@ -1001,11 +994,7 @@ def _unmatched_ids_transactions(
     Returns
     -------
     responses: list
-        A list to be appended to the ultimate response for load_from_data_frame.
-
-        The returned list will contain objects with the structure:
-            {transaction_id: instrument_identifiers}
-
+        A list of transaction objects to be appended to the ultimate response for load_from_data_frame.
     """
     # Extract a list of portfolio codes from the sync_batches
     portfolio_codes = extract_unique_portfolio_codes(sync_batches)
@@ -1048,7 +1037,7 @@ def return_unmatched_transactions(
 
     Returns
     -------
-    A list of objects with the structure { transaction_id: instrument_identifiers }.
+    A list of transaction objects with the structure.
     """
     transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
     done = False
@@ -1070,12 +1059,7 @@ def return_unmatched_transactions(
 
         response = transactions_api.get_transactions(**kwargs)
 
-        unmatched_transactions.extend(
-            [
-                {response.transaction_id: response.instrument_identifiers}
-                for response in response.values
-            ]
-        )
+        unmatched_transactions.extend([response for response in response.values])
 
         next_page = response.next_page
         done = response.next_page is None
@@ -1097,11 +1081,11 @@ def filter_unmatched_transactions(
     mapping_required : dict
         The required mapping from load_from_data_frame that helps identify the transaction_id column in the DataFrame
     unmatched_transactions : list
-         A list of objects with the structure { transaction_id: instrument_identifiers }
+         A list of transaction objects.
 
     Returns
     -------
-    A filtered list of unmatched_transactions.
+    A filtered list of transaction objects.
     """
     # Create a unique list of transaction_ids from the dataframe
     valid_txids = set(data_frame[mapping_required.get("transaction_id")])
@@ -1110,14 +1094,13 @@ def filter_unmatched_transactions(
     filtered_unmatched_transactions = [
         unmatched_transaction
         for unmatched_transaction in unmatched_transactions
-        for key in unmatched_transaction.keys()
-        if key in valid_txids
+        if unmatched_transaction.transaction_id in valid_txids
     ]
 
     return filtered_unmatched_transactions
 
 
-def _unmatched_ids_holdings(
+def _unmatched_holdings(
     api_factory: lusid.utilities.ApiClientFactory,
     scope: str,
     sync_batches: list = None,
@@ -1137,34 +1120,30 @@ def _unmatched_ids_holdings(
     Returns
     -------
     responses: list
-        A list to be appended to the ultimate response for load_from_data_frame.
-
-        The returned list will be a unique list of instrument_identifiers.
-
+        A list of holding objects to be appended to the ultimate response for load_from_data_frame.
     """
     # Extract a list of tuples of portfolio codes and effective at times from sync_batches
     code_tuples = extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
 
-    # Create empty list to hold instrument identifiers dictionaries that have not been resolved
-    unmatched_instruments = []
+    # Create empty list to hold holdings that have not been resolved
+    unmatched_holdings = []
 
     # For each holding adjustment in the upload, check whether any contained unresolved instruments and append to list
     for code_tuple in code_tuples:
-        unmatched_instruments.extend(
-            return_unmatched_instruments_from_holdings(
+        unmatched_holdings.extend(
+            return_unmatched_holdings(
                 api_factory=api_factory, scope=scope, code_tuple=code_tuple,
             )
         )
 
-    # Return a unique list of instrument_identifier dictionaries
-    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
+    return unmatched_holdings
 
 
-def return_unmatched_instruments_from_holdings(
+def return_unmatched_holdings(
     api_factory: lusid.utilities.ApiClientFactory, scope: str, code_tuple: (str, str),
 ):
     """
-    Call the get holdings adjustments api and return a list of instruments that have unresolved identifiers.
+    Call the get holdings adjustments api and return a list of holding objects that have unresolved identifiers.
 
     Parameters
     ----------
@@ -1178,7 +1157,7 @@ def return_unmatched_instruments_from_holdings(
 
     Returns
     -------
-    A unique list of instrument identifier dictionaries
+    A list of holding objects.
 
     """
     transactions_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
@@ -1187,47 +1166,12 @@ def return_unmatched_instruments_from_holdings(
         scope=scope, code=code_tuple[0], effective_at=str(DateOrCutLabel(code_tuple[1]))
     )
 
-    # Create a list of instrument identifiers (with LUID_ZZZZZZZZ) from the response
-    unmatched_instruments = [
-        adjustment.instrument_identifiers
+    # Create a list of holding objects with unmatched identifiers (e.g. with LUID_ZZZZZZZZ) from the response
+    return [
+        adjustment
         for adjustment in response.adjustments
         if adjustment.instrument_uid == "LUID_ZZZZZZZZ"
     ]
-
-    # Return a unique list of instrument_identifier dictionaries
-    return _unique_instrument_identifier_dictionaries(unmatched_instruments)
-
-
-def _unique_instrument_identifier_dictionaries(unmatched_instruments: list):
-    """
-    The unmatched_identifier list may contain duplicate instrument_identifier dictionaries. This method
-    will remove any duplicates from that list with the following logic:
-
-    For each dictionary of instrument identifiers:
-        Sort the identifier and its values (for cases where the same identifiers exist but in a different order)
-        Store the identifier and values as a tuple
-    Create a set from the list of tuples to remove duplicate values
-    Map each of the tuples back into a dictionary and return them as a list.
-
-    Parameters
-    ----------
-    unmatched_instruments: list
-        A list of instrument_identifiers
-
-    Returns
-    -------
-    A unique list of instrument identifier dictionaries
-
-    """
-    return list(
-        map(
-            dict,
-            set(
-                tuple(sorted(identifiers.items()))
-                for identifiers in unmatched_instruments
-            ),
-        )
-    )
 
 
 @checkargs
@@ -1248,7 +1192,7 @@ def load_from_data_frame(
     holdings_adjustment_only: bool = False,
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
-    return_unmatched_identifiers: bool = False,
+    return_unmatched_items: bool = False,
 ):
     """
 
@@ -1287,10 +1231,11 @@ def load_from_data_frame(
         The maximum number of workers to use in the thread pool used by the function
     sub_holding_keys_scope : str
         The scope to add the sub-holding keys to
-    return_unmatched_identifiers : bool
-        When loading transactions or holdings, a 'True' flag will return a list of identifiers that were
-        unmatched at the time of the upsert (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter
-        will be ignored for file types other than transactions or holdings
+    return_unmatched_items : bool
+        When loading transactions or holdings, a 'True' flag will return a list of the transaction or holding
+        objects where their instruments were unmatched at the time of the upsert
+        (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter will be ignored for file types other than
+        transactions or holdings
     Returns
     -------
     responses: dict
@@ -1631,7 +1576,7 @@ def load_from_data_frame(
             domain_lookup=domain_lookup,
             sub_holding_keys=sub_holding_keys,
             sub_holding_keys_scope=sub_holding_keys_scope,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
             **keyword_arguments,
         ),
         loop,

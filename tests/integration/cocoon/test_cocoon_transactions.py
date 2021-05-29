@@ -15,30 +15,45 @@ sedol = "Instrument/default/Sedol"
 name = "Instrument/default/Name"
 
 
+class MockTransaction:
+    def __init__(self, transaction_id, instrument_identifiers):
+        self.transaction_id = transaction_id
+        self.instrument_identifiers = instrument_identifiers
+
+
 def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
     if trd_0003:
-        trd_0003 = {
-            "trd_0003": {
+        trd_0003 = MockTransaction(
+            transaction_id="trd_0003",
+            instrument_identifiers={
                 client_internal: "THIS_WILL_NOT_RESOLVE_1",
                 sedol: "FAKESEDOL1",
                 name: "THIS_WILL_NOT_RESOLVE_1",
-            }
-        }
+            },
+        )
     else:
         trd_0003 = None
 
     if trd_0004:
-        trd_0004 = {
-            "trd_0004": {
+        trd_0004 = MockTransaction(
+            transaction_id="trd_0004",
+            instrument_identifiers={
                 client_internal: "THIS_WILL_NOT_RESOLVE_2",
                 sedol: "FAKESEDOL2",
                 name: "THIS_WILL_NOT_RESOLVE_2",
-            }
-        }
+            },
+        )
     else:
         trd_0004 = None
 
     return [transaction for transaction in [trd_0003, trd_0004] if transaction]
+
+
+def dict_for_comparison(list_of_transactions):
+    return {
+        transaction.transaction_id: transaction.instrument_identifiers
+        for transaction in list_of_transactions
+    }
 
 
 class CocoonTestsTransactions(unittest.TestCase):
@@ -320,37 +335,18 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "Test standard transaction load with two unresolved instruments",
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
                 True,
-                [
-                    {
-                        "unresolved_tx01": {
-                            client_internal: "FAKECLIENTINTERNAL1",
-                            "Instrument/default/Figi": "FAKEFIGI1",
-                            "Instrument/default/Isin": "FAKEISIN1",
-                        }
-                    },
-                    {
-                        "unresolved_tx02": {
-                            client_internal: "FAKECLIENTINTERNAL2",
-                            "Instrument/default/Figi": "FAKEFIGI2",
-                            "Instrument/default/Isin": "FAKEISIN2",
-                        }
-                    },
-                ],
+                ["unresolved_tx01", "unresolved_tx02",],
             ],
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-        self,
-        _,
-        file_name,
-        return_unmatched_identifiers,
-        expected_unmatched_transactions,
+        self, _, file_name, return_unmatched_items, expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
 
         :param str file_name: The name of the test data file
-        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
+        :param bool return_unmatched_items: A flag to request the return of all objects with unresolved instruments
         :param expected_unmatched_transactions: The expected unmatched transactions appended to the response
 
         :return: None
@@ -394,16 +390,25 @@ class CocoonTestsTransactions(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             batch_size=batch_size,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
         )
 
         self.assertGreater(len(responses["transactions"]["success"]), 0)
 
         self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
-        # Assert that the unmatched_identifiers returned are as expected for each case
+        # Assert that the unmatched_transactions returned are as expected for each case
+        # First check the count of transactions
         self.assertEqual(
-            responses["transactions"].get("unmatched_identifiers", False),
+            len(responses["transactions"].get("unmatched_items", False)),
+            len(expected_unmatched_transactions),
+        )
+        # Then check the transaction ids are the ones expected
+        self.assertCountEqual(
+            [
+                transaction.transaction_id
+                for transaction in responses["transactions"].get("unmatched_items", [])
+            ],
             expected_unmatched_transactions,
         )
 
@@ -472,10 +477,15 @@ class CocoonTestsTransactions(unittest.TestCase):
             self.api_factory, scope, code
         )
 
-        # Assert that there are only two values returned and that the transaction ids and instrument details match
+        # Assert that there are only two values returned
         self.assertEqual(len(response), 2)
+        # Assert that the transaction ids and instrument identifiers from the returned transactions match expectations
+        response_dict = {
+            transaction.transaction_id: transaction.instrument_identifiers
+            for transaction in response
+        }
         self.assertEqual(
-            response[0].get("trd_0003"),
+            response_dict.get("trd_0003"),
             {
                 client_internal: "THIS_WILL_NOT_RESOLVE_1",
                 sedol: "FAKESEDOL1",
@@ -483,7 +493,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             },
         )
         self.assertEqual(
-            response[1].get("trd_0004"),
+            response_dict.get("trd_0004"),
             {
                 client_internal: "THIS_WILL_NOT_RESOLVE_2",
                 sedol: "FAKESEDOL2",
@@ -519,7 +529,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             ],
         ]
     )
-    def test_filter_unmatched_transactions_method_only_returns_transaction_ids_originally_present_in_dataframe(
+    def test_filter_unmatched_transactions_method_only_returns_transactions_originally_present_in_dataframe(
         self,
         _,
         data_frame_path,
@@ -547,8 +557,10 @@ class CocoonTestsTransactions(unittest.TestCase):
             unmatched_transactions=unmatched_transactions,
         )
 
-        self.assertEqual(
-            filtered_unmatched_transactions, expected_filtered_unmatched_transactions
+        # Assert that the transaction ids and identifiers from the transactions returned match up to the expected ones
+        self.assertCountEqual(
+            dict_for_comparison(filtered_unmatched_transactions),
+            dict_for_comparison(expected_filtered_unmatched_transactions),
         )
 
     @lusid_feature("T8-14")
@@ -618,16 +630,15 @@ class CocoonTestsTransactions(unittest.TestCase):
             file_type="transactions",
             identifier_mapping=identifier_mapping,
             batch_size=None,
-            return_unmatched_identifiers=True,
+            return_unmatched_items=True,
         )
 
         self.assertGreater(len(transactions_response["transactions"]["success"]), 0)
         self.assertEqual(len(transactions_response["transactions"]["errors"]), 0)
 
-        # Assert that the unmatched_identifiers returned are as expected
+        # Assert that the unmatched_items returned are as expected
         self.assertEqual(
-            len(transactions_response["transactions"].get("unmatched_identifiers", [])),
-            2001,
+            len(transactions_response["transactions"].get("unmatched_items", [])), 2001,
         )
 
         # Delete the portfolio at the end of the test
