@@ -29,7 +29,7 @@ def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
                 client_internal: "THIS_WILL_NOT_RESOLVE_1",
                 sedol: "FAKESEDOL1",
                 name: "THIS_WILL_NOT_RESOLVE_1",
-            }
+            },
         )
     else:
         trd_0003 = None
@@ -41,7 +41,7 @@ def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
                 client_internal: "THIS_WILL_NOT_RESOLVE_2",
                 sedol: "FAKESEDOL2",
                 name: "THIS_WILL_NOT_RESOLVE_2",
-            }
+            },
         )
     else:
         trd_0004 = None
@@ -51,9 +51,8 @@ def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
 
 def dict_for_comparison(list_of_transactions):
     return {
-        transaction.transaction_id: transaction.instrument_identifiers for
-        transaction in
-        list_of_transactions
+        transaction.transaction_id: transaction.instrument_identifiers
+        for transaction in list_of_transactions
     }
 
 
@@ -336,19 +335,12 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "Test standard transaction load with two unresolved instruments",
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
                 True,
-                [
-                    "unresolved_tx01",
-                    "unresolved_tx02",
-                ],
+                ["unresolved_tx01", "unresolved_tx02",],
             ],
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-        self,
-        _,
-        file_name,
-        return_unmatched_items,
-        expected_unmatched_transactions,
+        self, _, file_name, return_unmatched_items, expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
@@ -409,16 +401,15 @@ class CocoonTestsTransactions(unittest.TestCase):
         # First check the count of transactions
         self.assertEqual(
             len(responses["transactions"].get("unmatched_items", False)),
-            len(expected_unmatched_transactions)
+            len(expected_unmatched_transactions),
         )
         # Then check the transaction ids are the ones expected
         self.assertCountEqual(
             [
-                transaction.transaction_id for
-                transaction in
-                responses["transactions"].get("unmatched_items", [])
+                transaction.transaction_id
+                for transaction in responses["transactions"].get("unmatched_items", [])
             ],
-            expected_unmatched_transactions
+            expected_unmatched_transactions,
         )
 
         self.assertTrue(
@@ -489,7 +480,10 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Assert that there are only two values returned
         self.assertEqual(len(response), 2)
         # Assert that the transaction ids and instrument identifiers from the returned transactions match expectations
-        response_dict = {transaction.transaction_id: transaction.instrument_identifiers for transaction in response}
+        response_dict = {
+            transaction.transaction_id: transaction.instrument_identifiers
+            for transaction in response
+        }
         self.assertEqual(
             response_dict.get("trd_0003"),
             {
@@ -566,7 +560,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Assert that the transaction ids and identifiers from the transactions returned match up to the expected ones
         self.assertCountEqual(
             dict_for_comparison(filtered_unmatched_transactions),
-            dict_for_comparison(expected_filtered_unmatched_transactions)
+            dict_for_comparison(expected_filtered_unmatched_transactions),
         )
 
     @lusid_feature("T8-14")
@@ -644,8 +638,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Assert that the unmatched_items returned are as expected
         self.assertEqual(
-            len(transactions_response["transactions"].get("unmatched_items", [])),
-            2001,
+            len(transactions_response["transactions"].get("unmatched_items", [])), 2001,
         )
 
         # Delete the portfolio at the end of the test

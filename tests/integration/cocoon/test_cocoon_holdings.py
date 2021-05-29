@@ -32,9 +32,8 @@ def holding_instrument_identifiers(fake1=False, fake2=False):
 
 def extract_unique_identifiers_from_holdings_response(response):
     unmatched_instruments = [
-        holding_adjustment.instrument_identifiers for
-        holding_adjustment in
-        response["holdings"].get("unmatched_items", [])
+        holding_adjustment.instrument_identifiers
+        for holding_adjustment in response["holdings"].get("unmatched_items", [])
     ]
 
     return list(
@@ -1035,7 +1034,10 @@ class CocoonTestsHoldings(unittest.TestCase):
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
 
         # Assert that the number of holdings returned are as expected
-        self.assertEqual(len(holding_responses["holdings"]["unmatched_items"]), expected_holdings_in_response)
+        self.assertEqual(
+            len(holding_responses["holdings"]["unmatched_items"]),
+            expected_holdings_in_response,
+        )
 
         # Assert that the holdings returned only contain the instrument identifiers that did not resolve
         self.assertCountEqual(
