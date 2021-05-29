@@ -15,30 +15,46 @@ sedol = "Instrument/default/Sedol"
 name = "Instrument/default/Name"
 
 
+class MockTransaction:
+    def __init__(self, transaction_id, instrument_identifiers):
+        self.transaction_id = transaction_id
+        self.instrument_identifiers = instrument_identifiers
+
+
 def transaction_and_instrument_identifiers(trd_0003=False, trd_0004=False):
     if trd_0003:
-        trd_0003 = {
-            "trd_0003": {
+        trd_0003 = MockTransaction(
+            transaction_id="trd_0003",
+            instrument_identifiers={
                 client_internal: "THIS_WILL_NOT_RESOLVE_1",
                 sedol: "FAKESEDOL1",
                 name: "THIS_WILL_NOT_RESOLVE_1",
             }
-        }
+        )
     else:
         trd_0003 = None
 
     if trd_0004:
-        trd_0004 = {
-            "trd_0004": {
+        trd_0004 = MockTransaction(
+            transaction_id="trd_0004",
+            instrument_identifiers={
                 client_internal: "THIS_WILL_NOT_RESOLVE_2",
                 sedol: "FAKESEDOL2",
                 name: "THIS_WILL_NOT_RESOLVE_2",
             }
-        }
+        )
     else:
         trd_0004 = None
 
     return [transaction for transaction in [trd_0003, trd_0004] if transaction]
+
+
+def dict_for_comparison(list_of_transactions):
+    return {
+        transaction.transaction_id: transaction.instrument_identifiers for
+        transaction in
+        list_of_transactions
+    }
 
 
 class CocoonTestsTransactions(unittest.TestCase):
@@ -321,20 +337,8 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
                 True,
                 [
-                    {
-                        "unresolved_tx01": {
-                            client_internal: "FAKECLIENTINTERNAL1",
-                            "Instrument/default/Figi": "FAKEFIGI1",
-                            "Instrument/default/Isin": "FAKEISIN1",
-                        }
-                    },
-                    {
-                        "unresolved_tx02": {
-                            client_internal: "FAKECLIENTINTERNAL2",
-                            "Instrument/default/Figi": "FAKEFIGI2",
-                            "Instrument/default/Isin": "FAKEISIN2",
-                        }
-                    },
+                    "unresolved_tx01",
+                    "unresolved_tx02",
                 ],
             ],
         ]
@@ -401,10 +405,20 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         self.assertEqual(len(responses["transactions"]["errors"]), 0)
 
-        # Assert that the unmatched_identifiers returned are as expected for each case
+        # Assert that the unmatched_transactions returned are as expected for each case
+        # First check the count of transactions
         self.assertEqual(
-            responses["transactions"].get("unmatched_identifiers", False),
-            expected_unmatched_transactions,
+            len(responses["transactions"].get("unmatched_identifiers", False)),
+            len(expected_unmatched_transactions)
+        )
+        # Then check the transaction ids are the ones expected
+        self.assertCountEqual(
+            [
+                transaction.transaction_id for
+                transaction in
+                responses["transactions"].get("unmatched_identifiers", [])
+            ],
+            expected_unmatched_transactions
         )
 
         self.assertTrue(
@@ -472,10 +486,12 @@ class CocoonTestsTransactions(unittest.TestCase):
             self.api_factory, scope, code
         )
 
-        # Assert that there are only two values returned and that the transaction ids and instrument details match
+        # Assert that there are only two values returned
         self.assertEqual(len(response), 2)
+        # Assert that the transaction ids and instrument identifiers match
+        response_dict = {transaction.transaction_id: transaction.instrument_identifiers for transaction in response}
         self.assertEqual(
-            response[0].get("trd_0003"),
+            response_dict.get("trd_0003"),
             {
                 client_internal: "THIS_WILL_NOT_RESOLVE_1",
                 sedol: "FAKESEDOL1",
@@ -483,7 +499,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             },
         )
         self.assertEqual(
-            response[1].get("trd_0004"),
+            response_dict.get("trd_0004"),
             {
                 client_internal: "THIS_WILL_NOT_RESOLVE_2",
                 sedol: "FAKESEDOL2",
@@ -547,8 +563,9 @@ class CocoonTestsTransactions(unittest.TestCase):
             unmatched_transactions=unmatched_transactions,
         )
 
-        self.assertEqual(
-            filtered_unmatched_transactions, expected_filtered_unmatched_transactions
+        self.assertCountEqual(
+            dict_for_comparison(filtered_unmatched_transactions),
+            dict_for_comparison(expected_filtered_unmatched_transactions)
         )
 
     @lusid_feature("T8-14")
