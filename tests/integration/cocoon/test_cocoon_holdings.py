@@ -34,7 +34,7 @@ def extract_unique_identifiers_from_holdings_response(response):
     unmatched_instruments = [
         holding_adjustment.instrument_identifiers for
         holding_adjustment in
-        response["holdings"].get("unmatched_identifiers", [])
+        response["holdings"].get("unmatched_items", [])
     ]
 
     return list(
@@ -956,7 +956,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             ],
         ]
     )
-    def test_load_from_data_frame_holdings_success_with_unmatched_identifiers(
+    def test_load_from_data_frame_holdings_success_with_unmatched_items(
         self,
         _,
         file_name,
@@ -991,7 +991,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         property_columns = ["Prime Broker"]
         properties_scope = "operations001"
         sub_holding_key_scope = None
-        return_unmatched_identifiers = True
+        return_unmatched_items = True
         expected_outcome = lusid.models.Version
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
@@ -1027,17 +1027,17 @@ class CocoonTestsHoldings(unittest.TestCase):
             sub_holding_keys=sub_holding_keys,
             holdings_adjustment_only=holdings_adjustment_only,
             sub_holding_keys_scope=sub_holding_key_scope,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
         )
 
         self.assertGreater(len(holding_responses["holdings"]["success"]), 0)
 
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 0)
 
-        self.assertEqual(len(holding_responses["holdings"]["unmatched_identifiers"]), expected_holdings_in_response)
+        # Assert that the number of holdings returned are as expected
+        self.assertEqual(len(holding_responses["holdings"]["unmatched_items"]), expected_holdings_in_response)
 
-        # Assert that the unmatched_identifiers code is hit when the return_unmatched_identifiers is set to True and
-        # Check that the lists contain the same elements, in any order (the assert name is misleading)
+        # Assert that the holdings returned only contain the instrument identifiers that did not resolve
         self.assertCountEqual(
             extract_unique_identifiers_from_holdings_response(holding_responses),
             expected_unmatched_identifiers,

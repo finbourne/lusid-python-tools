@@ -347,14 +347,14 @@ class CocoonTestsTransactions(unittest.TestCase):
         self,
         _,
         file_name,
-        return_unmatched_identifiers,
+        return_unmatched_items,
         expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
 
         :param str file_name: The name of the test data file
-        :param bool return_unmatched_identifiers: A flag to request the return of all unmatched instrument identifiers
+        :param bool return_unmatched_items: A flag to request the return of all objects with unresolved instruments
         :param expected_unmatched_transactions: The expected unmatched transactions appended to the response
 
         :return: None
@@ -398,7 +398,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             batch_size=batch_size,
-            return_unmatched_identifiers=return_unmatched_identifiers,
+            return_unmatched_items=return_unmatched_items,
         )
 
         self.assertGreater(len(responses["transactions"]["success"]), 0)
@@ -408,7 +408,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         # Assert that the unmatched_transactions returned are as expected for each case
         # First check the count of transactions
         self.assertEqual(
-            len(responses["transactions"].get("unmatched_identifiers", False)),
+            len(responses["transactions"].get("unmatched_items", False)),
             len(expected_unmatched_transactions)
         )
         # Then check the transaction ids are the ones expected
@@ -416,7 +416,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             [
                 transaction.transaction_id for
                 transaction in
-                responses["transactions"].get("unmatched_identifiers", [])
+                responses["transactions"].get("unmatched_items", [])
             ],
             expected_unmatched_transactions
         )
@@ -488,7 +488,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Assert that there are only two values returned
         self.assertEqual(len(response), 2)
-        # Assert that the transaction ids and instrument identifiers match
+        # Assert that the transaction ids and instrument identifiers from the returned transactions match expectations
         response_dict = {transaction.transaction_id: transaction.instrument_identifiers for transaction in response}
         self.assertEqual(
             response_dict.get("trd_0003"),
@@ -535,7 +535,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             ],
         ]
     )
-    def test_filter_unmatched_transactions_method_only_returns_transaction_ids_originally_present_in_dataframe(
+    def test_filter_unmatched_transactions_method_only_returns_transactions_originally_present_in_dataframe(
         self,
         _,
         data_frame_path,
@@ -563,6 +563,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             unmatched_transactions=unmatched_transactions,
         )
 
+        # Assert that the transaction ids and identifiers from the transactions returned match up to the expected ones
         self.assertCountEqual(
             dict_for_comparison(filtered_unmatched_transactions),
             dict_for_comparison(expected_filtered_unmatched_transactions)
@@ -635,15 +636,15 @@ class CocoonTestsTransactions(unittest.TestCase):
             file_type="transactions",
             identifier_mapping=identifier_mapping,
             batch_size=None,
-            return_unmatched_identifiers=True,
+            return_unmatched_items=True,
         )
 
         self.assertGreater(len(transactions_response["transactions"]["success"]), 0)
         self.assertEqual(len(transactions_response["transactions"]["errors"]), 0)
 
-        # Assert that the unmatched_identifiers returned are as expected
+        # Assert that the unmatched_items returned are as expected
         self.assertEqual(
-            len(transactions_response["transactions"].get("unmatched_identifiers", [])),
+            len(transactions_response["transactions"].get("unmatched_items", [])),
             2001,
         )
 
