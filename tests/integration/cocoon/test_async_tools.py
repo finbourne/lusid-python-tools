@@ -43,7 +43,7 @@ class CocoonTestsAsyncTools(unittest.TestCase):
                 "Standard load with ~700 portfolios in 5 batches with max_threads per batch of 20",
                 "data/holdings-example-large.csv",
                 5,
-                20,
+                10,
             ],
         ]
     )

@@ -149,6 +149,7 @@ class CommandsTests(unittest.TestCase):
             parse=lambda: get_props.parse(args=["--secrets", f"{self.secrets_file}"]),
             display_df=self.display_df,
         )
+        print(result)
         self.validate_results_df(result)
 
     def test_get_port_cons(self):
