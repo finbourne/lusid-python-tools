@@ -47,7 +47,9 @@ class CocoonTestsAsyncTools(unittest.TestCase):
             ],
         ]
     )
-    @unittest.skip("GitHub Actions failing on this. Skipping while we open a support ticket with GHA")
+    @unittest.skip(
+        "GitHub Actions failing on this. Skipping while we open a support ticket with GHA"
+    )
     def test_multiple_threads(
         self, _, file_name, number_threads, thread_pool_max_workers
     ):
