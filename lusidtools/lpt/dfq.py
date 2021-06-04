@@ -1,4 +1,5 @@
 import argparse
+import re
 import pandas as pd
 
 
@@ -13,7 +14,12 @@ def parse(with_inputs=True, args=None):
         "-s", "--select", nargs="*", metavar="column", help="fields to select"
     )
     parser.add_argument(
-        "-w", "--where", nargs="*", metavar="column=value", help="filtering"
+        "-w",
+        "--where",
+        nargs="*",
+        metavar="column=value",
+        help="filtering eg. -w 'cost>100' 'cost>-100' or -w "
+        "'strat=Tech,Pharma' 'region!=UK'",
     )
     parser.add_argument(
         "-o", "--order", nargs="*", metavar="column", help="fields to sort by"
@@ -164,9 +170,28 @@ def dfq(args, given_df=None):
 
     if args.where:
         for c in args.where:
-            kv = c.split("=")
+
+            # Get keys, values and operations
+            kv = re.findall(r"[^>,<,=]+", c)
+            ops = re.findall(r"[>,<,=]", c)
+
+            if len(kv) < 2:
+                raise ValueError(f"No keys or values found in clause: '{c}'")
+
+            # define behaviour
+            EQ = 1
+            GT = 2
+            LT = 4
+            GE = EQ + GT  # 3
+            LE = EQ + LT  # 5
+
+            op = EQ if "=" in ops else 0
+            op += GT if ">" in ops else 0
+            op += LT if "<" in ops else 0
+
             col = kv[0]
             invert = col.endswith("!")
+
             if invert:
                 col = col[:-1]
 
@@ -196,10 +221,21 @@ def dfq(args, given_df=None):
                         v = float(v)
                         dflt = 0.0
 
-                    crit = df[col].fillna(dflt) == v
+                    # apply appropriate boolean operator to get filter mask
+                    crit = {
+                        EQ: lambda f, v: f == v,
+                        GT: lambda f, v: f > v,
+                        LT: lambda f, v: f < v,
+                        GE: lambda f, v: f >= v,
+                        LE: lambda f, v: f <= v,
+                    }.get(op, lambda f, v: print("Invalid operation!"))(
+                        df[col].fillna(dflt), v
+                    )
+
             else:
                 crit = df[col].isin(s)
 
+            # apply filter mask
             if invert:
                 df = df[~crit]
             else:

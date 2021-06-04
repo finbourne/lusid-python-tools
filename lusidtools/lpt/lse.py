@@ -99,7 +99,7 @@ class Caller:
                 result = fn(*args, **(adjKwargs))
                 request_id = result[2].get("lusid-meta-requestId", "n/a")
             except self.exceptionClass as err:
-                data = {} if err.body == "" else json.loads(err.body)
+                data = {} if err.body == "" or err.body == b"" else json.loads(err.body)
 
                 instance = data.get("instance", "n/a")
                 s = instance.split("insights/logs/")
