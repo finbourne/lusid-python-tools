@@ -1060,9 +1060,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 scope=scope, code=portfolio.id.code
             )
 
-    @lusid_feature(
-        "T3-42",
-    )
+    @lusid_feature("T3-42",)
     def test_return_unmatched_holding_handles_empty_holdings_exception_in_lusid(self):
         """
         Test that the get holdings call to LUSID handles cases where there are no holdings present for a
@@ -1078,7 +1076,9 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         # Create an empty portfolio for the test, but handle situations where the portfolio already exists
         try:
-            portfolio_setup_response = self.api_factory.build(lusid.api.TransactionPortfoliosApi).create_portfolio(
+            portfolio_setup_response = self.api_factory.build(
+                lusid.api.TransactionPortfoliosApi
+            ).create_portfolio(
                 scope=portfolio_code_and_scope,
                 create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
                     display_name=portfolio_code_and_scope,
@@ -1086,7 +1086,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     code=portfolio_code_and_scope,
                     created=effective_at_datetime_for_portfolio,
                     base_currency=base_currency,
-                )
+                ),
             )
 
             # Assert that the portfolio was created successfully
@@ -1100,7 +1100,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         unmatched_holdings_response = cocoon.cocoon.return_unmatched_holdings(
             api_factory=self.api_factory,
             scope=portfolio_code_and_scope,
-            code_tuple=code_tuple
+            code_tuple=code_tuple,
         )
 
         # Assert that the unmatched holdings response does not throw an error, and returns an empty list
@@ -1108,6 +1108,5 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         # Delete the portfolio at the end of the test
         self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
-            scope=portfolio_code_and_scope,
-            code=portfolio_code_and_scope
+            scope=portfolio_code_and_scope, code=portfolio_code_and_scope
         )

@@ -1166,12 +1166,16 @@ def return_unmatched_holdings(
     # make sure to gracefully handle the exception so that any LUSID error from the main upload is not suppressed.
     try:
         response = transactions_api.get_holdings_adjustment(
-            scope=scope, code=code_tuple[0], effective_at=str(DateOrCutLabel(code_tuple[1]))
+            scope=scope,
+            code=code_tuple[0],
+            effective_at=str(DateOrCutLabel(code_tuple[1])),
         )
     except lusid.ApiException as e:
         if "HoldingsAdjustmentDoesNotExist" in str(e.body):
-            logging.info(f"While validating holding upload, LUSID was unable to find any holdings within portfolio "
-                         f"{code_tuple[0]} for effectiveAt {str(DateOrCutLabel(code_tuple[1]))}.")
+            logging.info(
+                f"While validating holding upload, LUSID was unable to find any holdings within portfolio "
+                f"{code_tuple[0]} for effectiveAt {str(DateOrCutLabel(code_tuple[1]))}."
+            )
             return []
 
     # Create a list of holding objects with unmatched identifiers (e.g. with LUID_ZZZZZZZZ) from the response
