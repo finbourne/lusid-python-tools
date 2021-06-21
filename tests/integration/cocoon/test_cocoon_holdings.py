@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 import pandas as pd
+from datetime import datetime
+import pytz
 from lusidfeature import lusid_feature
 
 from lusidtools import cocoon as cocoon
@@ -1057,3 +1059,54 @@ class CocoonTestsHoldings(unittest.TestCase):
             self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
                 scope=scope, code=portfolio.id.code
             )
+
+    @lusid_feature("T3-42",)
+    def test_return_unmatched_holding_handles_empty_holdings_exception_in_lusid(self):
+        """
+        Test that the get holdings call to LUSID handles cases where there are no holdings present for a
+        given portfolio code and effective at combination.
+
+        :return: None
+        """
+        portfolio_code_and_scope = "set_holdings_test"
+        effective_at_datetime_for_portfolio = datetime(2020, 1, 1, tzinfo=pytz.utc)
+        base_currency = "GBP"
+        effective_at_str_for_holdings = "2020-01-01T12:00:00"
+        code_tuple = (portfolio_code_and_scope, effective_at_str_for_holdings)
+
+        # Create an empty portfolio for the test, but handle situations where the portfolio already exists
+        try:
+            portfolio_setup_response = self.api_factory.build(
+                lusid.api.TransactionPortfoliosApi
+            ).create_portfolio(
+                scope=portfolio_code_and_scope,
+                create_transaction_portfolio_request=lusid.models.CreateTransactionPortfolioRequest(
+                    display_name=portfolio_code_and_scope,
+                    description=portfolio_code_and_scope,
+                    code=portfolio_code_and_scope,
+                    created=effective_at_datetime_for_portfolio,
+                    base_currency=base_currency,
+                ),
+            )
+
+            # Assert that the portfolio was created successfully
+            self.assertIsInstance(portfolio_setup_response, lusid.models.Portfolio)
+
+        except lusid.ApiException as e:
+            if "PortfolioWithIdAlreadyExists" not in str(e.body):
+                raise e
+
+        # Call the return_unmatched_holdings method where there are no holdings
+        unmatched_holdings_response = cocoon.cocoon.return_unmatched_holdings(
+            api_factory=self.api_factory,
+            scope=portfolio_code_and_scope,
+            code_tuple=code_tuple,
+        )
+
+        # Assert that the unmatched holdings response does not throw an error, and returns an empty list
+        self.assertEqual([], unmatched_holdings_response)
+
+        # Delete the portfolio at the end of the test
+        self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+            scope=portfolio_code_and_scope, code=portfolio_code_and_scope
+        )
