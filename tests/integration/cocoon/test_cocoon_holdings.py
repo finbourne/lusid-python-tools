@@ -1114,10 +1114,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             scope=portfolio_code_and_scope, code=portfolio_code_and_scope
         )
 
-    @lusid_feature(
-        "T3-43",
-        "T3-44"
-    )
+    @lusid_feature("T3-43", "T3-44")
     @parameterized.expand(
         [
             [
@@ -1133,15 +1130,11 @@ class CocoonTestsHoldings(unittest.TestCase):
                 ["Security Description"],
                 "PortfolioNotFound",
                 True,
-            ]
-        ])
+            ],
+        ]
+    )
     def test_failed_load_from_data_frame_holdings_returns_useful_errors_and_skips_validation_logic(
-            self,
-            _,
-            file_name,
-            sub_holding_keys,
-            error_name,
-            skip_portfolio,
+        self, _, file_name, sub_holding_keys, error_name, skip_portfolio,
     ) -> None:
         """
         Test that a failed holding upload is handled gracefully by the whole load_from_data_frame function.
@@ -1217,7 +1210,10 @@ class CocoonTestsHoldings(unittest.TestCase):
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 1)
 
         # Assert that the ApiError thrown by LUSID is what is expected, given the input data
-        self.assertEqual(json.loads(holding_responses["holdings"]["errors"][0].body)["name"], error_name)
+        self.assertEqual(
+            json.loads(holding_responses["holdings"]["errors"][0].body)["name"],
+            error_name,
+        )
 
         # Assert that there is no 'unmatched_item' field if the input data resulted in no successful uploads
         self.assertEqual(holding_responses["holdings"].get("unmatched_items"), None)

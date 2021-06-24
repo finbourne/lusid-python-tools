@@ -913,7 +913,7 @@ async def _construct_batches(
     if check_for_unmatched_items(
         flag=return_unmatched_items,
         file_type=file_type,
-        returned_response=returned_response
+        returned_response=returned_response,
     ):
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
