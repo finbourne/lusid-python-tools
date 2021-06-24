@@ -1,4 +1,5 @@
 import unittest
+import json
 from pathlib import Path
 import pandas as pd
 from datetime import datetime
@@ -970,7 +971,9 @@ class CocoonTestsHoldings(unittest.TestCase):
         Test that holdings can be loaded successfully
 
         :param str file_name: The name of the test data file
-        :sub_holding_keys
+        :param list[str] sub_holding_keys: The column names for any sub-holding-keys
+        :param bool holdings_adjustment_only: Whether to use the set or adjust holding api
+        :param int expected_holdings_in_response: The number of expected holdings in the response
         :param list[instrument_identifiers] expected_unmatched_identifiers: A list of expected instrument_identifiers
 
         :return: None
@@ -1060,7 +1063,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                 scope=scope, code=portfolio.id.code
             )
 
-    @lusid_feature("T3-42",)
+    @lusid_feature("T3-42")
     def test_return_unmatched_holding_handles_empty_holdings_exception_in_lusid(self):
         """
         Test that the get holdings call to LUSID handles cases where there are no holdings present for a
@@ -1110,3 +1113,118 @@ class CocoonTestsHoldings(unittest.TestCase):
         self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
             scope=portfolio_code_and_scope, code=portfolio_code_and_scope
         )
+
+    @lusid_feature(
+        "T3-43",
+        "T3-44"
+    )
+    @parameterized.expand(
+        [
+            [
+                "Failed load with duplicate shk",
+                "data/holdings-example-duplicate-shk.csv",
+                ["Security Description"],
+                "DuplicateSubHoldingKeysProvided",
+                False,
+            ],
+            [
+                "Failed with non-existent portfolio",
+                "data/holdings-example-single-holding.csv",
+                ["Security Description"],
+                "PortfolioNotFound",
+                True,
+            ]
+        ])
+    def test_failed_load_from_data_frame_holdings_returns_useful_errors_and_skips_validation_logic(
+            self,
+            _,
+            file_name,
+            sub_holding_keys,
+            error_name,
+            skip_portfolio,
+    ) -> None:
+        """
+        Test that a failed holding upload is handled gracefully by the whole load_from_data_frame function.
+        If any upload causes an error the validation logic will not run and all the errors will be returned
+        by load_from_data_frame.
+
+        :param str file_name: The name of the test data file
+        :param list[str] sub_holding_keys: The column names for any sub-holding-keys
+        :param str error_name: The name of the ApiException that is hit by this error
+        :param bool skip_portfolio: Flag whether to skip the creation of a test portfolio
+
+        :return: None
+        """
+        # Unchanged vars that have no need to be passed via param (they would count as duplicate lines)
+        scope = "unmatched_holdings_test"
+        mapping_required = {
+            "code": "FundCode",
+            "effective_at": "Effective Date",
+            "tax_lots.units": "Quantity",
+        }
+        mapping_optional = {"tax_lots.cost.currency": "Local Currency Code"}
+        identifier_mapping = {
+            "Isin": "ISIN Security Identifier",
+            "Sedol": "SEDOL Security Identifier",
+            "Currency": "is_cash_with_currency",
+            "ClientInternal": "Client Internal",
+        }
+        property_columns = ["Prime Broker"]
+        properties_scope = "operations001"
+        sub_holding_key_scope = None
+        return_unmatched_items = True
+        holdings_adjustment_only = False
+
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        if not skip_portfolio:
+            # Create the portfolios
+            portfolio_response = cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required={
+                    "code": "FundCode",
+                    "display_name": "FundCode",
+                    "base_currency": "Local Currency Code",
+                },
+                file_type="portfolio",
+                mapping_optional={"created": "Created Date"},
+            )
+
+            # Assert that all portfolios were created without any issues
+            self.assertEqual(len(portfolio_response.get("portfolios").get("errors")), 0)
+
+        # Load in the holdings adjustments
+        holding_responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="holdings",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            sub_holding_keys=sub_holding_keys,
+            holdings_adjustment_only=holdings_adjustment_only,
+            sub_holding_keys_scope=sub_holding_key_scope,
+            return_unmatched_items=return_unmatched_items,
+        )
+
+        self.assertEqual(len(holding_responses["holdings"]["success"]), 0)
+
+        self.assertEqual(len(holding_responses["holdings"]["errors"]), 1)
+
+        # Assert that the ApiError thrown by LUSID is what is expected, given the input data
+        self.assertEqual(json.loads(holding_responses["holdings"]["errors"][0].body)["name"], error_name)
+
+        # Assert that there is no 'unmatched_item' field if the input data resulted in no successful uploads
+        self.assertEqual(holding_responses["holdings"].get("unmatched_items"), None)
+
+        if not skip_portfolio:
+            # Delete the portfolios at the end of the test
+            for portfolio in portfolio_response.get("portfolios").get("success"):
+                self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+                    scope=scope, code=portfolio.id.code
+                )

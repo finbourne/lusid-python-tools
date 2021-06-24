@@ -909,8 +909,12 @@ async def _construct_batches(
         "success": [r for r in responses_flattened if not isinstance(r, Exception)],
     }
 
-    # For transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if return_unmatched_items is True and file_type in ["transaction", "holding"]:
+    # For successful transactions or holdings file types, optionally return unmatched identifiers with the responses
+    if check_for_unmatched_items(
+        flag=return_unmatched_items,
+        file_type=file_type,
+        returned_response=returned_response
+    ):
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
@@ -921,6 +925,34 @@ async def _construct_batches(
         )
 
     return returned_response
+
+
+def check_for_unmatched_items(flag, file_type, returned_response):
+    """
+    This method contains the conditional logic to determine whether the unmatched_items validation should be run.
+    It should not be run if:
+        a) it was not requested
+        b) the upload was not for transactions or holdings
+        c) the upload had no successful uploads
+
+    Parameters
+    ----------
+    flag : bool
+        The bool flag that indicates whether any unmatched identifiers should be checked
+    file_type : str
+        The file type of the upload
+    returned_response : dict
+        The response from laod_from_data_frame
+    Returns
+    -------
+
+    A boolean value indicating whether the unmatched_items validation should be completed
+    """
+    condition_1 = flag is True
+    condition_2 = file_type in ["transaction", "holding"]
+    condition_3 = len(returned_response["errors"]) == 0
+
+    return condition_1 and condition_2 and condition_3
 
 
 @checkargs
