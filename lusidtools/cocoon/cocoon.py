@@ -913,7 +913,6 @@ async def _construct_batches(
     if check_for_unmatched_items(
         flag=return_unmatched_items,
         file_type=file_type,
-        returned_response=returned_response,
     ):
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
@@ -921,19 +920,19 @@ async def _construct_batches(
             data_frame=data_frame,
             mapping_required=mapping_required,
             file_type=file_type,
+            returned_response=returned_response,
             sync_batches=sync_batches,
         )
 
     return returned_response
 
 
-def check_for_unmatched_items(flag, file_type, returned_response):
+def check_for_unmatched_items(flag, file_type):
     """
     This method contains the conditional logic to determine whether the unmatched_items validation should be run.
     It should not be run if:
         a) it was not requested
         b) the upload was not for transactions or holdings
-        c) the upload had no successful uploads
 
     Parameters
     ----------
@@ -941,8 +940,6 @@ def check_for_unmatched_items(flag, file_type, returned_response):
         The bool flag that indicates whether any unmatched identifiers should be checked
     file_type : str
         The file type of the upload
-    returned_response : dict
-        The response from laod_from_data_frame
     Returns
     -------
 
@@ -950,9 +947,8 @@ def check_for_unmatched_items(flag, file_type, returned_response):
     """
     condition_1 = flag is True
     condition_2 = file_type in ["transaction", "holding"]
-    condition_3 = len(returned_response["errors"]) == 0
 
-    return condition_1 and condition_2 and condition_3
+    return condition_1 and condition_2
 
 
 @checkargs
@@ -962,11 +958,15 @@ def unmatched_items(
     data_frame: pd.DataFrame,
     mapping_required: dict,
     file_type: str,
+    returned_response: dict,
     sync_batches: list = None,
 ):
     """
     This method orchestrates the identification of holdings or transactions objects that were successfully uploaded
-    but did not resolve to known identifiers (i.e. where the instrument_uid is LUID_ZZZZZZ)
+    but did not resolve to known identifiers (i.e. where the instrument_uid is LUID_ZZZZZZ).
+
+    If there were any errors in the attempted upload, the check will not complete and an error message will be returned
+    to let the user know that errors will need to be resolved first.
 
     Parameters
     ----------
@@ -980,6 +980,8 @@ def unmatched_items(
         The required mapping
     file_type : str
         The type of file e.g. transactions, instruments, holdings, quotes, portfolios
+    returned_response : dict
+        The response from laod_from_data_frame
     sync_batches : list
         A list of the batches used to upload the data into LUSID.
 
@@ -988,6 +990,10 @@ def unmatched_items(
     responses: list
         A list of objects to be appended to the ultimate response for load_from_data_frame.
     """
+
+    if len(returned_response["errors"]) > 0:
+        return ["Please resolve all upload errors to check for unmatched items."]
+
     if file_type == "transaction":
         return _unmatched_transactions(
             api_factory=api_factory,
