@@ -1167,7 +1167,9 @@ class CocoonTestsHoldings(unittest.TestCase):
         sub_holding_key_scope = None
         return_unmatched_items = True
         holdings_adjustment_only = False
-        failed_unmatched_items_check = ["Please resolve all upload errors to check for unmatched items."]
+        failed_unmatched_items_check = [
+            "Please resolve all upload errors to check for unmatched items."
+        ]
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
@@ -1210,14 +1212,17 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 1)
 
-        # Assert that the ApiError thrown by LUSID is what is expected, given the input data 
+        # Assert that the ApiError thrown by LUSID is what is expected, given the input data
         self.assertEqual(
             json.loads(holding_responses["holdings"]["errors"][0].body)["name"],
             error_name,
         )
 
         # Assert that there is no 'unmatched_item' field if the input data resulted in no successful uploads
-        self.assertEqual(holding_responses["holdings"].get("unmatched_items"), failed_unmatched_items_check)
+        self.assertEqual(
+            holding_responses["holdings"].get("unmatched_items"),
+            failed_unmatched_items_check,
+        )
 
         if not skip_portfolio:
             # Delete the portfolios at the end of the test

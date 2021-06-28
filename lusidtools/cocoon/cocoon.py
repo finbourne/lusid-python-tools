@@ -910,10 +910,7 @@ async def _construct_batches(
     }
 
     # For successful transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if check_for_unmatched_items(
-        flag=return_unmatched_items,
-        file_type=file_type,
-    ):
+    if check_for_unmatched_items(flag=return_unmatched_items, file_type=file_type,):
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
