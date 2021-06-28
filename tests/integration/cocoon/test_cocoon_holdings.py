@@ -1209,7 +1209,7 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertEqual(len(holding_responses["holdings"]["errors"]), 1)
 
-        # Assert that the ApiError thrown by LUSID is what is expected, given the input data
+        # Assert that the ApiError thrown by LUSID is what is expected, given the input data 
         self.assertEqual(
             json.loads(holding_responses["holdings"]["errors"][0].body)["name"],
             error_name,
