@@ -171,14 +171,17 @@ class BatchLoader:
             raise KeyError(
                 "You are trying to load transactions without a portfolio code, please ensure that a code is provided."
             )
-
-        return api_factory.build(
+        import timeit
+        start = timeit.timeit()
+        t =  api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).upsert_transactions(
             scope=kwargs["scope"],
             code=kwargs["code"],
             transaction_request=transaction_batch,
         )
+        logging.debug(f"Batch completed - duration: {timeit.timeit() - start}")
+        return t
 
     @staticmethod
     @run_in_executor
@@ -559,6 +562,7 @@ async def _load_data(
     """
 
     # Dynamically call the correct async function to use based on the file type
+    logging.debug(f"Running load_{file_type}_batch()")
     return await getattr(BatchLoader, f"load_{file_type}_batch")(
         api_factory,
         single_requests,
@@ -855,8 +859,11 @@ async def _construct_batches(
                     batch_size,
                 )
             ]
+        logging.debug("Created sync batches: ")
+        logging.debug(f"Number of batches: {len(sync_batches)}")
 
     # Asynchronously load the data into LUSID
+    logging.debug("Running _load_data() Asynchronously and gathering responses")
     responses = [
         await asyncio.gather(
             *[
@@ -891,7 +898,8 @@ async def _construct_batches(
         )
         for sync_batch in sync_batches
     ]
-
+    
+    logging.debug("Flattening responses")
     responses_flattened = [
         response for responses_sub in responses for response in responses_sub
     ]
@@ -911,6 +919,7 @@ async def _construct_batches(
 
     # For transactions or holdings file types, optionally return unmatched identifiers with the responses
     if return_unmatched_items is True and file_type in ["transaction", "holding"]:
+        logging.debug("return unmatched identifiers with the responses")
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
@@ -1436,6 +1445,7 @@ def load_from_data_frame(
     thread_pool = ThreadPool(thread_pool_max_workers).thread_pool
 
     if instrument_name_enrichment:
+        logging.info("performing instrument_name_enrichment")
         loop = cocoon.async_tools.start_event_loop_new_thread()
 
         data_frame, mapping_required = asyncio.run_coroutine_threadsafe(
@@ -1574,6 +1584,7 @@ def load_from_data_frame(
     }
 
     # Get the responses from LUSID
+    logging.debug("constructing batches...")
     responses = asyncio.run_coroutine_threadsafe(
         _construct_batches(
             api_factory=api_factory,
