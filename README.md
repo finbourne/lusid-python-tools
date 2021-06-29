@@ -57,6 +57,18 @@ lusidtools scopes  --secrets-file ~/.lusid/dev-secrets.json
 lusidtools portfolios <scope-name>  --secrets-file ~/.lusid/dev-secrets.json  
 ```
 
+#### List holdings
+
+```sh
+lusidtools hld <scope> <portfolio-code>  --secrets-file ~/.lusid/dev-secrets.json 
+```
+
+#### List transactions
+
+```sh
+lusidtools txn <scope> <portfolio-code>  --secrets-file ~/.lusid/dev-secrets.json 
+```
+
 ## Contributing
 
 We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
