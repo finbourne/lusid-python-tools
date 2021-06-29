@@ -1,7 +1,8 @@
-![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
+# Python tools for LUSID
 
-# lusid-python-tools
-Python tools for LUSID
+This is a CLI and library for interacting with the APIs of [LUSID by FINBOURNE](https://www.finbourne.com/lusid-technology), a bi-temporal investment management data platform with portfolio accounting capabilities. To use it you'll need a LUSID account. [Sign up for free at lusid.com](https://www.lusid.com/app/signup)
+
+![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
 ![PyPI](https://img.shields.io/pypi/v/lusidtools?color=blue)
 ![Daily build](https://github.com/finbourne/lusid-python-tools/workflows/Daily%20build/badge.svg) 
@@ -11,11 +12,7 @@ Python tools for LUSID
 
 For more details see the lusid-python-tools [wiki](https://github.com/finbourne/lusid-python-tools/wiki).
 
-## Getting Started
-
-You can learn more about LUSID and its benefits by visiting [www.lusid.com](https://www.lusid.com/app/home). 
-
-In order to interact with LUSID, if you have not already done so, go to the [create a LUSID account](https://www.lusid.com/app/signup) page to create your own free trial LUSID domain.
+## Installation
 
 The PyPi package for lusid-python-tools can installed globally on your machine using the following command:
 
