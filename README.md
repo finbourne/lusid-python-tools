@@ -78,12 +78,7 @@ lusidtools rec \
   --secrets-file ~/.lusid/dev-secrets.json 
 ```
 
----
-**NOTE**
-
 You can reconcile a portfolio against itself by specifying the same values for `<scope-left>` / `<scope-right>` and `<portfolio-left` / `<portfolio-right`> and then providing different effective dates
-
----
 
 ## Contributing
 
