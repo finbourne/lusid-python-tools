@@ -26,19 +26,36 @@ or if you are running as a non privileged user you may prefer to install specifi
 $ pip install --user lusidtools
 ```
 
-### Testing it works
+## Usage
 
-Once you have an LUSID account you will need to create a developer secrets file.  The steps to do this are covered in this [article](https://support.finbourne.com/getting-started-with-apis-sdks)
+You will need to create a secrets file.  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks)
 
-Check that the python `bin` folder is on your search path, you may have received a warning for this when you installed the tools above.   
+Makes sure that the Python `bin` folder is on your search path before trying the following examples.
 
-Run the command below, substituting your secrets file path for the one below.,
+
+#### List configured instrument identifier types
 
 ``` sh
-lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json
+lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json  
 ```
 
-This should run and return a list if configured instrument identifier types.
+#### List 10 instruments
+
+``` sh
+lusidtools instr_list -l 10  --secrets-file ~/.lusid/dev-secrets.json  
+```
+
+#### List scopes
+
+``` sh
+lusidtools scopes  --secrets-file ~/.lusid/dev-secrets.json  
+```
+
+#### List portfolios in a scope
+
+``` sh
+lusidtools portfolios <scope-name>  --secrets-file ~/.lusid/dev-secrets.json  
+```
 
 ## Contributing
 
