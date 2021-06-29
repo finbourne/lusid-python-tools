@@ -39,7 +39,7 @@ Makes sure that the Python `bin` folder is on your search path before trying the
 lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json  
 ```
 
-#### List 10 instruments
+#### List instruments
 
 ``` sh
 lusidtools instr_list -l 10  --secrets-file ~/.lusid/dev-secrets.json  
