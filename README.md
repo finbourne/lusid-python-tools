@@ -1,6 +1,6 @@
 # Python tools for LUSID
 
-This is a CLI and library for interacting with the APIs of [LUSID by FINBOURNE](https://www.finbourne.com/lusid-technology), a bi-temporal investment management data platform with portfolio accounting capabilities. To use it you'll need a LUSID account. [Sign up for free at lusid.com](https://www.lusid.com/app/signup)
+This is a CLI and library for interacting with the APIs of [LUSID by FINBOURNE](https://www.finbourne.com/lusid-technology). To use it you'll need a LUSID account. [Sign up for free at lusid.com](https://www.lusid.com/app/signup)
 
 ![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
