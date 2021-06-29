@@ -32,41 +32,46 @@ You will need to create a secrets file.  The steps to do this are covered in [Ge
 
 Makes sure that the Python `bin` folder is on your search path before trying the following examples.
 
+To see a full list of the available commands, run the following:
+
+```sh
+lusidtools --help --secrets-file /path/to/secrets.json
+```
 
 #### List configured instrument identifier types
 
 ``` sh
-lusidtools instr_id --secrets-file ~/.lusid/dev-secrets.json  
+lusidtools instr_id --secrets-file /path/to/secrets.json
 ```
 
 #### List instruments
 
 ``` sh
-lusidtools instr_list -l 10  --secrets-file ~/.lusid/dev-secrets.json  
+lusidtools instr_list -l 10  --secrets-file /path/to/secrets.json 
 ```
 
 #### List scopes
 
 ``` sh
-lusidtools scopes  --secrets-file ~/.lusid/dev-secrets.json  
+lusidtools scopes  --secrets-file /path/to/secrets.json
 ```
 
 #### List portfolios in a scope
 
 ``` sh
-lusidtools portfolios "<scope>"  --secrets-file ~/.lusid/dev-secrets.json  
+lusidtools portfolios "<scope>"  --secrets-file /path/to/secrets.json 
 ```
 
 #### List holdings
 
 ```sh
-lusidtools hld "<scope>" "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
+lusidtools hld "<scope>" "<portfolio-code>"  --secrets-file /path/to/secrets.json 
 ```
 
 #### List transactions
 
 ```sh
-lusidtools txn "<scope>" "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
+lusidtools txn "<scope>" "<portfolio-code>"  --secrets-file /path/to/secrets.json 
 ```
 
 #### Reconcile holdings
@@ -75,7 +80,7 @@ lusidtools txn "<scope>" "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets
 lusidtools rec \
   "<scope-left>" "<portfolio-left>" "YYYY-MM-DD" \
   "<scope-right>" "<portfolio-right>" "YYYY-MM-DD"  \
-  --secrets-file ~/.lusid/dev-secrets.json 
+  --secrets-file /path/to/secrets.json 
 ```
 
 You can reconcile a portfolio against itself by specifying the same values for `<scope-left>` / `<scope-right>` and `<portfolio-left` / `<portfolio-right`> and then providing different effective dates
