@@ -69,6 +69,22 @@ lusidtools hld <scope> <portfolio-code>  --secrets-file ~/.lusid/dev-secrets.jso
 lusidtools txn <scope> <portfolio-code>  --secrets-file ~/.lusid/dev-secrets.json 
 ```
 
+#### Reconcile holdings
+
+```sh
+lusidtools rec \
+  <scope-left> <portfolio-left> YYYY-MM-DD \
+  <scope-right> <portfolio-right> YYYY-MM-DD  \
+  --secrets-file ~/.lusid/dev-secrets.json 
+```
+
+---
+**NOTE**
+
+You can reconcile a portfolio against itself by specifying the same values for `<scope-left>` / `<scope-right>` and `<portfolio-left` / `<portfolio-right`> and then providing different effective dates
+
+---
+
 ## Contributing
 
 We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
