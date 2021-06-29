@@ -54,19 +54,19 @@ lusidtools scopes  --secrets-file ~/.lusid/dev-secrets.json
 #### List portfolios in a scope
 
 ``` sh
-lusidtools portfolios "<scope-name>"  --secrets-file ~/.lusid/dev-secrets.json  
+lusidtools portfolios "<scope>"  --secrets-file ~/.lusid/dev-secrets.json  
 ```
 
 #### List holdings
 
 ```sh
-lusidtools hld <scope> "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
+lusidtools hld "<scope>" "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
 ```
 
 #### List transactions
 
 ```sh
-lusidtools txn <scope> "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
+lusidtools txn "<scope>" "<portfolio-code>"  --secrets-file ~/.lusid/dev-secrets.json 
 ```
 
 #### Reconcile holdings
