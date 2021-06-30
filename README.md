@@ -26,7 +26,7 @@ or if you are running as a non privileged user you may prefer to install specifi
 $ pip install --user lusidtools
 ```
 
-## Usage
+## CLI Usage
 
 You will need to create a secrets file.  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks)
 
