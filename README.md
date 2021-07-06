@@ -35,7 +35,7 @@ Makes sure that the Python `bin` folder is on your search path before trying the
 To see a full list of the available commands, run the following:
 
 ```sh
-lusidtools --help --secrets-file /path/to/secrets.json
+lusidtools --help
 ```
 
 #### List configured instrument identifier types
