@@ -559,12 +559,17 @@ async def _load_data(
     """
 
     # Dynamically call the correct async function to use based on the file type
-    return await getattr(BatchLoader, f"load_{file_type}_batch")(
+    logging.debug(f"Running load_{file_type}_batch()")
+    from time import time
+    start = time()
+    response = await getattr(BatchLoader, f"load_{file_type}_batch")(
         api_factory,
         single_requests,
         # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
         **kwargs,
     )
+    logging.debug(f"Batch completed - duration: {time() - start}")
+    return response
 
 
 def _convert_batch_to_models(
@@ -856,6 +861,9 @@ async def _construct_batches(
                 )
             ]
 
+    logging.debug("Created sync batches: ")
+    logging.debug(f"Number of batches: {len(sync_batches)}")
+
     # Asynchronously load the data into LUSID
     responses = [
         await asyncio.gather(
@@ -891,7 +899,7 @@ async def _construct_batches(
         )
         for sync_batch in sync_batches
     ]
-
+    logging.debug("Flattening responses")
     responses_flattened = [
         response for responses_sub in responses for response in responses_sub
     ]
@@ -911,6 +919,7 @@ async def _construct_batches(
 
     # For successful transactions or holdings file types, optionally return unmatched identifiers with the responses
     if check_for_unmatched_items(flag=return_unmatched_items, file_type=file_type,):
+        logging.debug("returning unmatched identifiers with the responses")
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
             scope=kwargs.get("scope", None),
@@ -1609,6 +1618,7 @@ def load_from_data_frame(
     }
 
     # Get the responses from LUSID
+    logging.debug("constructing batches...")
     responses = asyncio.run_coroutine_threadsafe(
         _construct_batches(
             api_factory=api_factory,
