@@ -561,6 +561,7 @@ async def _load_data(
     # Dynamically call the correct async function to use based on the file type
     logging.debug(f"Running load_{file_type}_batch()")
     from time import time
+
     start = time()
     response = await getattr(BatchLoader, f"load_{file_type}_batch")(
         api_factory,
