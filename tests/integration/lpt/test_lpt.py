@@ -84,7 +84,7 @@ class LptTests(unittest.TestCase):
                 stats="-",
                 apiUrl="lusid.url",
             )
-        self.assertTrue('Missing the following config' in str(context.exception))
+        self.assertTrue("Missing the following config" in str(context.exception))
 
     def test_load_instruments(self):
 

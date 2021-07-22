@@ -11,7 +11,7 @@ config_mapping = {
     "FBN_PASSWORD": "password",
     "FBN_CLIENT_ID": "clientId",
     "FBN_CLIENT_SECRET": "clientSecret",
-    "FBN_LUSID_API_URL": "apiUrl"
+    "FBN_LUSID_API_URL": "apiUrl",
 }
 
 
