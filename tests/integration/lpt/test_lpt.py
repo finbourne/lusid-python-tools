@@ -75,6 +75,17 @@ class LptTests(unittest.TestCase):
         )
         self.assertIsNotNone(api)
 
+    def test_connect_with_missing_secrets_file(self):
+        with self.assertRaises(Exception) as context:
+            lse.connect(
+                env=["lusid"],
+                token="test_access_token",
+                secrets="i-do-not-exist.json",
+                stats="-",
+                apiUrl="lusid.url",
+            )
+        self.assertTrue("Missing the following config" in str(context.exception))
+
     def test_load_instruments(self):
 
         # Load instruments from the file: examples/ibm-msft.csv
