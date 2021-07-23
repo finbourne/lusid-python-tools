@@ -5,9 +5,25 @@ import lusid
 
 from .refreshing_token import RefreshingToken
 
+config_mapping = {
+    "FBN_TOKEN_URL": "tokenUrl",
+    "FBN_USERNAME": "username",
+    "FBN_PASSWORD": "password",
+    "FBN_CLIENT_ID": "clientId",
+    "FBN_CLIENT_SECRET": "clientSecret",
+    "FBN_LUSID_API_URL": "apiUrl",
+}
+
+
+def check_for_missing_config(config):
+    return [
+        {"Env variable": env_var, "Secrets file key": config_key}
+        for env_var, config_key in config_mapping.items()
+        if not os.getenv(env_var, config["api"][config_key])
+    ]
+
 
 def connect(config, **kwargs):
-
     if "api" not in config.keys():
         config["api"] = {}
         config["api"]["tokenUrl"] = None
@@ -16,6 +32,10 @@ def connect(config, **kwargs):
         config["api"]["clientId"] = None
         config["api"]["clientSecret"] = None
         config["api"]["apiUrl"] = None
+
+    missing_config = check_for_missing_config(config)
+    if len(missing_config) > 0:
+        raise Exception(f"Missing the following config: {missing_config}")
 
     token_url = os.getenv("FBN_TOKEN_URL", config["api"]["tokenUrl"])
     username = os.getenv("FBN_USERNAME", config["api"]["username"])
