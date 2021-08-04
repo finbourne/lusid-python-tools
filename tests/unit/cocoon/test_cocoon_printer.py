@@ -208,11 +208,20 @@ class CocoonPrinterTests(unittest.TestCase):
         err=None,
         failed=None,
         err_extended=False,
+        data_entity_details=False,
     ):
-        if succ is not None:
+        if succ is not None and not data_entity_details:
             self.assertEqual(num_items, len(succ))
             for index, row in succ.iterrows():
                 self.assertEqual(expected_value["succ"][index], row[succ.columns[0]])
+
+        if succ is not None and data_entity_details:
+            self.assertEqual(num_items, len(succ))
+            for index, row in succ.iterrows():
+                self.assertEqual(
+                    expected_value["succ"][index],
+                    {k: v for (k, v) in row.to_dict().items() if v},
+                )
 
         if err is not None and not err_extended:
             self.assertEqual(num_items, len(err))
@@ -225,11 +234,19 @@ class CocoonPrinterTests(unittest.TestCase):
                 self.assertEqual(expected_value["err"][index][0], row[err.columns[0]])
                 self.assertEqual(expected_value["err"][index][1], row[err.columns[2]])
 
-        if failed is not None:
+        if failed is not None and not data_entity_details:
             self.assertEqual(num_items, len(failed))
             for index, row in failed.iterrows():
                 self.assertEqual(
                     expected_value["failed"][index], row[failed.columns[0]]
+                )
+
+        if failed is not None and data_entity_details:
+            self.assertEqual(num_items, len(failed))
+            for index, row in failed.iterrows():
+                self.assertEqual(
+                    expected_value["failed"][index],
+                    {k: v for (k, v) in row.to_dict().items() if v},
                 )
 
     @parameterized.expand(
@@ -279,13 +296,61 @@ class CocoonPrinterTests(unittest.TestCase):
                     "err": ["not found", "not found"],
                 },
                 False,
+                False,
             ),
-            ("empty_response", empty_response_with_full_shape, 0, {}, False),
+            (
+                "standard_response_fully_expanded",
+                responses,
+                2,
+                {
+                    "succ": [
+                        {
+                            "lusid_instrument_id": "LUID_01234567",
+                            "version": 1,
+                            "state": "Active",
+                            "identifiers.0": "Luid",
+                            "identifiers.1": "Figi",
+                            "name": "name1",
+                        },
+                        {
+                            "lusid_instrument_id": "LUID_01234567",
+                            "version": 1,
+                            "state": "Active",
+                            "identifiers.0": "Luid",
+                            "identifiers.1": "Figi",
+                            "name": "name1",
+                        },
+                    ],
+                    "failed": [
+                        {
+                            "lusid_instrument_id": "LUID_01234567",
+                            "version": 1,
+                            "state": "Active",
+                            "identifiers.0": "Luid",
+                            "identifiers.1": "Figi",
+                            "name": "name1",
+                        },
+                        {
+                            "lusid_instrument_id": "LUID_01234567",
+                            "version": 1,
+                            "state": "Active",
+                            "identifiers.0": "Luid",
+                            "identifiers.1": "Figi",
+                            "name": "name1",
+                        },
+                    ],
+                    "err": ["not found", "not found"],
+                },
+                False,
+                True,
+            ),
+            ("empty_response", empty_response_with_full_shape, 0, {}, False, False),
             (
                 "empty_response_missing_shape",
                 empty_response_missing_shape,
                 0,
                 {},
+                False,
                 False,
             ),
             (
@@ -304,14 +369,23 @@ class CocoonPrinterTests(unittest.TestCase):
                     "err": extended_error_expected,
                 },
                 True,
+                False,
             ),
         ]
     )
     def test_format_instruments_response_success(
-        self, _, response, num_items, expected_value, extended_errors,
+        self,
+        _,
+        response,
+        num_items,
+        expected_value,
+        extended_errors,
+        data_entity_details,
     ):
         succ, err, failed = format_instruments_response(
-            response, extended_error_details=extended_errors
+            response,
+            extended_error_details=extended_errors,
+            data_entity_details=data_entity_details,
         )
         self.assert_responses(
             num_items,
@@ -320,6 +394,7 @@ class CocoonPrinterTests(unittest.TestCase):
             err=err,
             failed=failed,
             err_extended=extended_errors,
+            data_entity_details=data_entity_details,
         )
 
     @parameterized.expand(
