@@ -140,7 +140,9 @@ def get_non_href_response(response: dict, file_type: str, data_entity_details=Fa
 
 
 def format_instruments_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
+    data_entity_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from instrument requests and returns successful, failed and errored statuses for
@@ -151,7 +153,8 @@ def format_instruments_response(
         response from Lusid-python-tools
     extended_error_details : bool
         A flag that determines whether the errors returned will have extended details (request id, error body)
-
+    data_entity_details : bool
+        A flag that determines whether the fields from the response will all be extracted
     Returns
     -------
     success : pd.DataFrame
@@ -168,7 +171,9 @@ def format_instruments_response(
     )
 
     # get success and failures
-    items_success, items_failed = get_non_href_response(response, file_type)
+    items_success, items_failed = get_non_href_response(
+        response, file_type, data_entity_details
+    )
 
     return (
         items_success,
