@@ -12,6 +12,7 @@ from lusidtools.cocoon.cocoon_printer import (
     format_transactions_response,
     get_portfolio_from_href,
     format_reference_portfolios_response,
+    CocoonPrinter,
 )
 from parameterized import parameterized
 
@@ -399,6 +400,19 @@ class CocoonPrinterTests(unittest.TestCase):
             data_entity_details=data_entity_details,
         )
 
+        printer = self.create_printer(response, "instruments", extended_errors=extended_errors,
+                                      data_entity_details=data_entity_details)
+        succ, err, failed = printer.format_response()
+        self.assert_responses(
+            num_items,
+            expected_value,
+            succ=succ,
+            err=err,
+            failed=failed,
+            err_extended=extended_errors,
+            data_entity_details=data_entity_details,
+        )
+
     @parameterized.expand(
         [
             (
@@ -428,6 +442,15 @@ class CocoonPrinterTests(unittest.TestCase):
             num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
         )
 
+        printer = self.create_printer(response, "portfolios", extended_errors)
+
+        succ, err = printer.format_response()
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
+
+
+
     @parameterized.expand(
         [
             (
@@ -453,6 +476,13 @@ class CocoonPrinterTests(unittest.TestCase):
         succ, err = format_transactions_response(
             response, extended_error_details=extended_errors
         )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
+
+        printer = self.create_printer(response, "transactions", extended_errors)
+
+        succ, err = printer.format_response()
         self.assert_responses(
             num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
         )
@@ -515,6 +545,27 @@ class CocoonPrinterTests(unittest.TestCase):
                 row["quote_id.quote_series_id.instrument_id"],
             )
 
+        printer = self.create_printer(response, "quotes", extended_errors)
+
+        succ, err, failed = printer.format_response()
+        self.assertEqual(num_items, len(succ))
+        self.assertEqual(num_items, len(err))
+        self.assertEqual(num_items, len(failed))
+
+        for index, row in succ.iterrows():
+            self.assertEqual(
+                expected_value["succ"][index],
+                row["quote_id.quote_series_id.instrument_id"],
+            )
+        self.assert_responses(
+            num_items, expected_value, err=err, err_extended=extended_errors
+        )
+        for index, row in failed.iterrows():
+            self.assertEqual(
+                expected_value["failed"][index],
+                row["quote_id.quote_series_id.instrument_id"],
+            )
+
     @parameterized.expand(
         [
             (
@@ -540,6 +591,13 @@ class CocoonPrinterTests(unittest.TestCase):
         succ, err = format_holdings_response(
             response, extended_error_details=extended_errors
         )
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
+
+        printer = self.create_printer(response, "holdings", extended_errors)
+
+        succ, err = printer.format_response()
         self.assert_responses(
             num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
         )
@@ -573,6 +631,13 @@ class CocoonPrinterTests(unittest.TestCase):
             num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
         )
 
+        printer = self.create_printer(response, "reference_portfolios", extended_errors)
+
+        succ, err = printer.format_response()
+        self.assert_responses(
+            num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
+        )
+
     # Test failure cases
 
     @parameterized.expand(
@@ -584,6 +649,10 @@ class CocoonPrinterTests(unittest.TestCase):
     def test_format_instruments_response_fail(self, _, response, expected_error):
         with self.assertRaises(expected_error):
             succ, err, failed = format_instruments_response(response)
+
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "instruments")
+            succ, err, failed = printer.format_response()
 
     @parameterized.expand(
         [
@@ -597,6 +666,10 @@ class CocoonPrinterTests(unittest.TestCase):
         with self.assertRaises(expected_error):
             succ, err, failed = format_portfolios_response(response)
 
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "portfolios")
+            succ, err, failed = printer.format_response()
+
     @parameterized.expand(
         [
             ("no_error_field", responses_no_error_field, ValueError),
@@ -608,6 +681,10 @@ class CocoonPrinterTests(unittest.TestCase):
     ):
         with self.assertRaises(expected_error):
             succ, err, failed = format_transactions_response(response)
+
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "transactions")
+            succ, err, failed = printer.format_response()
 
     @parameterized.expand(
         [
@@ -621,6 +698,10 @@ class CocoonPrinterTests(unittest.TestCase):
         with self.assertRaises(expected_error):
             succ, err, failed = format_quotes_response(response)
 
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "quotes")
+            succ, err, failed = printer.format_response()
+
     @parameterized.expand(
         [
             ("no_error_field", responses_no_error_field, ValueError),
@@ -633,6 +714,10 @@ class CocoonPrinterTests(unittest.TestCase):
         with self.assertRaises(expected_error):
             succ, err, failed = format_holdings_response(response)
 
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "holdings")
+            succ, err, failed = printer.format_response()
+
     @parameterized.expand(
         [
             ("no_error_field", responses_no_error_field, ValueError),
@@ -644,3 +729,70 @@ class CocoonPrinterTests(unittest.TestCase):
     ):
         with self.assertRaises(expected_error):
             succ, err, failed = format_reference_portfolios_response(response)
+
+        with self.assertRaises(expected_error):
+            printer = self.create_printer(response, "reference_portfolios")
+            succ, err, failed = printer.format_response()
+
+    def test_invalid_key(self):
+        with self.assertRaises(ValueError) as context:
+            CocoonPrinter({"foo": {}})
+
+        self.assertTrue("Response contains invalid key" in str(context.exception))
+
+    def test_no_keys(self):
+        with self.assertRaises(ValueError) as context:
+            CocoonPrinter({})
+
+        self.assertTrue("Response doesn't contain any keys." in str(context.exception))
+
+    def test_too_many_keys(self):
+        with self.assertRaises(ValueError) as context:
+            CocoonPrinter(
+                {"instruments": {}, "portfolios": {},}
+            )
+
+        self.assertEqual(
+            "Response contains too many keys - only one is allowed, but received ['instruments', 'portfolios']",
+            str(context.exception),
+        )
+
+    def test_instruments(self):
+        printer = CocoonPrinter(
+            {
+                "instruments": {
+                    "errors": [api_exception for _ in range(2)],
+                    "success": [instrument_success for _ in range(2)],
+                },
+            }
+        )
+
+        succ, err, failed = printer.format_response()
+        self.assert_responses(
+            2,
+            {
+                "succ": [
+                    "ClientInternal: imd_00001234",
+                    "ClientInternal: imd_00001234",
+                ],
+                "failed": [
+                    "ClientInternal: imd_00001234",
+                    "ClientInternal: imd_00001234",
+                ],
+                "err": ["not found", "not found"],
+            },
+            succ=succ,
+            err=err,
+            failed=failed,
+            err_extended=False,
+        )
+
+    def create_printer(self, response, entity_type, extended_errors=False,data_entity_details=False):
+        return CocoonPrinter(
+            self.filter_response(response, entity_type),
+            extended_error_details=extended_errors,
+            data_entity_details=data_entity_details
+        )
+
+    def filter_response(self, response, entity_type):
+        return {k: v for k, v in response.items() if k == entity_type}
