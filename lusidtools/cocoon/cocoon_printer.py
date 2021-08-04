@@ -15,7 +15,9 @@ class CocoonPrinter:
         "reference_portfolios",
     ]
 
-    def __init__(self, response, extended_error_details=False, data_entity_details=False):
+    def __init__(
+        self, response, extended_error_details=False, data_entity_details=False
+    ):
         self.validate(response)
 
         self.response = response
@@ -42,8 +44,9 @@ class CocoonPrinter:
 
     def format_instruments_response(self):
         return format_instruments_response(
-            self.response, extended_error_details=self.extended_error_details,
-            data_entity_details=self.data_entity_details
+            self.response,
+            extended_error_details=self.extended_error_details,
+            data_entity_details=self.data_entity_details,
         )
 
     def format_portfolios_response(self):

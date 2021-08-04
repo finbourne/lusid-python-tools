@@ -400,8 +400,12 @@ class CocoonPrinterTests(unittest.TestCase):
             data_entity_details=data_entity_details,
         )
 
-        printer = self.create_printer(response, "instruments", extended_errors=extended_errors,
-                                      data_entity_details=data_entity_details)
+        printer = self.create_printer(
+            response,
+            "instruments",
+            extended_errors=extended_errors,
+            data_entity_details=data_entity_details,
+        )
         succ, err, failed = printer.format_response()
         self.assert_responses(
             num_items,
@@ -448,8 +452,6 @@ class CocoonPrinterTests(unittest.TestCase):
         self.assert_responses(
             num_items, expected_value, succ=succ, err=err, err_extended=extended_errors
         )
-
-
 
     @parameterized.expand(
         [
@@ -787,11 +789,13 @@ class CocoonPrinterTests(unittest.TestCase):
             err_extended=False,
         )
 
-    def create_printer(self, response, entity_type, extended_errors=False,data_entity_details=False):
+    def create_printer(
+        self, response, entity_type, extended_errors=False, data_entity_details=False
+    ):
         return CocoonPrinter(
             self.filter_response(response, entity_type),
             extended_error_details=extended_errors,
-            data_entity_details=data_entity_details
+            data_entity_details=data_entity_details,
         )
 
     def filter_response(self, response, entity_type):
