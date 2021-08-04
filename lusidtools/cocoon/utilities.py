@@ -1009,7 +1009,7 @@ def check_mapping_fields_exist(
     """
 
     missing_fields = [
-        item for item in required_list if item not in search_list and item[0] != "$"
+        item for item in required_list if item not in search_list and (len(item) > 0 and item[0] != "$")
     ]
     if missing_fields:
         raise ValueError(

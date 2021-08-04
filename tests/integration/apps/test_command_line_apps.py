@@ -300,6 +300,18 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, len(responses["transactions"]["errors"]))
         self.assertEqual(0, len(responses["transactions"]["success"]))
 
+    def test_upsert_transactions_with_empty_column_name(self):
+
+        args = self.invalid_args.copy()
+        test_data_root = Path(__file__).parent.joinpath("test_data")
+        args["file_path"] = test_data_root.joinpath("transactions.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_trans_invalid_empty_column.json")
+
+        with self.assertRaises(ValueError) as context:
+            load_transactions(args)
+        self.assertTrue("The values {''} exist in the identifier_mapping" in str(context.exception))
+        self.assertTrue("but do not exist in the DataFrame Columns" in str(context.exception))
+
     def test_upsert_quotes_with_valid_mapping(self):
 
         args = self.valid_args.copy()
