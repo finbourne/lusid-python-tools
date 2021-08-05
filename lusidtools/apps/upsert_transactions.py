@@ -26,7 +26,7 @@ def load_transactions(args):
 
     mappings = load_json_file(args["mapping"])
 
-    if "cash_flag" in mappings.keys():
+    if "cash_flag" in mappings[file_type].keys() or "cash_flag" in mappings.keys():
         identify_cash_items(transactions, mappings, file_type)
 
     validate_mapping_file_structure(mappings, transactions.columns, file_type)
