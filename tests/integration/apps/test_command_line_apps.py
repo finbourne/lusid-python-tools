@@ -236,6 +236,21 @@ class AppTests(unittest.TestCase):
         self.assertEqual(0, len(failed))
         self.assertEqual(14, len(succ))
 
+    def test_upsert_quotes_with_missing_cash_flag(self):
+
+        args = self.valid_args.copy()
+        test_data_root = Path(__file__).parent.joinpath("test_data")
+        args["file_path"] = test_data_root.joinpath("quotes_minimal.csv")
+        args["mapping"] = test_data_root.joinpath("mapping_quote_no_cash_flag.json")
+
+        responses = load_quotes(args)
+
+        succ, err, failed = cocoon_printer.format_quotes_response(responses)
+
+        self.assertEqual(0, len(err))
+        self.assertEqual(0, len(failed))
+        self.assertEqual(6, len(succ))
+
     def test_upsert_quotes_with_valid_mapping_check_scaled_values(self):
 
         args = self.valid_args.copy()
