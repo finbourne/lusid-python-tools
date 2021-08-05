@@ -1,0 +1,7 @@
+figi,isin,client_internal,name,currency,date,time,price,source,type
+BBG001KKJLR4,GB00B4RMG977,imd_34643653,UKGiltTreasury_3.75_2021,GBP,11/09/2019,LSEClose,10651,bloomberg,bond
+BBG001KKJLR4,GB00B4RMG977,imd_34643653,UKGiltTreasury_3.75_2021,GBP,10/09/2019,LSEClose,10659,bloomberg,bond
+BBG0000D14P3,GB00B52WS153,imd_34534534,UKGiltTreasury_4.5_2034,GBP,11/09/2019,LSEClose,151.44,bloomberg,mid_price
+BBG0000D14P3,GB00B52WS153,imd_34534534,UKGiltTreasury_4.5_2034,GBP,10/09/2019,LSEClose,152.28,bloomberg,mid_price
+BBG006N6HZM7,GB00BN65R313,imd_54234532,UKGiltTreasury_3.5_2045,GBP,11/09/2019,LSEClose,152.44,bloomberg,mid_price
+BBG006N6HZM7,GB00BN65R313,imd_54234532,UKGiltTreasury_3.5_2045,GBP,10/09/2019,LSEClose,153.16,bloomberg,mid_price

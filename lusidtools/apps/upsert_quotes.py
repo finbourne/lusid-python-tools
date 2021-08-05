@@ -40,7 +40,8 @@ def load_quotes(args):
         logging.error(err)
         raise ValueError(err)
 
-    quotes, mappings = identify_cash_items(quotes, mappings, "quotes", True)
+    if "cash_flag" in mappings.keys():
+        quotes, mappings = identify_cash_items(quotes, mappings, "quotes", True)
 
     validate_mapping_file_structure(mappings, quotes.columns, file_type)
 
