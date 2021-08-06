@@ -334,3 +334,170 @@ class CocoonTestsPortfolios(unittest.TestCase):
                     sub_holding_keys=sub_holding_keys,
                 ),
             )
+
+    @parameterized.expand(
+        [
+            [
+                "Standard load",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {},
+                {},
+                ["base_currency"],
+                "operations0011",
+            ]
+        ]
+    )
+    def test_properties_list_strings(
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+    ) -> None:
+        """
+        Test that portfolios can be loaded successfully
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict(str, str) mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict(str, str) mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict(str, str) identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list(str) property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+
+        :return: None
+        """
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="portfolios",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+        )
+
+        for property_column in property_columns:
+            response = self.api_factory.build(lusid.api.PropertyDefinitionsApi).get_property_definition(
+                domain="Portfolio",
+                scope=properties_scope,
+                code=property_column,
+            )
+            self.assertEqual(f"Portfolio/{properties_scope}/{property_column}", response.key)
+
+    @parameterized.expand(
+        [
+            [
+                "Source only",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {},
+                {},
+                {"source": "base_currency"},
+                "operations0011",
+                "operations0011",
+                "base_currency"
+            ],
+            [
+                "Source and target",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {},
+                {},
+                {"source": "base_currency", "target": "base_currency2"},
+                "operations0011",
+                "operations0011",
+                "base_currency2"
+            ],
+            [
+                "Scope",
+                "prime_broker_test",
+                "data/metamorph_portfolios-unique.csv",
+                {
+                    "code": "FundCode",
+                    "display_name": "display_name",
+                    "created": "created",
+                    "base_currency": "base_currency",
+                },
+                {},
+                {},
+                {"source": "base_currency", "target": "base_currency2", "scope": "foo"},
+                "operations0011",
+                "foo",
+                "base_currency2"
+            ]
+        ]
+    )
+    def test_properties_dicts(
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_column,
+        properties_scope,
+        expected_property_scope,
+        expected_property_code
+    ) -> None:
+        """
+        Test that portfolios can be loaded successfully
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict(str, str) mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict(str, str) mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict(str, str) identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list(str) property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+
+        :return: None
+        """
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="portfolios",
+            identifier_mapping=identifier_mapping,
+            property_columns=[property_column],
+            properties_scope=properties_scope,
+        )
+
+        response = self.api_factory.build(lusid.api.PropertyDefinitionsApi).get_property_definition(
+            domain="Portfolio",
+            scope=expected_property_scope,
+            code=expected_property_code,
+        )
+        self.assertEqual(f"Portfolio/{expected_property_scope}/{expected_property_code}", response.key)

@@ -620,8 +620,9 @@ def _convert_batch_to_models(
          A list of populated LUSID request models
     """
 
+    source_columns = [column.get("target", column.get("source")) for column in property_columns]
     # Get the data types of the columns to be added as properties
-    property_dtypes = data_frame.loc[:, property_columns].dtypes
+    property_dtypes = data_frame.loc[:, source_columns].dtypes
 
     # Get the types of the attributes on the top level model for this request
     open_api_types = getattr(
@@ -1426,6 +1427,11 @@ def load_from_data_frame(
         .value
     )
 
+    property_columns = [
+        {"source": column, "target": column} if isinstance(column, str) else column
+        for column in property_columns
+    ]
+
     property_columns = (
         Validator(property_columns, "property_columns")
         .set_default_value_if_none(default=[])
@@ -1551,7 +1557,8 @@ def load_from_data_frame(
         data_frame_columns, "DataFrame Columns"
     )
 
-    Validator(property_columns, "property_columns").check_subset_of_list(
+    source_columns = [column["source"] for column in property_columns]
+    Validator(source_columns, "property_columns").check_subset_of_list(
         data_frame_columns, "DataFrame Columns"
     )
 
@@ -1559,7 +1566,7 @@ def load_from_data_frame(
     data_frame = data_frame.applymap(cocoon.utilities.convert_cell_value_to_string)
 
     if remove_white_space:
-        column_list = [property_columns]
+        column_list = [source_columns]
         for col in [mapping_optional, mapping_required, identifier_mapping]:
             column_list.append(col.values())
 
