@@ -98,9 +98,7 @@ def parse_reconciled_holdings(result):
                 "right_units": item.right_units,
             }
 
-            shks = {
-                k: v.value.label_value for k, v in item.sub_holding_keys.items()
-            }
+            shks = {k: v.value.label_value for k, v in item.sub_holding_keys.items()}
             row.update(shks)
             data.append(row)
         df = pd.DataFrame(data)
