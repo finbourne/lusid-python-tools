@@ -517,17 +517,19 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 "Invalid dictionary",
                 [{"foo": "bar"}, "abc"],
                 "The value [{'foo': 'bar'}, 'abc'] provided in property_columns is invalid. "
-                "{'foo': 'bar'} does not contain the mandatory 'source' key."
+                "{'foo': 'bar'} does not contain the mandatory 'source' key.",
             ],
             [
                 "Non string or dictionary",
                 [1],
                 "The value [1] provided in property_columns is invalid. "
-                "1 is not a string or dictionary."
+                "1 is not a string or dictionary.",
             ],
         ]
     )
-    def test_invalid_properties(self, _, property_columns, expected_error_message) -> None:
+    def test_invalid_properties(
+        self, _, property_columns, expected_error_message
+    ) -> None:
         with self.assertRaises(ValueError) as context:
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
@@ -542,4 +544,3 @@ class CocoonTestsPortfolios(unittest.TestCase):
             )
 
         self.assertEqual(expected_error_message, str(context.exception))
-
