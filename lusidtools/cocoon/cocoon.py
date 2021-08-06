@@ -1597,7 +1597,7 @@ def load_from_data_frame(
             properties_scope=sub_holding_keys_scope,
             domain="Transaction",
             data_frame=data_frame,
-            property_columns=sub_holding_keys,
+            property_columns=[{"source": key} for key in sub_holding_keys],
         )
 
     # Check for and create missing property definitions for the properties

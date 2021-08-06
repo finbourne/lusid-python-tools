@@ -149,7 +149,6 @@ def check_property_definitions_exist_in_scope(
 @checkargs
 def create_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
     domain: str,
     data_frame: pd.DataFrame,
     missing_property_columns: list,
@@ -162,8 +161,6 @@ def create_property_definitions_from_file(
     ----------
     api_factory : lusid.utilities.ApiClientFactory
         The ApiFactory to use
-    scope : str
-        The scope to create the property definitions in
     domain : domain
         The domain to create the property definitions in
     data_frame : pd.Series
@@ -304,7 +301,6 @@ def create_missing_property_definitions_from_file(
                 data_frame,
             ) = cocoon.properties.create_property_definitions_from_file(
                 api_factory=api_factory,
-                scope=properties_scope,
                 domain=domain,
                 data_frame=data_frame,
                 missing_property_columns=missing_property_columns,

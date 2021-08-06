@@ -313,7 +313,6 @@ class CocoonPropertiesTests(unittest.TestCase):
             data_frame_updated,
         ) = cocoon.properties.create_property_definitions_from_file(
             api_factory=self.api_factory,
-            scope=scope,
             domain=domain,
             data_frame=data_frame,
             missing_property_columns=missing_property_columns,
