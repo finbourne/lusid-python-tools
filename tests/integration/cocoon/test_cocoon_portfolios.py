@@ -393,12 +393,14 @@ class CocoonTestsPortfolios(unittest.TestCase):
         )
 
         for property_column in property_columns:
-            response = self.api_factory.build(lusid.api.PropertyDefinitionsApi).get_property_definition(
-                domain="Portfolio",
-                scope=properties_scope,
-                code=property_column,
+            response = self.api_factory.build(
+                lusid.api.PropertyDefinitionsApi
+            ).get_property_definition(
+                domain="Portfolio", scope=properties_scope, code=property_column,
             )
-            self.assertEqual(f"Portfolio/{properties_scope}/{property_column}", response.key)
+            self.assertEqual(
+                f"Portfolio/{properties_scope}/{property_column}", response.key
+            )
 
     @parameterized.expand(
         [
@@ -417,7 +419,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"source": "base_currency"},
                 "operations0011",
                 "operations0011",
-                "base_currency"
+                "base_currency",
             ],
             [
                 "Source and target",
@@ -434,7 +436,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"source": "base_currency", "target": "base_currency2"},
                 "operations0011",
                 "operations0011",
-                "base_currency2"
+                "base_currency2",
             ],
             [
                 "Scope",
@@ -451,8 +453,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 {"source": "base_currency", "target": "base_currency2", "scope": "foo"},
                 "operations0011",
                 "foo",
-                "base_currency2"
-            ]
+                "base_currency2",
+            ],
         ]
     )
     def test_properties_dicts(
@@ -466,7 +468,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         property_column,
         properties_scope,
         expected_property_scope,
-        expected_property_code
+        expected_property_code,
     ) -> None:
         """
         Test that portfolios can be loaded successfully
@@ -495,9 +497,14 @@ class CocoonTestsPortfolios(unittest.TestCase):
             properties_scope=properties_scope,
         )
 
-        response = self.api_factory.build(lusid.api.PropertyDefinitionsApi).get_property_definition(
+        response = self.api_factory.build(
+            lusid.api.PropertyDefinitionsApi
+        ).get_property_definition(
             domain="Portfolio",
             scope=expected_property_scope,
             code=expected_property_code,
         )
-        self.assertEqual(f"Portfolio/{expected_property_scope}/{expected_property_code}", response.key)
+        self.assertEqual(
+            f"Portfolio/{expected_property_scope}/{expected_property_code}",
+            response.key,
+        )

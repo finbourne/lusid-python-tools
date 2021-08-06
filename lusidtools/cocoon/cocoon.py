@@ -620,7 +620,9 @@ def _convert_batch_to_models(
          A list of populated LUSID request models
     """
 
-    source_columns = [column.get("target", column.get("source")) for column in property_columns]
+    source_columns = [
+        column.get("target", column.get("source")) for column in property_columns
+    ]
     # Get the data types of the columns to be added as properties
     property_dtypes = data_frame.loc[:, source_columns].dtypes
 

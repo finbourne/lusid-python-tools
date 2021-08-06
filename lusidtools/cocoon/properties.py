@@ -69,7 +69,7 @@ def check_property_definitions_exist_in_scope(
     domain: str,
     data_frame: pd.DataFrame,
     target_columns: list,
-    column_to_scope: dict
+    column_to_scope: dict,
 ):
     """
     This function identifiers which property definitions are missing from LUSID
@@ -104,14 +104,10 @@ def check_property_definitions_exist_in_scope(
     # Iterate over the column names
     column_property_mapping = {}
 
-    for column_name, data_type in data_frame.loc[
-        :, target_columns
-    ].dtypes.iteritems():
+    for column_name, data_type in data_frame.loc[:, target_columns].dtypes.iteritems():
 
         # Create the property key
-        property_key = (
-            f"{domain}/{column_to_scope[column_name]}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
-        )
+        property_key = f"{domain}/{column_to_scope[column_name]}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
 
         column_property_mapping[property_key] = column_name
 
@@ -157,7 +153,7 @@ def create_property_definitions_from_file(
     domain: str,
     data_frame: pd.DataFrame,
     missing_property_columns: list,
-    column_to_scope: dict
+    column_to_scope: dict,
 ):
     """
     Creates the property definitions for all the columns in a file
@@ -269,9 +265,13 @@ def create_missing_property_definitions_from_file(
         for column in source_columns:
             data_frame.loc[:, source_to_target[column]] = data_frame[column]
 
-        target_columns = [column.get("target", column.get("source")) for column in property_columns]
+        target_columns = [
+            column.get("target", column.get("source")) for column in property_columns
+        ]
         column_to_scope = {
-            column.get("target", column.get("source")): column.get("scope", properties_scope)
+            column.get("target", column.get("source")): column.get(
+                "scope", properties_scope
+            )
             for column in property_columns
         }
 
@@ -285,7 +285,7 @@ def create_missing_property_definitions_from_file(
             domain=domain,
             data_frame=data_frame,
             target_columns=target_columns,
-            column_to_scope=column_to_scope
+            column_to_scope=column_to_scope,
         )
 
         logging.info(
@@ -308,7 +308,7 @@ def create_missing_property_definitions_from_file(
                 domain=domain,
                 data_frame=data_frame,
                 missing_property_columns=missing_property_columns,
-                column_to_scope=column_to_scope
+                column_to_scope=column_to_scope,
             )
 
     return data_frame
