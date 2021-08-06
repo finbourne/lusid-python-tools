@@ -1,5 +1,7 @@
 import unittest
 from pathlib import Path
+
+import pandas
 import pandas as pd
 import lusid
 from lusidfeature import lusid_feature
@@ -508,3 +510,22 @@ class CocoonTestsPortfolios(unittest.TestCase):
             f"Portfolio/{expected_property_scope}/{expected_property_code}",
             response.key,
         )
+
+    def test_invalid_properties(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope="foo",
+                data_frame=pandas.DataFrame(),
+                mapping_required={},
+                mapping_optional={},
+                file_type="portfolios",
+                identifier_mapping={},
+                property_columns=[{"foo": "bar"}, "abc"],
+                properties_scope="bar",
+            )
+
+        self.assertEqual("The value [{'foo': 'bar'}, 'abc'] provided in property_columns is invalid. "
+                         "{'foo': 'bar'} does not contain the mandatory 'source' key.",
+                         str(context.exception))
+
