@@ -57,44 +57,8 @@ def run_query(
         left=left, right=right, instrument_property_keys=instr_props + [AGG_INSTR],
     )
 
-    def success(result):
-        if len(result.content.values) == 0:
-            return "No reconciliation breaks"
-
-        def parse_breaks(result):
-            data = {}
-            for item in result.content.values:
-                row = {
-                    "LUID": item.instrument_uid,
-                    "Name": [
-                        i.value.label_value if i.key == AGG_INSTR else None
-                        for i in item.instrument_properties
-                    ][0],
-                    "diff_cost": item.difference_cost.amount,
-                    "diff_cost_ccy": item.difference_cost.currency,
-                    "left_cost": item.left_cost.amount,
-                    "left_cost_ccy": item.left_cost.currency,
-                    "left_units": item.left_units,
-                    "right_cost": item.right_cost.amount,
-                    "right_cost_ccy": item.right_cost.currency,
-                    "right_units": item.right_units,
-                }
-
-                shks = {
-                    k: v.value.label_value for k, v in item.sub_holding_keys.items()
-                }
-                row.update(shks)
-                data[item.instrument_uid] = row
-
-            df = pd.DataFrame.from_dict(data).T
-            df.fillna("N/A", inplace=True)
-
-            return df
-
-        return parse_breaks(result)
-
     return api.call.reconcile_holdings(portfolios_reconciliation_request=request).bind(
-        success
+        parse_reconciled_holdings
     )
 
 
@@ -109,6 +73,42 @@ def process_args(api, args):
         portfolio_right=args.portfolio_right,
         date_right=args.date_right[0],
     )  # .bind(lambda x: x[1])
+
+
+def parse_reconciled_holdings(result):
+    if len(result.content.values) == 0:
+        return "No reconciliation breaks"
+
+    def parse_breaks(result):
+        data = []
+        for item in result.content.values:
+            row = {
+                "LUID": item.instrument_uid,
+                "Name": [
+                    i.value.label_value if i.key == AGG_INSTR else None
+                    for i in item.instrument_properties
+                ][0],
+                "diff_cost": item.difference_cost.amount,
+                "diff_cost_ccy": item.difference_cost.currency,
+                "left_cost": item.left_cost.amount,
+                "left_cost_ccy": item.left_cost.currency,
+                "left_units": item.left_units,
+                "right_cost": item.right_cost.amount,
+                "right_cost_ccy": item.right_cost.currency,
+                "right_units": item.right_units,
+            }
+
+            shks = {
+                k: v.value.label_value for k, v in item.sub_holding_keys.items()
+            }
+            row.update(shks)
+            data.append(row)
+        df = pd.DataFrame(data)
+        df.fillna("N/A", inplace=True)
+
+        return df
+
+    return parse_breaks(result)
 
 
 def main(parse=parse, display_df=lpt.display_df):
