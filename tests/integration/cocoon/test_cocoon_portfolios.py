@@ -525,7 +525,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
                 properties_scope="bar",
             )
 
-        self.assertEqual("The value [{'foo': 'bar'}, 'abc'] provided in property_columns is invalid. "
-                         "{'foo': 'bar'} does not contain the mandatory 'source' key.",
-                         str(context.exception))
-
+        self.assertEqual(
+            "The value [{'foo': 'bar'}, 'abc'] provided in property_columns is invalid. "
+            "{'foo': 'bar'} does not contain the mandatory 'source' key.",
+            str(context.exception),
+        )

@@ -1429,7 +1429,9 @@ def load_from_data_frame(
         .value
     )
 
-    Validator(property_columns, "property_columns").check_entries_are_strings_or_dict_containing_key("source")
+    Validator(
+        property_columns, "property_columns"
+    ).check_entries_are_strings_or_dict_containing_key("source")
 
     property_columns = [
         {"source": column, "target": column} if isinstance(column, str) else column

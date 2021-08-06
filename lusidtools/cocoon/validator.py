@@ -216,5 +216,7 @@ class Validator:
     def check_entries_are_strings_or_dict_containing_key(self, expected_key):
         for item in self.value:
             if isinstance(item, dict) and expected_key not in item:
-                raise ValueError(f"The value {self.value} provided in {self.value_name} is invalid. "
-                                 f"{item} does not contain the mandatory 'source' key.")
+                raise ValueError(
+                    f"The value {self.value} provided in {self.value_name} is invalid. "
+                    f"{item} does not contain the mandatory 'source' key."
+                )
