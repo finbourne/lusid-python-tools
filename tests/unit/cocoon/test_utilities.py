@@ -1,4 +1,5 @@
 import copy
+import os
 import uuid
 
 import numpy
@@ -138,7 +139,7 @@ class MockTimeGeneratorNoTimeMethod:
 class CocoonUtilitiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(
         [
@@ -2605,7 +2606,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
 class GroupRequestUtilitiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     def test_group_request_into_one_portfolio_group(self):
         port_group = "Portfolio Group 1"

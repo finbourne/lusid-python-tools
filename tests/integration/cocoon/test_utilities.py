@@ -10,7 +10,7 @@ from lusidtools import logger
 class CocoonUtilitiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature("T14-1", "T14-2")
     @parameterized.expand(

@@ -20,7 +20,7 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         )
         cls.portfolios_api = cls.api_factory.build(lusid.api.PortfoliosApi)
         cls.unique_id = create_scope_id()
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
         cls.scope = "ModelFundTest"
         cls.file_name = "data/reference-portfolio/reference-test.csv"
 

@@ -1,3 +1,4 @@
+import os
 import unittest
 from pathlib import Path
 import pandas as pd
@@ -19,7 +20,7 @@ class ComplexInstrumentTests(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
         cls.instruments_api = cls.api_factory.build(lusid.api.InstrumentsApi)
 
         # Set test parameters as class methods

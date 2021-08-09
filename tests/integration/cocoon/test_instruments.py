@@ -19,7 +19,7 @@ class CocoonInstrumentsTests(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
         cls.loop = cocoon.async_tools.start_event_loop_new_thread()
 
     @classmethod

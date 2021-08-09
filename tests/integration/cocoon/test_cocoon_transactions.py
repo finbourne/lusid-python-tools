@@ -64,7 +64,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature("T8-1", "T8-2", "T8-3", "T8-4", "T8-5", "T8-6", "T8-7")
     @parameterized.expand(

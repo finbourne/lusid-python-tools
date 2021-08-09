@@ -1,3 +1,4 @@
+import os
 import unittest
 from lusidtools import logger
 from lusidtools.cocoon.instruments import prepare_key
@@ -7,7 +8,7 @@ from parameterized import parameterized
 class CocoonUtilitiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(
         [
