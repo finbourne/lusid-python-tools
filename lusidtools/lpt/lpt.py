@@ -305,7 +305,7 @@ def read_input(path, frame_type=None, mappings=None, **kwargs):
         path, sheet = path.rsplit(":", 1)
 
     if ".xls" in path.lower():
-        df = pd.read_excel(path, sheet_name=sheet, **kwargs)
+        df = pd.read_excel(path, sheet_name=sheet, engine='openpyxl', **kwargs)
     else:
         df = pd.read_csv(path, **kwargs)
 

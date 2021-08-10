@@ -224,7 +224,8 @@ class CocoonTestSeedDataNoMappingOverrideExcel(
         cls.sample_data = pd.read_excel(
             Path(__file__).parent.joinpath(
                 "data/seed_sample_data/sample_data_excel.xlsx"
-            )
+            ),
+            engine='openpyxl'
         )
 
         seed_data(
