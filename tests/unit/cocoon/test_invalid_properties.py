@@ -18,13 +18,17 @@ class CocoonInvalidPropertiesTests(unittest.TestCase):
         cls.logger = logger.LusidLogger("debug")
 
     @parameterized.expand(
-        [(
+        [
+            (
                 "Invalid numeric type",
                 pd.DataFrame([{"a": 2}]).astype(np.short),
-                "The following columns in the data_frame have not been mapped to LUSID data types: {'a': 'int16'}"
-        )
-        ])
-    def test_create_property_definitions_from_file(self, _, data_frame, expected_message) -> None:
+                "The following columns in the data_frame have not been mapped to LUSID data types: {'a': 'int16'}",
+            )
+        ]
+    )
+    def test_create_property_definitions_from_file(
+        self, _, data_frame, expected_message
+    ) -> None:
         with self.assertRaises(TypeError) as context:
             cocoon.properties.create_property_definitions_from_file(
                 api_factory=self.api_factory,
@@ -33,19 +37,25 @@ class CocoonInvalidPropertiesTests(unittest.TestCase):
                 data_frame=data_frame,
                 missing_property_columns=data_frame.columns.to_list(),
             )
-        self.assertTrue(expected_message in str(context.exception), str(context.exception))
+        self.assertTrue(
+            expected_message in str(context.exception), str(context.exception)
+        )
 
     @parameterized.expand(
-        [(
+        [
+            (
                 "Invalid numeric type",
                 pd.Series(data=[1], index=["a"]),
-                pd.Series(data=['int16'], index=["a"]),
-                "The following columns in the data_frame have not been mapped to LUSID data types: {'a': 'int16'}"
-        )
-        ])
+                pd.Series(data=["int16"], index=["a"]),
+                "The following columns in the data_frame have not been mapped to LUSID data types: {'a': 'int16'}",
+            )
+        ]
+    )
     def test_create_property_values(self, _, row, dtypes, expected_message) -> None:
         with self.assertRaises(TypeError) as context:
             cocoon.properties.create_property_values(
                 row=row, scope="abc", domain="def", dtypes=dtypes
             )
-        self.assertTrue(expected_message in str(context.exception), str(context.exception))
+        self.assertTrue(
+            expected_message in str(context.exception), str(context.exception)
+        )
