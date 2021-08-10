@@ -133,8 +133,8 @@ def dfq(args, given_df=None):
         elif ".xls" in path.lower():
             s = path.split(":")
             if len(s) == 2:
-                return pd.read_excel(s[0], **reader_args, sheet_name=s[1])
-            return pd.read_excel(path, **reader_args)
+                return pd.read_excel(s[0], engine='openpyxl', **reader_args, sheet_name=s[1])
+            return pd.read_excel(path, engine='openpyxl', **reader_args)
         else:
             return pd.read_csv(path, **reader_args)
 
