@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from lusidfeature import lusid_feature
