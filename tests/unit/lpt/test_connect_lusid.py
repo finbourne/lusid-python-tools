@@ -11,7 +11,7 @@ class ConnectLusidTests(unittest.TestCase):
         config["api"] = {}
         config["api"]["tokenUrl"] = "abc"
         config["api"]["username"] = "abc"
-        config["api"]["password"] = os.environ["FBN_PASSWORD"]
+        config["api"]["password"] = os.environ.get("FBN_PASSWORD", "dummyPassword")
         config["api"]["clientId"] = "abc"
         config["api"]["clientSecret"] = "abc"
         config["api"]["apiUrl"] = None

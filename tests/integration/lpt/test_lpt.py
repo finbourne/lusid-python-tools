@@ -1,6 +1,8 @@
 import os
 import unittest
 from pathlib import Path
+from unittest import mock
+
 from pandas import DataFrame
 
 from lusidtools.lpt import (
@@ -75,6 +77,7 @@ class LptTests(unittest.TestCase):
         )
         self.assertIsNotNone(api)
 
+    @mock.patch.dict(os.environ, {"FBN_LUSID_API_URL": ""})
     def test_connect_with_missing_secrets_file(self):
         with self.assertRaises(Exception) as context:
             lse.connect(
