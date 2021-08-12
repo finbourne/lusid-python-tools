@@ -8,7 +8,7 @@ from lusidtools import logger
 import lusid
 from lusidtools import cocoon as cocoon
 import pandas as pd
-
+import os
 from lusid.models import CurrencyAndAmount
 
 # Create the Portfolios, Portfolio Groups and Holdings
