@@ -223,10 +223,14 @@ class Validator:
 
             if isinstance(item, dict):
                 if expected_key not in item:
-                    missing_items.append(f"{item} does not contain the mandatory 'source' key")
+                    missing_items.append(
+                        f"{item} does not contain the mandatory 'source' key"
+                    )
                     continue
                 if not isinstance(item[expected_key], str):
-                    missing_items.append(f"{item[expected_key]} in {item} is not a string")
+                    missing_items.append(
+                        f"{item[expected_key]} in {item} is not a string"
+                    )
                     continue
 
         if len(missing_items) > 0:
