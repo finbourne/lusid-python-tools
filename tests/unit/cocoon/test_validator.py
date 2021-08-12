@@ -341,3 +341,52 @@ class CocoonUtilitiesTests(unittest.TestCase):
             Validator(value, value_name).check_no_intersection_with_list(
                 other_list, list_name
             )
+
+    @parameterized.expand(
+        [
+            [
+                "Dictionary missing 'source' key",
+                [{"foo": "bar"}],
+                "The value [{'foo': 'bar'}] provided in property_columns is invalid.",
+                "{'foo': 'bar'} does not contain the mandatory 'source' key."
+            ],
+            [
+                "Dictionary with 'source' that's not a string",
+                [{"source": 2}],
+                "The value [{'source': 2}] provided in property_columns is invalid.",
+                "2 in {'source': 2} is not a string."
+            ],
+            [
+                "Non string",
+                [1],
+                "The value [1] provided in property_columns is invalid",
+                "1 is not a string or dictionary."
+            ],
+            [
+                "Multiple errors",
+                [1, {"foo": "bar"}, {"source": [5]}],
+                "The value [1, {'foo': 'bar'}, {'source': [5]}] provided in property_columns is invalid",
+                "1 is not a string or dictionary, " +
+                "{'foo': 'bar'} does not contain the mandatory 'source' key, " +
+                "[5] in {'source': [5]} is not a string."
+            ]
+        ]
+    )
+    def test_check_entries_are_strings_or_dict_containing_key_invalid_values(self, _, value,
+                                                                             expected_message_part1,
+                                                                             expected_message_part2):
+        with self.assertRaises(ValueError) as context:
+            Validator(value, "property_columns").check_entries_are_strings_or_dict_containing_key("source")
+
+        self.assertTrue(expected_message_part1 in str(context.exception), str(context.exception))
+        self.assertTrue(expected_message_part2 in str(context.exception), str(context.exception))
+
+    @parameterized.expand(
+        [
+            ["Dictionary with 'source'", [{"source": "foo"}]],
+            ["String", ["foo"]],
+            ["Multiple values", ["foo", {"source": "bar"}]]
+        ]
+    )
+    def test_check_entries_are_strings_or_dict_containing_key_valid_values(self, _, value):
+        Validator(value, "property_columns").check_entries_are_strings_or_dict_containing_key("source")

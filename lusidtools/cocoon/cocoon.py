@@ -2,6 +2,9 @@ import asyncio
 import lusid
 import pandas as pd
 import json
+
+from typing import List
+
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
@@ -577,7 +580,7 @@ def _convert_batch_to_models(
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
-    property_columns: list,
+    property_columns: List[dict],
     properties_scope: str,
     instrument_identifier_mapping: dict,
     file_type: str,
@@ -597,7 +600,7 @@ def _convert_batch_to_models(
         The required mapping
     mapping_optional : dict
         The optional mapping
-    property_columns : list
+    property_columns : List[dict]
         The property columns to add as property values
     properties_scope : str
         The scope to add the property values in
