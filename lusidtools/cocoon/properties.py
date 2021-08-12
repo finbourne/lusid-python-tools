@@ -246,7 +246,7 @@ def create_missing_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
     properties_scope: str,
     data_frame: pd.DataFrame,
-    property_columns: List[dict],
+    property_columns: list,
     domain: str,
 ):
     # If there are property columns

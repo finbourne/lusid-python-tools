@@ -580,7 +580,7 @@ def _convert_batch_to_models(
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
-    property_columns: List[dict],
+    property_columns: list,
     properties_scope: str,
     instrument_identifier_mapping: dict,
     file_type: str,
@@ -600,7 +600,7 @@ def _convert_batch_to_models(
         The required mapping
     mapping_optional : dict
         The optional mapping
-    property_columns : List[dict]
+    property_columns : list
         The property columns to add as property values
     properties_scope : str
         The scope to add the property values in
@@ -717,7 +717,7 @@ async def _construct_batches(
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
-    property_columns: List[dict],
+    property_columns: list,
     properties_scope: str,
     instrument_identifier_mapping: dict,
     batch_size: int,
