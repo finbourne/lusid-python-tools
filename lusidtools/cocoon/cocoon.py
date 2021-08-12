@@ -1432,25 +1432,20 @@ def load_from_data_frame(
         .value
     )
 
-    Validator(
-        property_columns, "property_columns"
-    ).check_entries_are_strings_or_dict_containing_key("source")
-
     property_columns = [
         {"source": column, "target": column} if isinstance(column, str) else column
         for column in property_columns
     ]
 
-    property_columns = (
-        Validator(property_columns, "property_columns")
-        .set_default_value_if_none(default=[])
-        .value
-    )
+    property_columns = (Validator(property_columns, "property_columns")
+                        .set_default_value_if_none(default=[])
+                        .check_entries_are_strings_or_dict_containing_key("source")
+                        .value)
 
     sub_holding_keys = (
         Validator(sub_holding_keys, "sub_holding_keys")
-        .set_default_value_if_none(default=[])
-        .value
+            .set_default_value_if_none(default=[])
+            .value
     )
 
     batch_size = (

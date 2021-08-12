@@ -237,3 +237,5 @@ class Validator:
             raise ValueError(
                 f"The value {self.value} provided in {self.value_name} is invalid. {', '.join(missing_items)}."
             )
+
+        return self
