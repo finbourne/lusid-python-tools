@@ -67,7 +67,6 @@ def check_property_definitions_exist_in_scope_single(
 @checkargs
 def check_property_definitions_exist_in_scope(
     api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
     domain: str,
     data_frame: pd.DataFrame,
     target_columns: list,
@@ -80,8 +79,6 @@ def check_property_definitions_exist_in_scope(
     ----------
     api_factory :   lusid.utilities.ApiClientFactory
         The Api Factory to use
-    scope : str
-        The scope to check for property definitions in
     domain : str
         The domain to check for property definitions in
     data_frame : pd.DataFrame
@@ -280,7 +277,6 @@ def create_missing_property_definitions_from_file(
             data_frame,
         ) = cocoon.properties.check_property_definitions_exist_in_scope(
             api_factory=api_factory,
-            scope=properties_scope,
             domain=domain,
             data_frame=data_frame,
             target_columns=target_columns,

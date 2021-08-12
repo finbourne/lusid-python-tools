@@ -717,7 +717,7 @@ async def _construct_batches(
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
-    property_columns: list,
+    property_columns: List[dict],
     properties_scope: str,
     instrument_identifier_mapping: dict,
     batch_size: int,
