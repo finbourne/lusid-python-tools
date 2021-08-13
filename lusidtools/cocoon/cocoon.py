@@ -242,6 +242,7 @@ class BatchLoader:
                 code=kwargs["code"],
                 effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
                 adjust_holding_request=holding_batch,
+                _request_timeout=5
             )
 
         return api_factory.build(lusid.api.TransactionPortfoliosApi).set_holdings(
@@ -249,6 +250,7 @@ class BatchLoader:
             code=kwargs["code"],
             effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
             adjust_holding_request=holding_batch,
+            _request_timeout=5
         )
 
     @staticmethod
