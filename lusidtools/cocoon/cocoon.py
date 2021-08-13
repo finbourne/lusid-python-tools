@@ -874,17 +874,22 @@ async def _construct_batches(
 
     logging.debug("Created sync batches: ")
     logging.debug(
-        f"Number of batches: {len(sync_batches)}, " +
-        f"Number of items in batches: {sum([len(sync_batch['async_batches']) for sync_batch in sync_batches])}"
+        f"Number of batches: {len(sync_batches)}, "
+        + f"Number of items in batches: {sum([len(sync_batch['async_batches']) for sync_batch in sync_batches])}"
     )
 
     async def gather_func():
         # Schedule three calls *concurrently*:
-        requests = [(async_batch, code, effective_at)
-                    for sync_batch in sync_batches
-                    for async_batch, code, effective_at in
-                    zip(sync_batch["async_batches"], sync_batch["codes"], sync_batch["effective_at"], )
-                    if not async_batch.empty]
+        requests = [
+            (async_batch, code, effective_at)
+            for sync_batch in sync_batches
+            for async_batch, code, effective_at in zip(
+                sync_batch["async_batches"],
+                sync_batch["codes"],
+                sync_batch["effective_at"],
+            )
+            if not async_batch.empty
+        ]
 
         return await asyncio.gather(
             *[
