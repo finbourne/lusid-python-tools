@@ -313,7 +313,10 @@ class CocoonTestsTransactions(unittest.TestCase):
         self.assertEqual(
             len(responses["transactions"]["errors"]),
             0,
-            [(error.status, error.reason, error.body) for error in responses["transactions"]["errors"]]
+            [
+                (error.status, error.reason, error.body)
+                for error in responses["transactions"]["errors"]
+            ],
         )
 
         # Assert that by default no unmatched_identifiers are returned in the response
