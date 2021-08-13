@@ -515,8 +515,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
         [
             [
                 "Invalid dictionary",
-                [{"foo": "bar"}, "abc"],
-                "The value [{'foo': 'bar'}, 'abc'] provided in property_columns is invalid. "
+                [{"foo": "bar"}],
+                "The value [{'foo': 'bar'}] provided in property_columns is invalid. "
                 "{'foo': 'bar'} does not contain the mandatory 'source' key.",
             ],
             [
