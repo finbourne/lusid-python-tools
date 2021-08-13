@@ -880,20 +880,9 @@ async def _construct_batches(
         + f"Number of items in batches: {sum([len(sync_batch['async_batches']) for sync_batch in sync_batches])}"
     )
 
-    async def gather_func():
-        # Schedule three calls *concurrently*:
-        requests = [
-            (async_batch, code, effective_at)
-            for sync_batch in sync_batches
-            for async_batch, code, effective_at in zip(
-                sync_batch["async_batches"],
-                sync_batch["codes"],
-                sync_batch["effective_at"],
-            )
-            if not async_batch.empty
-        ]
-
-        return await asyncio.gather(
+    # Asynchronously load the data into LUSID
+    responses = [
+        await asyncio.gather(
             *[
                 _load_data(
                     api_factory=api_factory,
@@ -915,20 +904,21 @@ async def _construct_batches(
                     effective_at=effective_at,
                     **kwargs,
                 )
-                for async_batch, code, effective_at in requests
+                for async_batch, code, effective_at in zip(
+                    sync_batch["async_batches"],
+                    sync_batch["codes"],
+                    sync_batch["effective_at"],
+                )
+                if not async_batch.empty
             ],
             return_exceptions=True,
         )
-
-    # Asynchronously load the data into LUSID
-    try:
-        timeout = 300.0
-        responses = await asyncio.wait_for(gather_func(), timeout=timeout)
-    except asyncio.TimeoutError:
-        raise Exception(f"Timed out loading data after {timeout} seconds")
-
+        for sync_batch in sync_batches
+    ]
     logging.debug("Flattening responses")
-    responses_flattened = responses
+    responses_flattened = [
+        response for responses_sub in responses for response in responses_sub
+    ]
 
     # Raise any internal exceptions rather than propagating them to the response
     for response in responses_flattened:
