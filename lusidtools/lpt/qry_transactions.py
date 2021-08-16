@@ -47,7 +47,7 @@ def process_args(api, args):
             ("A", "total_consideration.amount", "SettleAmt"),
             ("A", "exchange_rate", "ExchRate"),
             ("A", "P:Transaction/default/TradeToPortfolioRate", "PortRate"),
-            ("C", "entry_date_time", "EntryDate"),
+            ("A", "entry_date_time", "EntryDate"),
             ("C", "cancel_date_time", "CancelDate"),
         ]
 
