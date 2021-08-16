@@ -69,6 +69,9 @@ def parse(with_inputs=True, args=None):
 
 
 def dfq(args, given_df=None):
+    if not isinstance(given_df, pd.DataFrame):
+        print(given_df)
+        return given_df
 
     # Display a dataframe with no cropping
     def display_df(df, decimals=2):
