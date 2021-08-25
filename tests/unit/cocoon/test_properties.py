@@ -141,7 +141,7 @@ class CocoonPropertiesTests(unittest.TestCase):
 
             self.assertEqual(property_existence, expected_outcomes[0])
             self.assertEqual(property_type, expected_outcomes[1])
-        except:
+        except lusid.exceptions.ApiException:
             self.assertEqual(throws_exception, True)
 
     @parameterized.expand(
