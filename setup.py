@@ -18,7 +18,7 @@ setup(
         "lusid-sdk-preview>=0.11.*",
         "msrest==0.6.16",
         "xlrd==1.2.0",
-        "pandas==1.0.5",
+        "pandas==1.1.4",
         "numpy==1.19.0",
         "pytz==2019.3",
         "tqdm==4.46.1",
