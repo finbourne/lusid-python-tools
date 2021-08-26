@@ -6,6 +6,7 @@ import lusidtools.cocoon as cocoon
 import pandas as pd
 import numpy as np
 from lusidtools import logger
+from http import HTTPStatus
 
 
 class CocoonPropertiesTests(unittest.TestCase):
@@ -84,14 +85,22 @@ class CocoonPropertiesTests(unittest.TestCase):
                     ),
                 }
 
+                forbidden_property_keys = {
+                    "Instrument/default/Forbidden": lusid.models.ResourceId(
+                        scope="system", code="string"
+                    )
+                }
+
                 # If the property exists return the defintion, else raise an exception
                 if property_key in list(property_keys_in_existance.keys()):
                     return lusid.models.PropertyDefinition(
                         key=property_key,
                         data_type_id=property_keys_in_existance[property_key],
                     )
+                elif property_key in list(forbidden_property_keys.keys()):
+                    raise lusid.exceptions.ApiException(HTTPStatus.FORBIDDEN)
                 else:
-                    raise lusid.exceptions.ApiException
+                    raise lusid.exceptions.ApiException(HTTPStatus.NOT_FOUND)
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -107,10 +116,11 @@ class CocoonPropertiesTests(unittest.TestCase):
             ["Transaction/default/TradeToPortfolioRate", [True, "number"]],
             ["Transaction/Operations/Strategy", [True, "string"]],
             ["Holding/Operations/Currency", [True, "currency"]],
+            ["Instrument/default/Forbidden", [True, "currency"], True],
         ]
     )
     def test_check_property_definitions_exist_in_scope_single(
-        self, property_key, expected_outcomes
+        self, property_key, expected_outcomes, throws_exception=False
     ) -> None:
         """
         Tests that checking for a property definition in a single scope works as expected. The call to LUSID
@@ -121,16 +131,18 @@ class CocoonPropertiesTests(unittest.TestCase):
 
         :return: None
         """
+        try:
+            (
+                property_existence,
+                property_type,
+            ) = cocoon.properties.check_property_definitions_exist_in_scope_single(
+                api_factory=self.api_factory, property_key=property_key
+            )
 
-        (
-            property_existence,
-            property_type,
-        ) = cocoon.properties.check_property_definitions_exist_in_scope_single(
-            api_factory=self.api_factory, property_key=property_key
-        )
-
-        self.assertEqual(property_existence, expected_outcomes[0])
-        self.assertEqual(property_type, expected_outcomes[1])
+            self.assertEqual(property_existence, expected_outcomes[0])
+            self.assertEqual(property_type, expected_outcomes[1])
+        except lusid.exceptions.ApiException:
+            self.assertEqual(throws_exception, True)
 
     @parameterized.expand(
         [

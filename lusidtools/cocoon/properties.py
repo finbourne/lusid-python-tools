@@ -3,6 +3,7 @@ from lusidtools import cocoon
 import lusid
 import pandas as pd
 import logging
+from http import HTTPStatus
 
 # Map Numpy data types to LUSID data types
 global_constants = {
@@ -52,8 +53,11 @@ def check_property_definitions_exist_in_scope_single(
         exists = True
         data_type = response.data_type_id.code
 
-    except lusid.exceptions.ApiException:
-        exists = False
+    except lusid.exceptions.ApiException as ex:
+        if ex.status == HTTPStatus.NOT_FOUND:
+            exists = False
+        else:
+            raise
 
     return exists, data_type
 
