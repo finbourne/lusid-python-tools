@@ -28,7 +28,7 @@ $ pip install --user lusidtools
 
 ## CLI Usage
 
-You will need to create a secrets file.  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks)
+You will need to create a secrets file.  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks).
 
 Makes sure that the Python `bin` folder is on your search path before trying the following examples.
 
@@ -83,7 +83,7 @@ lusidtools rec \
   --secrets-file /path/to/secrets.json 
 ```
 
-You can reconcile a portfolio against itself by specifying the same values for `<scope-left>` / `<scope-right>` and `<portfolio-left` / `<portfolio-right`> and then providing different effective dates
+You can reconcile a portfolio against itself by specifying the same values for `<scope-left>` / `<scope-right>` and `<portfolio-left` / `<portfolio-right`> and then providing different effective dates.
 
 ## Contributing
 
