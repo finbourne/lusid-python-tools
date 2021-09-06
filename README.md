@@ -87,7 +87,7 @@ You can reconcile a portfolio against itself by specifying the same values for `
 
 ## Contributing
 
-We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs)
+We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs).
 
 ## Reporting Issues
 If you encounter any issues please report these on the Github [issues page](https://github.com/finbourne/lusid-python-tools/issues).
