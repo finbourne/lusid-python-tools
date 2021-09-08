@@ -25,7 +25,7 @@ def load_holdings(args):
     holdings = load_data_to_df_and_detect_delimiter(args)
 
     mappings = load_json_file(args["mapping"])
-    if "cash_flag" in mappings[file_type].keys() or "cash_flag" in mappings.keys():
+    if "cash_flag" in mappings.keys():
         holdings, mappings = identify_cash_items(holdings, mappings, file_type)
 
     validate_mapping_file_structure(mappings, holdings.columns, file_type)
