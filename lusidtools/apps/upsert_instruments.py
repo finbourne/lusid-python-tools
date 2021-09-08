@@ -38,7 +38,7 @@ def load_instruments(args):
         raise ValueError(err)
 
     validate_mapping_file_structure(mappings, instruments.columns, file_type)
-    if "cash_flag" in mappings[file_type].keys() or "cash_flag" in mappings.keys():
+    if "cash_flag" in mappings.keys():
         instruments, mappings = identify_cash_items(
             instruments, mappings, file_type, True
         )
