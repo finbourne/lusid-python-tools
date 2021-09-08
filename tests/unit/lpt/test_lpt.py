@@ -97,7 +97,7 @@ class LptTests(unittest.TestCase):
         with patch("pandas.read_excel") as read_excel_mock:
             lpt.read_input(path=input_path)
             read_excel_mock.assert_called_once_with(
-                expected_path, sheet_name=expected_sheet_name
+                expected_path, sheet_name=expected_sheet_name, engine='openpyxl'
             )
 
     @parameterized.expand(
