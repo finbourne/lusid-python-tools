@@ -1743,9 +1743,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ),
         ]
     )
-    def test_cash_flag_file_type_global(
-        self, _, cash_flag, global_cash_flag, expected_values
-    ):
+    def test_cash_flag_file_type_global(self, _, cash_flag, global_cash_flag, expected_values):
         data = {
             "instrument_name": ["inst1", "inst2", "inst3", "inst4", "inst5"],
             "internal_currency": ["GBP_IMP", "GBP_IMP", "USD_IMP", "USD_IMP", "APPLUK"],
