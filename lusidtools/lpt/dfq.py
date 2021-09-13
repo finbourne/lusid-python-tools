@@ -68,32 +68,7 @@ def parse(with_inputs=True, args=None):
     return parser.parse_args(args)
 
 
-def dfq(args, given_df=None):
-
-    # Display a dataframe with no cropping
-    def display_df(df, decimals=2):
-        if args.xls:
-            import xlwings as xw
-
-            wb = xw.Book()
-            wb.sheets[0].range("A1").options(index=args.index).value = df
-        else:
-            fmt = "{:,." + str(decimals) + "f}"
-            pd.options.display.float_format = fmt.format
-            pd.set_option("display.max_colwidth", 200)
-
-            try:
-                if args.transpose:
-                    df = df.T
-                    args.index = True
-                with pd.option_context("display.width", None, "display.max_rows", 1000):
-                    if args.markdown:
-                        print(df.fillna("").to_markdown(index=args.index))
-                    else:
-                        print(df.fillna("").to_string(index=args.index))
-            except:
-                print(df.to_string(index=args.index))
-
+def apply_args(args, given_df):
     nrows = (
         args.first
         if args.first > 0
@@ -157,8 +132,7 @@ def dfq(args, given_df=None):
         del dfs
 
     if args.columns:
-        print("\n".join(df.columns.values))
-        exit()
+        return df
 
     if args.join:
         cols = [c.split("=") for c in args.join[1:]]
@@ -257,6 +231,53 @@ def dfq(args, given_df=None):
             ]
         df = df[args.select]
 
+    if args.unique:
+        df = df.drop_duplicates()
+
+    if args.single:
+        df = df.drop_duplicates(args.single)
+
+    if args.order:
+        df = df.sort_values(args.order)
+
+    return df
+
+
+def dfq(args, given_df=None):
+    if not isinstance(given_df, pd.DataFrame):
+        print(given_df)
+        exit(0)
+
+    df = apply_args(args, given_df)
+
+    if args.columns:
+        print("\n".join(df.columns.values))
+        exit()
+
+    # Display a dataframe with no cropping
+    def display_df(df, decimals=2):
+        if args.xls:
+            import xlwings as xw
+
+            wb = xw.Book()
+            wb.sheets[0].range("A1").options(index=args.index).value = df
+        else:
+            fmt = "{:,." + str(decimals) + "f}"
+            pd.options.display.float_format = fmt.format
+            pd.set_option("display.max_colwidth", 200)
+
+            try:
+                if args.transpose:
+                    df = df.T
+                    args.index = True
+                with pd.option_context("display.width", None, "display.max_rows", 1000):
+                    if args.markdown:
+                        print(df.fillna("").to_markdown(index=args.index))
+                    else:
+                        print(df.fillna("").to_string(index=args.index))
+            except:
+                print(df.to_string(index=args.index))
+
     def display(df, subset=None, total=0):
         if args.filename:
             if subset:
@@ -273,15 +294,6 @@ def dfq(args, given_df=None):
             if subset:
                 print("{} {}".format(subset, len(df)))
             display_df(df, args.dp)
-
-    if args.unique:
-        df = df.drop_duplicates()
-
-    if args.single:
-        df = df.drop_duplicates(args.single)
-
-    if args.order:
-        df = df.sort_values(args.order)
 
     if args.first > 0:
         display(df[: args.first], "First")
