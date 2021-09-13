@@ -10,7 +10,6 @@ from lusidtools import logger
 from mock_api_factory import MockApiFactory
 
 
-
 class CocoonPropertiesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
