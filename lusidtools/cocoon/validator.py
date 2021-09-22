@@ -212,3 +212,30 @@ class Validator:
                          "column" and "default"."""
                 logging.error(err)
                 raise ValueError(err)
+
+    def check_entries_are_strings_or_dict_containing_key(self, expected_key):
+        missing_items = []
+
+        for item in self.value:
+            if not (isinstance(item, dict) or isinstance(item, str)):
+                missing_items.append(f"{item} is not a string or dictionary")
+                continue
+
+            if isinstance(item, dict):
+                if expected_key not in item:
+                    missing_items.append(
+                        f"{item} does not contain the mandatory 'source' key"
+                    )
+                    continue
+                if not isinstance(item[expected_key], str):
+                    missing_items.append(
+                        f"{item[expected_key]} in {item} is not a string"
+                    )
+                    continue
+
+        if len(missing_items) > 0:
+            raise ValueError(
+                f"The value {self.value} provided in {self.value_name} is invalid. {', '.join(missing_items)}."
+            )
+
+        return self

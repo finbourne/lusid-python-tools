@@ -1,3 +1,5 @@
+from typing import List
+
 from lusidtools.cocoon.utilities import checkargs
 from lusidtools import cocoon
 import lusid
@@ -65,10 +67,10 @@ def check_property_definitions_exist_in_scope_single(
 @checkargs
 def check_property_definitions_exist_in_scope(
     api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
     domain: str,
     data_frame: pd.DataFrame,
-    property_columns: list,
+    target_columns: list,
+    column_to_scope: dict,
 ):
     """
     This function identifiers which property definitions are missing from LUSID
@@ -77,15 +79,14 @@ def check_property_definitions_exist_in_scope(
     ----------
     api_factory :   lusid.utilities.ApiClientFactory
         The Api Factory to use
-    scope : str
-        The scope to check for property definitions in
     domain : str
         The domain to check for property definitions in
     data_frame : pd.DataFrame
         The dataframe to check properties for
-    property_columns : list[str]
+    target_columns : list[str]
         The columns to add properties for
-
+    column_to_scope : dict[str:str]
+        Column name to scope
     Returns
     -------
     missing_property_columns :  list[str]
@@ -101,14 +102,11 @@ def check_property_definitions_exist_in_scope(
 
     # Iterate over the column names
     column_property_mapping = {}
-    for column_name, data_type in data_frame.loc[
-        :, property_columns
-    ].dtypes.iteritems():
+
+    for column_name, data_type in data_frame.loc[:, target_columns].dtypes.iteritems():
 
         # Create the property key
-        property_key = (
-            f"{domain}/{scope}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
-        )
+        property_key = f"{domain}/{column_to_scope[column_name]}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
 
         column_property_mapping[property_key] = column_name
 
@@ -150,10 +148,10 @@ def check_property_definitions_exist_in_scope(
 @checkargs
 def create_property_definitions_from_file(
     api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
     domain: str,
     data_frame: pd.DataFrame,
     missing_property_columns: list,
+    column_to_scope: dict,
 ):
     """
     Creates the property definitions for all the columns in a file
@@ -162,14 +160,14 @@ def create_property_definitions_from_file(
     ----------
     api_factory : lusid.utilities.ApiClientFactory
         The ApiFactory to use
-    scope : str
-        The scope to create the property definitions in
     domain : domain
         The domain to create the property definitions in
     data_frame : pd.Series
         The dataframe dtypes to add definitions for
     missing_property_columns : list[str]
         The columns that property defintions are missing for
+    column_to_scope : dict[str:str]
+        Column name to scope
 
     Returns
     -------
@@ -216,7 +214,7 @@ def create_property_definitions_from_file(
         # Create a request to define the property, assumes value_required is false for all
         property_request = lusid.models.CreatePropertyDefinitionRequest(
             domain=domain,
-            scope=scope,
+            scope=column_to_scope[column_name],
             code=lusid_friendly_code,
             value_required=False,
             display_name=column_name,
@@ -254,16 +252,35 @@ def create_missing_property_definitions_from_file(
     # If there are property columns
     if len(property_columns) > 0 and domain is not None:
 
+        source_columns = [column["source"] for column in property_columns]
+        source_to_target = {
+            column1["source"]: column1.get("target", column1.get("source"))
+            for column1 in property_columns
+        }
+
+        for column in source_columns:
+            data_frame.loc[:, source_to_target[column]] = data_frame[column]
+
+        target_columns = [
+            column.get("target", column.get("source")) for column in property_columns
+        ]
+        column_to_scope = {
+            column.get("target", column.get("source")): column.get(
+                "scope", properties_scope
+            )
+            for column in property_columns
+        }
+
         # Identify which property definitions are missing
         (
             missing_property_columns,
             data_frame,
         ) = cocoon.properties.check_property_definitions_exist_in_scope(
             api_factory=api_factory,
-            scope=properties_scope,
             domain=domain,
             data_frame=data_frame,
-            property_columns=property_columns,
+            target_columns=target_columns,
+            column_to_scope=column_to_scope,
         )
 
         logging.info(
@@ -282,10 +299,10 @@ def create_missing_property_definitions_from_file(
                 data_frame,
             ) = cocoon.properties.create_property_definitions_from_file(
                 api_factory=api_factory,
-                scope=properties_scope,
                 domain=domain,
                 data_frame=data_frame,
                 missing_property_columns=missing_property_columns,
+                column_to_scope=column_to_scope,
             )
 
     return data_frame
