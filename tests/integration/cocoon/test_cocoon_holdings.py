@@ -750,7 +750,9 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         self.assertGreater(len(responses["holdings"]["success"]), 0)
 
-        self.assertEqual(len(responses["holdings"]["errors"]), 0)
+        self.assertEqual(
+            len(responses["holdings"]["errors"]), 0, responses["holdings"]["errors"]
+        )
 
         # Assert that by default no unmatched_identifiers are returned in the response
         self.assertFalse(responses["holdings"].get("unmatched_identifiers", False))

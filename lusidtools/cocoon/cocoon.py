@@ -1,7 +1,13 @@
 import asyncio
+import concurrent
+import uuid
+
 import lusid
 import pandas as pd
 import json
+
+from typing import List
+
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
@@ -236,6 +242,7 @@ class BatchLoader:
                 code=kwargs["code"],
                 effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
                 adjust_holding_request=holding_batch,
+                _request_timeout=5,
             )
 
         return api_factory.build(lusid.api.TransactionPortfoliosApi).set_holdings(
@@ -243,6 +250,7 @@ class BatchLoader:
             code=kwargs["code"],
             effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
             adjust_holding_request=holding_batch,
+            _request_timeout=5,
         )
 
     @staticmethod
@@ -559,7 +567,8 @@ async def _load_data(
     """
 
     # Dynamically call the correct async function to use based on the file type
-    logging.debug(f"Running load_{file_type}_batch()")
+    identifier = uuid.uuid4()
+    logging.debug(f"Running load_{file_type}_batch({identifier})")
     from time import time
 
     start = time()
@@ -569,7 +578,7 @@ async def _load_data(
         # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
         **kwargs,
     )
-    logging.debug(f"Batch completed - duration: {time() - start}")
+    logging.debug(f"Batch completed ({identifier}) - duration: {time() - start}")
     return response
 
 
@@ -620,8 +629,11 @@ def _convert_batch_to_models(
          A list of populated LUSID request models
     """
 
+    source_columns = [
+        column.get("target", column.get("source")) for column in property_columns
+    ]
     # Get the data types of the columns to be added as properties
-    property_dtypes = data_frame.loc[:, property_columns].dtypes
+    property_dtypes = data_frame.loc[:, source_columns].dtypes
 
     # Get the types of the attributes on the top level model for this request
     open_api_types = getattr(
@@ -863,7 +875,10 @@ async def _construct_batches(
             ]
 
     logging.debug("Created sync batches: ")
-    logging.debug(f"Number of batches: {len(sync_batches)}")
+    logging.debug(
+        f"Number of batches: {len(sync_batches)}, "
+        + f"Number of items in batches: {sum([len(sync_batch['async_batches']) for sync_batch in sync_batches])}"
+    )
 
     # Asynchronously load the data into LUSID
     responses = [
@@ -1432,6 +1447,15 @@ def load_from_data_frame(
         .value
     )
 
+    property_columns = [
+        {"source": column, "target": column} if isinstance(column, str) else column
+        for column in property_columns
+    ]
+
+    Validator(
+        property_columns, "property_columns"
+    ).check_entries_are_strings_or_dict_containing_key("source")
+
     sub_holding_keys = (
         Validator(sub_holding_keys, "sub_holding_keys")
         .set_default_value_if_none(default=[])
@@ -1551,7 +1575,8 @@ def load_from_data_frame(
         data_frame_columns, "DataFrame Columns"
     )
 
-    Validator(property_columns, "property_columns").check_subset_of_list(
+    source_columns = [column["source"] for column in property_columns]
+    Validator(source_columns, "property_columns").check_subset_of_list(
         data_frame_columns, "DataFrame Columns"
     )
 
@@ -1559,7 +1584,7 @@ def load_from_data_frame(
     data_frame = data_frame.applymap(cocoon.utilities.convert_cell_value_to_string)
 
     if remove_white_space:
-        column_list = [property_columns]
+        column_list = [source_columns]
         for col in [mapping_optional, mapping_required, identifier_mapping]:
             column_list.append(col.values())
 
@@ -1588,7 +1613,7 @@ def load_from_data_frame(
             properties_scope=sub_holding_keys_scope,
             domain="Transaction",
             data_frame=data_frame,
-            property_columns=sub_holding_keys,
+            property_columns=[{"source": key} for key in sub_holding_keys],
         )
 
     # Check for and create missing property definitions for the properties

@@ -211,10 +211,10 @@ class CocoonPropertiesTests(unittest.TestCase):
             updated_data_frame,
         ) = cocoon.properties.check_property_definitions_exist_in_scope(
             api_factory=self.api_factory,
-            scope=scope,
             domain=domain,
             data_frame=data_frame,
-            property_columns=property_columns,
+            target_columns=property_columns,
+            column_to_scope={column: scope for column in property_columns},
         )
 
         self.assertEqual(first=len(missing_columns), second=len(set(missing_columns)))
@@ -313,10 +313,10 @@ class CocoonPropertiesTests(unittest.TestCase):
             data_frame_updated,
         ) = cocoon.properties.create_property_definitions_from_file(
             api_factory=self.api_factory,
-            scope=scope,
             domain=domain,
             data_frame=data_frame,
             missing_property_columns=missing_property_columns,
+            column_to_scope={column: scope for column in missing_property_columns},
         )
 
         self.assertEqual(first=property_key_mapping, second=expected_outcome[0])

@@ -76,7 +76,9 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
             property_columns=[],
             holdings_adjustment_only=True,
         )
-        assert len(response["holdings"]["errors"]) == 0
+        assert len(response["holdings"]["errors"]) == 0, len(
+            response["holdings"]["errors"]
+        )
 
         # Create groups
         response = cocoon.load_from_data_frame(
