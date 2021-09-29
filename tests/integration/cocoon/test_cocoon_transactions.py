@@ -354,12 +354,10 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "ClientInternal": "client_internal",
                     "Currency": "currency_transaction",
                 },
-                [
-                    "location_region"
-                ],
+                ["location_region"],
                 "operations001",
                 "operations001",
-                "location_region"
+                "location_region",
             ],
             [
                 "Test standard transaction load with scope",
@@ -384,11 +382,15 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 [
-                    {"scope": "foo", "source": "location_region", "target": "My_location"}
+                    {
+                        "scope": "foo",
+                        "source": "location_region",
+                        "target": "My_location",
+                    }
                 ],
                 "operations001",
                 "foo",
-                "My_location"
+                "My_location",
             ],
         ]
     )
@@ -418,7 +420,9 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         :return: None
         """
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath("data/global-fund-combined-transactions.csv"))
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath("data/global-fund-combined-transactions.csv")
+        )
 
         cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
@@ -438,15 +442,20 @@ class CocoonTestsTransactions(unittest.TestCase):
         ).get_transactions(
             scope=scope,
             code="GlobalCreditFund",
-            property_keys=[f"Transaction/{expected_property_scope}/{expected_property_code}"],
+            property_keys=[
+                f"Transaction/{expected_property_scope}/{expected_property_code}"
+            ],
             from_transaction_date=pd.to_datetime("2019-09-01", utc=True),
             to_transaction_date=pd.to_datetime("2019-09-12", utc=True),
         )
 
         for tx in transactions_from_response.values:
             self.assertIsNotNone(
-                tx.properties.get(f"Transaction/{expected_property_scope}/{expected_property_code}"),
-                tx)
+                tx.properties.get(
+                    f"Transaction/{expected_property_scope}/{expected_property_code}"
+                ),
+                tx,
+            )
 
     @lusid_feature("T8-8", "T8-9")
     @parameterized.expand(

@@ -371,9 +371,7 @@ def create_property_values(
             )
 
         # Set the property
-        property_key = (
-            f"{domain}/{column_to_scope.get(column_name, scope)}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
-        )
+        property_key = f"{domain}/{column_to_scope.get(column_name, scope)}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
         properties[property_key] = lusid.models.PerpetualProperty(
             key=property_key, value=property_value
         )

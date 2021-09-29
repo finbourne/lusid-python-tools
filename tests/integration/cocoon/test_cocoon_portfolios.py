@@ -513,8 +513,14 @@ class CocoonTestsPortfolios(unittest.TestCase):
         )
 
         for code in data_frame["FundCode"].values:
-            response = self.api_factory.build(lusid.api.PortfoliosApi).get_portfolio_properties(scope=scope, code=code)
-            self.assertIsNotNone(response.properties.get(f"Portfolio/{expected_property_scope}/{expected_property_code}"))
+            response = self.api_factory.build(
+                lusid.api.PortfoliosApi
+            ).get_portfolio_properties(scope=scope, code=code)
+            self.assertIsNotNone(
+                response.properties.get(
+                    f"Portfolio/{expected_property_scope}/{expected_property_code}"
+                )
+            )
 
     @parameterized.expand(
         [
