@@ -310,7 +310,7 @@ def create_missing_property_definitions_from_file(
 
 @checkargs
 def create_property_values(
-    row: pd.Series, scope: str, domain: str, dtypes: pd.Series
+    row: pd.Series, column_to_scope: dict, scope: str, domain: str, dtypes: pd.Series
 ) -> dict:
     """
     This function generates the property values for a row in a file
@@ -319,6 +319,8 @@ def create_property_values(
     ----------
     row : pd.Series
         The current row of the data frame to create property values for
+    column_to_scope : dict {str, str}
+        The scope for a column name
     scope : str
         The domain to create the property values in
     domain : str
@@ -370,7 +372,7 @@ def create_property_values(
 
         # Set the property
         property_key = (
-            f"{domain}/{scope}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
+            f"{domain}/{column_to_scope.get(column_name, scope)}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
         )
         properties[property_key] = lusid.models.PerpetualProperty(
             key=property_key, value=property_value

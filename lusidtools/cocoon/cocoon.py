@@ -632,6 +632,7 @@ def _convert_batch_to_models(
     source_columns = [
         column.get("target", column.get("source")) for column in property_columns
     ]
+
     # Get the data types of the columns to be added as properties
     property_dtypes = data_frame.loc[:, source_columns].dtypes
 
@@ -668,8 +669,16 @@ def _convert_batch_to_models(
         if domain_lookup[file_type]["domain"] is None:
             properties = None
         else:
+            column_to_scope = {
+                column.get("target", column.get("source")): column.get(
+                    "scope", properties_scope
+                )
+                for column in property_columns
+            }
+
             properties = cocoon.properties.create_property_values(
                 row=row,
+                column_to_scope=column_to_scope,
                 scope=properties_scope,
                 domain=domain_lookup[file_type]["domain"],
                 dtypes=property_dtypes,
@@ -682,6 +691,7 @@ def _convert_batch_to_models(
         ):
             sub_holding_keys_row = cocoon.properties.create_property_values(
                 row=row,
+                column_to_scope={},
                 scope=sub_holding_keys_scope,
                 domain="Transaction",
                 dtypes=sub_holding_key_dtypes,
