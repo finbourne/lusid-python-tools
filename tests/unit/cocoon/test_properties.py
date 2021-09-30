@@ -383,7 +383,7 @@ class CocoonPropertiesTests(unittest.TestCase):
         """
 
         property_values = cocoon.properties.create_property_values(
-            row=row, scope=scope, domain=domain, dtypes=dtypes
+            row=row, column_to_scope={}, scope=scope, domain=domain, dtypes=dtypes
         )
 
         self.assertEqual(first=property_values, second=expected_outcome)

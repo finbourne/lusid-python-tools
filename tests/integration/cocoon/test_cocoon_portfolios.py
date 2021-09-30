@@ -1,4 +1,5 @@
 import unittest
+import uuid
 from pathlib import Path
 
 import pandas
@@ -408,7 +409,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         [
             [
                 "Source only",
-                "prime_broker_test",
+                f"prime_broker_test__{uuid.uuid4()}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -425,7 +426,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
             ],
             [
                 "Source and target",
-                "prime_broker_test",
+                f"prime_broker_test_{uuid.uuid4()}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -442,7 +443,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
             ],
             [
                 "Scope",
-                "prime_broker_test",
+                f"prime_broker_test_{uuid.uuid4()}",
                 "data/metamorph_portfolios-unique.csv",
                 {
                     "code": "FundCode",
@@ -510,6 +511,16 @@ class CocoonTestsPortfolios(unittest.TestCase):
             f"Portfolio/{expected_property_scope}/{expected_property_code}",
             response.key,
         )
+
+        for code in data_frame["FundCode"].values:
+            response = self.api_factory.build(
+                lusid.api.PortfoliosApi
+            ).get_portfolio_properties(scope=scope, code=code)
+            self.assertIsNotNone(
+                response.properties.get(
+                    f"Portfolio/{expected_property_scope}/{expected_property_code}"
+                )
+            )
 
     @parameterized.expand(
         [

@@ -1,4 +1,5 @@
 import unittest
+import uuid
 from pathlib import Path
 import pandas as pd
 from lusidfeature import lusid_feature
@@ -328,6 +329,155 @@ class CocoonTestsTransactions(unittest.TestCase):
                 for success_response in responses["transactions"]["success"]
             )
         )
+
+    @parameterized.expand(
+        [
+            [
+                "Test standard transaction load",
+                f"prime_broker_test_dict_{uuid.uuid4()}",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["location_region"],
+                "operations001",
+                "operations001",
+                "location_region",
+            ],
+            [
+                "Test standard transaction load with scope",
+                f"prime_broker_test_dict_{uuid.uuid4()}",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                [
+                    {
+                        "scope": "foo",
+                        "source": "location_region",
+                        "target": "My_location",
+                    }
+                ],
+                "operations001",
+                "foo",
+                "My_location",
+            ],
+        ]
+    )
+    def test_properties_dicts(
+        self,
+        _,
+        scope,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        expected_property_scope,
+        expected_property_code,
+    ) -> None:
+        """
+        Test that transactions
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+        :param str expected_property_scope: The expected scope
+        :param str expected_property_code: The expected code
+
+        :return: None
+        """
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath("data/global-fund-combined-transactions.csv")
+        )
+
+        # Create the portfolio
+        portfolio_response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "display_name": "portfolio_code",
+                "base_currency": "$GBP",
+            },
+            file_type="portfolio",
+            mapping_optional={
+                "created": f"${str(data_frame['transaction_date'].min())}"
+            },
+        )
+
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            batch_size=None,
+        )
+
+        transactions_from_response = self.api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).get_transactions(
+            scope=scope,
+            code="GlobalCreditFund",
+            property_keys=[
+                f"Transaction/{expected_property_scope}/{expected_property_code}"
+            ],
+            from_transaction_date=pd.to_datetime("2019-09-01", utc=True),
+            to_transaction_date=pd.to_datetime("2019-09-12", utc=True),
+        )
+
+        for tx in transactions_from_response.values:
+            self.assertIsNotNone(
+                tx.properties.get(
+                    f"Transaction/{expected_property_scope}/{expected_property_code}"
+                ),
+                tx,
+            )
+
+        # Delete the portfolio at the end of the test
+        for portfolio in portfolio_response.get("portfolios").get("success"):
+            self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+                scope=scope, code=portfolio.id.code
+            )
 
     @lusid_feature("T8-8", "T8-9")
     @parameterized.expand(
