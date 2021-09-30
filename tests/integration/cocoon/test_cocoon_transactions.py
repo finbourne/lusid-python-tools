@@ -334,7 +334,7 @@ class CocoonTestsTransactions(unittest.TestCase):
         [
             [
                 "Test standard transaction load",
-                f"prime_broker_test_dict",
+                f"prime_broker_test_dict_{uuid.uuid4()}",
                 {
                     "code": "portfolio_code",
                     "transaction_id": "id",
@@ -361,7 +361,7 @@ class CocoonTestsTransactions(unittest.TestCase):
             ],
             [
                 "Test standard transaction load with scope",
-                f"prime_broker_test_dict",
+                f"prime_broker_test_dict_{uuid.uuid4()}",
                 {
                     "code": "portfolio_code",
                     "transaction_id": "id",
@@ -424,6 +424,20 @@ class CocoonTestsTransactions(unittest.TestCase):
             Path(__file__).parent.joinpath("data/global-fund-combined-transactions.csv")
         )
 
+        # Create the portfolio
+        portfolio_response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "display_name": "portfolio_code",
+                "base_currency": "$GBP",
+            },
+            file_type="portfolio",
+            mapping_optional={"created": f"${str(data_frame['transaction_date'].min())}"},
+        )
+
         cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
             scope=scope,
@@ -455,6 +469,12 @@ class CocoonTestsTransactions(unittest.TestCase):
                     f"Transaction/{expected_property_scope}/{expected_property_code}"
                 ),
                 tx,
+            )
+
+        # Delete the portfolio at the end of the test
+        for portfolio in portfolio_response.get("portfolios").get("success"):
+            self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+                scope=scope, code=portfolio.id.code
             )
 
     @lusid_feature("T8-8", "T8-9")
