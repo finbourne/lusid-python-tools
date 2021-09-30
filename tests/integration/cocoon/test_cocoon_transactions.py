@@ -435,7 +435,9 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "base_currency": "$GBP",
             },
             file_type="portfolio",
-            mapping_optional={"created": f"${str(data_frame['transaction_date'].min())}"},
+            mapping_optional={
+                "created": f"${str(data_frame['transaction_date'].min())}"
+            },
         )
 
         cocoon.cocoon.load_from_data_frame(
