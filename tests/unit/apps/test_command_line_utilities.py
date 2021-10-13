@@ -58,7 +58,7 @@ class AppTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        LusidLogger(cls.valid_args["debug"])
+        LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(args_list)
     def test_get_instruments_data(self, _, args_list):

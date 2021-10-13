@@ -8,7 +8,7 @@ from lusidtools import logger
 import lusid
 from lusidtools import cocoon as cocoon
 import pandas as pd
-
+import os
 from lusid.models import CurrencyAndAmount
 
 # Create the Portfolios, Portfolio Groups and Holdings
@@ -22,7 +22,7 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         cls.scope = scope
 

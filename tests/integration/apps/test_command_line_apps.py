@@ -60,7 +60,7 @@ class AppTests(unittest.TestCase):
             "display_response_head": True,
         }
 
-        LusidLogger("debug")
+        LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         portfolios_api = factory.build(PortfoliosApi)
@@ -147,7 +147,7 @@ class AppTests(unittest.TestCase):
         args["file_path"] = test_data_root.joinpath("instruments.csv")
         args["mapping"] = test_data_root.joinpath("mapping_inst_invalid.json")
 
-        LusidLogger(args["debug"])
+        LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
         responses = load_instruments(args)
 
         self.assertEqual(0, len(responses["instruments"]["errors"]))
@@ -169,8 +169,6 @@ class AppTests(unittest.TestCase):
                 ]
             ),
         )
-
-        LusidLogger("debug")
 
     def test_upsert_holdings_with_valid_mapping(self):
 
