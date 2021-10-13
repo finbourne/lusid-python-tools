@@ -38,7 +38,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                         transaction_class="TESTBUY1",
                         transaction_group="SYSTEM1",
                         transaction_roles="AllRoles",
-                        is_default=False
+                        is_default=False,
                     )
                 ],
                 movements=[
@@ -67,7 +67,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                         transaction_class="TESTSELL1",
                         transaction_group="SYSTEM1",
                         transaction_roles="AllRoles",
-                        is_default=False
+                        is_default=False,
                     )
                 ],
                 movements=[
