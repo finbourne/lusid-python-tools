@@ -28,7 +28,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             transaction_class="TESTBUY1",
             transaction_group="SYSTEM1",
             transaction_roles="AllRoles",
-            is_default=False
+            is_default=False,
         )
 
         cls.movements = [
@@ -59,8 +59,6 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         Create a new transaction type.
         Verify that the new transaction type is created.
         """
-
-
 
         self.assertEqual(
             set(self.response.transaction_configs[-1].aliases[0].to_dict().items()),
