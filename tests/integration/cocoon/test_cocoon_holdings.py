@@ -1,3 +1,4 @@
+import os
 import unittest
 import json
 from pathlib import Path
@@ -57,7 +58,7 @@ class CocoonTestsHoldings(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature(
         "T3-1",

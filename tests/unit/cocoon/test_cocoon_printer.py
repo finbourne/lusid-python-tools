@@ -1,3 +1,5 @@
+import os
+
 import lusid
 import lusid.models as models
 import unittest
@@ -198,7 +200,7 @@ extended_error_expected = [
 class CocoonPrinterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     def assert_responses(
         self,

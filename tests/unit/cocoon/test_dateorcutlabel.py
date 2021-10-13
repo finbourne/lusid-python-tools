@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import numpy as np
@@ -13,7 +14,7 @@ import pytz
 class CocoonDateOrCutLabelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(
         [

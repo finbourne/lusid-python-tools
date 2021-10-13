@@ -1,3 +1,4 @@
+import os
 import unittest
 import json
 from pathlib import Path
@@ -16,7 +17,7 @@ class CocoonPrinterIntegrationTests(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature("T6-1")
     def test_format_portfolios_response_includes_extended_errors(self):

@@ -1,3 +1,4 @@
+import os
 import unittest
 import uuid
 from pathlib import Path
@@ -22,7 +23,7 @@ class CocoonTestsPortfolios(unittest.TestCase):
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
-        cls.logger = logger.LusidLogger("debug")
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature("T6-1", "T6-2", "T6-3", "T6-4", "T6-5", "T6-6", "T6-7", "T6-8")
     @parameterized.expand(
