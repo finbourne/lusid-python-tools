@@ -328,7 +328,7 @@ class TxnConfigYaml:
             [abbrev(data.side), data.direction, abbrev(data.movement_types)],
             list(data.properties.values()),
             data.mappings,
-        ]
+        ] + ([data.name] if data.name else [])
 
     @classmethod
     def mvmt_con(cls, loader, node):
@@ -339,7 +339,13 @@ class TxnConfigYaml:
         movement_types = unabbrev(s[2])
         mappings = loader.construct_sequence(node.value[2])
 
-        return movement_types, side, direction, properties, mappings
+        name = None
+        if len(node.value) > 3:
+            name = node.value[3].value
+            if name == "null":
+                name = None
+
+        return movement_types, side, direction, properties, mappings, name
 
     # Set up the YAML converter for the TransactionPropertyMapping (mappings)
     @staticmethod
@@ -373,12 +379,19 @@ class TxnConfigYaml:
             data.transaction_group,
             data.transaction_class,
             abbrev(data.transaction_roles),
-        ]
+        ] + (["default"] if data.is_default else [])
 
     @staticmethod
     def alias_con(loader, node):
         s = loader.construct_sequence(node)
-        return s[0], s[1], s[3], s[2], unabbrev(s[4])
+        return (
+            s[0],
+            s[1],
+            s[3],
+            s[2],
+            unabbrev(s[4]),
+            (len(s) > 5 and s[5] == "default"),
+        )
 
     # Set up the YAML converter for the SideConfigurationDataRequest (side)
     @staticmethod
