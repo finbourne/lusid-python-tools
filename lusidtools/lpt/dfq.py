@@ -272,7 +272,11 @@ def dfq(args, given_df=None):
                     args.index = True
                 with pd.option_context("display.width", None, "display.max_rows", 1000):
                     if args.markdown:
-                        print(df.fillna("").to_markdown(index=args.index,floatfmt=f'.{decimals}f'))
+                        print(
+                            df.fillna("").to_markdown(
+                                index=args.index, floatfmt=f".{decimals}f"
+                            )
+                        )
                     else:
                         print(df.fillna("").to_string(index=args.index))
             except:
