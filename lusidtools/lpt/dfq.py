@@ -174,7 +174,7 @@ def apply_args(args, given_df):
             if kv[1].startswith("IN:") and kv[1].endswith(".csv"):
                 s = set(pd.read_csv(kv[1][3:]).iloc[:, 0].astype(str))
             else:
-                s = kv[1].split(",")
+                s = kv[1:]
 
             if len(s) == 1:
                 if "*" in kv[1]:
@@ -244,7 +244,7 @@ def apply_args(args, given_df):
 
 
 def dfq(args, given_df=None):
-    if not isinstance(given_df, pd.DataFrame):
+    if (given_df is not None) and (not isinstance(given_df, pd.DataFrame)):
         print(given_df)
         exit(0)
 
@@ -272,7 +272,7 @@ def dfq(args, given_df=None):
                     args.index = True
                 with pd.option_context("display.width", None, "display.max_rows", 1000):
                     if args.markdown:
-                        print(df.fillna("").to_markdown(index=args.index))
+                        print(df.fillna("").to_markdown(index=args.index,floatfmt=f'.{decimals}f'))
                     else:
                         print(df.fillna("").to_string(index=args.index))
             except:
