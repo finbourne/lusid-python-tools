@@ -28,15 +28,17 @@ $ pip install --user lusidtools
 
 ## CLI Usage
 
-You will need to create a secrets file.  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks).
+You will need to create a secrets file and supply its location using the `secrets-file` parameter (or alternatively lusidtools will pick up a file called `secrets.json` in the current directory).  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks).
 
-Makes sure that the Python `bin` folder is on your search path before trying the following examples.
+Make sure that the Python `bin` folder is on your search path before trying the following examples.
 
 To see a full list of the available commands, run the following:
 
 ```sh
 lusidtools --help
 ```
+
+### Examples
 
 #### List configured instrument identifier types
 
