@@ -96,7 +96,7 @@ class Parser:
             self.add(
                 "--dfq",
                 nargs=argparse.REMAINDER,
-                help="pass the output through to 'dfq' - see dfq --help for options",
+                help="pass the output through to 'dfq' - see `lusidtools dfq --help` for options",
             )
 
     def add(self, *args, **kwargs):
