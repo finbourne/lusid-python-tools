@@ -53,7 +53,7 @@ class CocoonPrinterIntegrationTests(unittest.TestCase):
         for index, row in err.iterrows():
             self.assertEqual(row[err.columns[0]], "Bad Request")
             # Regex for request id patterns
-            self.assertRegex(row[err.columns[2]], r"[A-Z0-9]{13}:[0-9]{8}")
+            self.assertRegex(row[err.columns[2]], r"[A-Z0-9]{13}:[A-F0-9]{8}")
             # Deserialise the ErrorDetails field and check one of the values
             self.assertEqual(
                 json.loads(row[err.columns[3]]).get("name"), "UndefinedCurrencyFailure"
