@@ -241,16 +241,14 @@ class BatchLoader:
                 scope=kwargs["scope"],
                 code=kwargs["code"],
                 effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
-                adjust_holding_request=holding_batch,
-                _request_timeout=5,
+                adjust_holding_request=holding_batch
             )
 
         return api_factory.build(lusid.api.TransactionPortfoliosApi).set_holdings(
             scope=kwargs["scope"],
             code=kwargs["code"],
             effective_at=str(DateOrCutLabel(kwargs["effective_at"])),
-            adjust_holding_request=holding_batch,
-            _request_timeout=5,
+            adjust_holding_request=holding_batch
         )
 
     @staticmethod
