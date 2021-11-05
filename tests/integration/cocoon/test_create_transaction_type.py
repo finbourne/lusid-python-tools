@@ -27,6 +27,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             description="TESTBUY1",
             transaction_class="TESTBUY1",
             transaction_group="SYSTEM1",
+            source="SYSTEM1",
             transaction_roles="AllRoles",
             is_default=False,
         )
