@@ -48,4 +48,5 @@ def process_args(api, args):
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
-    return lpt.standard_flow(parse, lse.connect, process_args, display_df)
+    raise NotImplementedError("Jira: SENG-40")
+    # return lpt.standard_flow(parse, lse.connect, process_args, display_df)

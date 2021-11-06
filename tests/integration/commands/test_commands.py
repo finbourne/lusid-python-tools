@@ -143,6 +143,7 @@ class CommandsTests(unittest.TestCase):
         )
         self.validate_results_df(result)
 
+    @unittest.skip("Jira: SENG-40")
     def test_get_props(self):
 
         result = get_props.main(
