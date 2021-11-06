@@ -377,6 +377,7 @@ class TxnConfigYaml:
             data.type,
             data.description,
             data.transaction_group,
+            data.source,
             data.transaction_class,
             abbrev(data.transaction_roles),
         ] + (["default"] if data.is_default else [])
@@ -387,10 +388,11 @@ class TxnConfigYaml:
         return (
             s[0],
             s[1],
+            s[4],
             s[3],
             s[2],
-            unabbrev(s[4]),
-            (len(s) > 5 and s[5] == "default"),
+            unabbrev(s[5]),
+            (len(s) > 6 and s[6] == "default"),
         )
 
     # Set up the YAML converter for the SideConfigurationDataRequest (side)
