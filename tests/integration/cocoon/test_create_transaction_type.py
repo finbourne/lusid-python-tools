@@ -70,8 +70,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         ][0]
 
         self.assertEqual(
-            set(new_alias.to_dict().items()),
-            set(self.alias.to_dict().items()),
+            set(new_alias.to_dict().items()), set(self.alias.to_dict().items()),
         )
 
         self.assertEqual(

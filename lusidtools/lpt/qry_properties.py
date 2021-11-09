@@ -5,8 +5,8 @@ from lusidtools.lpt import lpt
 
 # Jira: SENG-40 - Property search was deprecated and this query requires updating
 # Uncomment tooltips when fixed
-#TOOLNAME = "props"
-#TOOLTIP = "Query property definitions"
+# TOOLNAME = "props"
+# TOOLTIP = "Query property definitions"
 
 
 def parse(extend=None, args=None):
@@ -50,5 +50,7 @@ def process_args(api, args):
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
-    raise NotImplementedError("Jira: SENG-40 - Property search was deprecated and this query requires updating")
+    raise NotImplementedError(
+        "Jira: SENG-40 - Property search was deprecated and this query requires updating"
+    )
     # return lpt.standard_flow(parse, lse.connect, process_args, display_df)
