@@ -377,6 +377,7 @@ class TxnConfigYaml:
             data.type,
             data.description,
             data.transaction_group,
+            data.source,
             data.transaction_class,
             abbrev(data.transaction_roles),
         ] + (["default"] if data.is_default else [])
@@ -384,14 +385,28 @@ class TxnConfigYaml:
     @staticmethod
     def alias_con(loader, node):
         s = loader.construct_sequence(node)
-        return (
-            s[0],
-            s[1],
-            s[3],
-            s[2],
-            unabbrev(s[4]),
-            (len(s) > 5 and s[5] == "default"),
-        )
+        # If old yaml files are used with only 5 params set for txn type alias (SENG-41)
+        if len(s) == 5:
+            return (
+                s[0],
+                s[1],
+                s[3],
+                s[3],
+                s[2],
+                unabbrev(s[4]),
+                (len(s) > 5 and s[5] == "default"),
+            )
+        # If newer yaml files are used with additional params set for txn type alias (SENG-41)
+        else:
+            return (
+                s[0],
+                s[1],
+                s[4],
+                s[3],
+                s[2],
+                unabbrev(s[5]),
+                (len(s) > 6 and s[6] == "default"),
+            )
 
     # Set up the YAML converter for the SideConfigurationDataRequest (side)
     @staticmethod
