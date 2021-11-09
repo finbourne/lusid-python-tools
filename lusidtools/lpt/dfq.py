@@ -1,6 +1,7 @@
 import argparse
 import re
 import pandas as pd
+import numpy as np
 
 
 def parse(with_inputs=True, args=None):
@@ -191,6 +192,9 @@ def apply_args(args, given_df):
                         v = int(v[:-7])
                         dflt = 0
                     elif df[col].dtype == int:
+                        v = int(v)
+                        dflt = 0
+                    elif df[col].dtype == np.int64:
                         v = int(v)
                         dflt = 0
                     elif df[col].dtype == float:

@@ -27,6 +27,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             description="TESTBUY1",
             transaction_class="TESTBUY1",
             transaction_group="SYSTEM1",
+            source="SYSTEM1",
             transaction_roles="AllRoles",
             is_default=False,
         )
@@ -60,9 +61,16 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         Verify that the new transaction type is created.
         """
 
+        new_alias = [
+            alias
+            for transaction_grouping in self.response.transaction_configs
+            for alias in transaction_grouping.aliases
+            if (self.alias.type, self.alias.transaction_group)
+            == (alias.type, alias.transaction_group)
+        ][0]
+
         self.assertEqual(
-            set(self.response.transaction_configs[-1].aliases[0].to_dict().items()),
-            set(self.alias.to_dict().items()),
+            set(new_alias.to_dict().items()), set(self.alias.to_dict().items()),
         )
 
         self.assertEqual(
