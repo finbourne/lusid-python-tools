@@ -2,7 +2,7 @@
 
 name: Build and test
 
-# Trigger the workflow on push or pull request to master or develop
+# Trigger the workflow on push or pull request to master
 
 on:
   pull_request:
@@ -41,7 +41,7 @@ jobs:
     strategy: 
       max-parallel: 1
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -54,10 +54,10 @@ jobs:
       - name: Install dependancies
         run: |
           apt-get update && apt-get -y install jq
-          pip install --no-cache-dir -r requirements.txt
-          pip --no-cache-dir install --upgrade awscli
+          pip install --no-cache-dir -r requirements.dev.txt
 
-      - name: Run tests on MASTER branch
+      # This MASTER branch is the result of a test-merge between the base master and the branch in the PR
+      - name: Run tests on v2 MASTER branch
         if: ${{ github.base_ref == 'master' }}
         env: 
           FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}

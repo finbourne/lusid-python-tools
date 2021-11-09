@@ -19,8 +19,7 @@ jobs:
     - name: Install dependancies
       run: |
         apt-get update && apt-get -y install jq
-        pip install --no-cache-dir -r requirements.txt
-        pip --no-cache-dir install --upgrade awscli
+        pip install --no-cache-dir -r requirements.dev.txt
 
     - name: Run tests on MASTER branch
       if: ${{ github.ref == 'refs/heads/master' }}
