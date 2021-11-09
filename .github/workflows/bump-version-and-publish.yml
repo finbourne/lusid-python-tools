@@ -2,7 +2,7 @@
 
 name: bump-version-and-publish
 
-# Trigger the workflow on push or pull request to master or develop
+# Trigger the workflow on push or pull request to master
 
 on:
   push:
