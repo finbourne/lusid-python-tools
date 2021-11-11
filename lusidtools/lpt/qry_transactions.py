@@ -26,54 +26,54 @@ def parse(extend=None, args=None):
         )
         .add("--cancels", action="store_true", help="Show cancelled trades")
         .add("--brief", action="store_true", help="Show fewer data points")
+        .add("--pagesize",type=int,default=5000,help="Number of transactions returned per page")
         .extend(extend)
         .parse(args)
     )
 
+def convert_to_dataframe(args,txns):
+    available_columns = [
+        ("C", "transaction_status", "Status"),
+        ("B", "transaction_id", "TxnId"),
+        ("B", "type", "Type"),
+        ("B", "P:Instrument/default/Name", "Instrument"),
+        ("B", "instrument_uid", "LUID"),
+        ("B", "transaction_date", "TradeDate"),
+        ("A", "settlement_date", "SettleDate"),
+        ("B", "units", "Units"),
+        ("A", "transaction_price.price", "Price"),
+        ("A", "transaction_currency", "TradeCcy"),
+        ("A", "total_consideration.currency", "SettleCcy"),
+        ("A", "total_consideration.amount", "SettleAmt"),
+        ("A", "exchange_rate", "ExchRate"),
+        ("A", "P:Transaction/default/TradeToPortfolioRate", "PortRate"),
+        ("A", "entry_date_time", "EntryDate"),
+        ("C", "cancel_date_time", "CancelDate"),
+    ]
+
+    # Pick appropriate set of columns based on arguments
+
+    col_subset = "B" if args.brief else "AB"
+
+    if args.cancels:
+        col_subset += "C"
+
+    columns = [c for c in available_columns if c[0] in col_subset]
+    columns.extend(
+        [
+            ("X", "P:" + v, v.replace("Instrument/default/", ""))
+            for v in args.properties or []
+        ]
+    )
+
+    df = lpt.to_df(txns, [c[1] for c in columns])
+
+    # Rename the column headings
+    df.columns = [c[2] for c in columns]
+
+    return lpt.trim_df(df, args.limit)
 
 def process_args(api, args):
-    def success(txns):
-        available_columns = [
-            ("C", "transaction_status", "Status"),
-            ("B", "transaction_id", "TxnId"),
-            ("B", "type", "Type"),
-            ("B", "P:Instrument/default/Name", "Instrument"),
-            ("B", "instrument_uid", "LUID"),
-            ("B", "transaction_date", "TradeDate"),
-            ("A", "settlement_date", "SettleDate"),
-            ("B", "units", "Units"),
-            ("A", "transaction_price.price", "Price"),
-            ("A", "transaction_currency", "TradeCcy"),
-            ("A", "total_consideration.currency", "SettleCcy"),
-            ("A", "total_consideration.amount", "SettleAmt"),
-            ("A", "exchange_rate", "ExchRate"),
-            ("A", "P:Transaction/default/TradeToPortfolioRate", "PortRate"),
-            ("A", "entry_date_time", "EntryDate"),
-            ("C", "cancel_date_time", "CancelDate"),
-        ]
-
-        # Pick appropriate set of columns based on arguments
-
-        col_subset = "B" if args.brief else "AB"
-
-        if args.cancels:
-            col_subset += "C"
-
-        columns = [c for c in available_columns if c[0] in col_subset]
-        columns.extend(
-            [
-                ("X", "P:" + v, v.replace("Instrument/default/", ""))
-                for v in args.properties or []
-            ]
-        )
-
-        df = lpt.to_df(txns, [c[1] for c in columns])
-
-        # Rename the column headings
-        df.columns = [c[2] for c in columns]
-
-        return lpt.trim_df(df, args.limit)
-
     properties = ["Instrument/default/Name"]
     properties.extend(args.properties or [])
 
@@ -99,7 +99,7 @@ def process_args(api, args):
                 show_cancelled_transactions=args.cancels,
             ),
             property_keys=properties,
-            limit=5000,
+            limit=args.pagesize,
         )
     else:
         txn_fn = api.call.get_transactions
@@ -109,7 +109,7 @@ def process_args(api, args):
             from_transaction_date=lpt.to_date(args.start_date),
             to_transaction_date=lpt.to_date(args.end_date),
             property_keys=properties,
-            limit=5000,
+            limit=args.pagesize,
         )
 
     all_txns = []
@@ -123,10 +123,7 @@ def process_args(api, args):
         if content.next_page:
             txn_fn_args["page"] = content.next_page
         else:
-            return success(chain.from_iterable(all_txns))
-
-    return result.bind(success)
-
+            return convert_to_dataframe(args,chain.from_iterable(all_txns))
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
