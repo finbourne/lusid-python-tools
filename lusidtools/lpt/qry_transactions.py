@@ -26,12 +26,18 @@ def parse(extend=None, args=None):
         )
         .add("--cancels", action="store_true", help="Show cancelled trades")
         .add("--brief", action="store_true", help="Show fewer data points")
-        .add("--pagesize",type=int,default=5000,help="Number of transactions returned per page")
+        .add(
+            "--pagesize",
+            type=int,
+            default=5000,
+            help="Number of transactions returned per page",
+        )
         .extend(extend)
         .parse(args)
     )
 
-def convert_to_dataframe(args,txns):
+
+def convert_to_dataframe(args, txns):
     available_columns = [
         ("C", "transaction_status", "Status"),
         ("B", "transaction_id", "TxnId"),
@@ -72,6 +78,7 @@ def convert_to_dataframe(args,txns):
     df.columns = [c[2] for c in columns]
 
     return lpt.trim_df(df, args.limit)
+
 
 def process_args(api, args):
     properties = ["Instrument/default/Name"]
@@ -123,7 +130,8 @@ def process_args(api, args):
         if content.next_page:
             txn_fn_args["page"] = content.next_page
         else:
-            return convert_to_dataframe(args,chain.from_iterable(all_txns))
+            return convert_to_dataframe(args, chain.from_iterable(all_txns))
+
 
 # Standalone tool
 def main(parse=parse, display_df=lpt.display_df):
