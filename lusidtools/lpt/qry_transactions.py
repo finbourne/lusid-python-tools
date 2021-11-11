@@ -3,6 +3,7 @@ import datetime
 from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
+from itertools import chain
 
 TOOLNAME = "txn"
 TOOLTIP = "Query transactions"
@@ -76,6 +77,9 @@ def process_args(api, args):
     properties = ["Instrument/default/Name"]
     properties.extend(args.properties or [])
 
+    txn_fn = None
+    txn_fn_args = None
+
     if args.type != "input" or args.cancels == True:
         # Date range is required for build_transactions endpoint
         if args.start_date == None:
@@ -83,7 +87,9 @@ def process_args(api, args):
         if args.end_date == None:
             args.end_date = datetime.datetime.today()
 
-        result = api.call.build_transactions(
+        txn_fn = api.call.build_transactions
+        
+        txn_fn_args = dict (
             scope=args.scope,
             code=args.portfolio,
             transaction_query_parameters=api.models.TransactionQueryParameters(
@@ -93,15 +99,31 @@ def process_args(api, args):
                 show_cancelled_transactions=args.cancels,
             ),
             property_keys=properties,
+            limit=5000
         )
     else:
-        result = api.call.get_transactions(
-            args.scope,
-            args.portfolio,
+        txn_fn = api.call.get_transactions
+        txn_fn_args = dict(
+            scope = args.scope,
+            code = args.portfolio,
             from_transaction_date=lpt.to_date(args.start_date),
             to_transaction_date=lpt.to_date(args.end_date),
             property_keys=properties,
+            limit=5000
         )
+
+    all_txns = []
+    while True:
+        result = txn_fn(**txn_fn_args)
+        if result.is_left():
+            return result
+        
+        content = result.right.content
+        all_txns.append(content.values)
+        if content.next_page:
+           txn_fn_args['page'] = content.next_page
+        else:
+            return success(chain.from_iterable(all_txns))
 
     return result.bind(success)
 
