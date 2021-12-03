@@ -71,6 +71,7 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
             file_type="holdings",
             identifier_mapping={
                 "ClientInternal": "SEDOL Security Identifier",
+                "Sedol": "SEDOL Security Identifier",
                 "Currency": "is_cash_with_currency",
             },
             property_columns=[],
