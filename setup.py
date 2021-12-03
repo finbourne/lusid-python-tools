@@ -27,6 +27,7 @@ setup(
         "detect_delimiter==0.1.1",
         "pyyaml==5.4",
         "flatten-json==0.1.7",
+        "openpyxl==3.0.7",
     ],
     include_package_data=True,
     python_requires=">=3.7",
