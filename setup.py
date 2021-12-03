@@ -38,6 +38,7 @@ setup(
             "upsert_holdings=lusidtools.apps.upsert_holdings:main",
             "upsert_quotes=lusidtools.apps.upsert_quotes:main",
             "upsert_transactions=lusidtools.apps.upsert_transactions:main",
+            "flush_transactions=lusidtools.apps.flush_transactions:main",
         ],
     },
 )
