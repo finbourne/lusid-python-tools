@@ -1,10 +1,15 @@
 import logging
 import os
 import unittest
+from parameterized import parameterized
+import datetime
+from dateutil.tz import tzutc
 from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
+
+from tests.unit.apps.test_data import test_transactions as flush_test_data
 
 from lusidtools.apps import (
     load_instruments,
@@ -12,6 +17,7 @@ from lusidtools.apps import (
     load_transactions,
     load_quotes,
     load_portfolios,
+    flush_transactions
 )
 from lusidtools.cocoon import cocoon_printer
 from lusidtools.logger import LusidLogger
@@ -28,6 +34,9 @@ class AppTests(unittest.TestCase):
         cls.secrets = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.testscope = "testscope0001"
         cls.proptestscope = "testscope0001"
+
+        factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
+        cls.transaction_portfolios_api = factory.build(TransactionPortfoliosApi)
 
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
@@ -62,16 +71,15 @@ class AppTests(unittest.TestCase):
 
         LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
-        factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
-        portfolios_api = factory.build(PortfoliosApi)
-        portfolios_response = portfolios_api.list_portfolios_for_scope(
+        cls.portfolios_api = factory.build(PortfoliosApi)
+        portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
             scope=cls.testscope
         )
 
         existing_portfolios = [
             portfolio.id.code for portfolio in portfolios_response.values
         ]
-        test_list = ["Global-Strategies-SHK", "GlobalCreditFund"]
+        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio"]
 
         if not all(x in existing_portfolios for x in test_list):
             transactions_portfolio_api = factory.build(TransactionPortfoliosApi)
@@ -280,3 +288,58 @@ class AppTests(unittest.TestCase):
         ]
 
         self.assertEqual(expected_value, test_values)
+
+    @parameterized.expand([
+        [
+            "outside_the_test_data_time",
+            flush_transactions.parse(args=[
+                "testscope0001",
+                "TestFlushPortfolio",
+                "-s",
+                "2020-02-20T00:00:00.0000000+00:00",
+                "-e",
+                "2020-02-28T23:59:59.0000000+00:00",
+            ]),
+            6000,
+        ],
+        [
+            "inside_the_test_data_time",
+            flush_transactions.parse(args=[
+                "testscope0001",
+                "TestFlushPortfolio",
+                "-s",
+                "2020-02-10T00:00:00.0000000+00:00",
+                "-e",
+                "2020-02-28T23:59:59.0000000+00:00",
+            ]),
+            0,
+        ],
+    ])
+    def test_flush_between_dates(self, _, args, expected_txn_count):
+        # Upsert Test Transaction Data
+        self.transaction_portfolios_api.upsert_transactions(self.testscope, "TestFlushPortfolio",
+                                                            flush_test_data.gen_transaction_data(6000))
+
+        args.secrets = self.secrets
+        flush_transactions.flush(args)
+
+        args.end_date = None
+        args.start_date = None
+        observed_count = len(flush_transactions.get_all_txns(args))
+
+        self.assertEqual(observed_count, expected_txn_count)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
+            scope=cls.testscope
+        )
+
+        existing_portfolios = [
+            portfolio.id.code for portfolio in portfolios_response.values
+        ]
+
+        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio"]
+        for portfolio in test_list:
+            if portfolio in existing_portfolios:
+                response = cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)

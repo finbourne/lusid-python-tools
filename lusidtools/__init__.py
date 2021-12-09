@@ -6,4 +6,3 @@ import lusidtools.cocoon.utilities
 import lusidtools.cocoon.async_tools
 import lusidtools.cocoon.validator
 import lusidtools.cocoon.dateorcutlabel
-from lusidtools.apps.flush_transactions import flush

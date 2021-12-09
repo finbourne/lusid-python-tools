@@ -2,6 +2,7 @@ import logging
 import lusid
 import pathlib
 from lusidtools.lpt import stdargs
+from lusidtools.logger import LusidLogger
 
 
 def parse(extend=None, args=None):
@@ -49,116 +50,135 @@ def transaction_batcher_by_character_count(scope: str, code: str, host: str, inp
     base_url = f"{host}/api/transactionportfolios/{scope}/{code}/transactions?"
     unavoidable_character_count = len(base_url)
     remaining_count = maxCharacterCount - unavoidable_character_count
-    queryLengthPerTxnID = [len(f"transactionIds={x}&") for x in input_lst]
 
     # Build the batches
     batches = []
     curr_count = 0
     curr_batch = []
-    for txn_id, str_len in zip(input_lst, queryLengthPerTxnID):
-        if curr_count + str_len >= remaining_count:
+    for txn_id in input_lst:
+        if curr_count + len(f"transactionIds={txn_id}&") >= remaining_count:
             batches.append(curr_batch)
             curr_batch = []
             curr_count = 0
 
         curr_batch.append(txn_id)
-        curr_count = curr_count + str_len
+        curr_count = curr_count + len(f"transactionIds={txn_id}&")
 
     # Create remainder final batch if any remainder exists
     if curr_batch:
         batches.append(curr_batch)
 
+    logging.info(
+        f"Batched the transactions into {len(batches)} batches based on the character limit of {maxCharacterCount}")
+
     return batches
 
 
-def get_ids_from_txns(txns: lusid.VersionedResourceListOfTransaction):
-    """
-        Takes a given input list of transactions and extracts the transaction IDs from them
+class TxnGetter:
 
-        Parameters
-        ----------
-        txns : lusid.VersionedResourceListOfTransaction
-            Unedited list of transactions from GetTransactions response
+    def _get_transactions(self, args, page=None):
+        # make API call to LUSID
+        if page is None:
+            return self.transaction_portfolios_api.get_transactions(args.scope,
+                                                                    args.portfolio,
+                                                                    from_transaction_date=args.start_date,
+                                                                    to_transaction_date=args.end_date,
+                                                                    limit=5000,
+                                                                    )
+        else:
+            return self.transaction_portfolios_api.get_transactions(args.scope,
+                                                                    args.portfolio,
+                                                                    from_transaction_date=args.start_date,
+                                                                    to_transaction_date=args.end_date,
+                                                                    limit=5000,
+                                                                    page=page
+                                                                    )
 
-        Returns
-        -------
-        txnIDs : list
-            Returns a list of the transaction IDs for the observed transactions
-    """
-    return [txn.transaction_id for txn in txns.values]
+    def __init__(self, args):
+        self.args = args
+        api_factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=args.secrets
+        )
+        self.transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+        self.stop = False
+
+    def __iter__(self):
+        # get first page and get next page token
+        self.txns = self._get_transactions(self.args)
+        self.next_page = self.txns.next_page
+        return self
+
+    def __next__(self):
+        # if there is a next page token get the next page
+        if self.stop:
+            raise StopIteration
+
+        result = self.txns
+        if self.next_page:
+            self.txns = self._get_transactions(self.args, self.next_page)
+            self.next_page = self.txns.next_page
+            return result
+        else:
+            self.stop = True
+            return result
 
 
-def flush(scope, code, fromDate, toDate, api_factory):
+def get_paginated_txns(args):
+    txn_getter = TxnGetter(args)
+    return [response for response in txn_getter]
+
+
+def get_all_txns(args):
+    flat_list = []
+    # Iterate through the outer list
+    for element in get_paginated_txns(args):
+        flat_list = flat_list + element.values
+    return flat_list
+
+
+def flush(args):
     """
             Cancels all transactions found in a given date range for a specific portfolio
 
             Parameters
             ----------
-            scope : str
-                Scope of the portfolio in question
-            code : str
-                Code of the portfolio in question
-            fromDate : str
-                Date after which transactions will be retrieved
-            toDate : str
-                Date up to which transactions will be retrieved
+            args : Namespace
+                The arguments taken in when command is run
         """
-    # Initialise the api
-    secrets_path = str(pathlib.Path(__file__).parent.parent.parent.joinpath('tests', "secrets.json"))
 
+    # Initialise the api
+    api_factory = lusid.utilities.ApiClientFactory(
+        api_secrets_filename=args.secrets
+    )
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     # Get the Transaction Data
-    print("Getting Transaction Data")
-    transactions = transaction_portfolios_api.get_transactions(scope,
-                                                               code,
-                                                               from_transaction_date=fromDate,
-                                                               to_transaction_date=toDate,
-                                                               limit=5000)
-
-    txn_ids = get_ids_from_txns(transactions)
-
-    # Manage pagination of GetTransactions
-    next_transaction_page = transactions.next_page
-    while next_transaction_page is not None:
-        page_of_transactions = transaction_portfolios_api.get_transactions(scope,
-                                                                           code,
-                                                                           from_transaction_date=fromDate,
-                                                                           to_transaction_date=toDate,
-                                                                           limit=5000,
-                                                                           page=next_transaction_page)
-
-        txn_ids = txn_ids + get_ids_from_txns(page_of_transactions)
-
-        next_transaction_page = page_of_transactions.next_page
+    txn_ids = [txn.transaction_id for txn in get_all_txns(args)]
 
     if not txn_ids:
-        print("No transactions found between the specified dates")
         logging.error("No transactions found between the specified dates")
         return
 
-    logging.info(f"Found {len(txn_ids)} transactions between the specified dates")
+    logging.info(f"Found {len(txn_ids)} transactions in date range {args.end_date} {args.start_date} ")
 
-    # Batch the transactions
-    character_count = 4000
-    txn_ids = transaction_batcher_by_character_count(scope, code, api_factory.api_client.configuration.host, txn_ids,
-                                                     character_count)
-    logging.info(
-        f"Batched the transactions into {len(txn_ids)} batches based on the character limit of {character_count}")
+    # Batch the transactions - Necessary to limit the length of the URI in the API call
+    txn_ids_batches = transaction_batcher_by_character_count(args.scope, args.portfolio,
+                                                             api_factory.api_client.configuration.host,
+                                                             txn_ids
+                                                             )
 
-    print("Flushing the transactions")
+    logging.info("Flushing the transactions")
 
-    for batch in txn_ids:
-        response = transaction_portfolios_api.cancel_transactions(scope, code, transaction_ids=batch)
+    for batch in txn_ids_batches:
+        response = transaction_portfolios_api.cancel_transactions(args.scope, args.portfolio, transaction_ids=batch)
 
 
 def main():
     args = parse()
-    print(args)
-    api_factory = lusid.utilities.ApiClientFactory(
-        api_secrets_filename=args.secrets
-    )
-    flush(scope=args.scope, code=args.portfolio, fromDate=args.start_date, toDate=args.end_date, api_factory=api_factory)
+    if args.debug:
+        LusidLogger(args.debug)
+    flush(args)
+
     return 0
 
 
