@@ -124,11 +124,37 @@ class TxnGetter:
 
 
 def get_paginated_txns(args):
+    """
+    Gets paginated transactions in a given time window
+
+    Parameters
+    ----------
+    args : Namespace
+        The arguments taken in when command is run
+
+    Returns
+    -------
+    List of all responses from LUSID, each response relating to a page of transactions
+
+    """
     txn_getter = TxnGetter(args)
     return [response for response in txn_getter]
 
 
 def get_all_txns(args):
+    """
+    Gets all the transactions in a given time window
+
+    Parameters
+    ----------
+    args : Namespace
+        The arguments taken in when command is run
+
+    Returns
+    -------
+    List of all transactions
+
+    """
     flat_list = []
     # Iterate through the outer list
     for element in get_paginated_txns(args):
