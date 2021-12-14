@@ -155,11 +155,7 @@ def get_all_txns(args):
     List of all transactions
 
     """
-    flat_list = []
-    # Iterate through the outer list
-    for element in get_paginated_txns(args):
-        flat_list = flat_list + element.values
-    return flat_list
+    return [transaction for page in get_paginated_txns(args) for transaction in page.values]
 
 
 def flush(args):

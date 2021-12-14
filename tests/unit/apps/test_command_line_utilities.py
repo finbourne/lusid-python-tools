@@ -7,7 +7,8 @@ from lusidtools.cocoon import load_data_to_df_and_detect_delimiter, parse_args
 from tests.unit.apps.test_data import test_transactions as flush_test_data
 import lusidtools.apps.flush_transactions as flush
 import lusid
-
+import datetime
+from dateutil.tz import tzutc
 
 class AppTests(unittest.TestCase):
     test_data_root = Path(__file__).parent.joinpath("test_data")
@@ -240,20 +241,20 @@ class AppTests(unittest.TestCase):
         [
             "batch-number-greater-than-1",
             4000,
-            flush_test_data.gen_transaction_data(1500),
-            [108, 105, 105, 105, 105, 105, 105, 105, 105, 103, 102, 102, 102, 102, 41]
+            flush_test_data.gen_transaction_data(1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
+            [63, 62, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 60, 60, 60, 60, 60, 60, 60, 40]
         ],
         [
             "batch-number-equals-1",
             4000,
-            flush_test_data.gen_transaction_data(10),
+            flush_test_data.gen_transaction_data(10, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
             [10]
         ],
         [
             "larger-max-character-count",
             8000,
-            flush_test_data.gen_transaction_data(1500),
-            [216, 213, 213, 213, 211, 207, 207, 20]
+            flush_test_data.gen_transaction_data(1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
+            [127, 125, 125, 125, 125, 125, 125, 125, 123, 123, 123, 123, 6]
         ],
     ])
     def test_transaction_batcher_by_character_count(self, _, maxCharacterCount, whole_txn_set, test_batch_size_list):
@@ -265,7 +266,11 @@ class AppTests(unittest.TestCase):
                                                                     txn_id_lst,
                                                                     maxCharacterCount)
         batched_data_size_list = [len(batch) for batch in batched_data]
+
         self.assertListEqual(batched_data_size_list, test_batch_size_list)
+        for batch in batched_data:
+            batch_length = sum(len(txn_id) for txn_id in batch) + len(f"{self.api_factory.api_client.configuration.host}/api/transactionportfolios/{self.testscope}/{self.code}/transactions?")
+            self.assertLessEqual(batch_length, maxCharacterCount)
 
     @parameterized.expand([
         [
@@ -301,7 +306,7 @@ class AppTests(unittest.TestCase):
                                                                                      "baseCurrency": "USD",
                                                                                      })
         self.transaction_portfolios_api.upsert_transactions(self.testscope, self.code,
-                                                            flush_test_data.gen_transaction_data(txn_num))
+                                                            flush_test_data.gen_transaction_data(txn_num, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())))
         args.secrets = self.secrets
 
         self.assertEqual(txn_num, len(flush.get_all_txns(args)))

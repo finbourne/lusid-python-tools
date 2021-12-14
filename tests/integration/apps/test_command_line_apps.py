@@ -8,6 +8,7 @@ from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
+import json
 
 from tests.unit.apps.test_data import test_transactions as flush_test_data
 
@@ -79,7 +80,8 @@ class AppTests(unittest.TestCase):
         existing_portfolios = [
             portfolio.id.code for portfolio in portfolios_response.values
         ]
-        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio"]
+        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio",
+                     "support_non_existent_portfolio_tester"]
 
         if not all(x in existing_portfolios for x in test_list):
             transactions_portfolio_api = factory.build(TransactionPortfoliosApi)
@@ -303,31 +305,64 @@ class AppTests(unittest.TestCase):
             6000,
         ],
         [
+            "outside_the_test_data_time",
+            flush_transactions.parse(args=[
+                "testscope0001",
+                "TestFlushPortfolio",
+                "-s",
+                "2020-02-18T00:00:00.0000000+00:00",
+                "-e",
+                "2020-02-28T23:59:59.0000000+00:00",
+            ]),
+            4000,
+        ],
+        [
             "inside_the_test_data_time",
             flush_transactions.parse(args=[
                 "testscope0001",
                 "TestFlushPortfolio",
                 "-s",
-                "2020-02-10T00:00:00.0000000+00:00",
+                "2017-02-10T00:00:00.0000000+00:00",
                 "-e",
                 "2020-02-28T23:59:59.0000000+00:00",
             ]),
             0,
-        ],
+        ]
     ])
     def test_flush_between_dates(self, _, args, expected_txn_count):
         # Upsert Test Transaction Data
-        self.transaction_portfolios_api.upsert_transactions(self.testscope, "TestFlushPortfolio",
-                                                            flush_test_data.gen_transaction_data(6000))
+        dates = [datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
+                 datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
+                 datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc())]
 
+        for date in dates:
+            self.transaction_portfolios_api.upsert_transactions(self.testscope, "TestFlushPortfolio",
+                                                                flush_test_data.gen_transaction_data(2000,
+                                                                                                     date))
         args.secrets = self.secrets
         flush_transactions.flush(args)
-
         args.end_date = None
         args.start_date = None
         observed_count = len(flush_transactions.get_all_txns(args))
 
         self.assertEqual(observed_count, expected_txn_count)
+
+    def test_flush_without_valid_portfolio(self):
+        args = flush_transactions.parse(args=[
+            "testscope0001",
+            "support_non_existent_portfolio_tester",
+            "-s",
+            "2016-03-05T12:00:00+00:00",
+            "-e",
+            "2017-03-05T12:00:00+00:00",
+        ])
+        args.secrets = self.secrets
+
+        with self.assertRaises(lusid.exceptions.ApiException) as cm:
+            flush_transactions.flush(args)
+
+        exception = cm.exception
+        self.assertEqual(json.loads(exception.body)["code"], 109)
 
     @classmethod
     def tearDownClass(cls) -> None:
