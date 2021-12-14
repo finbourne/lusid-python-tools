@@ -374,7 +374,7 @@ class AppTests(unittest.TestCase):
             portfolio.id.code for portfolio in portfolios_response.values
         ]
 
-        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio"]
+        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio", "support_non_existent_portfolio_tester"]
         for portfolio in test_list:
             if portfolio in existing_portfolios:
                 response = cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
