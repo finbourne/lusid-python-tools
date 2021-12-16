@@ -10,6 +10,7 @@ import lusid
 import datetime
 from dateutil.tz import tzutc
 
+
 class AppTests(unittest.TestCase):
     test_data_root = Path(__file__).parent.joinpath("test_data")
     mapping_valid = test_data_root.joinpath("mapping.json")
@@ -79,7 +80,7 @@ class AppTests(unittest.TestCase):
         ]
 
         for portfolio in existing_portfolios:
-            response = cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
+            cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
 
     @parameterized.expand(args_list)
     def test_get_instruments_data(self, _, args_list):
@@ -242,7 +243,7 @@ class AppTests(unittest.TestCase):
             "batch-number-greater-than-1",
             4000,
             flush_test_data.gen_transaction_data(1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
-            [63, 62, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 60, 60, 60, 60, 60, 60, 60, 40]
+            [63, 62, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 33]
         ],
         [
             "batch-number-equals-1",
@@ -260,16 +261,17 @@ class AppTests(unittest.TestCase):
     def test_transaction_batcher_by_character_count(self, _, maxCharacterCount, whole_txn_set, test_batch_size_list):
         txn_id_lst = [txn['transactionId'] for txn in whole_txn_set]
 
-        batched_data = flush.transaction_batcher_by_character_count(self.testscope,
-                                                                    self.code,
-                                                                    self.api_factory.api_client.configuration.host,
+        batched_data = flush.transaction_batcher_by_character_count("exampleScope",
+                                                                    "exampleCode",
+                                                                    "www.exampleHost.lusid.com/api",
                                                                     txn_id_lst,
                                                                     maxCharacterCount)
         batched_data_size_list = [len(batch) for batch in batched_data]
 
         self.assertListEqual(batched_data_size_list, test_batch_size_list)
         for batch in batched_data:
-            batch_length = sum(len(txn_id) for txn_id in batch) + len(f"{self.api_factory.api_client.configuration.host}/api/transactionportfolios/{self.testscope}/{self.code}/transactions?")
+            batch_length = sum(len(txn_id) for txn_id in batch) + len(
+                f"www.exampleHost.lusid.com/api/api/transactionportfolios/exampleScope/exampleCode/transactions?")
             self.assertLessEqual(batch_length, maxCharacterCount)
 
     @parameterized.expand([
@@ -298,20 +300,25 @@ class AppTests(unittest.TestCase):
             ]),
         ],
     ])
-    def test_get_transactions_iterator(self, _, txn_num, args):
-        response = self.transaction_portfolios_api.create_portfolio(self.testscope, {"displayName": "TestPortfolio",
-                                                                                     "description": "Portfolio for flush tests",
-                                                                                     "code": self.code,
-                                                                                     "created": "2018-03-05T12:00:00.0000000+00:00",
-                                                                                     "baseCurrency": "USD",
-                                                                                     })
+    def test_get_all_txns(self, _, txn_num, args):
+        self.transaction_portfolios_api.create_portfolio(self.testscope, {"displayName": "TestPortfolio",
+                                                                          "description": "Portfolio for flush tests",
+                                                                          "code": self.code,
+                                                                          "created": "2018-03-05T12:00:00.0000000+00:00",
+                                                                          "baseCurrency": "USD",
+                                                                          })
         self.transaction_portfolios_api.upsert_transactions(self.testscope, self.code,
-                                                            flush_test_data.gen_transaction_data(txn_num, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())))
+                                                            flush_test_data.gen_transaction_data(txn_num,
+                                                                                                 datetime.datetime(2020,
+                                                                                                                   2,
+                                                                                                                   14,
+                                                                                                                   0, 0,
+                                                                                                                   tzinfo=tzutc())))
         args.secrets = self.secrets
 
         self.assertEqual(txn_num, len(flush.get_all_txns(args)))
 
-        response = self.portfolios_api.delete_portfolio(self.testscope, self.code)
+        self.portfolios_api.delete_portfolio(self.testscope, self.code)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -324,4 +331,4 @@ class AppTests(unittest.TestCase):
         ]
 
         for portfolio in existing_portfolios:
-            response = cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
+            cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)

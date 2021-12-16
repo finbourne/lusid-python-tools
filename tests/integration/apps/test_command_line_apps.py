@@ -9,6 +9,7 @@ from lusid import PortfoliosApi, TransactionPortfoliosApi
 import lusid
 from lusid.utilities import ApiClientBuilder
 import json
+from unittest.mock import patch
 
 from tests.unit.apps.test_data import test_transactions as flush_test_data
 
@@ -36,8 +37,8 @@ class AppTests(unittest.TestCase):
         cls.testscope = "testscope0001"
         cls.proptestscope = "testscope0001"
 
-        factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
-        cls.transaction_portfolios_api = factory.build(TransactionPortfoliosApi)
+        cls.factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
+        cls.transaction_portfolios_api = cls.factory.build(TransactionPortfoliosApi)
 
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
@@ -72,7 +73,7 @@ class AppTests(unittest.TestCase):
 
         LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
-        cls.portfolios_api = factory.build(PortfoliosApi)
+        cls.portfolios_api = cls.factory.build(PortfoliosApi)
         portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
             scope=cls.testscope
         )
@@ -80,12 +81,12 @@ class AppTests(unittest.TestCase):
         existing_portfolios = [
             portfolio.id.code for portfolio in portfolios_response.values
         ]
-        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio",
-                     "support_non_existent_portfolio_tester"]
+        cls.test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio",
+                         "FlushNonExistentPortfolioTest", "FlushFailedResponseTestPortfolio"]
 
-        if not all(x in existing_portfolios for x in test_list):
-            transactions_portfolio_api = factory.build(TransactionPortfoliosApi)
-            for portfolio in test_list:
+        if not all(x in existing_portfolios for x in cls.test_list):
+            transactions_portfolio_api = cls.factory.build(TransactionPortfoliosApi)
+            for portfolio in cls.test_list:
                 if portfolio not in existing_portfolios:
                     transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
                         display_name=portfolio,
@@ -364,6 +365,45 @@ class AppTests(unittest.TestCase):
         exception = cm.exception
         self.assertEqual(json.loads(exception.body)["code"], 109)
 
+    @parameterized.expand([
+        [
+            "single-batch-failure",
+            1,
+        ],
+        [
+            "3-batch-failure",
+            3,
+        ]
+    ]
+    )
+    @patch('lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions')
+    def test_flush_with_failed_responses(self, _, test_fail, mock_lusid_cancel_txns):
+        args = flush_transactions.parse(args=[
+            "testscope0001",
+            "FlushFailedResponseTestPortfolio",
+            "-s",
+            "2017-02-10T00:00:00.0000000+00:00",
+            "-e",
+            "2020-02-28T23:59:59.0000000+00:00",
+        ])
+        args.secrets = self.secrets
+        transactions = flush_test_data.gen_transaction_data(250,
+                                                            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()))
+
+        self.transaction_portfolios_api.upsert_transactions(self.testscope, "FlushFailedResponseTestPortfolio",
+                                                            transactions)
+
+        batch_count = len(flush_transactions.transaction_batcher_by_character_count(args.scope, args.portfolio,
+                                                                                    self.factory.api_client.configuration.host,
+                                                                                    [txn["transactionId"] for txn in
+                                                                                     transactions]
+                                                                                    ))
+
+        mock_lusid_cancel_txns.side_effect = [lusid.exceptions.ApiException for i in range(test_fail)] + [None for _ in
+                                                                                                          range(batch_count - test_fail)]
+        success_count, failure_count = flush_transactions.flush(args)
+        self.assertEqual(failure_count, test_fail)
+
     @classmethod
     def tearDownClass(cls) -> None:
         portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
@@ -374,7 +414,6 @@ class AppTests(unittest.TestCase):
             portfolio.id.code for portfolio in portfolios_response.values
         ]
 
-        test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio", "support_non_existent_portfolio_tester"]
-        for portfolio in test_list:
+        for portfolio in cls.test_list:
             if portfolio in existing_portfolios:
-                response = cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
+                cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)

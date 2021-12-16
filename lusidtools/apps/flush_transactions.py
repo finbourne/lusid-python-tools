@@ -76,6 +76,14 @@ def transaction_batcher_by_character_count(scope: str, code: str, host: str, inp
 
 class TxnGetter:
 
+    def __init__(self, args):
+        self.args = args
+        api_factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=args.secrets
+        )
+        self.transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+        self.stop = False
+
     def _get_transactions(self, args, page=None):
         # make API call to LUSID
         if page is None:
@@ -93,14 +101,6 @@ class TxnGetter:
                                                                     limit=5000,
                                                                     page=page
                                                                     )
-
-    def __init__(self, args):
-        self.args = args
-        api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=args.secrets
-        )
-        self.transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
-        self.stop = False
 
     def __iter__(self):
         # get first page and get next page token
@@ -160,13 +160,18 @@ def get_all_txns(args):
 
 def flush(args):
     """
-            Cancels all transactions found in a given date range for a specific portfolio
+        Cancels all transactions found in a given date range for a specific portfolio
 
-            Parameters
-            ----------
-            args : Namespace
-                The arguments taken in when command is run
-        """
+        Parameters
+        ----------
+        args : Namespace
+            The arguments taken in when command is run
+
+        Returns
+        ----------
+        Number of successful batches : int
+        Number of failed batches : int
+    """
 
     # Initialise the api
     api_factory = lusid.utilities.ApiClientFactory(
@@ -190,9 +195,15 @@ def flush(args):
                                                              )
 
     logging.info("Flushing the transactions")
-
+    failed_batch_count = 0
     for batch in txn_ids_batches:
-        response = transaction_portfolios_api.cancel_transactions(args.scope, args.portfolio, transaction_ids=batch)
+        try:
+            transaction_portfolios_api.cancel_transactions(args.scope, args.portfolio, transaction_ids=batch)
+        except lusid.exceptions.ApiException as e:
+            logging.error(f"Batch {txn_ids_batches.index(batch)} failed with exception {e}")
+            failed_batch_count = failed_batch_count + 1
+
+    return (len(txn_ids_batches) - failed_batch_count), failed_batch_count
 
 
 def main():
