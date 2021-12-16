@@ -7,21 +7,15 @@ from lusidtools.logger import LusidLogger
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser(
-            "Flush Transactions",
-            [
-                "scope",
-                "portfolio",
-                "date_range",
-            ],
-        )
-            .extend(extend)
-            .parse(args)
+        stdargs.Parser("Flush Transactions", ["scope", "portfolio", "date_range",],)
+        .extend(extend)
+        .parse(args)
     )
 
 
-def transaction_batcher_by_character_count(scope: str, code: str, host: str, input_lst: list,
-                                           maxCharacterCount: int = 4000):
+def transaction_batcher_by_character_count(
+    scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
+):
     """
     Takes a given input list of transactions or transactionIDs and batches them based on a maximum number of
     characters allowed in the URI
@@ -69,38 +63,42 @@ def transaction_batcher_by_character_count(scope: str, code: str, host: str, inp
         batches.append(curr_batch)
 
     logging.info(
-        f"Batched the transactions into {len(batches)} batches based on the character limit of {maxCharacterCount}")
+        f"Batched the transactions into {len(batches)} batches based on the character limit of {maxCharacterCount}"
+    )
 
     return batches
 
 
 class TxnGetter:
-
     def __init__(self, args):
         self.args = args
         api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=args.secrets
         )
-        self.transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+        self.transaction_portfolios_api = api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        )
         self.stop = False
 
     def _get_transactions(self, args, page=None):
         # make API call to LUSID
         if page is None:
-            return self.transaction_portfolios_api.get_transactions(args.scope,
-                                                                    args.portfolio,
-                                                                    from_transaction_date=args.start_date,
-                                                                    to_transaction_date=args.end_date,
-                                                                    limit=5000,
-                                                                    )
+            return self.transaction_portfolios_api.get_transactions(
+                args.scope,
+                args.portfolio,
+                from_transaction_date=args.start_date,
+                to_transaction_date=args.end_date,
+                limit=5000,
+            )
         else:
-            return self.transaction_portfolios_api.get_transactions(args.scope,
-                                                                    args.portfolio,
-                                                                    from_transaction_date=args.start_date,
-                                                                    to_transaction_date=args.end_date,
-                                                                    limit=5000,
-                                                                    page=page
-                                                                    )
+            return self.transaction_portfolios_api.get_transactions(
+                args.scope,
+                args.portfolio,
+                from_transaction_date=args.start_date,
+                to_transaction_date=args.end_date,
+                limit=5000,
+                page=page,
+            )
 
     def __iter__(self):
         # get first page and get next page token
@@ -155,7 +153,9 @@ def get_all_txns(args):
     List of all transactions
 
     """
-    return [transaction for page in get_paginated_txns(args) for transaction in page.values]
+    return [
+        transaction for page in get_paginated_txns(args) for transaction in page.values
+    ]
 
 
 def flush(args):
@@ -174,9 +174,7 @@ def flush(args):
     """
 
     # Initialise the api
-    api_factory = lusid.utilities.ApiClientFactory(
-        api_secrets_filename=args.secrets
-    )
+    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=args.secrets)
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     # Get the Transaction Data
@@ -186,21 +184,26 @@ def flush(args):
         logging.error("No transactions found between the specified dates")
         return
 
-    logging.info(f"Found {len(txn_ids)} transactions in date range {args.end_date} {args.start_date} ")
+    logging.info(
+        f"Found {len(txn_ids)} transactions in date range {args.end_date} {args.start_date} "
+    )
 
     # Batch the transactions - Necessary to limit the length of the URI in the API call
-    txn_ids_batches = transaction_batcher_by_character_count(args.scope, args.portfolio,
-                                                             api_factory.api_client.configuration.host,
-                                                             txn_ids
-                                                             )
+    txn_ids_batches = transaction_batcher_by_character_count(
+        args.scope, args.portfolio, api_factory.api_client.configuration.host, txn_ids
+    )
 
     logging.info("Flushing the transactions")
     failed_batch_count = 0
     for batch in txn_ids_batches:
         try:
-            transaction_portfolios_api.cancel_transactions(args.scope, args.portfolio, transaction_ids=batch)
+            transaction_portfolios_api.cancel_transactions(
+                args.scope, args.portfolio, transaction_ids=batch
+            )
         except lusid.exceptions.ApiException as e:
-            logging.error(f"Batch {txn_ids_batches.index(batch)} failed with exception {e}")
+            logging.error(
+                f"Batch {txn_ids_batches.index(batch)} failed with exception {e}"
+            )
             failed_batch_count = failed_batch_count + 1
 
     return (len(txn_ids_batches) - failed_batch_count), failed_batch_count

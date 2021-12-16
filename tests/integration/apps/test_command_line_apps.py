@@ -19,7 +19,7 @@ from lusidtools.apps import (
     load_transactions,
     load_quotes,
     load_portfolios,
-    flush_transactions
+    flush_transactions,
 )
 from lusidtools.cocoon import cocoon_printer
 from lusidtools.logger import LusidLogger
@@ -81,8 +81,13 @@ class AppTests(unittest.TestCase):
         existing_portfolios = [
             portfolio.id.code for portfolio in portfolios_response.values
         ]
-        cls.test_list = ["Global-Strategies-SHK", "GlobalCreditFund", "TestFlushPortfolio",
-                         "FlushNonExistentPortfolioTest", "FlushFailedResponseTestPortfolio"]
+        cls.test_list = [
+            "Global-Strategies-SHK",
+            "GlobalCreditFund",
+            "TestFlushPortfolio",
+            "FlushNonExistentPortfolioTest",
+            "FlushFailedResponseTestPortfolio",
+        ]
 
         if not all(x in existing_portfolios for x in cls.test_list):
             transactions_portfolio_api = cls.factory.build(TransactionPortfoliosApi)
@@ -292,54 +297,66 @@ class AppTests(unittest.TestCase):
 
         self.assertEqual(expected_value, test_values)
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "outside_the_test_data_time",
-            flush_transactions.parse(args=[
-                "testscope0001",
-                "TestFlushPortfolio",
-                "-s",
-                "2020-02-20T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]),
-            6000,
-        ],
-        [
-            "outside_the_test_data_time",
-            flush_transactions.parse(args=[
-                "testscope0001",
-                "TestFlushPortfolio",
-                "-s",
-                "2020-02-18T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]),
-            4000,
-        ],
-        [
-            "inside_the_test_data_time",
-            flush_transactions.parse(args=[
-                "testscope0001",
-                "TestFlushPortfolio",
-                "-s",
-                "2017-02-10T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]),
-            0,
+            [
+                "outside_the_test_data_time",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "TestFlushPortfolio",
+                        "-s",
+                        "2020-02-20T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                    ]
+                ),
+                6000,
+            ],
+            [
+                "outside_the_test_data_time",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "TestFlushPortfolio",
+                        "-s",
+                        "2020-02-18T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                    ]
+                ),
+                4000,
+            ],
+            [
+                "inside_the_test_data_time",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "TestFlushPortfolio",
+                        "-s",
+                        "2017-02-10T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                    ]
+                ),
+                0,
+            ],
         ]
-    ])
+    )
     def test_flush_between_dates(self, _, args, expected_txn_count):
         # Upsert Test Transaction Data
-        dates = [datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
-                 datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
-                 datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc())]
+        dates = [
+            datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
+            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
+            datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc()),
+        ]
 
         for date in dates:
-            self.transaction_portfolios_api.upsert_transactions(self.testscope, "TestFlushPortfolio",
-                                                                flush_test_data.gen_transaction_data(2000,
-                                                                                                     date))
+            self.transaction_portfolios_api.upsert_transactions(
+                self.testscope,
+                "TestFlushPortfolio",
+                flush_test_data.gen_transaction_data(2000, date),
+            )
         args.secrets = self.secrets
         flush_transactions.flush(args)
         args.end_date = None
@@ -349,14 +366,16 @@ class AppTests(unittest.TestCase):
         self.assertEqual(observed_count, expected_txn_count)
 
     def test_flush_without_valid_portfolio(self):
-        args = flush_transactions.parse(args=[
-            "testscope0001",
-            "support_non_existent_portfolio_tester",
-            "-s",
-            "2016-03-05T12:00:00+00:00",
-            "-e",
-            "2017-03-05T12:00:00+00:00",
-        ])
+        args = flush_transactions.parse(
+            args=[
+                "testscope0001",
+                "support_non_existent_portfolio_tester",
+                "-s",
+                "2016-03-05T12:00:00+00:00",
+                "-e",
+                "2017-03-05T12:00:00+00:00",
+            ]
+        )
         args.secrets = self.secrets
 
         with self.assertRaises(lusid.exceptions.ApiException) as cm:
@@ -365,42 +384,42 @@ class AppTests(unittest.TestCase):
         exception = cm.exception
         self.assertEqual(json.loads(exception.body)["code"], 109)
 
-    @parameterized.expand([
-        [
-            "single-batch-failure",
-            1,
-        ],
-        [
-            "3-batch-failure",
-            3,
-        ]
-    ]
+    @parameterized.expand([["single-batch-failure", 1,], ["3-batch-failure", 3,]])
+    @patch(
+        "lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions"
     )
-    @patch('lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions')
     def test_flush_with_failed_responses(self, _, test_fail, mock_lusid_cancel_txns):
-        args = flush_transactions.parse(args=[
-            "testscope0001",
-            "FlushFailedResponseTestPortfolio",
-            "-s",
-            "2017-02-10T00:00:00.0000000+00:00",
-            "-e",
-            "2020-02-28T23:59:59.0000000+00:00",
-        ])
+        args = flush_transactions.parse(
+            args=[
+                "testscope0001",
+                "FlushFailedResponseTestPortfolio",
+                "-s",
+                "2017-02-10T00:00:00.0000000+00:00",
+                "-e",
+                "2020-02-28T23:59:59.0000000+00:00",
+            ]
+        )
         args.secrets = self.secrets
-        transactions = flush_test_data.gen_transaction_data(250,
-                                                            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()))
+        transactions = flush_test_data.gen_transaction_data(
+            250, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+        )
 
-        self.transaction_portfolios_api.upsert_transactions(self.testscope, "FlushFailedResponseTestPortfolio",
-                                                            transactions)
+        self.transaction_portfolios_api.upsert_transactions(
+            self.testscope, "FlushFailedResponseTestPortfolio", transactions
+        )
 
-        batch_count = len(flush_transactions.transaction_batcher_by_character_count(args.scope, args.portfolio,
-                                                                                    self.factory.api_client.configuration.host,
-                                                                                    [txn["transactionId"] for txn in
-                                                                                     transactions]
-                                                                                    ))
+        batch_count = len(
+            flush_transactions.transaction_batcher_by_character_count(
+                args.scope,
+                args.portfolio,
+                self.factory.api_client.configuration.host,
+                [txn["transactionId"] for txn in transactions],
+            )
+        )
 
-        mock_lusid_cancel_txns.side_effect = [lusid.exceptions.ApiException for i in range(test_fail)] + [None for _ in
-                                                                                                          range(batch_count - test_fail)]
+        mock_lusid_cancel_txns.side_effect = [
+            lusid.exceptions.ApiException for i in range(test_fail)
+        ] + [None for _ in range(batch_count - test_fail)]
         success_count, failure_count = flush_transactions.flush(args)
         self.assertEqual(failure_count, test_fail)
 

@@ -20,9 +20,7 @@ class AppTests(unittest.TestCase):
     secrets = str(Path(__file__).parent.parent.parent.joinpath("secrets.json"))
     testscope = "test-scope"
     code = "FAndFTestPortfolio01"
-    api_factory = lusid.utilities.ApiClientFactory(
-        api_secrets_filename=secrets
-    )
+    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=secrets)
 
     valid_args = {
         "file_path": os.path.join(cur_dir, valid_instruments),
@@ -68,7 +66,9 @@ class AppTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
-        cls.transaction_portfolios_api = cls.api_factory.build(lusid.api.TransactionPortfoliosApi)
+        cls.transaction_portfolios_api = cls.api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        )
         cls.portfolios_api = cls.api_factory.build(lusid.api.PortfoliosApi)
 
         portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
@@ -98,119 +98,119 @@ class AppTests(unittest.TestCase):
     @parameterized.expand(
         [
             (
-                    "only_required",
-                    ["-f", valid_args["file_path"], "-m", valid_args["mapping"]],
-                    {"-f": valid_args["file_path"], "-m": valid_args["mapping"]},
+                "only_required",
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"]],
+                {"-f": valid_args["file_path"], "-m": valid_args["mapping"]},
             ),
             (
-                    "optional_arg_secrets",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-c",
-                        valid_args["secrets_file"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-c": valid_args["secrets_file"],
-                    },
+                "optional_arg_secrets",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-c",
+                    valid_args["secrets_file"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-c": valid_args["secrets_file"],
+                },
             ),
             (
-                    "optional_arg_scope",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-s",
-                        valid_args["scope"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-s": valid_args["scope"],
-                    },
+                "optional_arg_scope",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-s",
+                    valid_args["scope"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-s": valid_args["scope"],
+                },
             ),
             (
-                    "optional_arg_delimiter",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-dl",
-                        valid_args["delimiter"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-dl": valid_args["delimiter"],
-                    },
+                "optional_arg_delimiter",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-dl",
+                    valid_args["delimiter"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-dl": valid_args["delimiter"],
+                },
             ),
             (
-                    "optional_arg_num_header",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-nh",
-                        valid_args["num_header"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-nh": valid_args["num_header"],
-                    },
+                "optional_arg_num_header",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-nh",
+                    valid_args["num_header"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-nh": valid_args["num_header"],
+                },
             ),
             (
-                    "optional_arg_num_footer",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-nf",
-                        valid_args["num_footer"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-nf": valid_args["num_footer"],
-                    },
+                "optional_arg_num_footer",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-nf",
+                    valid_args["num_footer"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-nf": valid_args["num_footer"],
+                },
             ),
             (
-                    "optional_arg_dryrun",
-                    ["-f", valid_args["file_path"], "-m", valid_args["mapping"], ],
-                    {"-f": valid_args["file_path"], "-m": valid_args["mapping"], },
+                "optional_arg_dryrun",
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"],],
+                {"-f": valid_args["file_path"], "-m": valid_args["mapping"],},
             ),
             (
-                    "optional_arg_dryrun",
-                    ["-f", valid_args["file_path"], "-m", valid_args["mapping"], "-dr"],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-dr": True,
-                    },
+                "optional_arg_dryrun",
+                ["-f", valid_args["file_path"], "-m", valid_args["mapping"], "-dr"],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-dr": True,
+                },
             ),
             (
-                    "optional_debug",
-                    [
-                        "-f",
-                        valid_args["file_path"],
-                        "-m",
-                        valid_args["mapping"],
-                        "-d",
-                        valid_args["debug"],
-                    ],
-                    {
-                        "-f": valid_args["file_path"],
-                        "-m": valid_args["mapping"],
-                        "-d": valid_args["debug"],
-                    },
+                "optional_debug",
+                [
+                    "-f",
+                    valid_args["file_path"],
+                    "-m",
+                    valid_args["mapping"],
+                    "-d",
+                    valid_args["debug"],
+                ],
+                {
+                    "-f": valid_args["file_path"],
+                    "-m": valid_args["mapping"],
+                    "-d": valid_args["debug"],
+                },
             ),
         ]
     )
@@ -238,82 +238,131 @@ class AppTests(unittest.TestCase):
             for key in expected_value.keys()
         ]
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "batch-number-greater-than-1",
-            4000,
-            flush_test_data.gen_transaction_data(1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
-            [63, 62, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 33]
-        ],
-        [
-            "batch-number-equals-1",
-            4000,
-            flush_test_data.gen_transaction_data(10, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
-            [10]
-        ],
-        [
-            "larger-max-character-count",
-            8000,
-            flush_test_data.gen_transaction_data(1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
-            [127, 125, 125, 125, 125, 125, 125, 125, 123, 123, 123, 123, 6]
-        ],
-    ])
-    def test_transaction_batcher_by_character_count(self, _, maxCharacterCount, whole_txn_set, test_batch_size_list):
-        txn_id_lst = [txn['transactionId'] for txn in whole_txn_set]
+            [
+                "batch-number-greater-than-1",
+                4000,
+                flush_test_data.gen_transaction_data(
+                    1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                ),
+                [
+                    63,
+                    62,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    61,
+                    33,
+                ],
+            ],
+            [
+                "batch-number-equals-1",
+                4000,
+                flush_test_data.gen_transaction_data(
+                    10, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                ),
+                [10],
+            ],
+            [
+                "larger-max-character-count",
+                8000,
+                flush_test_data.gen_transaction_data(
+                    1500, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                ),
+                [127, 125, 125, 125, 125, 125, 125, 125, 123, 123, 123, 123, 6],
+            ],
+        ]
+    )
+    def test_transaction_batcher_by_character_count(
+        self, _, maxCharacterCount, whole_txn_set, test_batch_size_list
+    ):
+        txn_id_lst = [txn["transactionId"] for txn in whole_txn_set]
 
-        batched_data = flush.transaction_batcher_by_character_count("exampleScope",
-                                                                    "exampleCode",
-                                                                    "www.exampleHost.lusid.com/api",
-                                                                    txn_id_lst,
-                                                                    maxCharacterCount)
+        batched_data = flush.transaction_batcher_by_character_count(
+            "exampleScope",
+            "exampleCode",
+            "www.exampleHost.lusid.com/api",
+            txn_id_lst,
+            maxCharacterCount,
+        )
         batched_data_size_list = [len(batch) for batch in batched_data]
 
         self.assertListEqual(batched_data_size_list, test_batch_size_list)
         for batch in batched_data:
             batch_length = sum(len(txn_id) for txn_id in batch) + len(
-                f"www.exampleHost.lusid.com/api/api/transactionportfolios/exampleScope/exampleCode/transactions?")
+                f"www.exampleHost.lusid.com/api/api/transactionportfolios/exampleScope/exampleCode/transactions?"
+            )
             self.assertLessEqual(batch_length, maxCharacterCount)
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "1000-transactions",
-            1000,
-            flush.parse(args=[
-                "test-scope",
-                "FAndFTestPortfolio01",
-                "-s",
-                "2020-02-10T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]),
-        ],
-        [
-            "6000-transactions",
-            6000,
-            flush.parse(args=[
-                "test-scope",
-                "FAndFTestPortfolio01",
-                "-s",
-                "2020-02-10T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]),
-        ],
-    ])
+            [
+                "1000-transactions",
+                1000,
+                flush.parse(
+                    args=[
+                        "test-scope",
+                        "FAndFTestPortfolio01",
+                        "-s",
+                        "2020-02-10T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                    ]
+                ),
+            ],
+            [
+                "6000-transactions",
+                6000,
+                flush.parse(
+                    args=[
+                        "test-scope",
+                        "FAndFTestPortfolio01",
+                        "-s",
+                        "2020-02-10T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                    ]
+                ),
+            ],
+        ]
+    )
     def test_get_all_txns(self, _, txn_num, args):
-        self.transaction_portfolios_api.create_portfolio(self.testscope, {"displayName": "TestPortfolio",
-                                                                          "description": "Portfolio for flush tests",
-                                                                          "code": self.code,
-                                                                          "created": "2018-03-05T12:00:00.0000000+00:00",
-                                                                          "baseCurrency": "USD",
-                                                                          })
-        self.transaction_portfolios_api.upsert_transactions(self.testscope, self.code,
-                                                            flush_test_data.gen_transaction_data(txn_num,
-                                                                                                 datetime.datetime(2020,
-                                                                                                                   2,
-                                                                                                                   14,
-                                                                                                                   0, 0,
-                                                                                                                   tzinfo=tzutc())))
+        self.transaction_portfolios_api.create_portfolio(
+            self.testscope,
+            {
+                "displayName": "TestPortfolio",
+                "description": "Portfolio for flush tests",
+                "code": self.code,
+                "created": "2018-03-05T12:00:00.0000000+00:00",
+                "baseCurrency": "USD",
+            },
+        )
+        self.transaction_portfolios_api.upsert_transactions(
+            self.testscope,
+            self.code,
+            flush_test_data.gen_transaction_data(
+                txn_num, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+            ),
+        )
         args.secrets = self.secrets
 
         self.assertEqual(txn_num, len(flush.get_all_txns(args)))
