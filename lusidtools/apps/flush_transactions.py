@@ -213,7 +213,13 @@ def main():
     args = parse()
     if args.debug:
         LusidLogger(args.debug)
-    flush(args)
+    successful_batch_count, failed_batch_count = flush(args)
+
+    if failed_batch_count == 0:
+        logging.info("All transaction batches were successfully flushed")
+    else:
+        logging.info(f"The following number of batches were successful: {successful_batch_count}")
+        logging.error(f"The following number of batches failed to flush: {failed_batch_count}")
 
     return 0
 
