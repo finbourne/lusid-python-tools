@@ -79,11 +79,7 @@ class Parser:
             help="Write statistics to file. [Leave blank for stdout]",
         )
 
-        self.add(
-            "-d",
-            "--debug",
-            help=r"print debug messages, expected input: 'debug'"
-        )
+        self.add("-d", "--debug", help=r"print debug messages, expected input: 'debug'")
 
         if "asat" in sections:
             self.add(
