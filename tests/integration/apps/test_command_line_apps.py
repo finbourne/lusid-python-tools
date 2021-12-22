@@ -5,7 +5,7 @@ from parameterized import parameterized
 import datetime
 from dateutil.tz import tzutc
 from pathlib import Path
-from lusid import PortfoliosApi, TransactionPortfoliosApi
+from lusid import PortfoliosApi, TransactionPortfoliosApi, PortfolioGroupsApi
 import lusid
 from lusid.utilities import ApiClientBuilder
 import json
@@ -39,6 +39,7 @@ class AppTests(unittest.TestCase):
 
         cls.factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         cls.transaction_portfolios_api = cls.factory.build(TransactionPortfoliosApi)
+        cls.groups_api = cls.factory.build(PortfolioGroupsApi)
 
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
@@ -90,7 +91,6 @@ class AppTests(unittest.TestCase):
         ]
 
         if not all(x in existing_portfolios for x in cls.test_list):
-            transactions_portfolio_api = cls.factory.build(TransactionPortfoliosApi)
             for portfolio in cls.test_list:
                 if portfolio not in existing_portfolios:
                     transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
@@ -100,11 +100,106 @@ class AppTests(unittest.TestCase):
                         created="2018-03-05T12:00:00+00:00",
                         sub_holding_keys=[f"Transaction/{cls.testscope}/currency"],
                     )
-                    transactions_portfolio_response1 = transactions_portfolio_api.create_portfolio(
+                    transactions_portfolio_response1 = cls.transaction_portfolios_api.create_portfolio(
                         scope=cls.testscope,
                         create_transaction_portfolio_request=transaction_portfolio_request1,
                     )
                     logging.info(f"created portfolio: {portfolio}")
+
+        # Porfolio Groups Setup
+        groups_test_scopes = ["test_flush_groups_scope_01", "test_flush_groups_scope_02", "test_flush_groups_scope_03"]
+        cls.groups_test_list = [
+            "TestFlushPortfolio01",
+            "TestFlushPortfolio02",
+            "TestFlushPortfolio03",
+        ]
+        for scope in groups_test_scopes:
+            portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
+                scope=scope
+            )
+
+            existing_portfolios = [
+                portfolio.id.code for portfolio in portfolios_response.values
+            ]
+
+            if not all(x in existing_portfolios for x in cls.groups_test_list):
+                for portfolio in cls.groups_test_list:
+                    if portfolio not in existing_portfolios:
+                        transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
+                            display_name=portfolio,
+                            code=portfolio,
+                            base_currency="GBP",
+                            created="2018-03-05T12:00:00+00:00",
+                            sub_holding_keys=[f"Transaction/{scope}/currency"],
+                        )
+                        transactions_portfolio_response1 = cls.transaction_portfolios_api.create_portfolio(
+                            scope=scope,
+                            create_transaction_portfolio_request=transaction_portfolio_request1,
+                        )
+                        logging.info(f"created portfolio: {portfolio}")
+
+            for portfolio in cls.groups_test_list:
+                cls.transaction_portfolios_api.upsert_transactions(
+                    scope,
+                    portfolio,
+                    flush_test_data.gen_transaction_data(50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
+                )
+        create_portfolio_group_request_01 = {"code": "testFlushGroupsClean",
+                                             "created": "2019-10-04T00:00:00.0000000+00:00",
+                                             "values": [{"scope": "test_flush_groups_scope_01",
+                                                         "code": "TestFlushPortfolio01"},
+                                                        {"scope": "test_flush_groups_scope_01",
+                                                         "code": "TestFlushPortfolio02"},
+                                                        {"scope": "test_flush_groups_scope_01",
+                                                         "code": "TestFlushPortfolio03"}],
+                                             "displayName": "TestFlushGroupClean"
+                                             }
+        create_portfolio_group_request_02 = {"code": "testFlushGroupsMixedScopes",
+                                             "created": "2019-10-04T00:00:00.0000000+00:00",
+                                             "values": [{"scope": "test_flush_groups_scope_02",
+                                                         "code": "TestFlushPortfolio01"},
+                                                        {"scope": "test_flush_groups_scope_02",
+                                                         "code": "TestFlushPortfolio02"},
+                                                        {"scope": "test_flush_groups_scope_03",
+                                                         "code": "TestFlushPortfolio01"},
+                                                        {"scope": "test_flush_groups_scope_03",
+                                                         "code": "TestFlushPortfolio02"}],
+                                             "displayName": "TestFlushGroupMixed",
+                                             }
+
+        create_portfolio_group_request_03 = {"code": "testFlushGroupsSingle",
+                                             "created": "2019-10-04T00:00:00.0000000+00:00",
+                                             "values": [{"scope": "test_flush_groups_scope_02",
+                                                         "code": "TestFlushPortfolio03"}],
+                                             "displayName": "TestFlushGroupSingle",
+                                             }
+
+        create_portfolio_group_request_04 = {"code": "testFlushGroupsEmpty",
+                                             "created": "2019-10-04T00:00:00.0000000+00:00",
+                                             "values": [],
+                                             "displayName": "TestFlushGroupEmpty",
+                                             }
+
+        portfolio_groups_response = cls.groups_api.list_portfolio_groups(
+            scope="test_flush_groups_scope_01"
+        )
+
+        existing_groups = [
+            portfolio.id.code for portfolio in portfolio_groups_response.values
+        ]
+        if "testFlushGroupsClean" not in existing_groups:
+            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
+                                                  create_portfolio_group_request=create_portfolio_group_request_01)
+        if "testFlushGroupsMixedScopes" not in existing_groups:
+            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
+                                                  create_portfolio_group_request=create_portfolio_group_request_02)
+        if "testFlushGroupsSingle" not in existing_groups:
+            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
+                                                  create_portfolio_group_request=create_portfolio_group_request_03)
+        if "testFlushGroupsEmpty" not in existing_groups:
+            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
+                                                  create_portfolio_group_request=create_portfolio_group_request_04)
+
 
     def test_upsert_portfolios_withvalid_mapping(self):
         args = self.valid_args.copy()
@@ -297,131 +392,165 @@ class AppTests(unittest.TestCase):
 
         self.assertEqual(expected_value, test_values)
 
-    @parameterized.expand(
+    # @parameterized.expand(
+    #     [
+    #         [
+    #             "outside_the_test_data_time",
+    #             flush_transactions.parse(
+    #                 args=[
+    #                     "testscope0001",
+    #                     "TestFlushPortfolio",
+    #                     "-s",
+    #                     "2020-02-20T00:00:00.0000000+00:00",
+    #                     "-e",
+    #                     "2020-02-28T23:59:59.0000000+00:00",
+    #                 ]
+    #             ),
+    #             6000,
+    #         ],
+    #         [
+    #             "outside_the_test_data_time",
+    #             flush_transactions.parse(
+    #                 args=[
+    #                     "testscope0001",
+    #                     "TestFlushPortfolio",
+    #                     "-s",
+    #                     "2020-02-18T00:00:00.0000000+00:00",
+    #                     "-e",
+    #                     "2020-02-28T23:59:59.0000000+00:00",
+    #                 ]
+    #             ),
+    #             4000,
+    #         ],
+    #         [
+    #             "inside_the_test_data_time",
+    #             flush_transactions.parse(
+    #                 args=[
+    #                     "testscope0001",
+    #                     "TestFlushPortfolio",
+    #                     "-s",
+    #                     "2017-02-10T00:00:00.0000000+00:00",
+    #                     "-e",
+    #                     "2020-02-28T23:59:59.0000000+00:00",
+    #                 ]
+    #             ),
+    #             0,
+    #         ],
+    #     ]
+    # )
+    # def test_flush_between_dates(self, _, args, expected_txn_count):
+    #     # Upsert Test Transaction Data
+    #     dates = [
+    #         datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
+    #         datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
+    #         datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc()),
+    #     ]
+    #
+    #     for date in dates:
+    #         self.transaction_portfolios_api.upsert_transactions(
+    #             self.testscope,
+    #             "TestFlushPortfolio",
+    #             flush_test_data.gen_transaction_data(2000, date),
+    #         )
+    #     args.secrets = self.secrets
+    #     flush_transactions.flush(args)
+    #     args.end_date = None
+    #     args.start_date = None
+    #     observed_count = len(flush_transactions.get_all_txns(args))
+    #
+    #     self.assertEqual(observed_count, expected_txn_count)
+    #
+    # def test_flush_without_valid_portfolio(self):
+    #     args = flush_transactions.parse(
+    #         args=[
+    #             "testscope0001",
+    #             "support_non_existent_portfolio_tester",
+    #             "-s",
+    #             "2016-03-05T12:00:00+00:00",
+    #             "-e",
+    #             "2017-03-05T12:00:00+00:00",
+    #         ]
+    #     )
+    #     args.secrets = self.secrets
+    #
+    #     with self.assertRaises(lusid.exceptions.ApiException) as cm:
+    #         flush_transactions.flush(args)
+    #
+    #     exception = cm.exception
+    #     self.assertEqual(json.loads(exception.body)["code"], 109)
+    #
+    # @parameterized.expand([["single-batch-failure", 1, ], ["3-batch-failure", 3, ]])
+    # @patch(
+    #     "lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions"
+    # )
+    # def test_flush_with_failed_responses(self, _, test_fail, mock_lusid_cancel_txns):
+    #     args = flush_transactions.parse(
+    #         args=[
+    #             "testscope0001",
+    #             "FlushFailedResponseTestPortfolio",
+    #             "-s",
+    #             "2017-02-10T00:00:00.0000000+00:00",
+    #             "-e",
+    #             "2020-02-28T23:59:59.0000000+00:00",
+    #         ]
+    #     )
+    #     args.secrets = self.secrets
+    #     transactions = flush_test_data.gen_transaction_data(
+    #         250, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+    #     )
+    #
+    #     self.transaction_portfolios_api.upsert_transactions(
+    #         self.testscope, "FlushFailedResponseTestPortfolio", transactions
+    #     )
+    #
+    #     batch_count = len(
+    #         flush_transactions.transaction_batcher_by_character_count(
+    #             args.scope,
+    #             args.portfolio,
+    #             self.factory.api_client.configuration.host,
+    #             [txn["transactionId"] for txn in transactions],
+    #         )
+    #     )
+    #
+    #     mock_lusid_cancel_txns.side_effect = [
+    #                                              lusid.exceptions.ApiException for i in range(test_fail)
+    #                                          ] + [None for _ in range(batch_count - test_fail)]
+    #     success_count, failure_count = flush_transactions.flush(args)
+    #     self.assertEqual(failure_count, test_fail)
+
+    @parameterized.expand([
         [
-            [
-                "outside_the_test_data_time",
-                flush_transactions.parse(
-                    args=[
-                        "testscope0001",
-                        "TestFlushPortfolio",
-                        "-s",
-                        "2020-02-20T00:00:00.0000000+00:00",
-                        "-e",
-                        "2020-02-28T23:59:59.0000000+00:00",
-                    ]
-                ),
-                6000,
-            ],
-            [
-                "outside_the_test_data_time",
-                flush_transactions.parse(
-                    args=[
-                        "testscope0001",
-                        "TestFlushPortfolio",
-                        "-s",
-                        "2020-02-18T00:00:00.0000000+00:00",
-                        "-e",
-                        "2020-02-28T23:59:59.0000000+00:00",
-                    ]
-                ),
-                4000,
-            ],
-            [
-                "inside_the_test_data_time",
-                flush_transactions.parse(
-                    args=[
-                        "testscope0001",
-                        "TestFlushPortfolio",
-                        "-s",
-                        "2017-02-10T00:00:00.0000000+00:00",
-                        "-e",
-                        "2020-02-28T23:59:59.0000000+00:00",
-                    ]
-                ),
-                0,
-            ],
+            "multiple-portfolios-all-filled-same-scope",
+            "testFlushGroupsClean",
+        ],
+        [
+            "multiple-portfolios-with-different-scopes",
+            "testFlushGroupsMixedScopes"
+        ],
+        [
+            "only-one-portfolio-filled",
+            "testFlushGroupsSingle"
+        ],
+        [
+            "empty-group",
+            "testFlushGroupsEmpty"
         ]
-    )
-    def test_flush_between_dates(self, _, args, expected_txn_count):
-        # Upsert Test Transaction Data
-        dates = [
-            datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
-            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
-            datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc()),
-        ]
-
-        for date in dates:
-            self.transaction_portfolios_api.upsert_transactions(
-                self.testscope,
-                "TestFlushPortfolio",
-                flush_test_data.gen_transaction_data(2000, date),
-            )
-        args.secrets = self.secrets
-        flush_transactions.flush(args)
-        args.end_date = None
-        args.start_date = None
-        observed_count = len(flush_transactions.get_all_txns(args))
-
-        self.assertEqual(observed_count, expected_txn_count)
-
-    def test_flush_without_valid_portfolio(self):
+    ])
+    def test_flush_with_portfolio_groups(self, _, group_name):
         args = flush_transactions.parse(
             args=[
-                "testscope0001",
-                "support_non_existent_portfolio_tester",
-                "-s",
-                "2016-03-05T12:00:00+00:00",
-                "-e",
-                "2017-03-05T12:00:00+00:00",
+                "test_flush_groups_scope_01",
+                group_name,
+                "--group"
             ]
         )
         args.secrets = self.secrets
 
-        with self.assertRaises(lusid.exceptions.ApiException) as cm:
-            flush_transactions.flush(args)
-
-        exception = cm.exception
-        self.assertEqual(json.loads(exception.body)["code"], 109)
-
-    @parameterized.expand([["single-batch-failure", 1,], ["3-batch-failure", 3,]])
-    @patch(
-        "lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions"
-    )
-    def test_flush_with_failed_responses(self, _, test_fail, mock_lusid_cancel_txns):
-        args = flush_transactions.parse(
-            args=[
-                "testscope0001",
-                "FlushFailedResponseTestPortfolio",
-                "-s",
-                "2017-02-10T00:00:00.0000000+00:00",
-                "-e",
-                "2020-02-28T23:59:59.0000000+00:00",
-            ]
-        )
-        args.secrets = self.secrets
-        transactions = flush_test_data.gen_transaction_data(
-            250, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
-        )
-
-        self.transaction_portfolios_api.upsert_transactions(
-            self.testscope, "FlushFailedResponseTestPortfolio", transactions
-        )
-
-        batch_count = len(
-            flush_transactions.transaction_batcher_by_character_count(
-                args.scope,
-                args.portfolio,
-                self.factory.api_client.configuration.host,
-                [txn["transactionId"] for txn in transactions],
-            )
-        )
-
-        mock_lusid_cancel_txns.side_effect = [
-            lusid.exceptions.ApiException for i in range(test_fail)
-        ] + [None for _ in range(batch_count - test_fail)]
         success_count, failure_count = flush_transactions.flush(args)
-        self.assertEqual(failure_count, test_fail)
+
+        self.assertTrue(failure_count == 0)
+        self.assertTrue(success_count != 0)
+
 
     @classmethod
     def tearDownClass(cls) -> None:

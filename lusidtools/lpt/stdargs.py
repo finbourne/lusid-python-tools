@@ -55,6 +55,14 @@ class Parser:
                 help="Quiet mode. Doesn't show the progress bar",
             )
 
+        if "group" in sections:
+            self.add(
+                "-g",
+                "--group",
+                action="store_true",
+                help="Indicates use of Portfolio Groups"
+            )
+
         self.add(
             "--secrets-file",
             dest="secrets",

@@ -7,14 +7,14 @@ from lusidtools.logger import LusidLogger
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Flush Transactions", ["scope", "portfolio", "date_range",],)
-        .extend(extend)
-        .parse(args)
+        stdargs.Parser("Flush Transactions", ["scope", "portfolio", "date_range", "group"], )
+            .extend(extend)
+            .parse(args)
     )
 
 
 def transaction_batcher_by_character_count(
-    scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
+        scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
 ):
     """
     Takes a given input list of transactions or transactionIDs and batches them based on a maximum number of
@@ -70,39 +70,44 @@ def transaction_batcher_by_character_count(
 
 
 class TxnGetter:
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, scope, portfolio, start_date, end_date, secrets):
+        self.scope = scope
+        self.portfolio = portfolio
+        self.start_date = start_date
+        self.end_date = end_date
+        self.secrets = secrets
+
         api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=args.secrets
+            api_secrets_filename=self.secrets
         )
         self.transaction_portfolios_api = api_factory.build(
             lusid.api.TransactionPortfoliosApi
         )
         self.stop = False
 
-    def _get_transactions(self, args, page=None):
+    def _get_transactions(self, scope, portfolio, start_date, end_date, page=None):
         # make API call to LUSID
         if page is None:
             return self.transaction_portfolios_api.get_transactions(
-                args.scope,
-                args.portfolio,
-                from_transaction_date=args.start_date,
-                to_transaction_date=args.end_date,
+                scope,
+                portfolio,
+                from_transaction_date=start_date,
+                to_transaction_date=end_date,
                 limit=5000,
             )
         else:
             return self.transaction_portfolios_api.get_transactions(
-                args.scope,
-                args.portfolio,
-                from_transaction_date=args.start_date,
-                to_transaction_date=args.end_date,
+                scope,
+                portfolio,
+                from_transaction_date=start_date,
+                to_transaction_date=end_date,
                 limit=5000,
                 page=page,
             )
 
     def __iter__(self):
         # get first page and get next page token
-        self.txns = self._get_transactions(self.args)
+        self.txns = self._get_transactions(self.scope, self.portfolio, self.start_date, self.end_date)
         self.next_page = self.txns.next_page
         return self
 
@@ -113,7 +118,8 @@ class TxnGetter:
 
         result = self.txns
         if self.next_page:
-            self.txns = self._get_transactions(self.args, self.next_page)
+            self.txns = self._get_transactions(self.scope, self.portfolio, self.start_date, self.end_date,
+                                               self.next_page)
             self.next_page = self.txns.next_page
             return result
         else:
@@ -121,7 +127,7 @@ class TxnGetter:
             return result
 
 
-def get_paginated_txns(args):
+def get_paginated_txns(scope, portfolio, start_date, end_date, secrets):
     """
     Gets paginated transactions in a given time window
 
@@ -135,11 +141,11 @@ def get_paginated_txns(args):
     List of all responses from LUSID, each response relating to a page of transactions
 
     """
-    txn_getter = TxnGetter(args)
+    txn_getter = TxnGetter(scope, portfolio, start_date, end_date, secrets)
     return [response for response in txn_getter]
 
 
-def get_all_txns(args):
+def get_all_txns_ORIG(args):
     """
     Gets all the transactions in a given time window
 
@@ -156,6 +162,55 @@ def get_all_txns(args):
     return [
         transaction for page in get_paginated_txns(args) for transaction in page.values
     ]
+
+
+def get_all_txns(args):
+    """
+    Gets all the transactions in a given time window
+
+    Parameters
+    ----------
+    args : Namespace
+            The arguments taken in when command is run
+
+    Returns
+    -------
+    Dictionary with key: (scope, code) and value: list of transactions
+    """
+
+    if args.group:
+        # Get a list of all portfolios from the group
+        api_factory = lusid.utilities.ApiClientFactory(
+            api_secrets_filename=args.secrets
+        )
+        groups_api = api_factory.build(
+            lusid.api.PortfolioGroupsApi
+        )
+
+        portfolio_lst = []
+        group_scope = args.scope
+        group_code = args.portfolio
+
+        portfolios_response = groups_api.get_portfolio_group_expansion(
+            scope=group_scope,
+            code=group_code
+        )
+        portfolio_lst.extend([(portfolio.id.scope, portfolio.id.code) for portfolio in portfolios_response.values])
+        if not portfolios_response.sub_groups:
+            break
+        else:
+            group_code
+
+    else:
+        return {(args.scope, args.portfolio): [
+            transaction for page in
+            get_paginated_txns(args.scope, args.portfolio, args.start_date, args.end_date, args.secrets) for transaction
+            in page.values
+        ]}
+
+def get_portfolios_from_group(expanded_group):
+
+
 
 
 def flush(args):
@@ -218,12 +273,8 @@ def main():
     if failed_batch_count == 0:
         logging.info("All transaction batches were successfully flushed")
     else:
-        logging.info(
-            f"The following number of batches were successful: {successful_batch_count}"
-        )
-        logging.error(
-            f"The following number of batches failed to flush: {failed_batch_count}"
-        )
+        logging.info(f"The following number of batches were successful: {successful_batch_count}")
+        logging.error(f"The following number of batches failed to flush: {failed_batch_count}")
 
     return 0
 
