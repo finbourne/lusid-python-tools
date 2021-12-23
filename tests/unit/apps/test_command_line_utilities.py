@@ -365,7 +365,7 @@ class AppTests(unittest.TestCase):
         )
         args.secrets = self.secrets
 
-        self.assertEqual(txn_num, len(flush.get_all_txns(args)))
+        self.assertEqual(txn_num, len(list(flush.get_all_txns(args).values())[0]))
 
         self.portfolios_api.delete_portfolio(self.testscope, self.code)
 
