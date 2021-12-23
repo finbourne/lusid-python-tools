@@ -7,14 +7,16 @@ from lusidtools.logger import LusidLogger
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Flush Transactions", ["scope", "portfolio", "date_range", "group"], )
-            .extend(extend)
-            .parse(args)
+        stdargs.Parser(
+            "Flush Transactions", ["scope", "portfolio", "date_range", "group"],
+        )
+        .extend(extend)
+        .parse(args)
     )
 
 
 def transaction_batcher_by_character_count(
-        scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
+    scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
 ):
     """
     Takes a given input list of transactions or transactionIDs and batches them based on a maximum number of
@@ -70,7 +72,9 @@ def transaction_batcher_by_character_count(
 
 
 class TxnGetter:
-    def __init__(self, scope, portfolio, start_date, end_date, transaction_portfolios_api):
+    def __init__(
+        self, scope, portfolio, start_date, end_date, transaction_portfolios_api
+    ):
         self.scope = scope
         self.portfolio = portfolio
         self.start_date = start_date
@@ -100,7 +104,9 @@ class TxnGetter:
 
     def __iter__(self):
         # get first page and get next page token
-        self.txns = self._get_transactions(self.scope, self.portfolio, self.start_date, self.end_date)
+        self.txns = self._get_transactions(
+            self.scope, self.portfolio, self.start_date, self.end_date
+        )
         self.next_page = self.txns.next_page
         return self
 
@@ -111,8 +117,13 @@ class TxnGetter:
 
         result = self.txns
         if self.next_page:
-            self.txns = self._get_transactions(self.scope, self.portfolio, self.start_date, self.end_date,
-                                               self.next_page)
+            self.txns = self._get_transactions(
+                self.scope,
+                self.portfolio,
+                self.start_date,
+                self.end_date,
+                self.next_page,
+            )
             self.next_page = self.txns.next_page
             return result
         else:
@@ -120,7 +131,9 @@ class TxnGetter:
             return result
 
 
-def get_paginated_txns(scope, portfolio, start_date, end_date, transaction_portfolios_api):
+def get_paginated_txns(
+    scope, portfolio, start_date, end_date, transaction_portfolios_api
+):
     """
     Gets paginated transactions in a given time window
 
@@ -134,7 +147,9 @@ def get_paginated_txns(scope, portfolio, start_date, end_date, transaction_portf
     List of all responses from LUSID, each response relating to a page of transactions
 
     """
-    txn_getter = TxnGetter(scope, portfolio, start_date, end_date, transaction_portfolios_api)
+    txn_getter = TxnGetter(
+        scope, portfolio, start_date, end_date, transaction_portfolios_api
+    )
     return [response for response in txn_getter]
 
 
@@ -152,45 +167,59 @@ def get_all_txns(args):
     Dictionary with key: (scope, code) and value: list of transactions
     """
 
-    api_factory = lusid.utilities.ApiClientFactory(
-        api_secrets_filename=args.secrets
-    )
+    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=args.secrets)
 
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     if args.group:
         # Get a list of all portfolios from the group
-        groups_api = api_factory.build(
-            lusid.api.PortfolioGroupsApi
-        )
+        groups_api = api_factory.build(lusid.api.PortfolioGroupsApi)
 
         portfolios_response = groups_api.get_portfolio_group_expansion(
-            scope=args.scope,
-            code=args.portfolio
+            scope=args.scope, code=args.portfolio
         )
         portfolio_lst = get_portfolios_from_group(portfolios_response)
 
         # Get transactions from these portfolios
         txn_dict = {}
         for portfolio_scope, portfolio_code in portfolio_lst:
-            transaction_lst_single_portfolio = [transaction for page in
-                                                get_paginated_txns(portfolio_scope, portfolio_code, args.start_date,
-                                                                   args.end_date, transaction_portfolios_api)
-                                                for transaction in page.values]
-            txn_dict[(portfolio_scope, portfolio_code)] = transaction_lst_single_portfolio
+            transaction_lst_single_portfolio = [
+                transaction
+                for page in get_paginated_txns(
+                    portfolio_scope,
+                    portfolio_code,
+                    args.start_date,
+                    args.end_date,
+                    transaction_portfolios_api,
+                )
+                for transaction in page.values
+            ]
+            txn_dict[
+                (portfolio_scope, portfolio_code)
+            ] = transaction_lst_single_portfolio
 
         return txn_dict
 
     else:
-        return {(args.scope, args.portfolio): [
-            transaction for page in
-            get_paginated_txns(args.scope, args.portfolio, args.start_date, args.end_date, transaction_portfolios_api)
-            for transaction in page.values
-        ]}
+        return {
+            (args.scope, args.portfolio): [
+                transaction
+                for page in get_paginated_txns(
+                    args.scope,
+                    args.portfolio,
+                    args.start_date,
+                    args.end_date,
+                    transaction_portfolios_api,
+                )
+                for transaction in page.values
+            ]
+        }
 
 
 def get_portfolios_from_group(expanded_group):
-    temp_portfolio_lst = [(portfolio.id.scope, portfolio.id.code) for portfolio in expanded_group.values]
+    temp_portfolio_lst = [
+        (portfolio.id.scope, portfolio.id.code) for portfolio in expanded_group.values
+    ]
 
     if expanded_group.sub_groups:
         for sub_group in expanded_group.sub_groups:
@@ -238,7 +267,10 @@ def flush(args):
 
         # Batch the transactions - Necessary to limit the length of the URI in the API call
         txn_ids_batches = transaction_batcher_by_character_count(
-            args.scope, args.portfolio, api_factory.api_client.configuration.host, txn_ids
+            args.scope,
+            args.portfolio,
+            api_factory.api_client.configuration.host,
+            txn_ids,
         )
 
         # Flush the transactions
@@ -259,7 +291,9 @@ def flush(args):
         total_failed_batch_count = total_failed_batch_count + local_failure_count
         total_batch_count = total_batch_count + len(txn_ids_batches)
 
-        logging.info(f"Done flushing this portfolio with {len(txn_ids_batches) - local_failure_count} successes and {local_failure_count} failures")
+        logging.info(
+            f"Done flushing this portfolio with {len(txn_ids_batches) - local_failure_count} successes and {local_failure_count} failures"
+        )
 
     return (total_batch_count - total_failed_batch_count), total_failed_batch_count
 
@@ -273,8 +307,12 @@ def main():
     if failed_batch_count == 0:
         logging.info("All transaction batches were successfully flushed")
     else:
-        logging.info(f"The following number of batches were successful: {successful_batch_count}")
-        logging.error(f"The following number of batches failed to flush: {failed_batch_count}")
+        logging.info(
+            f"The following number of batches were successful: {successful_batch_count}"
+        )
+        logging.error(
+            f"The following number of batches failed to flush: {failed_batch_count}"
+        )
 
     return 0
 

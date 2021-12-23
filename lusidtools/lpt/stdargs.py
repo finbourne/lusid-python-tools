@@ -60,7 +60,7 @@ class Parser:
                 "-g",
                 "--group",
                 action="store_true",
-                help="Indicates use of Portfolio Groups"
+                help="Indicates use of Portfolio Groups",
             )
 
         self.add(

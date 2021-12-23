@@ -107,12 +107,16 @@ class AppTests(unittest.TestCase):
                     logging.info(f"created portfolio: {portfolio}")
 
         # Portfolio Groups Setup
-        cls.groups_test_scopes = ["test_flush_groups_scope_01", "test_flush_groups_scope_02",
-                                  "test_flush_groups_scope_03", "test_flush_groups_sub_scope"]
+        cls.groups_test_scopes = [
+            "test_flush_groups_scope_01",
+            "test_flush_groups_scope_02",
+            "test_flush_groups_scope_03",
+            "test_flush_groups_sub_scope",
+        ]
         cls.groups_test_list = [
             "TestFlushPortfolio01",
             "TestFlushPortfolio02",
-            "TestFlushPortfolio03"
+            "TestFlushPortfolio03",
         ]
         for scope in cls.groups_test_scopes:
             portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
@@ -142,10 +146,15 @@ class AppTests(unittest.TestCase):
                 cls.transaction_portfolios_api.upsert_transactions(
                     scope,
                     portfolio,
-                    flush_test_data.gen_transaction_data(50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
+                    flush_test_data.gen_transaction_data(
+                        50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                    ),
                 )
 
-        group_master_scopes = ["test_flush_groups_sub_scope", "test_flush_groups_scope_01"]
+        group_master_scopes = [
+            "test_flush_groups_sub_scope",
+            "test_flush_groups_scope_01",
+        ]
         for scope in group_master_scopes:
             portfolio_groups_response = cls.groups_api.list_portfolio_groups(
                 scope=scope
@@ -157,8 +166,9 @@ class AppTests(unittest.TestCase):
             for group in flush_test_data.group_portfolio_requests[scope]:
                 code = group["code"]
                 if code not in existing_groups:
-                    cls.groups_api.create_portfolio_group(scope,
-                                                          create_portfolio_group_request=group)
+                    cls.groups_api.create_portfolio_group(
+                        scope, create_portfolio_group_request=group
+                    )
                     logging.info(f"created group: {code}")
 
     def test_upsert_portfolios_withvalid_mapping(self):
@@ -439,7 +449,7 @@ class AppTests(unittest.TestCase):
         exception = cm.exception
         self.assertEqual(json.loads(exception.body)["code"], 109)
 
-    @parameterized.expand([["single-batch-failure", 1, ], ["3-batch-failure", 3, ]])
+    @parameterized.expand([["single-batch-failure", 1,], ["3-batch-failure", 3,]])
     @patch(
         "lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions"
     )
@@ -473,51 +483,44 @@ class AppTests(unittest.TestCase):
         )
 
         mock_lusid_cancel_txns.side_effect = [
-                                                 lusid.exceptions.ApiException for i in range(test_fail)
-                                             ] + [None for _ in range(batch_count - test_fail)]
+            lusid.exceptions.ApiException for i in range(test_fail)
+        ] + [None for _ in range(batch_count - test_fail)]
         success_count, failure_count = flush_transactions.flush(args)
         self.assertEqual(failure_count, test_fail)
 
-    @parameterized.expand([
+    @parameterized.expand(
         [
-            "multiple-portfolios-all-filled-same-scope",
-            "test_flush_groups_sub_scope",
-            "testFlushGroupsClean",
-            3
-        ],
-        [
-            "multiple-portfolios-all-filled-same-scope-no-sub-groups",
-            "test_flush_groups_scope_01",
-            "testFlushGroupsCleanNoSub",
-            3
-        ],
-        [
-            "multiple-portfolios-with-different-scopes",
-            "test_flush_groups_scope_01",
-            "testFlushGroupsMixedScopes",
-            4
-        ],
-        [
-            "only-one-portfolio-filled",
-            "test_flush_groups_scope_01",
-            "testFlushGroupsSingle",
-            1
-        ],
-        [
-            "empty-group",
-            "test_flush_groups_scope_01",
-            "testFlushGroupsEmpty",
-            0
+            [
+                "multiple-portfolios-all-filled-same-scope",
+                "test_flush_groups_sub_scope",
+                "testFlushGroupsClean",
+                3,
+            ],
+            [
+                "multiple-portfolios-all-filled-same-scope-no-sub-groups",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsCleanNoSub",
+                3,
+            ],
+            [
+                "multiple-portfolios-with-different-scopes",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsMixedScopes",
+                4,
+            ],
+            [
+                "only-one-portfolio-filled",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsSingle",
+                1,
+            ],
+            ["empty-group", "test_flush_groups_scope_01", "testFlushGroupsEmpty", 0],
         ]
-    ])
-    def test_flush_with_portfolio_groups(self, _, group_scope, group_name, target_success):
-        args = flush_transactions.parse(
-            args=[
-                group_scope,
-                group_name,
-                "--group"
-            ]
-        )
+    )
+    def test_flush_with_portfolio_groups(
+        self, _, group_scope, group_name, target_success
+    ):
+        args = flush_transactions.parse(args=[group_scope, group_name, "--group"])
         args.secrets = self.secrets
 
         success_count, failure_count = flush_transactions.flush(args)
