@@ -70,19 +70,12 @@ def transaction_batcher_by_character_count(
 
 
 class TxnGetter:
-    def __init__(self, scope, portfolio, start_date, end_date, secrets):
+    def __init__(self, scope, portfolio, start_date, end_date, transaction_portfolios_api):
         self.scope = scope
         self.portfolio = portfolio
         self.start_date = start_date
         self.end_date = end_date
-        self.secrets = secrets
-
-        api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=self.secrets
-        )
-        self.transaction_portfolios_api = api_factory.build(
-            lusid.api.TransactionPortfoliosApi
-        )
+        self.transaction_portfolios_api = transaction_portfolios_api
         self.stop = False
 
     def _get_transactions(self, scope, portfolio, start_date, end_date, page=None):
@@ -127,7 +120,7 @@ class TxnGetter:
             return result
 
 
-def get_paginated_txns(scope, portfolio, start_date, end_date, secrets):
+def get_paginated_txns(scope, portfolio, start_date, end_date, transaction_portfolios_api):
     """
     Gets paginated transactions in a given time window
 
@@ -141,27 +134,8 @@ def get_paginated_txns(scope, portfolio, start_date, end_date, secrets):
     List of all responses from LUSID, each response relating to a page of transactions
 
     """
-    txn_getter = TxnGetter(scope, portfolio, start_date, end_date, secrets)
+    txn_getter = TxnGetter(scope, portfolio, start_date, end_date, transaction_portfolios_api)
     return [response for response in txn_getter]
-
-
-def get_all_txns_ORIG(args):
-    """
-    Gets all the transactions in a given time window
-
-    Parameters
-    ----------
-    args : Namespace
-        The arguments taken in when command is run
-
-    Returns
-    -------
-    List of all transactions
-
-    """
-    return [
-        transaction for page in get_paginated_txns(args) for transaction in page.values
-    ]
 
 
 def get_all_txns(args):
@@ -178,11 +152,14 @@ def get_all_txns(args):
     Dictionary with key: (scope, code) and value: list of transactions
     """
 
+    api_factory = lusid.utilities.ApiClientFactory(
+        api_secrets_filename=args.secrets
+    )
+
+    transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+
     if args.group:
         # Get a list of all portfolios from the group
-        api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=args.secrets
-        )
         groups_api = api_factory.build(
             lusid.api.PortfolioGroupsApi
         )
@@ -198,7 +175,7 @@ def get_all_txns(args):
         for portfolio_scope, portfolio_code in portfolio_lst:
             transaction_lst_single_portfolio = [transaction for page in
                                                 get_paginated_txns(portfolio_scope, portfolio_code, args.start_date,
-                                                                   args.end_date, args.secrets)
+                                                                   args.end_date, transaction_portfolios_api)
                                                 for transaction in page.values]
             txn_dict[(portfolio_scope, portfolio_code)] = transaction_lst_single_portfolio
 
@@ -207,8 +184,8 @@ def get_all_txns(args):
     else:
         return {(args.scope, args.portfolio): [
             transaction for page in
-            get_paginated_txns(args.scope, args.portfolio, args.start_date, args.end_date, args.secrets) for transaction
-            in page.values
+            get_paginated_txns(args.scope, args.portfolio, args.start_date, args.end_date, transaction_portfolios_api)
+            for transaction in page.values
         ]}
 
 
