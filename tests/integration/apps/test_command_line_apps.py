@@ -132,7 +132,7 @@ class AppTests(unittest.TestCase):
                             base_currency="GBP",
                             created="2018-03-05T12:00:00+00:00",
                         )
-                        transactions_portfolio_response1 = cls.transaction_portfolios_api.create_portfolio(
+                        cls.transaction_portfolios_api.create_portfolio(
                             scope=scope,
                             create_transaction_portfolio_request=transaction_portfolio_request1,
                         )
@@ -145,95 +145,21 @@ class AppTests(unittest.TestCase):
                     flush_test_data.gen_transaction_data(50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())),
                 )
 
-        create_portfolio_sub_group = {"code": "testFlushSubGroup",
-                                      "created": "2019-10-04T00:00:00.0000000+00:00",
-                                      "values": [{"scope": "test_flush_groups_sub_scope", "code": "TestFlushPortfolio02"},
-                                                 {"scope": "test_flush_groups_sub_scope", "code": "TestFlushPortfolio03"}],
-                                      "displayName": "TestFlushSubGroup"}
+        group_master_scopes = ["test_flush_groups_sub_scope", "test_flush_groups_scope_01"]
+        for scope in group_master_scopes:
+            portfolio_groups_response = cls.groups_api.list_portfolio_groups(
+                scope=scope
+            )
 
-        create_portfolio_group_request_00 = {"code": "testFlushGroupsClean",
-                                             "created": "2019-10-04T00:00:00.0000000+00:00",
-                                             "values": [{"scope": "test_flush_groups_sub_scope", "code": "TestFlushPortfolio01"}],
-                                             "subGroups": [{"scope": "test_flush_groups_sub_scope",
-                                                            "code": "testFlushSubGroup"}],
-                                             "displayName": "TestFlushGroupClean"}
-
-        create_portfolio_group_request_01 = {"code": "testFlushGroupsCleanNoSub",
-                                             "created": "2019-10-04T00:00:00.0000000+00:00",
-                                             "values": [{"scope": "test_flush_groups_scope_01",
-                                                         "code": "TestFlushPortfolio01"},
-                                                        {"scope": "test_flush_groups_scope_01",
-                                                         "code": "TestFlushPortfolio02"},
-                                                        {"scope": "test_flush_groups_scope_01",
-                                                         "code": "TestFlushPortfolio03"}],
-                                             "displayName": "TestFlushGroupCleanNoSub"
-                                             }
-        create_portfolio_group_request_02 = {"code": "testFlushGroupsMixedScopes",
-                                             "created": "2019-10-04T00:00:00.0000000+00:00",
-                                             "values": [{"scope": "test_flush_groups_scope_02",
-                                                         "code": "TestFlushPortfolio01"},
-                                                        {"scope": "test_flush_groups_scope_02",
-                                                         "code": "TestFlushPortfolio02"},
-                                                        {"scope": "test_flush_groups_scope_03",
-                                                         "code": "TestFlushPortfolio01"},
-                                                        {"scope": "test_flush_groups_scope_03",
-                                                         "code": "TestFlushPortfolio02"}],
-                                             "displayName": "TestFlushGroupMixed",
-                                             }
-
-        create_portfolio_group_request_03 = {"code": "testFlushGroupsSingle",
-                                             "created": "2019-10-04T00:00:00.0000000+00:00",
-                                             "values": [{"scope": "test_flush_groups_scope_02",
-                                                         "code": "TestFlushPortfolio03"}],
-                                             "displayName": "TestFlushGroupSingle",
-                                             }
-
-        create_portfolio_group_request_04 = {"code": "testFlushGroupsEmpty",
-                                             "created": "2019-10-04T00:00:00.0000000+00:00",
-                                             "values": [],
-                                             "displayName": "TestFlushGroupEmpty",
-                                             }
-
-        portfolio_groups_response = cls.groups_api.list_portfolio_groups(
-            scope="test_flush_groups_scope_01"
-        )
-
-        existing_groups = [
-            portfolio.id.code for portfolio in portfolio_groups_response.values
-        ]
-
-        portfolio_groups_response = cls.groups_api.list_portfolio_groups(
-            scope="test_flush_groups_sub_scope"
-        )
-
-        existing_groups.extend([
-            portfolio.id.code for portfolio in portfolio_groups_response.values
-        ])
-
-        if "testFlushSubGroup" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_sub_scope",
-                                                  create_portfolio_group_request=create_portfolio_sub_group)
-            logging.info(f"created group: TestFlushSubGroup")
-        if "testFlushGroupsClean" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_sub_scope",
-                                                  create_portfolio_group_request=create_portfolio_group_request_00)
-            logging.info(f"created group: TestFlushGroupClean")
-        if "testFlushGroupsCleanNoSub" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
-                                                  create_portfolio_group_request=create_portfolio_group_request_01)
-            logging.info(f"created group: TestFlushGroupCleanNoSub")
-        if "testFlushGroupsMixedScopes" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
-                                                  create_portfolio_group_request=create_portfolio_group_request_02)
-            logging.info(f"created group: testFlushGroupsMixedScopes")
-        if "testFlushGroupsSingle" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
-                                                  create_portfolio_group_request=create_portfolio_group_request_03)
-            logging.info(f"created group: testFlushGroupsSingle")
-        if "testFlushGroupsEmpty" not in existing_groups:
-            cls.groups_api.create_portfolio_group("test_flush_groups_scope_01",
-                                                  create_portfolio_group_request=create_portfolio_group_request_04)
-            logging.info(f"created group: TestFlushGroupEmpty")
+            existing_groups = [
+                portfolio.id.code for portfolio in portfolio_groups_response.values
+            ]
+            for group in flush_test_data.group_portfolio_requests[scope]:
+                code = group["code"]
+                if code not in existing_groups:
+                    cls.groups_api.create_portfolio_group(scope,
+                                                          create_portfolio_group_request=group)
+                    logging.info(f"created group: {code}")
 
     def test_upsert_portfolios_withvalid_mapping(self):
         args = self.valid_args.copy()
