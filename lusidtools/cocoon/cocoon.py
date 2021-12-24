@@ -1538,22 +1538,23 @@ def load_from_data_frame(
     thread_pool = ThreadPool(thread_pool_max_workers).thread_pool
 
     if instrument_name_enrichment:
+
         loop = cocoon.async_tools.start_event_loop_new_thread()
-
-        data_frame, mapping_required = asyncio.run_coroutine_threadsafe(
-            cocoon.instruments.enrich_instruments(
-                api_factory=api_factory,
-                data_frame=data_frame,
-                instrument_identifier_mapping=identifier_mapping,
-                mapping_required=mapping_required,
-                constant_prefix="$",
-                **{"thread_pool": thread_pool},
-            ),
-            loop,
-        ).result()
-
-        # Stop the additional event loop
-        cocoon.async_tools.stop_event_loop_new_thread(loop)
+        try:
+            data_frame, mapping_required = asyncio.run_coroutine_threadsafe(
+                cocoon.instruments.enrich_instruments(
+                    api_factory=api_factory,
+                    data_frame=data_frame,
+                    instrument_identifier_mapping=identifier_mapping,
+                    mapping_required=mapping_required,
+                    constant_prefix="$",
+                    **{"thread_pool": thread_pool},
+                ),
+                loop,
+            ).result()
+        finally:
+            # Stop the additional event loop
+            cocoon.async_tools.stop_event_loop_new_thread(loop)
 
     """
     Unnest and populate defaults where a mapping is provided with column and/or default fields in a nested dictionary
@@ -1676,29 +1677,30 @@ def load_from_data_frame(
         "thread_pool": thread_pool,
     }
 
-    # Get the responses from LUSID
-    logging.debug("constructing batches...")
-    responses = asyncio.run_coroutine_threadsafe(
-        _construct_batches(
-            api_factory=api_factory,
-            data_frame=data_frame,
-            mapping_required=mapping_required,
-            mapping_optional=mapping_optional,
-            property_columns=property_columns,
-            properties_scope=properties_scope,
-            instrument_identifier_mapping=identifier_mapping,
-            batch_size=batch_size,
-            file_type=file_type,
-            domain_lookup=domain_lookup,
-            sub_holding_keys=sub_holding_keys,
-            sub_holding_keys_scope=sub_holding_keys_scope,
-            return_unmatched_items=return_unmatched_items,
-            **keyword_arguments,
-        ),
-        loop,
-    ).result()
-
-    # Stop the additional event loop
-    cocoon.async_tools.stop_event_loop_new_thread(loop)
+    try:
+        # Get the responses from LUSID
+        logging.debug("constructing batches...")
+        responses = asyncio.run_coroutine_threadsafe(
+            _construct_batches(
+                api_factory=api_factory,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+                instrument_identifier_mapping=identifier_mapping,
+                batch_size=batch_size,
+                file_type=file_type,
+                domain_lookup=domain_lookup,
+                sub_holding_keys=sub_holding_keys,
+                sub_holding_keys_scope=sub_holding_keys_scope,
+                return_unmatched_items=return_unmatched_items,
+                **keyword_arguments,
+            ),
+            loop,
+        ).result()
+    finally:
+        # Stop the additional event loop
+        cocoon.async_tools.stop_event_loop_new_thread(loop)
 
     return {file_type + "s": responses}
