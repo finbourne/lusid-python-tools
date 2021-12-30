@@ -10,13 +10,13 @@ def parse(extend=None, args=None):
         stdargs.Parser(
             "Flush Transactions", ["scope", "portfolio", "date_range", "group"],
         )
-        .extend(extend)
-        .parse(args)
+            .extend(extend)
+            .parse(args)
     )
 
 
 def transaction_batcher_by_character_count(
-    scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
+        scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
 ):
     """
     Takes a given input list of transactions or transactionIDs and batches them based on a maximum number of
@@ -73,7 +73,7 @@ def transaction_batcher_by_character_count(
 
 class TxnGetter:
     def __init__(
-        self, scope, portfolio, start_date, end_date, transaction_portfolios_api
+            self, scope, portfolio, start_date, end_date, transaction_portfolios_api
     ):
         self.scope = scope
         self.portfolio = portfolio
@@ -132,15 +132,23 @@ class TxnGetter:
 
 
 def get_paginated_txns(
-    scope, portfolio, start_date, end_date, transaction_portfolios_api
+        scope, portfolio, start_date, end_date, transaction_portfolios_api
 ):
     """
     Gets paginated transactions in a given time window
 
     Parameters
     ----------
-    args : Namespace
-        The arguments taken in when command is run
+    scope : str
+        Scope of the portfolio in question
+    portfolio : str
+        Code of the portfolio in question
+    start_date : str
+        Lower bound from when transactions will be looked for
+    end_date : str
+        Upper bound to when transactions will be looked for
+    transaction_portfolios_api : TransactionPortfoliosApi
+        The instance of the API used for the requests
 
     Returns
     -------
@@ -151,6 +159,31 @@ def get_paginated_txns(
         scope, portfolio, start_date, end_date, transaction_portfolios_api
     )
     return [response for response in txn_getter]
+
+
+def get_portfolios_from_group(expanded_group):
+    """
+    Recursive function to extract all the portfolio information from the get_portfolio_group_expansion endpoint
+
+    Parameters
+    ----------
+    expanded_group : ExpandedGroup
+        Response from get_portfolio_group_expansion endpoint containing all the portfolio scopes and codes in this group
+        as well as further ExpandedGroup objects for each of the sub-groups
+
+    Returns
+    -------
+    A list of tuples with each item describing a portfolios in the form (scope, code)
+    """
+    temp_portfolio_lst = [
+        (portfolio.id.scope, portfolio.id.code) for portfolio in expanded_group.values
+    ]
+
+    if expanded_group.sub_groups:
+        for sub_group in expanded_group.sub_groups:
+            temp_portfolio_lst.extend(get_portfolios_from_group(sub_group))
+
+    return temp_portfolio_lst
 
 
 def get_all_txns(args):
@@ -214,18 +247,6 @@ def get_all_txns(args):
                 for transaction in page.values
             ]
         }
-
-
-def get_portfolios_from_group(expanded_group):
-    temp_portfolio_lst = [
-        (portfolio.id.scope, portfolio.id.code) for portfolio in expanded_group.values
-    ]
-
-    if expanded_group.sub_groups:
-        for sub_group in expanded_group.sub_groups:
-            temp_portfolio_lst.extend(get_portfolios_from_group(sub_group))
-
-    return temp_portfolio_lst
 
 
 def flush(args):
