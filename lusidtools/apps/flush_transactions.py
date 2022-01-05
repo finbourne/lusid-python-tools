@@ -272,11 +272,10 @@ def flush(args):
     total_batch_count = 0
     total_failed_batch_count = 0
 
-    txns = get_all_txns(args)
-    for key, value in get_all_txns(args).items():
-        txn_ids = [txn.transaction_id for txn in value]
+    for portfolio_id, transactions in get_all_txns(args).items():
+        txn_ids = [txn.transaction_id for txn in transactions]
 
-        logging.info(f"Looking at portfolio with scope: {key[0]} and code: {key[1]}")
+        logging.info(f"Looking at portfolio with scope: {portfolio_id[0]} and code: {portfolio_id[1]}")
 
         if not txn_ids:
             logging.error("No transactions found between the specified dates")
@@ -300,12 +299,12 @@ def flush(args):
         for batch in txn_ids_batches:
             try:
                 transaction_portfolios_api.cancel_transactions(
-                    key[0], key[1], transaction_ids=batch
+                    portfolio_id[0], portfolio_id[1], transaction_ids=batch
                 )
             except lusid.exceptions.ApiException as e:
                 logging.error(
-                    f"Batch {txn_ids_batches.index(batch)} in portfolio with scope: {key[0]} and code: {key[1]} has "
-                    f"failed with exception {e} "
+                    f"Batch {txn_ids_batches.index(batch)} in portfolio with scope: {portfolio_id[0]} "
+                    f"and code: {portfolio_id[1]} has failed with exception {e} "
                 )
                 local_failure_count = local_failure_count + 1
 
