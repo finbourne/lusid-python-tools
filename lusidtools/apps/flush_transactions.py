@@ -7,7 +7,9 @@ from lusidtools.logger import LusidLogger
 
 def parse(extend=None, args=None):
     return (
-        stdargs.Parser("Flush Transactions", ["scope", "portfolio", "date_range",],)
+        stdargs.Parser(
+            "Flush Transactions", ["scope", "portfolio", "date_range", "group"],
+        )
         .extend(extend)
         .parse(args)
     )
@@ -70,39 +72,41 @@ def transaction_batcher_by_character_count(
 
 
 class TxnGetter:
-    def __init__(self, args):
-        self.args = args
-        api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=args.secrets
-        )
-        self.transaction_portfolios_api = api_factory.build(
-            lusid.api.TransactionPortfoliosApi
-        )
+    def __init__(
+        self, scope, portfolio, start_date, end_date, transaction_portfolios_api
+    ):
+        self.scope = scope
+        self.portfolio = portfolio
+        self.start_date = start_date
+        self.end_date = end_date
+        self.transaction_portfolios_api = transaction_portfolios_api
         self.stop = False
 
-    def _get_transactions(self, args, page=None):
+    def _get_transactions(self, scope, portfolio, start_date, end_date, page=None):
         # make API call to LUSID
         if page is None:
             return self.transaction_portfolios_api.get_transactions(
-                args.scope,
-                args.portfolio,
-                from_transaction_date=args.start_date,
-                to_transaction_date=args.end_date,
+                scope,
+                portfolio,
+                from_transaction_date=start_date,
+                to_transaction_date=end_date,
                 limit=5000,
             )
         else:
             return self.transaction_portfolios_api.get_transactions(
-                args.scope,
-                args.portfolio,
-                from_transaction_date=args.start_date,
-                to_transaction_date=args.end_date,
+                scope,
+                portfolio,
+                from_transaction_date=start_date,
+                to_transaction_date=end_date,
                 limit=5000,
                 page=page,
             )
 
     def __iter__(self):
         # get first page and get next page token
-        self.txns = self._get_transactions(self.args)
+        self.txns = self._get_transactions(
+            self.scope, self.portfolio, self.start_date, self.end_date
+        )
         self.next_page = self.txns.next_page
         return self
 
@@ -113,7 +117,13 @@ class TxnGetter:
 
         result = self.txns
         if self.next_page:
-            self.txns = self._get_transactions(self.args, self.next_page)
+            self.txns = self._get_transactions(
+                self.scope,
+                self.portfolio,
+                self.start_date,
+                self.end_date,
+                self.next_page,
+            )
             self.next_page = self.txns.next_page
             return result
         else:
@@ -121,22 +131,59 @@ class TxnGetter:
             return result
 
 
-def get_paginated_txns(args):
+def get_paginated_txns(
+    scope, portfolio, start_date, end_date, transaction_portfolios_api
+):
     """
     Gets paginated transactions in a given time window
 
     Parameters
     ----------
-    args : Namespace
-        The arguments taken in when command is run
+    scope : str
+        Scope of the portfolio in question
+    portfolio : str
+        Code of the portfolio in question
+    start_date : str
+        Lower bound from when transactions will be looked for
+    end_date : str
+        Upper bound to when transactions will be looked for
+    transaction_portfolios_api : TransactionPortfoliosApi
+        The instance of the API used for the requests
 
     Returns
     -------
     List of all responses from LUSID, each response relating to a page of transactions
 
     """
-    txn_getter = TxnGetter(args)
+    txn_getter = TxnGetter(
+        scope, portfolio, start_date, end_date, transaction_portfolios_api
+    )
     return [response for response in txn_getter]
+
+
+def get_portfolios_from_group(expanded_group):
+    """
+    Recursive function to extract all the portfolio information from the get_portfolio_group_expansion endpoint
+
+    Parameters
+    ----------
+    expanded_group : ExpandedGroup
+        Response from get_portfolio_group_expansion endpoint containing all the portfolio scopes and codes in this group
+        as well as further ExpandedGroup objects for each of the sub-groups
+
+    Returns
+    -------
+    A list of tuples with each item describing a portfolios in the form (scope, code)
+    """
+    temp_portfolio_lst = [
+        (portfolio.id.scope, portfolio.id.code) for portfolio in expanded_group.values
+    ]
+
+    if expanded_group.sub_groups:
+        for sub_group in expanded_group.sub_groups:
+            temp_portfolio_lst.extend(get_portfolios_from_group(sub_group))
+
+    return temp_portfolio_lst
 
 
 def get_all_txns(args):
@@ -146,16 +193,60 @@ def get_all_txns(args):
     Parameters
     ----------
     args : Namespace
-        The arguments taken in when command is run
+            The arguments taken in when command is run
 
     Returns
     -------
-    List of all transactions
-
+    Dictionary with key: (scope, code) and value: list of transactions
     """
-    return [
-        transaction for page in get_paginated_txns(args) for transaction in page.values
-    ]
+
+    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=args.secrets)
+
+    transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+
+    if args.group:
+        # Get a list of all portfolios from the group
+        groups_api = api_factory.build(lusid.api.PortfolioGroupsApi)
+
+        portfolios_response = groups_api.get_portfolio_group_expansion(
+            scope=args.scope, code=args.portfolio
+        )
+        portfolio_lst = get_portfolios_from_group(portfolios_response)
+
+        # Get transactions from these portfolios
+        txn_dict = {}
+        for portfolio_scope, portfolio_code in portfolio_lst:
+            transaction_lst_single_portfolio = [
+                transaction
+                for page in get_paginated_txns(
+                    portfolio_scope,
+                    portfolio_code,
+                    args.start_date,
+                    args.end_date,
+                    transaction_portfolios_api,
+                )
+                for transaction in page.values
+            ]
+            txn_dict[
+                (portfolio_scope, portfolio_code)
+            ] = transaction_lst_single_portfolio
+
+        return txn_dict
+
+    else:
+        return {
+            (args.scope, args.portfolio): [
+                transaction
+                for page in get_paginated_txns(
+                    args.scope,
+                    args.portfolio,
+                    args.start_date,
+                    args.end_date,
+                    transaction_portfolios_api,
+                )
+                for transaction in page.values
+            ]
+        }
 
 
 def flush(args):
@@ -178,35 +269,55 @@ def flush(args):
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     # Get the Transaction Data
-    txn_ids = [txn.transaction_id for txn in get_all_txns(args)]
+    total_batch_count = 0
+    total_failed_batch_count = 0
 
-    if not txn_ids:
-        logging.error("No transactions found between the specified dates")
-        return
+    for portfolio_id, transactions in get_all_txns(args).items():
+        txn_ids = [txn.transaction_id for txn in transactions]
 
-    logging.info(
-        f"Found {len(txn_ids)} transactions in date range {args.end_date} {args.start_date} "
-    )
+        logging.info(
+            f"Looking at portfolio with scope: {portfolio_id[0]} and code: {portfolio_id[1]}"
+        )
 
-    # Batch the transactions - Necessary to limit the length of the URI in the API call
-    txn_ids_batches = transaction_batcher_by_character_count(
-        args.scope, args.portfolio, api_factory.api_client.configuration.host, txn_ids
-    )
+        if not txn_ids:
+            logging.error("No transactions found between the specified dates")
+            continue
 
-    logging.info("Flushing the transactions")
-    failed_batch_count = 0
-    for batch in txn_ids_batches:
-        try:
-            transaction_portfolios_api.cancel_transactions(
-                args.scope, args.portfolio, transaction_ids=batch
-            )
-        except lusid.exceptions.ApiException as e:
-            logging.error(
-                f"Batch {txn_ids_batches.index(batch)} failed with exception {e}"
-            )
-            failed_batch_count = failed_batch_count + 1
+        logging.info(
+            f"Found {len(txn_ids)} transactions in date range {args.end_date} {args.start_date} "
+        )
 
-    return (len(txn_ids_batches) - failed_batch_count), failed_batch_count
+        # Batch the transactions - Necessary to limit the length of the URI in the API call
+        txn_ids_batches = transaction_batcher_by_character_count(
+            args.scope,
+            args.portfolio,
+            api_factory.api_client.configuration.host,
+            txn_ids,
+        )
+
+        # Flush the transactions
+        logging.info("Flushing the transactions")
+        local_failure_count = 0
+        for batch in txn_ids_batches:
+            try:
+                transaction_portfolios_api.cancel_transactions(
+                    portfolio_id[0], portfolio_id[1], transaction_ids=batch
+                )
+            except lusid.exceptions.ApiException as e:
+                logging.error(
+                    f"Batch {txn_ids_batches.index(batch)} in portfolio with scope: {portfolio_id[0]} "
+                    f"and code: {portfolio_id[1]} has failed with exception {e} "
+                )
+                local_failure_count = local_failure_count + 1
+
+        total_failed_batch_count = total_failed_batch_count + local_failure_count
+        total_batch_count = total_batch_count + len(txn_ids_batches)
+
+        logging.info(
+            f"Done flushing this portfolio with {len(txn_ids_batches) - local_failure_count} successes and {local_failure_count} failures"
+        )
+
+    return (total_batch_count - total_failed_batch_count), total_failed_batch_count
 
 
 def main():
