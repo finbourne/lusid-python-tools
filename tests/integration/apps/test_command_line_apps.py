@@ -5,7 +5,7 @@ from parameterized import parameterized
 import datetime
 from dateutil.tz import tzutc
 from pathlib import Path
-from lusid import PortfoliosApi, TransactionPortfoliosApi
+from lusid import PortfoliosApi, TransactionPortfoliosApi, PortfolioGroupsApi
 import lusid
 from lusid.utilities import ApiClientBuilder
 import json
@@ -39,6 +39,7 @@ class AppTests(unittest.TestCase):
 
         cls.factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
         cls.transaction_portfolios_api = cls.factory.build(TransactionPortfoliosApi)
+        cls.groups_api = cls.factory.build(PortfolioGroupsApi)
 
         cls.valid_args = {
             "file_path": os.path.join(cls.cur_dir, cls.valid_instruments),
@@ -90,7 +91,6 @@ class AppTests(unittest.TestCase):
         ]
 
         if not all(x in existing_portfolios for x in cls.test_list):
-            transactions_portfolio_api = cls.factory.build(TransactionPortfoliosApi)
             for portfolio in cls.test_list:
                 if portfolio not in existing_portfolios:
                     transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
@@ -100,11 +100,76 @@ class AppTests(unittest.TestCase):
                         created="2018-03-05T12:00:00+00:00",
                         sub_holding_keys=[f"Transaction/{cls.testscope}/currency"],
                     )
-                    transactions_portfolio_response1 = transactions_portfolio_api.create_portfolio(
+                    transactions_portfolio_response1 = cls.transaction_portfolios_api.create_portfolio(
                         scope=cls.testscope,
                         create_transaction_portfolio_request=transaction_portfolio_request1,
                     )
                     logging.info(f"created portfolio: {portfolio}")
+
+        # Portfolio Groups Setup
+        cls.groups_test_scopes = [
+            "test_flush_groups_scope_01",
+            "test_flush_groups_scope_02",
+            "test_flush_groups_scope_03",
+            "test_flush_groups_sub_scope",
+        ]
+        cls.groups_test_list = [
+            "TestFlushPortfolio01",
+            "TestFlushPortfolio02",
+            "TestFlushPortfolio03",
+        ]
+        for scope in cls.groups_test_scopes:
+            portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
+                scope=scope
+            )
+
+            existing_portfolios = [
+                portfolio.id.code for portfolio in portfolios_response.values
+            ]
+
+            if not all(x in existing_portfolios for x in cls.groups_test_list):
+                for portfolio in cls.groups_test_list:
+                    if portfolio not in existing_portfolios:
+                        transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
+                            display_name=portfolio,
+                            code=portfolio,
+                            base_currency="GBP",
+                            created="2018-03-05T12:00:00+00:00",
+                        )
+                        cls.transaction_portfolios_api.create_portfolio(
+                            scope=scope,
+                            create_transaction_portfolio_request=transaction_portfolio_request1,
+                        )
+                        logging.info(f"created portfolio: {portfolio}")
+
+            for portfolio in cls.groups_test_list:
+                cls.transaction_portfolios_api.upsert_transactions(
+                    scope,
+                    portfolio,
+                    flush_test_data.gen_transaction_data(
+                        50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                    ),
+                )
+
+        group_master_scopes = [
+            "test_flush_groups_sub_scope",
+            "test_flush_groups_scope_01",
+        ]
+        for scope in group_master_scopes:
+            portfolio_groups_response = cls.groups_api.list_portfolio_groups(
+                scope=scope
+            )
+
+            existing_groups = [
+                portfolio.id.code for portfolio in portfolio_groups_response.values
+            ]
+            for group in flush_test_data.group_portfolio_requests[scope]:
+                code = group["code"]
+                if code not in existing_groups:
+                    cls.groups_api.create_portfolio_group(
+                        scope, create_portfolio_group_request=group
+                    )
+                    logging.info(f"created group: {code}")
 
     def test_upsert_portfolios_withvalid_mapping(self):
         args = self.valid_args.copy()
@@ -314,7 +379,7 @@ class AppTests(unittest.TestCase):
                 6000,
             ],
             [
-                "outside_the_test_data_time",
+                "partly_inside_the_test_data_time",
                 flush_transactions.parse(
                     args=[
                         "testscope0001",
@@ -361,9 +426,9 @@ class AppTests(unittest.TestCase):
         flush_transactions.flush(args)
         args.end_date = None
         args.start_date = None
-        observed_count = len(flush_transactions.get_all_txns(args))
+        observed_count = len(list(flush_transactions.get_all_txns(args).values())[0])
 
-        self.assertEqual(observed_count, expected_txn_count)
+        self.assertEqual(expected_txn_count, observed_count)
 
     def test_flush_without_valid_portfolio(self):
         args = flush_transactions.parse(
@@ -423,16 +488,70 @@ class AppTests(unittest.TestCase):
         success_count, failure_count = flush_transactions.flush(args)
         self.assertEqual(failure_count, test_fail)
 
+    @parameterized.expand(
+        [
+            [
+                "multiple-portfolios-all-filled-same-scope",
+                "test_flush_groups_sub_scope",
+                "testFlushGroupsClean",
+                3,
+            ],
+            [
+                "multiple-portfolios-all-filled-same-scope-no-sub-groups",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsCleanNoSub",
+                3,
+            ],
+            [
+                "multiple-portfolios-with-different-scopes",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsMixedScopes",
+                4,
+            ],
+            [
+                "only-one-portfolio-filled",
+                "test_flush_groups_scope_01",
+                "testFlushGroupsSingle",
+                1,
+            ],
+            ["empty-group", "test_flush_groups_scope_01", "testFlushGroupsEmpty", 0],
+        ]
+    )
+    def test_flush_with_portfolio_groups(
+        self, _, group_scope, group_name, target_success
+    ):
+        args = flush_transactions.parse(args=[group_scope, group_name, "--group"])
+        args.secrets = self.secrets
+
+        success_count, failure_count = flush_transactions.flush(args)
+
+        self.assertTrue(failure_count == 0)
+        self.assertTrue(success_count == target_success)
+
     @classmethod
     def tearDownClass(cls) -> None:
-        portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
-            scope=cls.testscope
-        )
+        for scope in [cls.testscope] + cls.groups_test_scopes:
+            portfolios_response = cls.portfolios_api.list_portfolios_for_scope(
+                scope=scope
+            )
 
-        existing_portfolios = [
-            portfolio.id.code for portfolio in portfolios_response.values
-        ]
+            existing_portfolios = [
+                portfolio.id.code for portfolio in portfolios_response.values
+            ]
 
-        for portfolio in cls.test_list:
-            if portfolio in existing_portfolios:
-                cls.portfolios_api.delete_portfolio(cls.testscope, portfolio)
+            for portfolio in cls.test_list + cls.groups_test_list:
+                if portfolio in existing_portfolios:
+                    cls.portfolios_api.delete_portfolio(scope, portfolio)
+
+        # Tear down Groups
+        for scope in ["test_flush_groups_scope_01", "test_flush_groups_sub_scope"]:
+            portfolio_groups_response = cls.groups_api.list_portfolio_groups(
+                scope=scope
+            )
+
+            existing_groups = [
+                portfolio.id.code for portfolio in portfolio_groups_response.values
+            ]
+
+            for group in existing_groups:
+                cls.groups_api.delete_portfolio_group(scope=scope, code=group)
