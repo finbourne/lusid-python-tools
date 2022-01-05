@@ -275,7 +275,9 @@ def flush(args):
     for portfolio_id, transactions in get_all_txns(args).items():
         txn_ids = [txn.transaction_id for txn in transactions]
 
-        logging.info(f"Looking at portfolio with scope: {portfolio_id[0]} and code: {portfolio_id[1]}")
+        logging.info(
+            f"Looking at portfolio with scope: {portfolio_id[0]} and code: {portfolio_id[1]}"
+        )
 
         if not txn_ids:
             logging.error("No transactions found between the specified dates")
