@@ -10,13 +10,13 @@ def parse(extend=None, args=None):
         stdargs.Parser(
             "Flush Transactions", ["scope", "portfolio", "date_range", "group"],
         )
-            .extend(extend)
-            .parse(args)
+        .extend(extend)
+        .parse(args)
     )
 
 
 def transaction_batcher_by_character_count(
-        scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
+    scope: str, code: str, host: str, input_lst: list, maxCharacterCount: int = 4000
 ):
     """
     Takes a given input list of transactions or transactionIDs and batches them based on a maximum number of
@@ -73,7 +73,7 @@ def transaction_batcher_by_character_count(
 
 class TxnGetter:
     def __init__(
-            self, scope, portfolio, start_date, end_date, transaction_portfolios_api
+        self, scope, portfolio, start_date, end_date, transaction_portfolios_api
     ):
         self.scope = scope
         self.portfolio = portfolio
@@ -132,7 +132,7 @@ class TxnGetter:
 
 
 def get_paginated_txns(
-        scope, portfolio, start_date, end_date, transaction_portfolios_api
+    scope, portfolio, start_date, end_date, transaction_portfolios_api
 ):
     """
     Gets paginated transactions in a given time window
