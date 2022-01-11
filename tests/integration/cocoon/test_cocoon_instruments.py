@@ -231,6 +231,16 @@ class CocoonTestsInstruments(unittest.TestCase):
             properties_scope=properties_scope,
         )
 
+        self.assertEqual(0, len(responses["instruments"]["errors"]), responses["instruments"]["errors"])
+
+        failed = [
+            f
+            for response in responses["instruments"]["success"]
+            for f in response.failed.values()
+        ]
+
+        self.assertEqual(0, len(failed), failed)
+
         self.assertEqual(
             first=sum(
                 [
@@ -239,16 +249,6 @@ class CocoonTestsInstruments(unittest.TestCase):
                 ]
             ),
             second=len(data_frame["client_internal"].unique()),
-        )
-
-        self.assertEqual(
-            first=sum(
-                [
-                    len(response.failed)
-                    for response in responses["instruments"]["success"]
-                ]
-            ),
-            second=0,
         )
 
         # Assert that by no unmatched_identifiers are returned in the response for instruments
