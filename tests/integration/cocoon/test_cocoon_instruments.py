@@ -231,7 +231,11 @@ class CocoonTestsInstruments(unittest.TestCase):
             properties_scope=properties_scope,
         )
 
-        self.assertEqual(0, len(responses["instruments"]["errors"]), responses["instruments"]["errors"])
+        self.assertEqual(
+            0,
+            len(responses["instruments"]["errors"]),
+            responses["instruments"]["errors"],
+        )
 
         failed = [
             f
