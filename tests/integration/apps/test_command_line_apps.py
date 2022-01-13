@@ -147,7 +147,7 @@ class AppTests(unittest.TestCase):
                     scope,
                     portfolio,
                     flush_test_data.gen_transaction_data(
-                        50, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                        2, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
                     ),
                 )
 
@@ -376,7 +376,7 @@ class AppTests(unittest.TestCase):
                         "2020-02-28T23:59:59.0000000+00:00",
                     ]
                 ),
-                6000,
+                6,
             ],
             [
                 "partly_inside_the_test_data_time",
@@ -390,7 +390,7 @@ class AppTests(unittest.TestCase):
                         "2020-02-28T23:59:59.0000000+00:00",
                     ]
                 ),
-                4000,
+                4,
             ],
             [
                 "inside_the_test_data_time",
@@ -420,7 +420,7 @@ class AppTests(unittest.TestCase):
             self.transaction_portfolios_api.upsert_transactions(
                 self.testscope,
                 "TestFlushPortfolio",
-                flush_test_data.gen_transaction_data(2000, date),
+                flush_test_data.gen_transaction_data(2, date),
             )
         args.secrets = self.secrets
         flush_transactions.flush(args)
