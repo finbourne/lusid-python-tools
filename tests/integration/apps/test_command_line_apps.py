@@ -449,7 +449,7 @@ class AppTests(unittest.TestCase):
         exception = cm.exception
         self.assertEqual(json.loads(exception.body)["code"], 109)
 
-    @parameterized.expand([["single-batch-failure", 1,], ["3-batch-failure", 3,]])
+    @parameterized.expand([["single-batch-failure", 1], ["3-batch-failure", 3]])
     @patch(
         "lusidtools.apps.flush_transactions.lusid.api.TransactionPortfoliosApi.cancel_transactions"
     )
@@ -466,7 +466,7 @@ class AppTests(unittest.TestCase):
         )
         args.secrets = self.secrets
         transactions = flush_test_data.gen_transaction_data(
-            250, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+            150, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
         )
 
         self.transaction_portfolios_api.upsert_transactions(
