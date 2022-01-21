@@ -2,7 +2,7 @@ boto3==1.16.22
 coloredlogs==14.0
 detect_delimiter==0.1.1
 flatten-json==0.1.7
-IPython==7.19.0
+IPython==7.31.1
 lusidfeature
 lusid-sdk-preview>=0.11.3681
 pandas>=1.1.4
