@@ -633,15 +633,23 @@ class CocoonTestsTransactions(unittest.TestCase):
 
         # Call the return_unmatched_transactions method for dates that include two of the four unmatched
         response_focused = cocoon.cocoon.return_unmatched_transactions(
-            self.api_factory, scope, code, from_transaction_date="2020-01-01", to_transaction_date="2020-01-03"
+            self.api_factory,
+            scope,
+            code,
+            from_transaction_date="2020-01-01",
+            to_transaction_date="2020-01-03",
         )
 
         # Call the return_unmatched_transactions method for dates that include four of the four unmatched
         response_wide = cocoon.cocoon.return_unmatched_transactions(
-            self.api_factory, scope, code, from_transaction_date="2000-01-01", to_transaction_date="2050-01-01"
+            self.api_factory,
+            scope,
+            code,
+            from_transaction_date="2000-01-01",
+            to_transaction_date="2050-01-01",
         )
         self.assertEqual(len(response_wide), 4)
-        
+
         # Assert that there are only two values returned
         self.assertEqual(len(response_focused), 2)
         # Assert that the transaction ids and instrument identifiers from the returned transactions match expectations

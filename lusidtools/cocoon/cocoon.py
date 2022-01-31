@@ -1073,9 +1073,19 @@ def _unmatched_transactions(
     # For each portfolio, request the unmatched transactions from LUSID and append to the instantiated list
     for portfolio_code in portfolio_codes:
 
-        portfolio_transactions = data_frame.loc[data_frame[mapping_required["code"]] == portfolio_code]
-        from_transaction_date = min(portfolio_transactions[mapping_required["transaction_date"]].apply(lambda x: str(DateOrCutLabel(x))))
-        to_transactions_date = max(portfolio_transactions[mapping_required["transaction_date"]].apply(lambda x: str(DateOrCutLabel(x))))
+        portfolio_transactions = data_frame.loc[
+            data_frame[mapping_required["code"]] == portfolio_code
+        ]
+        from_transaction_date = min(
+            portfolio_transactions[mapping_required["transaction_date"]].apply(
+                lambda x: str(DateOrCutLabel(x))
+            )
+        )
+        to_transactions_date = max(
+            portfolio_transactions[mapping_required["transaction_date"]].apply(
+                lambda x: str(DateOrCutLabel(x))
+            )
+        )
 
         unmatched_transactions.extend(
             return_unmatched_transactions(
@@ -1083,7 +1093,7 @@ def _unmatched_transactions(
                 scope=scope,
                 code=portfolio_code,
                 from_transaction_date=from_transaction_date,
-                to_transaction_date=to_transactions_date
+                to_transaction_date=to_transactions_date,
             )
         )
 
@@ -1100,7 +1110,7 @@ def return_unmatched_transactions(
     scope: str,
     code: str,
     from_transaction_date: str,
-    to_transaction_date: str
+    to_transaction_date: str,
 ):
     """
     Call the get transactions api and only return those transactions with unresolved identifiers.
