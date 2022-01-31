@@ -583,6 +583,7 @@ class CocoonTestsTransactions(unittest.TestCase):
     ):
         scope = "unmatched_transactions_test"
         code = "MIS_INST_FUND"
+
         data_frame = pd.read_csv(
             Path(__file__).parent.joinpath(
                 "data/transactions_unmatched_instruments.csv"
@@ -600,10 +601,10 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "base_currency": "base_currency",
             },
             file_type="portfolio",
-            mapping_optional={"created": "txn_trade_date"},
+            mapping_optional={"created": "$2000-01-01"},
         )
 
-        # Upsert some transactions; one with known id, two with unknown ids
+        # Upsert some transactions; one with known id, four with unknown ids
         cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
             scope=scope,
@@ -630,9 +631,9 @@ class CocoonTestsTransactions(unittest.TestCase):
             mapping_optional={},
         )
 
-        # Call the return_unmatched_transactions method
+        # Call the return_unmatched_transactions method for dates that include two of the four unmatched
         response = cocoon.cocoon.return_unmatched_transactions(
-            self.api_factory, scope, code
+            self.api_factory, scope, code, from_transaction_date="2020-01-01", to_transaction_date="2020-01-03"
         )
 
         # Assert that there are only two values returned
