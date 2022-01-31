@@ -1072,9 +1072,18 @@ def _unmatched_transactions(
 
     # For each portfolio, request the unmatched transactions from LUSID and append to the instantiated list
     for portfolio_code in portfolio_codes:
+
+        portfolio_transactions = data_frame.loc[data_frame[mapping_required["code"]] == portfolio_code]
+        from_transaction_date = min(portfolio_transactions[mapping_required["transaction_date"]].apply(lambda x: str(DateOrCutLabel(x))))
+        to_transactions_date = max(portfolio_transactions[mapping_required["transaction_date"]].apply(lambda x: str(DateOrCutLabel(x))))
+
         unmatched_transactions.extend(
             return_unmatched_transactions(
-                api_factory=api_factory, scope=scope, code=portfolio_code,
+                api_factory=api_factory,
+                scope=scope,
+                code=portfolio_code,
+                from_transaction_date=from_transaction_date,
+                to_transaction_date=to_transactions_date
             )
         )
 
@@ -1087,7 +1096,11 @@ def _unmatched_transactions(
 
 
 def return_unmatched_transactions(
-    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str
+    api_factory: lusid.utilities.ApiClientFactory,
+    scope: str,
+    code: str,
+    from_transaction_date: str,
+    to_transaction_date: str
 ):
     """
     Call the get transactions api and only return those transactions with unresolved identifiers.
@@ -1119,6 +1132,8 @@ def return_unmatched_transactions(
         kwargs = {
             "scope": scope,
             "code": code,
+            "from_transaction_date": from_transaction_date,
+            "to_transaction_date": to_transaction_date,
             "filter": "instrumentUid eq'LUID_ZZZZZZZZ'",
         }
 
