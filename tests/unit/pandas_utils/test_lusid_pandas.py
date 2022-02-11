@@ -1,16 +1,24 @@
-from pathlib import Path
+
 import lusid
 import lusid.models as models
 import unittest
-from lusidtools.pandas_utils.lusid_pandas import lusid_response_to_data_frame
 import pandas as pd
 import datetime
+import json
+from pathlib import Path
+from lusidtools.pandas_utils.lusid_pandas import lusid_response_to_data_frame
+
+
 
 
 class TestResponseToPandasObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
+        json_path_string = "lusidtools/pandas_utils/config/response_column_rename.json"
+        cls.json_file = Path(__file__).parent.parent.parent.parent.joinpath(json_path_string)
+
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
         )
@@ -58,6 +66,16 @@ class TestResponseToPandasObject(unittest.TestCase):
                     "key": "Instrument/MultiAssetScope/sm_instrument_type",
                     "value": {"label_value": "Equity", "metric_value": None},
                 },
+
+                "Instrument/default/Name": {
+                    "key": "Instrument/default/Name",
+                    "value": {
+                        "label_value": "Test123",
+                        "metric_value": None,
+                    },
+                }
+
+
             },
             settled_units=1372222.0,
             sub_holding_keys={
@@ -389,3 +407,36 @@ class TestResponseToPandasObject(unittest.TestCase):
         print(empty_df)
 
         self.assertEqual(empty_df.empty, True)
+
+
+    def test_default_column_rename_from_lusid_model_list(self):
+
+        df = lusid_response_to_data_frame([self.holding_1], lusidtools_column_rename=True, rename_properties=True)
+        
+        with open(self.json_file, "r") as json_file:
+            column_mapping = json.load(json_file)
+
+        holdings_mapping = set(column_mapping["PortfolioHolding"].values())
+        df_column_set = set(df.columns)
+
+        self.assertSetEqual(holdings_mapping, df_column_set.intersection(holdings_mapping))
+
+
+    def test_default_column_rename_from_lusid_model(self):
+
+        with open(self.json_file, "r") as json_file:
+            column_mapping = json.load(json_file)
+
+        test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
+            version=1, values=[self.holding_no_props_1, self.holding_no_props_2]
+        )
+
+        df = lusid_response_to_data_frame(test_holdings_response, lusidtools_column_rename= True)
+
+        holdings_mapping = set(column_mapping["PortfolioHolding"].values())
+        df_column_set = set(df.columns)
+
+        self.assertEqual(1, 1)
+        ## TODO: Finish test
+        #self.assertSetEqual(holdings_mapping, df_column_set.intersection(holdings_mapping))
+
