@@ -72,13 +72,10 @@ class Parser:
 
         self.add(
             "--apiUrl",
-            help="the relevant LUSID Api url (e.g. https://somedomain.lusid.com/api)"
+            help="the relevant LUSID Api url (e.g. https://somedomain.lusid.com/api)",
         )
 
-        self.add(
-            "--token",
-            help="a valid current bearer token"
-        )
+        self.add("--token", help="a valid current bearer token")
 
         self.add(
             "--stats",
