@@ -186,8 +186,9 @@ def get_portfolios_from_group(expanded_group):
     return temp_portfolio_lst
 
 
-def get_transactions_from_portfolio_list(args, portfolio_list, transaction_portfolios_api):
+def get_all_transactions_from_portfolio_list(args, portfolio_list, transaction_portfolios_api):
     """
+    Gets all transactions from the list of portfolio scope and codes that are passed in. Pagination is handled.
 
     Parameters
     ----------
@@ -205,24 +206,22 @@ def get_transactions_from_portfolio_list(args, portfolio_list, transaction_portf
 
     """
     # Get transactions from these portfolios
-    txn_dict = {}
-    for portfolio_scope, portfolio_code in portfolio_list:
-        transaction_lst_single_portfolio = [
+    return {
+        (portfolio_scope, portfolio_code): [
             transaction
-            for page in get_paginated_txns(
+            for page
+            in get_paginated_txns(
                 portfolio_scope,
                 portfolio_code,
                 args.start_date,
                 args.end_date,
                 transaction_portfolios_api,
             )
-            for transaction in page.values
-        ]
-        txn_dict[
-            (portfolio_scope, portfolio_code)
-        ] = transaction_lst_single_portfolio
-
-    return txn_dict
+            for transaction
+            in page.values]
+        for (portfolio_scope, portfolio_code)
+        in portfolio_list
+    }
 
 
 def get_all_txns(args):
@@ -251,7 +250,7 @@ def get_all_txns(args):
         )
         portfolio_lst = get_portfolios_from_group(portfolios_response)
 
-        return get_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
+        return get_all_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
 
     elif args.flush_scope:
         # Get a list of all portfolios in the scope
@@ -263,7 +262,7 @@ def get_all_txns(args):
             portfolios_api.list_portfolios_for_scope(scope=args.scope).values
         ]
 
-        return get_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
+        return get_all_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
 
     else:
         # Return the portfolio and scope passed in
