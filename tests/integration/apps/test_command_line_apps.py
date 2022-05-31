@@ -409,6 +409,48 @@ class AppTests(unittest.TestCase):
                 ),
                 0,
             ],
+            [
+                "outside_the_test_data_time_for_scope",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "-s",
+                        "2020-02-20T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                        "--flush_scope"
+                    ]
+                ),
+                6,
+            ],
+            [
+                "partly_inside_the_test_data_time_for_scope",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "-s",
+                        "2020-02-18T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                        "--flush_scope"
+                    ]
+                ),
+                4,
+            ],
+            [
+                "inside_the_test_data_time_for_scope",
+                flush_transactions.parse(
+                    args=[
+                        "testscope0001",
+                        "-s",
+                        "2017-02-10T00:00:00.0000000+00:00",
+                        "-e",
+                        "2020-02-28T23:59:59.0000000+00:00",
+                        "--flush_scope"
+                    ]
+                ),
+                0,
+            ],
         ]
     )
     def test_flush_between_dates(self, _, args, expected_txn_count):
@@ -429,7 +471,9 @@ class AppTests(unittest.TestCase):
         flush_transactions.flush(args)
         args.end_date = None
         args.start_date = None
-        observed_count = len(list(flush_transactions.get_all_txns(args).values())[0])
+        observed_count = 0
+        for txn_list in list(flush_transactions.get_all_txns(args).values()):
+            observed_count += len(txn_list)
 
         self.assertEqual(expected_txn_count, observed_count)
 
