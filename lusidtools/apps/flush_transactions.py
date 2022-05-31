@@ -8,7 +8,7 @@ from lusidtools.logger import LusidLogger
 def parse(extend=None, args=None):
     return (
         stdargs.Parser(
-            "Flush Transactions", ["scope", "portfolio", "date_range", "group"],
+            "Flush Transactions", ["scope", "optional_portfolio", "date_range", "group"],
         )
         .extend(extend)
         .parse(args)

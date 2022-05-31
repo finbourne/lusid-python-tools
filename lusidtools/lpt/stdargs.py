@@ -63,6 +63,14 @@ class Parser:
                 help="Indicates use of Portfolio Groups",
             )
 
+        if "optional_portfolio" in sections:
+            self.add(
+                "-p",
+                "--portfolio",
+                dest="portfolio",
+                help="Optional Portfolio id"
+            )
+
         self.add(
             "--secrets-file",
             dest="secrets",

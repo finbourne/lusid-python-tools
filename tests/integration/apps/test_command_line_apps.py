@@ -369,6 +369,7 @@ class AppTests(unittest.TestCase):
                 flush_transactions.parse(
                     args=[
                         "testscope0001",
+                        "-p",
                         "TestFlushPortfolio",
                         "-s",
                         "2020-02-20T00:00:00.0000000+00:00",
@@ -383,6 +384,7 @@ class AppTests(unittest.TestCase):
                 flush_transactions.parse(
                     args=[
                         "testscope0001",
+                        "-p",
                         "TestFlushPortfolio",
                         "-s",
                         "2020-02-18T00:00:00.0000000+00:00",
@@ -397,6 +399,7 @@ class AppTests(unittest.TestCase):
                 flush_transactions.parse(
                     args=[
                         "testscope0001",
+                        "-p",
                         "TestFlushPortfolio",
                         "-s",
                         "2017-02-10T00:00:00.0000000+00:00",
@@ -434,6 +437,7 @@ class AppTests(unittest.TestCase):
         args = flush_transactions.parse(
             args=[
                 "testscope0001",
+                "-p",
                 "support_non_existent_portfolio_tester",
                 "-s",
                 "2016-03-05T12:00:00+00:00",
@@ -457,6 +461,7 @@ class AppTests(unittest.TestCase):
         args = flush_transactions.parse(
             args=[
                 "testscope0001",
+                "-p",
                 "FlushFailedResponseTestPortfolio",
                 "-s",
                 "2017-02-10T00:00:00.0000000+00:00",
@@ -520,7 +525,7 @@ class AppTests(unittest.TestCase):
     def test_flush_with_portfolio_groups(
         self, _, group_scope, group_name, target_success
     ):
-        args = flush_transactions.parse(args=[group_scope, group_name, "--group"])
+        args = flush_transactions.parse(args=[group_scope, "-p", group_name, "--group"])
         args.secrets = self.secrets
 
         success_count, failure_count = flush_transactions.flush(args)
