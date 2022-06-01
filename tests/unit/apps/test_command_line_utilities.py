@@ -321,6 +321,7 @@ class AppTests(unittest.TestCase):
                 flush.parse(
                     args=[
                         "test-scope",
+                        "-p",
                         "FAndFTestPortfolio01",
                         "-s",
                         "2020-02-10T00:00:00.0000000+00:00",
@@ -335,6 +336,7 @@ class AppTests(unittest.TestCase):
                 flush.parse(
                     args=[
                         "test-scope",
+                        "-p",
                         "FAndFTestPortfolio01",
                         "-s",
                         "2020-02-10T00:00:00.0000000+00:00",

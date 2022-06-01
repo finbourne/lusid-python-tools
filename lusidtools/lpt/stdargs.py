@@ -63,6 +63,22 @@ class Parser:
                 help="Indicates use of Portfolio Groups",
             )
 
+        if "optional_portfolio" in sections:
+            self.add(
+                "-p",
+                "--portfolio",
+                dest="portfolio",
+                help="Optional Portfolio id"
+            )
+
+        if "flush_scope" in sections:
+            self.add(
+                "--flush_scope",
+                dest="flush_scope",
+                action="store_true",
+                help="Flush all transactions in scope"
+            )
+
         self.add(
             "--secrets-file",
             dest="secrets",

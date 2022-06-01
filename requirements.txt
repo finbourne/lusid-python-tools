@@ -4,7 +4,7 @@ detect_delimiter==0.1.1
 flatten-json==0.1.7
 IPython==7.31.1
 lusidfeature
-lusid-sdk-preview>=0.11.3681
+lusid-sdk-preview>=0.11.4425
 pandas>=1.1.4
 PyYAML==5.4
 requests==2.25.0
