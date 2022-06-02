@@ -10,4 +10,5 @@ PyYAML==5.4
 requests==2.27.1
 tqdm==4.52.0
 openpyxl==3.0.7
+urllib3==1.26.9
 xlrd==1.2.0
