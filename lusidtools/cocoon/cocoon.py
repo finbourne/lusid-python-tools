@@ -1,6 +1,5 @@
 import asyncio
 import concurrent
-from urllib import request
 import uuid
 
 import lusid
@@ -34,9 +33,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_batch(
-        api_factory: lusid.utilities.ApiClientFactory,
-        instrument_batch: list,
-        **kwargs,
+        api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
         Upserts a batch of instruments to LUSID
@@ -66,8 +63,7 @@ class BatchLoader:
 
         @checkargs
         def get_alphabetically_first_identifier_key(
-            instrument: lusid.models.InstrumentDefinition,
-            unique_identifiers: list,
+            instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
             """
             Gets the alphabetically first occurring unique identifier on an instrument and use it as the correlation
@@ -102,7 +98,7 @@ class BatchLoader:
                     instrument, unique_identifiers
                 ): instrument
                 for instrument in instrument_batch
-            },
+            }
         )
 
     @staticmethod
@@ -511,8 +507,7 @@ class BatchLoader:
             ]
 
             for code, scope in set(
-                [(resource.code, resource.scope)
-                 for resource in new_portfolios]
+                [(resource.code, resource.scope) for resource in new_portfolios]
             ):
 
                 try:
@@ -523,8 +518,7 @@ class BatchLoader:
                         scope=kwargs["scope"],
                         code=kwargs["code"],
                         effective_at=datetime.now(tz=pytz.UTC),
-                        resource_id=lusid.models.ResourceId(
-                            scope=scope, code=code),
+                        resource_id=lusid.models.ResourceId(scope=scope, code=code),
                     )
 
                 except lusid.exceptions.ApiException as e:
@@ -583,8 +577,7 @@ async def _load_data(
         # Any specific arguments e.g. 'code' for transactions, 'effective_at' for holdings is passed in via **kwargs
         **kwargs,
     )
-    logging.debug(
-        f"Batch completed ({identifier}) - duration: {time() - start}")
+    logging.debug(f"Batch completed ({identifier}) - duration: {time() - start}")
     return response
 
 
@@ -831,8 +824,7 @@ async def _construct_batches(
             # Create a group for each effective date as they can not be batched asynchronously
             effective_at_groups = [
                 data_frame.loc[
-                    data_frame[mapping_required["effective_at"]
-                               ] == effective_at
+                    data_frame[mapping_required["effective_at"]] == effective_at
                 ]
                 for effective_at in unique_effective_dates
             ]
@@ -846,8 +838,7 @@ async def _construct_batches(
                             data_frame[mapping_required["code"]] == code
                         ]
                         for code in list(
-                            effective_at_group[mapping_required["code"]].unique(
-                            )
+                            effective_at_group[mapping_required["code"]].unique()
                         )
                     ],
                     "codes": list(
@@ -867,8 +858,7 @@ async def _construct_batches(
 
         else:
 
-            unique_portfolios = list(
-                data_frame[mapping_required["code"]].unique())
+            unique_portfolios = list(data_frame[mapping_required["code"]].unique())
 
             # Different portfolio codes can be batched asynchronously
             async_batches = [
@@ -1163,8 +1153,7 @@ def return_unmatched_transactions(
 
         response = transactions_api.get_transactions(**kwargs)
 
-        unmatched_transactions.extend(
-            [response for response in response.values])
+        unmatched_transactions.extend([response for response in response.values])
 
         next_page = response.next_page
         done = response.next_page is None
@@ -1228,8 +1217,7 @@ def _unmatched_holdings(
         A list of holding objects to be appended to the ultimate response for load_from_data_frame.
     """
     # Extract a list of tuples of portfolio codes and effective at times from sync_batches
-    code_tuples = extract_unique_portfolio_codes_effective_at_tuples(
-        sync_batches)
+    code_tuples = extract_unique_portfolio_codes_effective_at_tuples(sync_batches)
 
     # Create empty list to hold holdings that have not been resolved
     unmatched_holdings = []
@@ -1453,8 +1441,7 @@ def load_from_data_frame(
     """
 
     # A mapping between the file type and relevant attributes e.g. domain, top_level_model etc.
-    domain_lookup = cocoon.utilities.load_json_file(
-        "config/domain_settings.json")
+    domain_lookup = cocoon.utilities.load_json_file("config/domain_settings.json")
 
     # Convert the file type to lower case & singular as well as checking it is of the allowed value
     file_type = (
@@ -1466,8 +1453,7 @@ def load_from_data_frame(
     )
 
     # Ensures that it is a single index dataframe
-    Validator(data_frame.index, "data_frame_index").check_is_not_instance(
-        pd.MultiIndex)
+    Validator(data_frame.index, "data_frame_index").check_is_not_instance(pd.MultiIndex)
 
     # Set defaults aligned with the data type of each argument, this allows for users to provide None
     identifier_mapping = (
@@ -1496,8 +1482,7 @@ def load_from_data_frame(
     )
 
     property_columns = [
-        {"source": column, "target": column} if isinstance(
-            column, str) else column
+        {"source": column, "target": column} if isinstance(column, str) else column
         for column in property_columns
     ]
 
@@ -1547,8 +1532,7 @@ def load_from_data_frame(
     cocoon.utilities.verify_all_required_attributes_mapped(
         mapping=mapping_required,
         model_object_name=domain_lookup[file_type]["top_level_model"],
-        exempt_attributes=["identifiers",
-                           "properties", "instrument_identifiers"],
+        exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
     )
 
     # Create the thread pool to use with the async_tools.run_in_executor decorator to make sync functions awaitable
@@ -1631,16 +1615,14 @@ def load_from_data_frame(
     )
 
     # Converts higher level data types such as dictionaries and lists to strings
-    data_frame = data_frame.applymap(
-        cocoon.utilities.convert_cell_value_to_string)
+    data_frame = data_frame.applymap(cocoon.utilities.convert_cell_value_to_string)
 
     if remove_white_space:
         column_list = [source_columns]
         for col in [mapping_optional, mapping_required, identifier_mapping]:
             column_list.append(col.values())
 
-        column_list = list(
-            set([item for sublist in column_list for item in sublist]))
+        column_list = list(set([item for sublist in column_list for item in sublist]))
         data_frame = strip_whitespace(data_frame, column_list)
 
     # Get the types of the attributes on the top level model for this request
