@@ -92,7 +92,7 @@ class BatchLoader:
             return f"{first_unique_identifier_alphabetically}: {instrument.identifiers[first_unique_identifier_alphabetically].value}"
 
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            scope=kwargs["scope"],
+            scope=kwargs.get("scope"),
             request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
