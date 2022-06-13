@@ -751,3 +751,62 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
             for CI in list(df["client_internal"])
         ]
+
+    @lusid_feature("T4-20")
+    @parameterized.expand(
+        [
+            [
+                "A successful load of scoped instruments",
+                "data/global-fund-combined-instrument-master.csv",
+                {"name": "instrument_name"},
+                {},
+                {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
+                ["s&p rating", "moodys_rating", "currency"],
+                "TestPropertiesScope1",
+            ],
+        ]
+    )
+    def test_load_from_data_frame_instruments_with_missing_scope(
+        self,
+        _,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+    ) -> None:
+        """
+        Test that instruments can be loaded successfully to default scope
+
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
+
+        :return: None
+        """
+
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="instruments",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+        )
+
+        # Assert that instruments have been assigne scope
+        self.assertTrue(
+            expr=all(
+                instrument.scope == "default"
+                for response in responses["instruments"]["success"]
+                for instrument in response.values.values()
+            )
+        )
