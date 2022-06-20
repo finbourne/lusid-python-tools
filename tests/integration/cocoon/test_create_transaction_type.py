@@ -1,21 +1,22 @@
+import os
 import unittest
 from pathlib import Path
 import lusid
 import lusid.models as models
 from lusidfeature import lusid_feature
 
+from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 from lusidtools.cocoon.transaction_type_upload import (
     create_transaction_type_configuration,
 )
-import logging
-
-logger = logging.getLogger()
 
 
 class CocoonTestTransactionTypeUpload(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
@@ -76,8 +77,10 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         self.assertEqual(
             sorted(
                 [
-                    item.to_dict()
-                    for item in self.response.transaction_configs[-1].movements
+                    mvmts.to_dict()
+                    for txn_configs in self.response.transaction_configs
+                    for mvmts in txn_configs.movements
+                    if any(x.type == new_alias.type for x in txn_configs.aliases)
                 ],
                 key=lambda item: item.get("movement_types"),
             ),
