@@ -91,8 +91,9 @@ class BatchLoader:
             first_unique_identifier_alphabetically = unique_identifiers_populated[0]
             return f"{first_unique_identifier_alphabetically}: {instrument.identifiers[first_unique_identifier_alphabetically].value}"
 
+        # If scope is not defined set to default scope
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            scope=kwargs.get("scope"),
+            scope=kwargs.get("scope") if kwargs.get("scope") != None else "default",
             request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
@@ -1308,6 +1309,7 @@ def load_from_data_frame(
         The api factory to use
     scope : str
         The scope of the resource to load the data into
+        If scope=None and file_type="instrument", scope will be set to the default scope "default"
     data_frame : pd.DataFrame
         The DataFrame containing the data
     mapping_required : dict{str, str}
@@ -1342,6 +1344,7 @@ def load_from_data_frame(
         objects where their instruments were unmatched at the time of the upsert
         (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter will be ignored for file types other than
         transactions or holdings
+
     Returns
     -------
     responses: dict
