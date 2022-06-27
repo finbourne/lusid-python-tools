@@ -93,7 +93,7 @@ class BatchLoader:
 
         # If scope is not defined set to default scope
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            scope=kwargs.get("scope") if kwargs.get("scope") != None else "default",
+            scope="default" if kwargs.get("scope") is None else kwargs.get("scope"),
             request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
