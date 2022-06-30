@@ -56,6 +56,7 @@ def expected_response(property_scope="TestPropertiesScope1"):
 class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -63,13 +64,24 @@ class CocoonTestsInstruments(unittest.TestCase):
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature(
-        "T4-1", "T4-2", "T4-3", "T4-4", "T4-5", "T4-6", "T4-7", "T4-8", "T4-9"
+        "T4-1", "T4-2", "T4-3", "T4-4", "T4-5", "T4-6", "T4-7", "T4-8", "T4-9", "T4-10"
     )
     @parameterized.expand(
         [
             [
-                "A standard successful load of instruments",
+                "A standard successful load of scoped instruments",
                 "TestScope1",
+                "data/global-fund-combined-instrument-master.csv",
+                {"name": "instrument_name"},
+                {},
+                {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
+                ["s&p rating", "moodys_rating", "currency"],
+                "TestPropertiesScope1",
+                expected_response(),
+            ],
+            [
+                "A successful load of instruments to default scope",
+                None,
                 "data/global-fund-combined-instrument-master.csv",
                 {"name": "instrument_name"},
                 {},
@@ -272,7 +284,19 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    @lusid_feature("T4-10")
+        # set scope as default scope if None
+        scope = scope if scope != None else "default"
+        
+        # Assert that instruments has been assigned a scope value
+        self.assertTrue(
+            expr=all(
+                instrument.scope == scope
+                for response in responses["instruments"]["success"]
+                for instrument in response.values.values()
+            )
+        )
+
+    @lusid_feature("T4-11")
     @parameterized.expand(
         [
             [
@@ -380,7 +404,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    @lusid_feature("T4-11")
+    @lusid_feature("T4-12")
     @parameterized.expand(
         [
             [
@@ -476,7 +500,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-    @lusid_feature("T4-12")
+    @lusid_feature("T4-13")
     def test_load_instrument_properties(self,):
         data_frame = pd.DataFrame(
             {
@@ -552,7 +576,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             result["instrument_propertys"].get("unmatched_identifiers", False)
         )
 
-    @lusid_feature("T4-13")
+    @lusid_feature("T4-14")
     def test_load_instrument_properties_with_missing_instruments(self):
         properties_df = pd.DataFrame({"isin": ["blah"], "category": ["Oil & Gas"]})
 
@@ -738,7 +762,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
         [
             self.api_factory.build(lusid.api.InstrumentsApi).delete_instrument(
-                "ClientInternal", CI
+                "ClientInternal", CI, scope=scope,
             )
             for CI in list(df["client_internal"])
         ]
