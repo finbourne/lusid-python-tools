@@ -287,7 +287,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         # set scope as default scope if None
         scope = scope if scope != None else "default"
         
-        # Assert that instruments have been assigne scope
+        # Assert that instruments has been assigned a scope value
         self.assertTrue(
             expr=all(
                 instrument.scope == scope
