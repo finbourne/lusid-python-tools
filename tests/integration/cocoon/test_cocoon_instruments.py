@@ -69,7 +69,7 @@ class CocoonTestsInstruments(unittest.TestCase):
     @parameterized.expand(
         [
             [
-                "A standard successful load of scope instruments",
+                "A standard successful load of scoped instruments",
                 "TestScope1",
                 "data/global-fund-combined-instrument-master.csv",
                 {"name": "instrument_name"},
