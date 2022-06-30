@@ -76,11 +76,18 @@ def checkargs(function: typing.Callable) -> typing.Callable:
                 else:
                     is_default_value = argument_value == argument_details.default
 
+            # Acceptable edge cases
+            # condition 1. check instance matches expected instance type
+            condition_1 = not isinstance(argument_value, argument_details.annotation)
+
+            # condition 2. check annotation is not empty
+            condition_2 = argument_details.annotation is not argument_details.empty
+
+            # condition 3. allow assignment of scope to None if file_type is instrument
+            condition_3 = not (kwargs.get("file_type") in ["Instruments", "instruments"] and argument_name == 'scope')
+
             # If the argument value is of the wrong type e.g. list instead of dict then throw an error
-            if (
-                not isinstance(argument_value, argument_details.annotation)
-                and argument_details.annotation is not argument_details.empty
-            ):
+            if all([condition_1, condition_2, condition_3]):
                 # Only exception to this is if it matches the default value which may be of a different type e.g. None
                 if not is_default_value:
                     raise TypeError(
