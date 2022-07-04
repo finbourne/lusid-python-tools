@@ -42,7 +42,7 @@ To see a full list of the available commands, run the following:
 lusidtools --help
 ```
 
-### Examples
+### Examples:
 
 #### List configured instrument identifier types
 
