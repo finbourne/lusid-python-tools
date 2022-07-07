@@ -238,6 +238,10 @@ def format_transactions_response(
          successful calls from request
     error : pd.DataFrame
         Error responses from request that fail (APIExceptions: 400 errors)
+
+    Prints
+    -----------
+    Number of transactions
     """
 
     file_type = "transactions"
@@ -253,9 +257,15 @@ def format_transactions_response(
         response[file_type]["errors"], extended_error_details
     )
 
+    number_of_transactions = len(response[file_type]["success"])
+    portfolios = get_portfolio_from_href(items_success, file_type)
+    number_of_portfolios = len(set(portfolios))
+
+    print(f"{number_of_transactions} transactions upserted across {number_of_portfolios} portfolios")
+
     return (
         pd.DataFrame(
-            get_portfolio_from_href(items_success, file_type),
+            portfolios,
             columns=["successful items"],
         ),
         errors,
