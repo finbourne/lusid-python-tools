@@ -300,7 +300,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         # Assert that instruments has been assigned a scope value
         self.assertTrue(
             expr=all(
-                instrument.scope == instrument_scope if instrument_scope != None else "default"
+                instrument.scope == instrument_scope if instrument_scope is not None else "default"
                 for response in responses["instruments"]["success"]
                 for instrument in response.values.values()
             )
