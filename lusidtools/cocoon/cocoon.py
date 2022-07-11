@@ -93,7 +93,7 @@ class BatchLoader:
 
         # If scope is not defined set to default scope
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            scope="default" if kwargs.get("scope") is None else kwargs.get("scope"),
+            scope=kwargs["instrument_scope"],
             request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
@@ -1300,6 +1300,7 @@ def load_from_data_frame(
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
     return_unmatched_items: bool = False,
+    instrument_scope: str = "default",
 ):
     """
 
@@ -1344,6 +1345,8 @@ def load_from_data_frame(
         objects where their instruments were unmatched at the time of the upsert
         (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter will be ignored for file types other than
         transactions or holdings
+    instrument_scope : str
+        The scope to upsert to when upseting instrument
 
     Returns
     -------
@@ -1366,7 +1369,8 @@ def load_from_data_frame(
             file_type="instruments",
             identifier_mapping=mapping["instruments"]["identifier_mapping"],
             property_columns=mapping["instruments"]["properties"],
-            properties_scope=scope
+            properties_scope=scope,
+            instrument_scope=scope
         )
 
     * Loading Instrument Properties
@@ -1475,6 +1479,12 @@ def load_from_data_frame(
     sub_holding_keys_scope = (
         Validator(sub_holding_keys_scope, "sub_holding_keys_scope")
         .set_default_value_if_none(default=properties_scope)
+        .value
+    )
+
+    instrument_scope = (
+        Validator(instrument_scope, "instrument_scope")
+        .set_default_value_if_none(default="default")
         .value
     )
 
@@ -1678,6 +1688,7 @@ def load_from_data_frame(
         ),
         "holdings_adjustment_only": holdings_adjustment_only,
         "thread_pool": thread_pool,
+        "instrument_scope": instrument_scope,
     }
 
     # Get the responses from LUSID

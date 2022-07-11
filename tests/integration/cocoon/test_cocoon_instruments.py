@@ -77,6 +77,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -88,6 +89,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                None,
                 expected_response(),
             ],
             [
@@ -99,6 +101,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -110,6 +113,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -121,6 +125,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 f"TestPropertiesScope1_{unique_properties_scope}",
+                "TestScope1",
                 expected_response(f"TestPropertiesScope1_{unique_properties_scope}"),
             ],
             [
@@ -132,6 +137,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -147,6 +153,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -167,6 +174,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -187,6 +195,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 },
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
             [
@@ -198,6 +207,7 @@ class CocoonTestsInstruments(unittest.TestCase):
                 {"Figi": "figi", "Isin": "isin", "ClientInternal": "client_internal"},
                 ["s&p rating", "moodys_rating", "currency"],
                 "TestPropertiesScope1",
+                "TestScope1",
                 expected_response(),
             ],
         ]
@@ -212,6 +222,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         identifier_mapping,
         property_columns,
         properties_scope,
+        instrument_scope,
         expected_outcome,
     ) -> None:
         """
@@ -224,6 +235,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
         :param list[str] property_columns: The columns to create properties for
         :param str properties_scope: The scope to add the properties to
+        :param str | None instrument_scope: The scope to add the instruments to
         :param any expected_outcome: The expected outcome
 
         :return: None
@@ -231,17 +243,31 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
-        responses = cocoon.cocoon.load_from_data_frame(
-            api_factory=self.api_factory,
-            scope=scope,
-            data_frame=data_frame,
-            mapping_required=mapping_required,
-            mapping_optional=mapping_optional,
-            file_type="instruments",
-            identifier_mapping=identifier_mapping,
-            property_columns=property_columns,
-            properties_scope=properties_scope,
-        )
+        if instrument_scope == None:
+            responses = cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                file_type="instruments",
+                identifier_mapping=identifier_mapping,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+            )
+        else:
+            responses = cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                file_type="instruments",
+                identifier_mapping=identifier_mapping,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+                instrument_scope=instrument_scope,
+            )
 
         self.assertEqual(
             0,
@@ -284,13 +310,10 @@ class CocoonTestsInstruments(unittest.TestCase):
             )
         )
 
-        # set scope as default scope if None
-        scope = scope if scope != None else "default"
-        
         # Assert that instruments has been assigned a scope value
         self.assertTrue(
             expr=all(
-                instrument.scope == scope
+                instrument.scope == instrument_scope if instrument_scope != None else "default"
                 for response in responses["instruments"]["success"]
                 for instrument in response.values.values()
             )
@@ -762,7 +785,7 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
         [
             self.api_factory.build(lusid.api.InstrumentsApi).delete_instrument(
-                "ClientInternal", CI, scope=scope,
+                "ClientInternal", CI,
             )
             for CI in list(df["client_internal"])
         ]
