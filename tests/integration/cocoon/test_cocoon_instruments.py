@@ -82,7 +82,7 @@ class CocoonTestsInstruments(unittest.TestCase):
             ],
             [
                 "A successful load of instruments to default scope",
-                None,
+                "TestScope1",
                 "data/global-fund-combined-instrument-master.csv",
                 {"name": "instrument_name"},
                 {},
@@ -243,31 +243,18 @@ class CocoonTestsInstruments(unittest.TestCase):
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
-        if instrument_scope == None:
-            responses = cocoon.cocoon.load_from_data_frame(
-                api_factory=self.api_factory,
-                scope=scope,
-                data_frame=data_frame,
-                mapping_required=mapping_required,
-                mapping_optional=mapping_optional,
-                file_type="instruments",
-                identifier_mapping=identifier_mapping,
-                property_columns=property_columns,
-                properties_scope=properties_scope,
-            )
-        else:
-            responses = cocoon.cocoon.load_from_data_frame(
-                api_factory=self.api_factory,
-                scope=scope,
-                data_frame=data_frame,
-                mapping_required=mapping_required,
-                mapping_optional=mapping_optional,
-                file_type="instruments",
-                identifier_mapping=identifier_mapping,
-                property_columns=property_columns,
-                properties_scope=properties_scope,
-                instrument_scope=instrument_scope,
-            )
+        responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="instruments",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            instrument_scope=instrument_scope,
+        )
 
         self.assertEqual(
             0,

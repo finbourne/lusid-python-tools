@@ -1300,7 +1300,7 @@ def load_from_data_frame(
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
     return_unmatched_items: bool = False,
-    instrument_scope: str = "default",
+    instrument_scope: str = None,
 ):
     """
 
@@ -1310,7 +1310,7 @@ def load_from_data_frame(
         The api factory to use
     scope : str
         The scope of the resource to load the data into
-        If scope=None and file_type="instrument", scope will be set to the default scope "default"
+        If file_type="instrument" scope will only be used for instrument properties
     data_frame : pd.DataFrame
         The DataFrame containing the data
     mapping_required : dict{str, str}
