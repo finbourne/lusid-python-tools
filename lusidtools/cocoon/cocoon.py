@@ -91,9 +91,7 @@ class BatchLoader:
             first_unique_identifier_alphabetically = unique_identifiers_populated[0]
             return f"{first_unique_identifier_alphabetically}: {instrument.identifiers[first_unique_identifier_alphabetically].value}"
 
-        # If scope is not defined set to default scope
         return api_factory.build(lusid.api.InstrumentsApi).upsert_instruments(
-            scope=kwargs["instrument_scope"],
             request_body={
                 get_alphabetically_first_identifier_key(
                     instrument, unique_identifiers
@@ -800,7 +798,7 @@ async def _construct_batches(
 
         # Everything can be sent up asynchronously, prepare batches based on batch size alone
         async_batches = [
-            data_frame.iloc[i: i + batch_size]
+            data_frame.iloc[i : i + batch_size]
             for i in range(0, len(data_frame), batch_size)
         ]
 
@@ -871,7 +869,7 @@ async def _construct_batches(
             sync_batches = [
                 {
                     "async_batches": [
-                        async_batch.iloc[i: i + batch_size]
+                        async_batch.iloc[i : i + batch_size]
                         for async_batch in async_batches
                     ],
                     "codes": [str(code) for code in unique_portfolios],
@@ -1300,7 +1298,6 @@ def load_from_data_frame(
     thread_pool_max_workers: int = 5,
     sub_holding_keys_scope: str = None,
     return_unmatched_items: bool = False,
-    instrument_scope: str = None,
 ):
     """
 
@@ -1310,7 +1307,6 @@ def load_from_data_frame(
         The api factory to use
     scope : str
         The scope of the resource to load the data into
-        If file_type="instrument" scope will only be used for instrument properties
     data_frame : pd.DataFrame
         The DataFrame containing the data
     mapping_required : dict{str, str}
@@ -1345,9 +1341,6 @@ def load_from_data_frame(
         objects where their instruments were unmatched at the time of the upsert
         (i.e. where instrument_uid is LUID_ZZZZZZ). This parameter will be ignored for file types other than
         transactions or holdings
-    instrument_scope : str
-        The scope to upsert to when upseting instrument
-
     Returns
     -------
     responses: dict
@@ -1369,8 +1362,7 @@ def load_from_data_frame(
             file_type="instruments",
             identifier_mapping=mapping["instruments"]["identifier_mapping"],
             property_columns=mapping["instruments"]["properties"],
-            properties_scope=scope,
-            instrument_scope=scope
+            properties_scope=scope
         )
 
     * Loading Instrument Properties
@@ -1479,12 +1471,6 @@ def load_from_data_frame(
     sub_holding_keys_scope = (
         Validator(sub_holding_keys_scope, "sub_holding_keys_scope")
         .set_default_value_if_none(default=properties_scope)
-        .value
-    )
-
-    instrument_scope = (
-        Validator(instrument_scope, "instrument_scope")
-        .set_default_value_if_none(default="default")
         .value
     )
 
@@ -1688,7 +1674,6 @@ def load_from_data_frame(
         ),
         "holdings_adjustment_only": holdings_adjustment_only,
         "thread_pool": thread_pool,
-        "instrument_scope": instrument_scope,
     }
 
     # Get the responses from LUSID
