@@ -819,3 +819,86 @@ class CocoonTestsTransactions(unittest.TestCase):
             self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
                 scope=scope, code=portfolio.id.code
             )
+
+    @lusid_feature("T8-69")
+    @parameterized.expand(
+        [
+            [
+                "Test standard transaction load",
+                "load_dataframe_test",
+                "data/no-subholding-keys-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                ["exposure_counterparty", "compls", "val", "location_region"],
+                "load_dataframe_test",
+                None,
+                ["SHK_data"],
+                ['Transaction/load_dataframe_test/SHK_data']
+            ]
+        ]
+    )
+    def test_load_from_dataframe_non_existent_subholding_keys(
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        batch_size,
+        sub_holding_keys,
+        expected_sub_holdings_keys
+    ):
+        """
+        This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
+        """
+
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        responses = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions",
+            identifier_mapping=identifier_mapping,
+            property_columns=property_columns,
+            properties_scope=properties_scope,
+            batch_size=batch_size,
+            sub_holding_keys = sub_holding_keys
+        )
+
+        portfolio_details = self.api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).get_details(scope=scope, code='no-SHK')
+
+        transactions = self.api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).get_transactions(scope = scope, code = 'no-SHK')
+
+        self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[0].properties.keys())
+        self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[1].properties.keys())
+
+        self.assertSetEqual(
+            set(portfolio_details.sub_holding_keys), set(expected_sub_holdings_keys)
+        )
