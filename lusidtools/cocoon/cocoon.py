@@ -1661,16 +1661,32 @@ def load_from_data_frame(
             property_columns=[{"source": key} for key in sub_holding_keys],
         )
 
+    # Check for and create missing property definitions for the properties
+    if domain_lookup[file_type]["domain"] is not None:
+        data_frame = cocoon.properties.create_missing_property_definitions_from_file(
+            api_factory=api_factory,
+            properties_scope=properties_scope,
+            domain=domain_lookup[file_type]["domain"],
+            data_frame=data_frame,
+            property_columns=property_columns,
+        )
+
     # If the transaction contains subholding keys which aren't defined in the portfolio. We first create the
     # properties that don't already exist, then we make the properties sub-holding keys in the portfolios.
     if file_type == "transaction" and sub_holding_keys is not None and sub_holding_keys != []:
+        # if the SHK key is written in {domain}/{scope}/{code} form we extract the code since when we add it to
+        # the properties there will be issues due to different formats. Also, there are issues with the
+        # create_missing_property_definitions_from_file function as it extracts data from columns using the
+        # sub-holding keys.
+        sub_holding_keys_codes = [key if '/' not in key else key.split('/')[2] for key in sub_holding_keys]
+
         # Check for and create missing property definitions for the sub-holding-keys
         data_frame = cocoon.properties.create_missing_property_definitions_from_file(
             api_factory=api_factory,
             properties_scope=properties_scope,
             domain="Transaction",
             data_frame=data_frame,
-            property_columns=[{"source": key} for key in sub_holding_keys],
+            property_columns=[{"source": key} for key in sub_holding_keys_codes],
         )
 
         # Add subholding keys to the portfolios we are going to apply the transactions to
@@ -1685,17 +1701,7 @@ def load_from_data_frame(
 
         # Add sub-holding keys to the properties, so it is created for each transaction.
         property_columns += [{'source': sub_holding_key, 'target': sub_holding_key} for sub_holding_key in
-                             sub_holding_keys]
-
-    # Check for and create missing property definitions for the properties
-    if domain_lookup[file_type]["domain"] is not None:
-        data_frame = cocoon.properties.create_missing_property_definitions_from_file(
-            api_factory=api_factory,
-            properties_scope=properties_scope,
-            domain=domain_lookup[file_type]["domain"],
-            data_frame=data_frame,
-            property_columns=property_columns,
-        )
+                             sub_holding_keys_codes]
 
     # Start a new event loop in a new thread, this is required to run inside a Jupyter notebook
     loop = cocoon.async_tools.start_event_loop_new_thread()

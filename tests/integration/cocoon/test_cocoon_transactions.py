@@ -1,3 +1,4 @@
+import datetime
 import os
 import unittest
 import uuid
@@ -871,10 +872,16 @@ class CocoonTestsTransactions(unittest.TestCase):
         """
         This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
         """
+        portfolios = self.api_factory.build(lusid.PortfoliosApi).list_portfolios_for_scope(scope).values
+
+        for portfolio in portfolios:
+            self.api_factory.build(lusid.PortfoliosApi).delete_portfolio(scope, portfolio.id.code)
+
+        self.api_factory.build(lusid.TransactionPortfoliosApi).create_portfolio(scope, {'displayName': "test_load_from_dataframe_non_existent_subholding_keys portfolio", 'code': 'no-SHK', 'baseCurrency': 'GBP', 'created': "2017-06-22T00:00:00.0000000+00:00"})
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
-        responses = cocoon.cocoon.load_from_data_frame(
+        cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
             scope=scope,
             data_frame=data_frame,
