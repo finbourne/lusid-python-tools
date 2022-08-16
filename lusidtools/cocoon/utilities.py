@@ -837,6 +837,10 @@ def handle_nested_default_and_column_mapping(
         The updated mapping
     """
 
+    # copy the data frame to ensure that it is a copy and not a view (which could make changes to the original
+    # dataframe).
+    data_frame = data_frame.copy()
+
     mapping_updated = {}
 
     for key, value in mapping.items():
