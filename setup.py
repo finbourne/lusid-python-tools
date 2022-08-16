@@ -31,6 +31,8 @@ setup(
 
         "boto3>=1.16.22",
         "IPython>=7.31.1",
+
+        "lusid-sdk-preview>=0.11.4425"
     ],
     include_package_data=True,
     python_requires=">=3.7",
