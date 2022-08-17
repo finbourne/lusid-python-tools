@@ -12,7 +12,6 @@ import lusid
 from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
 
-
 client_internal = "Instrument/default/ClientInternal"
 sedol = "Instrument/default/Sedol"
 name = "Instrument/default/Name"
@@ -270,17 +269,17 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
-        expected_outcome,
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            batch_size,
+            expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -397,16 +396,16 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_properties_dicts(
-        self,
-        _,
-        scope,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        expected_property_scope,
-        expected_property_code,
+            self,
+            _,
+            scope,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            expected_property_scope,
+            expected_property_code,
     ) -> None:
         """
         Test that transactions
@@ -494,12 +493,12 @@ class CocoonTestsTransactions(unittest.TestCase):
                 "Test standard transaction load with two unresolved instruments",
                 "data/global-fund-combined-transactions-unresolved-instruments.csv",
                 True,
-                ["unresolved_tx01", "unresolved_tx02",],
+                ["unresolved_tx01", "unresolved_tx02", ],
             ],
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-        self, _, file_name, return_unmatched_items, expected_unmatched_transactions,
+            self, _, file_name, return_unmatched_items, expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
@@ -580,7 +579,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-10")
     def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(
-        self,
+            self,
     ):
         scope = "unmatched_transactions_test"
         code = "MIS_INST_FUND"
@@ -704,11 +703,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_filter_unmatched_transactions_method_only_returns_transactions_originally_present_in_dataframe(
-        self,
-        _,
-        data_frame_path,
-        unmatched_transactions,
-        expected_filtered_unmatched_transactions,
+            self,
+            _,
+            data_frame_path,
+            unmatched_transactions,
+            expected_filtered_unmatched_transactions,
     ):
         """
         Test that unmatched transactions that were not part of the current load_from_data_frame operation are
@@ -739,7 +738,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-14")
     def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(
-        self,
+            self,
     ):
         """
         The GetTransactions API will only return up to 2,000 transactions per request. This test is to verify that
@@ -856,28 +855,32 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_dataframe_non_existent_subholding_keys(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
-        sub_holding_keys,
-        expected_sub_holdings_keys
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            batch_size,
+            sub_holding_keys,
+            expected_sub_holdings_keys
     ):
         """
         This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
         """
-        portfolios = self.api_factory.build(lusid.PortfoliosApi).list_portfolios_for_scope(scope).values
+        portfolios_api = self.api_factory.build(lusid.PortfoliosApi)
+        transaction_portfolio_api = self.api_factory.build(lusid.TransactionPortfoliosApi)
+        portfolios = portfolios_api.list_portfolios_for_scope(scope).values
 
         for portfolio in portfolios:
-            self.api_factory.build(lusid.PortfoliosApi).delete_portfolio(scope, portfolio.id.code)
+            portfolios_api.delete_portfolio(scope, portfolio.id.code)
 
-        self.api_factory.build(lusid.TransactionPortfoliosApi).create_portfolio(scope, {'displayName': "test_load_from_dataframe_non_existent_subholding_keys portfolio", 'code': 'no-SHK', 'baseCurrency': 'GBP', 'created': "2017-06-22T00:00:00.0000000+00:00"})
+        transaction_portfolio_api.create_portfolio(scope, {
+            'displayName': "test_load_from_dataframe_non_existent_subholding_keys portfolio", 'code': 'no-SHK',
+            'baseCurrency': 'GBP', 'created': "2017-06-22T00:00:00.0000000+00:00"})
 
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
@@ -892,16 +895,18 @@ class CocoonTestsTransactions(unittest.TestCase):
             property_columns=property_columns,
             properties_scope=properties_scope,
             batch_size=batch_size,
-            sub_holding_keys = sub_holding_keys
+            sub_holding_keys=sub_holding_keys
         )
 
-        portfolio_details = self.api_factory.build(
-            lusid.api.TransactionPortfoliosApi
-        ).get_details(scope=scope, code='no-SHK')
+        portfolio_details = transaction_portfolio_api.get_details(scope=scope, code='no-SHK')
 
-        transactions = self.api_factory.build(
-            lusid.api.TransactionPortfoliosApi
-        ).get_transactions(scope = scope, code = 'no-SHK')
+        transactions = transaction_portfolio_api.get_transactions(scope=scope, code='no-SHK')
+
+        try:
+            portfolios_api.delete_portfolio(scope, 'no-SHK')
+        except lusid.ApiException as e:
+            if "PortfolioNotFound" not in str(e.body):
+                raise e
 
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[0].properties.keys())
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[1].properties.keys())

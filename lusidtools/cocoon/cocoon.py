@@ -1689,15 +1689,16 @@ def load_from_data_frame(
             property_columns=[{"source": key} for key in sub_holding_keys_codes],
         )
 
+        transaction_portfolio_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+
         # Add subholding keys to the portfolios we are going to apply the transactions to
         for code in set(data_frame[mapping_required['code']]):
-            api_factory.build(
-                lusid.api.TransactionPortfoliosApi
-            ).patch_portfolio_details(scope, code, [{"value": cocoon.properties._infer_full_property_keys(
-                partial_keys=sub_holding_keys,
-                properties_scope=properties_scope,
-                domain="Transaction",
-            ), "path": "/subHoldingKeys", "op": "add"}])
+            transaction_portfolio_api.patch_portfolio_details(scope, code,
+                                                              [{"value": cocoon.properties._infer_full_property_keys(
+                                                                  partial_keys=sub_holding_keys,
+                                                                  properties_scope=properties_scope,
+                                                                  domain="Transaction",
+                                                              ), "path": "/subHoldingKeys", "op": "add"}])
 
         # Add sub-holding keys to the properties, so it is created for each transaction.
         property_columns += [{'source': sub_holding_key, 'target': sub_holding_key} for sub_holding_key in
