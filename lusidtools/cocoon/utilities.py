@@ -837,8 +837,9 @@ def handle_nested_default_and_column_mapping(
         The updated mapping
     """
 
-    # copy the data frame to ensure that it is a copy and not a view (which could make changes to the original
-    # dataframe).
+    # Copy the data frame to ensure that it is a copy and not a view (which could make changes to the original
+    # dataframe). This also fixes the SettingWithCopyWarning that pandas will throw due to the difference between copy
+    # and view.
     data_frame = data_frame.copy()
 
     mapping_updated = {}
