@@ -9,9 +9,10 @@ services:
     environment:
       - FBN_CLIENT_ID
       - FBN_CLIENT_SECRET
-      - FBN_LUSID_API_URL
       - FBN_PASSWORD
       - FBN_TOKEN_URL
       - FBN_USERNAME
+      - FBN_LUSID_API_URL=${FBN_BASE_API_URL}/api
+      - FBN_ACCESS_TOKEN
     volumes:
       - .:/usr/src

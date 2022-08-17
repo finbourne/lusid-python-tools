@@ -30,6 +30,7 @@ jobs:
         FBN_CLIENT_ID: ${{ secrets.MASTER_FBN_CLIENT_ID }}
         FBN_CLIENT_SECRET: ${{ secrets.MASTER_FBN_CLIENT_SECRET }}
         FBN_LUSID_API_URL: ${{ secrets.MASTER_FBN_LUSID_API_URL }}
+        FBN_BASE_API_URL: ${{ secrets.MASTER_FBN_BASE_API_URL }}
         FBN_APP_NAME: ${{ secrets.MASTER_FBN_CLIENT_ID }}
       run: | 
         python -m unittest discover -v
