@@ -871,19 +871,26 @@ class CocoonTestsTransactions(unittest.TestCase):
         """
         This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
         """
+
+        # create the apis to reduce repeat definitions
         portfolios_api = self.api_factory.build(lusid.PortfoliosApi)
         transaction_portfolio_api = self.api_factory.build(lusid.TransactionPortfoliosApi)
+
+        # make sure the portfolio doesn't already exist in scope
         portfolios = portfolios_api.list_portfolios_for_scope(scope).values
 
         for portfolio in portfolios:
             portfolios_api.delete_portfolio(scope, portfolio.id.code)
 
+        # create the portfolio we're going to use
         transaction_portfolio_api.create_portfolio(scope, {
             'displayName': "test_load_from_dataframe_non_existent_subholding_keys portfolio", 'code': 'no-SHK',
             'baseCurrency': 'GBP', 'created': "2017-06-22T00:00:00.0000000+00:00"})
 
+        # load the data
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
+        # load in the transactions along with the sub-holding keys
         cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
             scope=scope,
@@ -898,19 +905,30 @@ class CocoonTestsTransactions(unittest.TestCase):
             sub_holding_keys=sub_holding_keys
         )
 
+        # we get the details from the portfolio
         portfolio_details = transaction_portfolio_api.get_details(scope=scope, code='no-SHK')
 
+        # get the transactions that we just loaded in
         transactions = transaction_portfolio_api.get_transactions(scope=scope, code='no-SHK')
 
+        # delete the portfolio as it is no longer required
         try:
             portfolios_api.delete_portfolio(scope, 'no-SHK')
         except lusid.ApiException as e:
             if "PortfolioNotFound" not in str(e.body):
                 raise e
 
+        # check that the sub holding key is a property of the two transactions
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[0].properties.keys())
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[1].properties.keys())
 
+        # delete the property now that we know that it exists.
+        self.api_factory.build(lusid.PropertyDefinitionsApi).delete_property_definition('Transaction',
+                                                                                        'load_dataframe_test',
+                                                                                        'SHK_data')
+
+
+        # check that the property is a sub-holding key in the portfolio.
         self.assertSetEqual(
             set(portfolio_details.sub_holding_keys), set(expected_sub_holdings_keys)
         )
