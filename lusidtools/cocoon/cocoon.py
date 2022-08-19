@@ -33,7 +33,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_batch(
-        api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
         Upserts a batch of instruments to LUSID
@@ -63,7 +63,7 @@ class BatchLoader:
 
         @checkargs
         def get_alphabetically_first_identifier_key(
-            instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
+                instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
             """
             Gets the alphabetically first occurring unique identifier on an instrument and use it as the correlation
@@ -105,7 +105,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_quote_batch(
-        api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
     ) -> lusid.models.UpsertQuotesResponse:
         """
         Upserts a batch of quotes into LUSID
@@ -148,7 +148,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transaction_batch(
-        api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID
@@ -191,7 +191,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_holding_batch(
-        api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
         """
         Upserts a batch of holdings into LUSID
@@ -234,8 +234,8 @@ class BatchLoader:
 
         # If only an adjustment has been specified
         if (
-            "holdings_adjustment_only" in list(kwargs.keys())
-            and kwargs["holdings_adjustment_only"]
+                "holdings_adjustment_only" in list(kwargs.keys())
+                and kwargs["holdings_adjustment_only"]
         ):
             return api_factory.build(
                 lusid.api.TransactionPortfoliosApi
@@ -256,7 +256,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_batch(
-        api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
     ) -> lusid.models.Portfolio:
         """
         Upserts a batch of portfolios to LUSID
@@ -308,9 +308,9 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_reference_portfolio_batch(
-        api_factory: lusid.utilities.ApiClientFactory,
-        reference_portfolio_batch: list,
-        **kwargs,
+            api_factory: lusid.utilities.ApiClientFactory,
+            reference_portfolio_batch: list,
+            **kwargs,
     ) -> lusid.models.Portfolio:
         """
         Upserts a batch of reference portfolios to LUSID
@@ -363,7 +363,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_property_batch(
-        api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
     ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
         """
         Add properties to the set instruments
@@ -436,9 +436,9 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_group_batch(
-        api_factory: lusid.utilities.ApiClientFactory,
-        portfolio_group_batch: list,
-        **kwargs,
+            api_factory: lusid.utilities.ApiClientFactory,
+            portfolio_group_batch: list,
+            **kwargs,
     ) -> lusid.models.PortfolioGroup:
         """
         Upserts a batch of portfolios to LUSID
@@ -485,7 +485,7 @@ class BatchLoader:
 
             #  Capture all portfolios - the ones currently in group + the new ones to be added
             all_portfolios_to_add = (
-                updated_request.values + current_portfolio_group.portfolios
+                    updated_request.values + current_portfolio_group.portfolios
             )
 
             current_portfolios_in_group = [
@@ -508,7 +508,7 @@ class BatchLoader:
             ]
 
             for code, scope in set(
-                [(resource.code, resource.scope) for resource in new_portfolios]
+                    [(resource.code, resource.scope) for resource in new_portfolios]
             ):
 
                 try:
@@ -541,10 +541,10 @@ class BatchLoader:
 
 
 async def _load_data(
-    api_factory: lusid.utilities.ApiClientFactory,
-    single_requests: list,
-    file_type: str,
-    **kwargs,
+        api_factory: lusid.utilities.ApiClientFactory,
+        single_requests: list,
+        file_type: str,
+        **kwargs,
 ):
     """
     This function calls the appropriate batch loader
@@ -583,17 +583,17 @@ async def _load_data(
 
 
 def _convert_batch_to_models(
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    property_columns: list,
-    properties_scope: str,
-    instrument_identifier_mapping: dict,
-    file_type: str,
-    domain_lookup: dict,
-    sub_holding_keys: list,
-    sub_holding_keys_scope: str,
-    **kwargs,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        property_columns: list,
+        properties_scope: str,
+        instrument_identifier_mapping: dict,
+        file_type: str,
+        domain_lookup: dict,
+        sub_holding_keys: list,
+        sub_holding_keys_scope: str,
+        **kwargs,
 ):
     """
     This function populates the required models from a DataFrame and loads the data into LUSID
@@ -644,8 +644,8 @@ def _convert_batch_to_models(
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to be populated with property values
     if (
-        "sub_holding_keys" in open_api_types.keys()
-        and "dict" in open_api_types["sub_holding_keys"]
+            "sub_holding_keys" in open_api_types.keys()
+            and "dict" in open_api_types["sub_holding_keys"]
     ):
         sub_holding_key_dtypes = data_frame.loc[:, sub_holding_keys].dtypes
     # If not and they are provided as full keys
@@ -686,8 +686,8 @@ def _convert_batch_to_models(
 
         # Create the sub-holding-keys for this row
         if (
-            "sub_holding_keys" in open_api_types.keys()
-            and "dict" in open_api_types["sub_holding_keys"]
+                "sub_holding_keys" in open_api_types.keys()
+                and "dict" in open_api_types["sub_holding_keys"]
         ):
             sub_holding_keys_row = cocoon.properties.create_property_values(
                 row=row,
@@ -699,7 +699,7 @@ def _convert_batch_to_models(
 
         # Create identifiers for this row if applicable
         if instrument_identifier_mapping is None or not bool(
-            instrument_identifier_mapping
+                instrument_identifier_mapping
         ):
             identifiers = None
         else:
@@ -729,20 +729,20 @@ def _convert_batch_to_models(
 
 
 async def _construct_batches(
-    api_factory: lusid.utilities.ApiClientFactory,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    property_columns: list,
-    properties_scope: str,
-    instrument_identifier_mapping: dict,
-    batch_size: int,
-    file_type: str,
-    domain_lookup: dict,
-    sub_holding_keys: list,
-    sub_holding_keys_scope: str,
-    return_unmatched_items: bool,
-    **kwargs,
+        api_factory: lusid.utilities.ApiClientFactory,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        property_columns: list,
+        properties_scope: str,
+        instrument_identifier_mapping: dict,
+        batch_size: int,
+        file_type: str,
+        domain_lookup: dict,
+        sub_holding_keys: list,
+        sub_holding_keys_scope: str,
+        return_unmatched_items: bool,
+        **kwargs,
 ):
     """
     This constructs the batches and asynchronously sends them to be loaded into LUSID
@@ -826,7 +826,7 @@ async def _construct_batches(
             effective_at_groups = [
                 data_frame.loc[
                     data_frame[mapping_required["effective_at"]] == effective_at
-                ]
+                    ]
                 for effective_at in unique_effective_dates
             ]
 
@@ -837,7 +837,7 @@ async def _construct_batches(
                     "async_batches": [
                         effective_at_group.loc[
                             data_frame[mapping_required["code"]] == code
-                        ]
+                            ]
                         for code in list(
                             effective_at_group[mapping_required["code"]].unique()
                         )
@@ -846,13 +846,13 @@ async def _construct_batches(
                         effective_at_group[mapping_required["code"]].unique()
                     ),
                     "effective_at": [
-                        list(
-                            effective_at_group[
-                                mapping_required["effective_at"]
-                            ].unique()
-                        )[0]
-                    ]
-                    * len(list(effective_at_group[mapping_required["code"]].unique())),
+                                        list(
+                                            effective_at_group[
+                                                mapping_required["effective_at"]
+                                            ].unique()
+                                        )[0]
+                                    ]
+                                    * len(list(effective_at_group[mapping_required["code"]].unique())),
                 }
                 for effective_at_group in effective_at_groups
             ]
@@ -933,7 +933,7 @@ async def _construct_batches(
     # Raise any internal exceptions rather than propagating them to the response
     for response in responses_flattened:
         if isinstance(response, Exception) and not isinstance(
-            response, lusid.exceptions.ApiException
+                response, lusid.exceptions.ApiException
         ):
             raise response
 
@@ -944,7 +944,7 @@ async def _construct_batches(
     }
 
     # For successful transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if check_for_unmatched_items(flag=return_unmatched_items, file_type=file_type,):
+    if check_for_unmatched_items(flag=return_unmatched_items, file_type=file_type, ):
         logging.debug("returning unmatched identifiers with the responses")
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
@@ -985,13 +985,13 @@ def check_for_unmatched_items(flag, file_type):
 
 @checkargs
 def unmatched_items(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    file_type: str,
-    returned_response: dict,
-    sync_batches: list = None,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        file_type: str,
+        returned_response: dict,
+        sync_batches: list = None,
 ):
     """
     This method orchestrates the identification of holdings or transactions objects that were successfully uploaded
@@ -1041,11 +1041,11 @@ def unmatched_items(
 
 
 def _unmatched_transactions(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    sync_batches: list = None,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        sync_batches: list = None,
 ):
     """
     This method identifies which instruments were not resolved with a transaction upload using load_from_data_frame.
@@ -1074,10 +1074,9 @@ def _unmatched_transactions(
 
     # For each portfolio, request the unmatched transactions from LUSID and append to the instantiated list
     for portfolio_code in portfolio_codes:
-
         portfolio_transactions = data_frame.loc[
             data_frame[mapping_required["code"]] == portfolio_code
-        ]
+            ]
         from_transaction_date = min(
             portfolio_transactions[mapping_required["transaction_date"]].apply(
                 lambda x: str(DateOrCutLabel(x))
@@ -1108,11 +1107,11 @@ def _unmatched_transactions(
 
 
 def return_unmatched_transactions(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    code: str,
-    from_transaction_date: str,
-    to_transaction_date: str,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        code: str,
+        from_transaction_date: str,
+        to_transaction_date: str,
 ):
     """
     Call the get transactions api and only return those transactions with unresolved identifiers.
@@ -1163,7 +1162,7 @@ def return_unmatched_transactions(
 
 
 def filter_unmatched_transactions(
-    data_frame: pd.DataFrame, mapping_required: dict, unmatched_transactions: list,
+        data_frame: pd.DataFrame, mapping_required: dict, unmatched_transactions: list,
 ):
     """
     This method will take the full list of unmatched transactions and remove any transactions that were not
@@ -1196,9 +1195,9 @@ def filter_unmatched_transactions(
 
 
 def _unmatched_holdings(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    sync_batches: list = None,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        sync_batches: list = None,
 ):
     """
     This method identifies which instruments were not resolved with a holdings upload using load_from_data_frame.
@@ -1235,7 +1234,7 @@ def _unmatched_holdings(
 
 
 def return_unmatched_holdings(
-    api_factory: lusid.utilities.ApiClientFactory, scope: str, code_tuple: (str, str),
+        api_factory: lusid.utilities.ApiClientFactory, scope: str, code_tuple: (str, str),
 ):
     """
     Call the get holdings adjustments api and return a list of holding objects that have unresolved identifiers.
@@ -1283,24 +1282,24 @@ def return_unmatched_holdings(
 
 @checkargs
 def load_from_data_frame(
-    api_factory: lusid.utilities.ApiClientFactory,
-    scope: str,
-    data_frame: pd.DataFrame,
-    mapping_required: dict,
-    mapping_optional: dict,
-    file_type: str,
-    identifier_mapping: dict = None,
-    property_columns: list = None,
-    properties_scope: str = None,
-    batch_size: int = None,
-    remove_white_space: bool = True,
-    instrument_name_enrichment: bool = False,
-    sub_holding_keys: list = None,
-    holdings_adjustment_only: bool = False,
-    thread_pool_max_workers: int = 5,
-    sub_holding_keys_scope: str = None,
-    return_unmatched_items: bool = False,
-    instrument_scope: str = None,
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        mapping_optional: dict,
+        file_type: str,
+        identifier_mapping: dict = None,
+        property_columns: list = None,
+        properties_scope: str = None,
+        batch_size: int = None,
+        remove_white_space: bool = True,
+        instrument_name_enrichment: bool = False,
+        sub_holding_keys: list = None,
+        holdings_adjustment_only: bool = False,
+        thread_pool_max_workers: int = 5,
+        sub_holding_keys_scope: str = None,
+        return_unmatched_items: bool = False,
+        instrument_scope: str = None,
 ):
     """
 
@@ -1646,10 +1645,9 @@ def load_from_data_frame(
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to have a property definition and be populated with values from the provided dataframe columns
     if (
-        "sub_holding_keys" in open_api_types.keys()
-        and "dict" in open_api_types["sub_holding_keys"]
+            "sub_holding_keys" in open_api_types.keys()
+            and "dict" in open_api_types["sub_holding_keys"]
     ):
-
         Validator(sub_holding_keys, "sub_holding_key_columns").check_subset_of_list(
             data_frame_columns, "DataFrame Columns"
         )
@@ -1672,6 +1670,39 @@ def load_from_data_frame(
             data_frame=data_frame,
             property_columns=property_columns,
         )
+
+    # If the transaction contains subholding keys which aren't defined in the portfolio. We first create the
+    # properties that don't already exist, then we make the properties sub-holding keys in the portfolios.
+    if file_type == "transaction" and sub_holding_keys is not None and sub_holding_keys != []:
+        # if the SHK key is written in {domain}/{scope}/{code} form we extract the code since when we add it to
+        # the properties there will be issues due to different formats. Also, there are issues with the
+        # create_missing_property_definitions_from_file function as it extracts data from columns using the
+        # sub-holding keys.
+        sub_holding_keys_codes = [key if '/' not in key else key.split('/')[2] for key in sub_holding_keys]
+
+        # Check for and create missing property definitions for the sub-holding-keys
+        data_frame = cocoon.properties.create_missing_property_definitions_from_file(
+            api_factory=api_factory,
+            properties_scope=properties_scope,
+            domain="Transaction",
+            data_frame=data_frame,
+            property_columns=[{"source": key} for key in sub_holding_keys_codes],
+        )
+
+        transaction_portfolio_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+
+        # Add subholding keys to the portfolios we are going to apply the transactions to
+        for code in set(data_frame[mapping_required['code']]):
+            transaction_portfolio_api.patch_portfolio_details(scope, code,
+                                                              [{"value": cocoon.properties._infer_full_property_keys(
+                                                                  partial_keys=sub_holding_keys,
+                                                                  properties_scope=properties_scope,
+                                                                  domain="Transaction",
+                                                              ), "path": "/subHoldingKeys", "op": "add"}])
+
+        # Add sub-holding keys to the properties, so it is created for each transaction.
+        property_columns += [{'source': sub_holding_key, 'target': sub_holding_key} for sub_holding_key in
+                             sub_holding_keys_codes]
 
     # Start a new event loop in a new thread, this is required to run inside a Jupyter notebook
     loop = cocoon.async_tools.start_event_loop_new_thread()
