@@ -922,13 +922,16 @@ class CocoonTestsTransactions(unittest.TestCase):
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[0].properties.keys())
         self.assertTrue('Transaction/load_dataframe_test/SHK_data' in transactions.values[1].properties.keys())
 
-        # delete the property now that we know that it exists.
-        self.api_factory.build(lusid.PropertyDefinitionsApi).delete_property_definition('Transaction',
+        # delete the property
+        try:
+            self.api_factory.build(lusid.PropertyDefinitionsApi).delete_property_definition('Transactions',
                                                                                         'load_dataframe_test',
                                                                                         'SHK_data')
+        except lusid.ApiException as e:
+            if 'domain' not in str(e.body) and 'PropertyNotDefined' not in str(e.body):
+                raise e
 
-
-        # check that the property is a sub-holding key in the portfolio.
+        # check that the property is a sub-holding key in the portfolio
         self.assertSetEqual(
             set(portfolio_details.sub_holding_keys), set(expected_sub_holdings_keys)
         )
