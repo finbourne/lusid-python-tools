@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import lusid
 import lusid.models as models
@@ -10,6 +11,8 @@ import datetime
 class TestResponseToPandasObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
+        
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -386,6 +389,6 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         empty_df = lusid_response_to_data_frame(empty_list)
 
-        print(empty_df)
+        logging.info(empty_df)
 
         self.assertEqual(empty_df.empty, True)

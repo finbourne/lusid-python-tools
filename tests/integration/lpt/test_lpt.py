@@ -25,7 +25,11 @@ class LptTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api = lse.connect(secrets=secrets_file, stats="-")  # stats to stdout
+        personal_access_token = os.getenv("FBN_ACCESS_TOKEN", None)
+        if personal_access_token is None:
+            cls.api = lse.connect(secrets=secrets_file, stats="-")  # stats to stdout
+        else:
+            cls.api = lse.connect(env=["token"], apiUrl=os.getenv("FBN_LUSID_API_URL"), token=personal_access_token, stats="-")  # stats to stdout
 
         # delete the properties that are created in the tests
         properties = [
@@ -63,7 +67,7 @@ class LptTests(unittest.TestCase):
             and cls.api.call.get_portfolio(scope="JLH", code="JLH2").is_right()
             and cls.api.call.get_portfolio(scope="JLH", code="JLH3").is_right()
             and cls.api.call.get_portfolio(
-                scope="Finbourne-Examples", code="Global-Equity"
+                scope="Finbourne-Examples-lusid-tools", code="Global-Equity"
             ).is_right()
         )
 
@@ -235,11 +239,11 @@ class LptTests(unittest.TestCase):
             self.api,
             qah.parse(
                 args=[
-                    "Finbourne-Examples",
+                    "Finbourne-Examples-lusid-tools",
                     "Global-Equity",
                     "2020-01-01",
                     "--pricing-scope",
-                    "Finbourne-Examples",
+                    "Finbourne-Examples-lusid-tools",
                     "--recipe",
                     "FinbourneExamplesRecipeMidThenBid",
                     "--properties",
@@ -250,7 +254,7 @@ class LptTests(unittest.TestCase):
             ),
         ).match(
             lambda left: self.fail(lpt.display_error(left)),
-            lambda right: self.assertIsInstance(right, DataFrame),
+            lambda right: self.assertIsInstance(right, DataFrame, f"{right} is not of type DataFrame"),
         )
 
     def test_reconcile_holdings(self):
