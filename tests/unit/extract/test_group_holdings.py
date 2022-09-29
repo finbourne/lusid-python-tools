@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from lusidtools import logger
@@ -191,7 +192,7 @@ class CocoonExtractGroupHoldingsTests(unittest.TestCase):
             dict_key=dict_key,
         )
 
-        print(joined_holdings)
-        print(expected_outcome)
+        logging.info(joined_holdings)
+        logging.info(expected_outcome)
 
         self.assertEqual(joined_holdings, expected_outcome)

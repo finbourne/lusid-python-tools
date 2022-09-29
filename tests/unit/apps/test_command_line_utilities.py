@@ -93,7 +93,6 @@ class AppTests(unittest.TestCase):
             self.assertEqual(data.tail(1).values[0][0], "Whitebread_LondonStockEx_WTB")
         else:
             self.assertEqual(data.tail(1).values[0][0], "USTreasury_6.875_2025")
-        print("")
 
     @parameterized.expand(
         [

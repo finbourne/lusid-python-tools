@@ -1,3 +1,4 @@
+import logging
 import copy
 import os
 import uuid
@@ -1318,7 +1319,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ("dict_string", checkargs_dict, {"a": "b"}),
             ("dict_mixed", checkargs_dict, {"a": 1}),
             ("dict_number", checkargs_dict, {1: 2}),
-            ("function", checkargs_function, lambda: print("lambda")),
+            ("function", checkargs_function, lambda: logging.info("lambda")),
         ]
     )
     def test_checkargs(self, _, function, param):
