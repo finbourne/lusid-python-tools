@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from lusidtools import logger
@@ -57,6 +58,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
             identifier_lusid=identifier_lusid, full_key_format=full_key_format
         )
 
-        print(output_key, expected_outcome)
+        logging.info(output_key, expected_outcome)
 
         self.assertEqual(output_key, expected_outcome)
