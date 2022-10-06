@@ -25,7 +25,7 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
         """
 
         def create_property_definition(
-            self, create_property_definition_request, **kwargs
+            self, create_property_definition_request
         ) -> lusid.models.PropertyDefinition:
             """
             This mocks the creation of a portfolio definition
@@ -47,7 +47,7 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
             )
 
         def get_property_definition(
-            self, domain, scope, code, **kwargs
+            self, domain, scope, code
         ) -> lusid.models.PropertyDefinition:
             """
             This mocks the call to get a property definition
