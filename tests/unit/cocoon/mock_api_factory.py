@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import lusid
 
 
@@ -83,4 +85,4 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
                     data_type_id=property_keys_in_existance[property_key],
                 )
             else:
-                raise lusid.exceptions.ApiException
+                raise lusid.exceptions.ApiException(status=HTTPStatus.NOT_FOUND)
