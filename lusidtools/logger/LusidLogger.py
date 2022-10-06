@@ -3,15 +3,16 @@ import coloredlogs
 
 
 class LusidLogger:
-    def __init__(self, log_level="info"):
-        self.begin_logger(log_level)
+    def __init__(self, log_level="info", logging_file=None):
+        self.begin_logger(log_level, logging_file)
         pass
 
     @staticmethod
-    def begin_logger(log_level) -> None:
+    def begin_logger(log_level, logging_file) -> None:
         """
         This function gets an instance of the root logger and sets the log_level. 
         :param log_level: A string defining what log level to set logger at
+        :param logging_file: Path to file to store log messages
         :return:
         """
         set_logger_level = {
@@ -31,6 +32,10 @@ class LusidLogger:
             )
 
         # set up logging
+        if logging_file:
+            print(f"Logging to {logging_file}")
+            logging.basicConfig(filename=logging_file)
+
         root_logger = logging.getLogger()
         root_logger.setLevel(set_logger_level[log_level])
         coloredlogs.install(level=set_logger_level[log_level], logger=root_logger)

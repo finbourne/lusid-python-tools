@@ -1104,6 +1104,13 @@ def parse_args(args: dict):
         "-d", "--debug", help=r"print debug messages, expected input: 'debug'"
     )
 
+    ap.add_argument(
+        "-l",
+        "--logging_file",
+        required=False,
+        help=r"full path for logging file (eg. c:\Users\Joe\data\debug.log )",
+    )
+
     return vars(ap.parse_args(args=args)), ap
 
 
