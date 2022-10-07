@@ -183,7 +183,7 @@ def create_property_definitions_from_file(
         [str(data_type) for data_type in missing_property_data_frame.dtypes.unique()]
     )
     allowed_data_types = set(global_constants["data_type_mapping"])
-    if actual_data_types > allowed_data_types:
+    if not (actual_data_types <= allowed_data_types):
         unmapped_data_types = [
             np.dtype(value) for value in actual_data_types - allowed_data_types
         ]
@@ -348,7 +348,7 @@ def create_property_values(
     allowed_data_types = set(global_constants["data_type_mapping"])
 
     # Ensure that all data types in the file have been mapped
-    if actual_data_types > allowed_data_types:
+    if not (actual_data_types <= allowed_data_types):
         unmapped_data_types = list(actual_data_types - allowed_data_types)
         unmapped_columns = dtypes[dtypes.isin(unmapped_data_types)]
         raise TypeError(
