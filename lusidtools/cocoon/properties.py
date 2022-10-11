@@ -347,7 +347,7 @@ def create_property_values(
     properties = {}
 
     # Iterate over each column name and data type
-    for column_name, data_type in dtypes.iteritems():
+    for column_name, data_type in dtypes.items():
 
         # Set the data type to be a string so that it is easier to work with
         string_data_type = str(data_type)
