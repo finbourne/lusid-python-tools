@@ -1,0 +1,23 @@
+{
+  "transactions": {
+    "required": {
+      "code": "portfolio_code",
+      "transaction_id": "id",
+      "type": "transaction_type",
+      "transaction_price.price": "transaction_price",
+      "transaction_price.type": "$Price",
+      "total_consideration.amount": "amount",
+      "units": "units",
+      "transaction_date": "transaction_date",
+      "total_consideration.currency": "trade_currency",
+      "settlement_date": "settlement_date"
+    },
+    "identifier_mapping": {
+      "LusidInstrumentId": "client_internal",
+      "ClientInternal": "figi",
+      "Isin": ""
+    },
+    "optional": {
+    }
+  }
+}

@@ -157,7 +157,9 @@ class Validator:
         if isinstance(self.value, list):
             to_remove = []
             for value in self.value:
-                if isinstance(value, str) and value[0] == first_character:
+                if isinstance(value, str) and (
+                    len(value) > 0 and value[0] == first_character
+                ):
                     to_remove.append(value)
             self.value = [value for value in self.value if value not in to_remove]
         return self
