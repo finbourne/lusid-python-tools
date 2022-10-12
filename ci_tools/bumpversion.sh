@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 last_commit_message=$(git log -1 HEAD --pretty=format:%s)
 
