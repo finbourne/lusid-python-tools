@@ -33,6 +33,7 @@ jobs:
           echo "bumping version"
           git config --global user.email "engineering@finbourne.com"
           git config --global user.name "finbourne-bot-public"
+          export GH_TOKEN=${GH_TOKEN}
           bash -e ci_tools/bumpversion.sh
           
       - name: Publish package to PyPi
