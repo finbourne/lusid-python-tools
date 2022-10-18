@@ -7,7 +7,7 @@ import lusidtools.cocoon as cocoon
 import pandas as pd
 import numpy as np
 from lusidtools import logger
-from mock_api_factory import MockApiFactory
+from .mock_api_factory import MockApiFactory
 
 
 class CocoonPropertiesTests(unittest.TestCase):
