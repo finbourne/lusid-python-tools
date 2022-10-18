@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 last_commit_message=$(git log -1 HEAD --pretty=format:%s)
 
@@ -17,6 +17,6 @@ else
 
     	# Bump the version in project and make commit back to master
 	bump2version patch --message "Bump version in Travis CI: {current_version} to {new_version} [skip ci]"
-	git push https://finbourne-bot-public:${GH_TOKEN}@github.com/finbourne/lusid-python-tools.git HEAD:master
+	git push -f https://finbourne-bot-public:${GH_TOKEN}@github.com/finbourne/lusid-python-tools.git HEAD:master
 	echo "Commit with incremented version completed"
 fi

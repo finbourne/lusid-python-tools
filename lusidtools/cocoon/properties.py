@@ -104,7 +104,7 @@ def check_property_definitions_exist_in_scope(
     # Iterate over the column names
     column_property_mapping = {}
 
-    for column_name, data_type in data_frame.loc[:, target_columns].dtypes.iteritems():
+    for column_name, data_type in data_frame.loc[:, target_columns].dtypes.items():
 
         # Create the property key
         property_key = f"{domain}/{column_to_scope[column_name]}/{cocoon.utilities.make_code_lusid_friendly(column_name)}"
@@ -198,7 +198,7 @@ def create_property_definitions_from_file(
     property_key_mapping = {}
 
     # Iterate over the each column and its data type
-    for column_name, data_type in missing_property_data_frame.dtypes.iteritems():
+    for column_name, data_type in missing_property_data_frame.dtypes.items():
 
         # Make the column name LUSID friendly
         lusid_friendly_code = cocoon.utilities.make_code_lusid_friendly(column_name)
@@ -359,7 +359,7 @@ def create_property_values(
     properties = {}
 
     # Iterate over each column name and data type
-    for column_name, data_type in dtypes.iteritems():
+    for column_name, data_type in dtypes.items():
 
         # Set the data type to be a string so that it is easier to work with
         string_data_type = str(data_type)

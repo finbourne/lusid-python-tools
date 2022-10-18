@@ -20,6 +20,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       - uses: "actions/setup-python@v2"
       
       - name: Install dependancies
@@ -33,12 +35,12 @@ jobs:
           echo "bumping version"
           git config --global user.email "engineering@finbourne.com"
           git config --global user.name "finbourne-bot-public"
-          bash ci_tools/bumpversion.sh
+          bash -e ci_tools/bumpversion.sh
           
       - name: Publish package to PyPi
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}    
         run: |
-          bash ci_tools/publish.sh "$PYPI_USERNAME" "$PYPI_PASSWORD"
+          bash -e ci_tools/publish.sh "$PYPI_USERNAME" "$PYPI_PASSWORD"
     
