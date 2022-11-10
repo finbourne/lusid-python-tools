@@ -518,7 +518,7 @@ class BatchLoader:
                     ).add_portfolio_to_group(
                         scope=kwargs["scope"],
                         code=kwargs["code"],
-                        effective_at=datetime.now(tz=pytz.UTC),
+                        effective_at=datetime.now(tz=pytz.UTC).isoformat(),
                         resource_id=lusid.models.ResourceId(scope=scope, code=code),
                     )
 
