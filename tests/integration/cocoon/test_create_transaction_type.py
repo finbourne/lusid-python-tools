@@ -36,6 +36,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         cls.movements = [
             models.TransactionConfigurationMovementDataRequest(
                 movement_types="StockMovement",
+                movement_options=[],
                 side="Side1",
                 direction=1,
                 properties={},
@@ -43,6 +44,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
             ),
             models.TransactionConfigurationMovementDataRequest(
                 movement_types="CashCommitment",
+                movement_options=[],
                 side="Side2",
                 direction=-1,
                 properties={},

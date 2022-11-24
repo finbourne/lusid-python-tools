@@ -14,6 +14,7 @@ logger = logging.getLogger()
 new_buy_transaction_type = "BUY-LPT-TEST"
 new_sell_transaction_type = "SELL-LPT-TEST"
 type_which_does_not_exist = create_scope_id()
+txn_type_source = "LPT_TXN_CFG_TESTS"
 
 
 class CocoonTestTransactionTypeUpload(unittest.TestCase):
@@ -34,10 +35,10 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 aliases=[
                     models.TransactionConfigurationTypeAlias(
                         type=new_buy_transaction_type,
-                        description="TESTBUY1",
-                        transaction_class="TESTBUY1",
-                        transaction_group="SYSTEM1",
-                        source="SYSTEM1",
+                        description="LPT_TESTBUY1",
+                        transaction_class="LPT_TESTBUY1",
+                        transaction_group=txn_type_source,
+                        source=txn_type_source,
                         transaction_roles="AllRoles",
                         is_default=False,
                     )
@@ -45,6 +46,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 movements=[
                     models.TransactionConfigurationMovementData(
                         movement_types="StockMovement",
+                        movement_options=[],
                         side="Side1",
                         direction=1,
                         properties={},
@@ -52,6 +54,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                     ),
                     models.TransactionConfigurationMovementData(
                         movement_types="CashCommitment",
+                        movement_options=[],
                         side="Side2",
                         direction=1,
                         properties={},
@@ -64,10 +67,10 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 aliases=[
                     models.TransactionConfigurationTypeAlias(
                         type=new_sell_transaction_type,
-                        description="TESTSELL1",
-                        transaction_class="TESTSELL1",
-                        transaction_group="SYSTEM1",
-                        source="SYSTEM1",
+                        description="LPT_TESTSELL1",
+                        transaction_class="LPT_TESTSELL1",
+                        transaction_group=txn_type_source,
+                        source=txn_type_source,
                         transaction_roles="AllRoles",
                         is_default=False,
                     )
@@ -75,6 +78,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 movements=[
                     models.TransactionConfigurationMovementData(
                         movement_types="StockMovement",
+                        movement_options=[],
                         side="Side1",
                         direction=-1,
                         properties={},
@@ -82,6 +86,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                     ),
                     models.TransactionConfigurationMovementData(
                         movement_types="CashCommitment",
+                        movement_options=[],
                         side="Side2",
                         direction=-1,
                         properties={},
@@ -121,7 +126,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == new_movements_alias.aliases[0].type:
+                if alias.type == new_movements_alias.aliases[0].type and alias.source == txn_type_source:
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias[0], new_movements_alias)
@@ -142,7 +147,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == alias_which_does_not_exist.aliases[0].type:
+                if alias.type == alias_which_does_not_exist.aliases[0].type and alias.source == txn_type_source:
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias[0], alias_which_does_not_exist)
@@ -170,7 +175,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type in [new_buy_transaction_type, new_sell_transaction_type]:
+                if alias.type in [new_buy_transaction_type, new_sell_transaction_type] and alias.source == txn_type_source:
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias, trans_type_with_multiple_alias)
