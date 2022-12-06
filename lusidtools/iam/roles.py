@@ -16,10 +16,11 @@ import logging
 
 @checkargs
 def create_role(
-        api_factory: lusid.utilities.ApiClientFactory,
-        access_role_creation_request: access_models.RoleCreationRequest,
+    api_factory: lusid.utilities.ApiClientFactory,
+    access_role_creation_request: access_models.RoleCreationRequest,
 ):
     """
+    Creates a role through both the access and identity APIs
 
     Parameters
     ----------
@@ -30,7 +31,7 @@ def create_role(
 
     Returns
     -------
-    responses: none
+    responses: None
 
     """
 
@@ -65,14 +66,16 @@ def create_role(
         access_role_creation_success = True
     except finbourne_access.ApiException as e:
         detail = json.loads(e.body)
-        if detail['code'] not in [612, 613, 615]:  # RoleWithCodeAlreadyExists
+        if detail["code"] not in [612, 613, 615]:  # RoleWithCodeAlreadyExists
             raise e
         logging.info(
             f"Role with code {access_role_creation_request.code} has already been created via the access API"
         )
 
     # Create the same role using the identity API.
-    identity_role_creation_request = identity_models.CreateRoleRequest(access_role_creation_request.code)
+    identity_role_creation_request = identity_models.CreateRoleRequest(
+        access_role_creation_request.code
+    )
     try:
         identity_roles_api.create_role(identity_role_creation_request)
         identity_role_creation_success = True
@@ -85,4 +88,6 @@ def create_role(
         )
 
     if access_role_creation_success & identity_role_creation_success:
-        logging.info(f"Successfully created the role with code {access_role_creation_request.code}")
+        logging.info(
+            f"Successfully created the role with code {access_role_creation_request.code}"
+        )
