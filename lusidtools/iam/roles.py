@@ -57,13 +57,12 @@ def create_role(
     access_roles_api = access_api_factory.build(finbourne_access.RolesApi)
     identity_roles_api = identity_api_factory.build(finbourne_identity.RolesApi)
 
-    access_role_creation_success = False
-    identity_role_creation_success = False
-
     # Create the role using the access API.
     try:
         access_roles_api.create_role(access_role_creation_request)
-        access_role_creation_success = True
+        logging.info(
+            f"Role with code {access_role_creation_request.code} has been created via the access API"
+        )
     except finbourne_access.ApiException as e:
         detail = json.loads(e.body)
         if detail["code"] not in [612, 613, 615]:  # RoleWithCodeAlreadyExists
@@ -78,16 +77,13 @@ def create_role(
     )
     try:
         identity_roles_api.create_role(identity_role_creation_request)
-        identity_role_creation_success = True
+        logging.info(
+            f"Role with code {access_role_creation_request.code} has been created via the identity API"
+        )
     except finbourne_identity.ApiException as e:
         detail = json.loads(e.body)
         if detail["code"] != 157:  # RoleWithCodeAlreadyExists
             raise e
         logging.info(
             f"Role with code {access_role_creation_request.code} has already been created via the identity API"
-        )
-
-    if access_role_creation_success & identity_role_creation_success:
-        logging.info(
-            f"Successfully created the role with code {access_role_creation_request.code}"
         )
