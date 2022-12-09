@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome and thank you for considering contributing to the LUSID Python Tools repository.  We're delighted to have you as part of our community.
+Welcome and thank you for considering contributing to the Python tools for LUSID repository.  We're delighted to have you as part of our community.
 
 Following these guidelines will help us to manage the contribution process effectively for everyone involved. It communicates that you respect the time of our Core Team managing and developing this open source project. In return, we will reciprocate that respect by addressing your issue, assessing changes, and helping you finalize your pull requests.
 
