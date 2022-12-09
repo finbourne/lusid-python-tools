@@ -55,7 +55,10 @@ class IAMTestsRoles(unittest.TestCase):
 
         role_code = "TestRoleCode"
 
-        self.delete_role(role_code)
+        try:
+            self.delete_role(role_code)
+        except Exception as e:
+            print(e)
 
         # Create a role creation request (using the access model)
         access_role_creation_request = create_access_role_creation_request(role_code)
