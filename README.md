@@ -26,7 +26,7 @@ or if you are running as a non privileged user you may prefer to install specifi
 $ pip install --user lusidtools
 ```
 
-## CLI Usage
+## CLI usage
 
 You will need to create a secrets file and supply its location using the `secrets-file` parameter (or alternatively lusidtools will pick up a file called `secrets.json` in the current directory).  The steps to do this are covered in [Getting started with the LUSID API and SDKs](https://support.finbourne.com/getting-started-with-apis-sdks).
 
@@ -93,10 +93,7 @@ You can reconcile a portfolio against itself by specifying the same values for `
 
 ## Contributing
 
-We welcome community participation in our tools. For information on contributing see our article [here](https://github.com/finbourne/lusid-python-tools/tree/master/docs).
-
-## Reporting Issues
-If you encounter any issues please report these on the Github [issues page](https://github.com/finbourne/lusid-python-tools/issues).
+We welcome contributions from our community. See our [contributing guide](docs/CONTRIBUTING.md) for information on how to contribute to and report issues with the Python tools for LUSID repository.
 
 ## Upgrading
 
