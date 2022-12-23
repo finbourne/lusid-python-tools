@@ -17,22 +17,17 @@ setup(
     install_requires=[
         "urllib3>=1.26.9",
         "requests>=2.27.1",
-
         "coloredlogs>=14.0",
         "detect_delimiter>=0.1",
         "flatten-json>=0.1.7",
         "pandas>=1.1.4",
-        "msrest>=0.6.16",
         "PyYAML>=5.4",
         "tqdm>=4.52.0",
         "openpyxl>=3.0.7",
         "xlrd~=1.2",
         "pytz>=2019.3",
-
-        "boto3>=1.16.22",
         "IPython>=7.31.1",
-
-        "lusid-sdk-preview>=0.11.4425, < 2"
+        "lusid-sdk-preview>=0.11.4425, < 2",
     ],
     include_package_data=True,
     python_requires=">=3.7",
