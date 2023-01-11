@@ -7,107 +7,15 @@ import lusidtools.cocoon as cocoon
 import pandas as pd
 import numpy as np
 from lusidtools import logger
-from http import HTTPStatus
+from .mock_api_factory import MockApiFactory
 
 
 class CocoonPropertiesTests(unittest.TestCase):
-    class MockApiFactory(lusid.utilities.ApiClientFactory):
-        """
-        This is a mock of the lusid.utilities.ApiClientFactory class
-        """
-
-        def build(self, api):
-            """
-
-            :param lusid.api api: The api to mock
-
-            :return: mock(lusid.api): The mocked api
-            """
-
-            if api == lusid.PropertyDefinitionsApi:
-                return self.MockPropertyDefinitionsApi()
-
-        class MockPropertyDefinitionsApi:
-            """
-            A mock of the lusid.PropertyDefinitionsApi
-            """
-
-            def create_property_definition(
-                self, create_property_definition_request, **kwargs
-            ) -> lusid.models.PropertyDefinition:
-                """
-                This mocks the creation of a portfolio definition
-
-                :param lusid.models.CreatePropertyDefinitionRequest create_property_definition_request: The create property definition request
-                :param kwargs:
-                :return: lusid.models.PropertyDefinition: The property defintion of the created property
-                """
-                return lusid.models.PropertyDefinition(
-                    key="{}/{}/{}".format(
-                        create_property_definition_request.domain,
-                        create_property_definition_request.scope,
-                        create_property_definition_request.code,
-                    ),
-                    data_type_id=lusid.models.ResourceId(
-                        scope=create_property_definition_request.data_type_id.scope,
-                        code=create_property_definition_request.data_type_id.code,
-                    ),
-                )
-
-            def get_property_definition(
-                self, domain, scope, code, **kwargs
-            ) -> lusid.models.PropertyDefinition:
-                """
-                This mocks the call to get a property definition
-
-                :param domain: The domain of the property
-                :param scope: The scope of the property
-                :param code: The code of the property
-                :param kwargs:
-
-                :return: lusid.models.PropertyDefinition any: The property definition of the property if it exists
-                """
-                # Construct the property key
-                property_key = "{}/{}/{}".format(domain, scope, code)
-
-                # A static representation of the property definitions that exist
-                property_keys_in_existance = {
-                    "Instrument/default/Figi": lusid.models.ResourceId(
-                        scope="system", code="string"
-                    ),
-                    "Transaction/default/TradeToPortfolioRate": lusid.models.ResourceId(
-                        scope="system", code="number"
-                    ),
-                    "Transaction/Operations/Strategy": lusid.models.ResourceId(
-                        scope="system", code="string"
-                    ),
-                    "Holding/Operations/Currency": lusid.models.ResourceId(
-                        scope="system", code="currency"
-                    ),
-                }
-
-                forbidden_property_keys = {
-                    "Instrument/default/Forbidden": lusid.models.ResourceId(
-                        scope="system", code="string"
-                    )
-                }
-
-                # If the property exists return the defintion, else raise an exception
-                if property_key in list(property_keys_in_existance.keys()):
-                    return lusid.models.PropertyDefinition(
-                        key=property_key,
-                        data_type_id=property_keys_in_existance[property_key],
-                    )
-                elif property_key in list(forbidden_property_keys.keys()):
-                    raise lusid.exceptions.ApiException(HTTPStatus.FORBIDDEN)
-                else:
-                    raise lusid.exceptions.ApiException(HTTPStatus.NOT_FOUND)
-
     @classmethod
     def setUpClass(cls) -> None:
         # Use a mock of the lusid.ApiClientFactory
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = cls.MockApiFactory(api_secrets_filename=secrets_file)
+        cls.api_factory = MockApiFactory(api_secrets_filename=secrets_file)
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(
@@ -117,7 +25,7 @@ class CocoonPropertiesTests(unittest.TestCase):
             ["Transaction/default/TradeToPortfolioRate", [True, "number"]],
             ["Transaction/Operations/Strategy", [True, "string"]],
             ["Holding/Operations/Currency", [True, "currency"]],
-            ["Instrument/default/Forbidden", [True, "currency"], True],
+            ["Instrument/default/Forbidden", [False, None]],
         ]
     )
     def test_check_property_definitions_exist_in_scope_single(
