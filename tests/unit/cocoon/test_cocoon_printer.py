@@ -588,11 +588,12 @@ class CocoonPrinterTests(unittest.TestCase):
         self.assertEqual(num_items, len(succ))
         self.assertEqual(num_items, len(err))
         self.assertEqual(num_items, len(failed))
+        instrument_id_selector = "quote_id.quote_series_id.instrument_id"
 
         for index, row in succ.iterrows():
             self.assertEqual(
                 expected_value["succ"][index],
-                row["quote_id.quote_series_id.instrument_id"],
+                row[instrument_id_selector],
             )
         self.assert_responses(
             num_items, expected_value, err=err, err_extended=extended_errors
@@ -600,7 +601,7 @@ class CocoonPrinterTests(unittest.TestCase):
         for index, row in failed.iterrows():
             self.assertEqual(
                 expected_value["failed"][index],
-                row["quote_id.quote_series_id.instrument_id"],
+                row[instrument_id_selector],
             )
 
         printer = self.create_printer(response, "quotes", extended_errors)
@@ -613,7 +614,7 @@ class CocoonPrinterTests(unittest.TestCase):
         for index, row in succ.iterrows():
             self.assertEqual(
                 expected_value["succ"][index],
-                row["quote_id.quote_series_id.instrument_id"],
+                row[instrument_id_selector],
             )
         self.assert_responses(
             num_items, expected_value, err=err, err_extended=extended_errors
@@ -621,7 +622,7 @@ class CocoonPrinterTests(unittest.TestCase):
         for index, row in failed.iterrows():
             self.assertEqual(
                 expected_value["failed"][index],
-                row["quote_id.quote_series_id.instrument_id"],
+                row[instrument_id_selector],
             )
 
     @parameterized.expand(
