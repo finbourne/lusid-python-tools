@@ -10,7 +10,9 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
 
     def build(self, api):
         """
-
+        Creates and returns appropriate Mock for api passed in
+        supports:
+         - lusid.PropertyDefinitionsApi
         :param lusid.api api: The api to mock
 
         :return: mock(lusid.api): The mocked api
@@ -35,11 +37,7 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
             :return: lusid.models.PropertyDefinition: The property defintion of the created property
             """
             return lusid.models.PropertyDefinition(
-                key="{}/{}/{}".format(
-                    create_property_definition_request.domain,
-                    create_property_definition_request.scope,
-                    create_property_definition_request.code,
-                ),
+                key=f"{create_property_definition_request.domain}/{create_property_definition_request.scope}/{create_property_definition_request.code}",
                 data_type_id=lusid.models.ResourceId(
                     scope=create_property_definition_request.data_type_id.scope,
                     code=create_property_definition_request.data_type_id.code,
@@ -60,7 +58,7 @@ class MockApiFactory(lusid.utilities.ApiClientFactory):
             :return: lusid.models.PropertyDefinition any: The property definition of the property if it exists
             """
             # Construct the property key
-            property_key = "{}/{}/{}".format(domain, scope, code)
+            property_key = f"{domain}/{scope}/{code}"
 
             # A static representation of the property definitions that exist
             property_keys_in_existance = {
