@@ -16,12 +16,12 @@ from lusidtools.cocoon.cocoon_printer import (
 )
 from parameterized import parameterized
 
-
+instrument_id = "ClientInternal: imd_00001234"
 # Set up api responses
 
 instrument_success = models.UpsertInstrumentsResponse(
     values={
-        "ClientInternal: imd_00001234": models.Instrument(
+        instrument_id: models.Instrument(
             lusid_instrument_id="LUID_01234567",
             version=1,
             name="name1",
@@ -30,7 +30,7 @@ instrument_success = models.UpsertInstrumentsResponse(
         )
     },
     failed={
-        "ClientInternal: imd_00001234": models.Instrument(
+        instrument_id: models.Instrument(
             lusid_instrument_id="LUID_01234567",
             version=1,
             name="name1",
@@ -154,42 +154,93 @@ responses = {
 empty_response_with_full_shape = {
     "instruments": {
         "errors": [],
-        "success": [models.UpsertInstrumentsResponse(values={}, failed={}),],
+        "success": [
+            models.UpsertInstrumentsResponse(values={}, failed={}),
+        ],
     },
-    "portfolios": {"errors": [], "success": [],},
-    "transactions": {"errors": [], "success": [],},
+    "portfolios": {
+        "errors": [],
+        "success": [],
+    },
+    "transactions": {
+        "errors": [],
+        "success": [],
+    },
     "quotes": {
         "errors": [],
         "success": [models.UpsertQuotesResponse(failed={}, values={})],
     },
-    "holdings": {"errors": [], "success": [],},
-    "reference_portfolios": {"errors": [], "success": [],},
+    "holdings": {
+        "errors": [],
+        "success": [],
+    },
+    "reference_portfolios": {
+        "errors": [],
+        "success": [],
+    },
 }
 
 empty_response_missing_shape = {
-    "instruments": {"errors": [], "success": [],},
-    "portfolios": {"errors": [], "success": [],},
-    "transactions": {"errors": [], "success": [],},
+    "instruments": {
+        "errors": [],
+        "success": [],
+    },
+    "portfolios": {
+        "errors": [],
+        "success": [],
+    },
+    "transactions": {
+        "errors": [],
+        "success": [],
+    },
     "quotes": {"errors": [], "success": []},
-    "holdings": {"errors": [], "success": [],},
-    "reference_portfolios": {"errors": [], "success": [],},
+    "holdings": {
+        "errors": [],
+        "success": [],
+    },
+    "reference_portfolios": {
+        "errors": [],
+        "success": [],
+    },
 }
 
 responses_no_error_field = {
-    "instruments": {"success": [instrument_success],},
-    "portfolios": {"success": [portfolio_success],},
-    "transactions": {"success": [transaction_success],},
+    "instruments": {
+        "success": [instrument_success],
+    },
+    "portfolios": {
+        "success": [portfolio_success],
+    },
+    "transactions": {
+        "success": [transaction_success],
+    },
     "quotes": {"success": [quote_success]},
-    "holdings": {"success": [adjust_holding_success],},
-    "reference_portfolios": {"success": [portfolio_success],},
+    "holdings": {
+        "success": [adjust_holding_success],
+    },
+    "reference_portfolios": {
+        "success": [portfolio_success],
+    },
 }
 responses_no_success_field = {
-    "instruments": {"errors": [api_exception for _ in range(2)],},
-    "portfolios": {"errors": [api_exception for _ in range(2)],},
-    "transactions": {"errors": [api_exception for _ in range(2)],},
-    "quotes": {"errors": [api_exception for _ in range(2)],},
-    "holdings": {"errors": [api_exception for _ in range(2)],},
-    "reference_portfolios": {"errors": [api_exception for _ in range(2)],},
+    "instruments": {
+        "errors": [api_exception for _ in range(2)],
+    },
+    "portfolios": {
+        "errors": [api_exception for _ in range(2)],
+    },
+    "transactions": {
+        "errors": [api_exception for _ in range(2)],
+    },
+    "quotes": {
+        "errors": [api_exception for _ in range(2)],
+    },
+    "holdings": {
+        "errors": [api_exception for _ in range(2)],
+    },
+    "reference_portfolios": {
+        "errors": [api_exception for _ in range(2)],
+    },
 }
 
 extended_error_expected = [
@@ -289,12 +340,12 @@ class CocoonPrinterTests(unittest.TestCase):
                 2,
                 {
                     "succ": [
-                        "ClientInternal: imd_00001234",
-                        "ClientInternal: imd_00001234",
+                        instrument_id,
+                        instrument_id,
                     ],
                     "failed": [
-                        "ClientInternal: imd_00001234",
-                        "ClientInternal: imd_00001234",
+                        instrument_id,
+                        instrument_id,
                     ],
                     "err": ["not found", "not found"],
                 },
@@ -362,12 +413,12 @@ class CocoonPrinterTests(unittest.TestCase):
                 2,
                 {
                     "succ": [
-                        "ClientInternal: imd_00001234",
-                        "ClientInternal: imd_00001234",
+                        instrument_id,
+                        instrument_id,
                     ],
                     "failed": [
-                        "ClientInternal: imd_00001234",
-                        "ClientInternal: imd_00001234",
+                        instrument_id,
+                        instrument_id,
                     ],
                     "err": extended_error_expected,
                 },
@@ -437,7 +488,12 @@ class CocoonPrinterTests(unittest.TestCase):
         ]
     )
     def test_format_portfolios_response_success(
-        self, _, response, num_items, expected_value, extended_errors,
+        self,
+        _,
+        response,
+        num_items,
+        expected_value,
+        extended_errors,
     ):
         succ, err = format_portfolios_response(
             response, extended_error_details=extended_errors
@@ -751,7 +807,10 @@ class CocoonPrinterTests(unittest.TestCase):
     def test_too_many_keys(self):
         with self.assertRaises(ValueError) as context:
             CocoonPrinter(
-                {"instruments": {}, "portfolios": {},}
+                {
+                    "instruments": {},
+                    "portfolios": {},
+                }
             )
 
         self.assertEqual(
@@ -774,12 +833,12 @@ class CocoonPrinterTests(unittest.TestCase):
             2,
             {
                 "succ": [
-                    "ClientInternal: imd_00001234",
-                    "ClientInternal: imd_00001234",
+                    instrument_id,
+                    instrument_id,
                 ],
                 "failed": [
-                    "ClientInternal: imd_00001234",
-                    "ClientInternal: imd_00001234",
+                    instrument_id,
+                    instrument_id,
                 ],
                 "err": ["not found", "not found"],
             },
