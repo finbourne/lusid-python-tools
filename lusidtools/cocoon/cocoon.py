@@ -190,6 +190,49 @@ class BatchLoader:
 
     @staticmethod
     @run_in_executor
+    def load_transaction_batch(
+            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
+    ) -> lusid.models.UpsertPortfolioTransactionsResponse:
+        """
+        Upserts a batch of transactions into LUSID
+
+        Parameters
+        ----------
+        api_factory : lusid.utilities.ApiClientFactory
+            The api factory to use
+        code : str
+            The code of the TransactionPortfolio to upsert the transactions into
+        transaction_batch : list[lusid.models.TransactionRequest]
+            The batch of transactions to upsert
+        kwargs
+            code -The code of the TransactionPortfolio to upsert the transactions into
+
+        Returns
+        -------
+        lusid.models.UpsertPortfolioTransactionsResponse
+            The response from LUSID
+        """
+
+        if "scope" not in list(kwargs.keys()):
+            raise KeyError(
+                "You are trying to load transactions without a scope, please ensure that a scope is provided."
+            )
+
+        if "code" not in list(kwargs.keys()):
+            raise KeyError(
+                "You are trying to load transactions without a portfolio code, please ensure that a code is provided."
+            )
+
+        return api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).upsert_batch_transactions(
+            scope=kwargs["scope"],
+            code=kwargs["code"],
+            transaction_request=transaction_batch,
+        )
+
+    @staticmethod
+    @run_in_executor
     def load_holding_batch(
             api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
@@ -364,7 +407,7 @@ class BatchLoader:
     @run_in_executor
     def load_instrument_property_batch(
             api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
-    ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
+    ) -> List[lusid.models.UpsertInstrumentPropertiesResponse]:
         """
         Add properties to the set instruments
 
@@ -590,6 +633,7 @@ def _convert_batch_to_models(
         properties_scope: str,
         instrument_identifier_mapping: dict,
         file_type: str,
+        transaction_commit_mode: str,
         domain_lookup: dict,
         sub_holding_keys: list,
         sub_holding_keys_scope: str,
@@ -738,6 +782,7 @@ async def _construct_batches(
         instrument_identifier_mapping: dict,
         batch_size: int,
         file_type: str,
+        transaction_commit_mode: str,
         domain_lookup: dict,
         sub_holding_keys: list,
         sub_holding_keys_scope: str,
@@ -904,6 +949,7 @@ async def _construct_batches(
                         properties_scope=properties_scope,
                         instrument_identifier_mapping=instrument_identifier_mapping,
                         file_type=file_type,
+                        transaction_commit_mode=transaction_commit_mode,
                         domain_lookup=domain_lookup,
                         sub_holding_keys=sub_holding_keys,
                         sub_holding_keys_scope=sub_holding_keys_scope,
@@ -1294,6 +1340,7 @@ def load_from_data_frame(
         batch_size: int = None,
         remove_white_space: bool = True,
         instrument_name_enrichment: bool = False,
+        transaction_commit_mode: str = None,
         sub_holding_keys: list = None,
         holdings_adjustment_only: bool = False,
         thread_pool_max_workers: int = 5,
