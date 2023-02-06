@@ -5,6 +5,79 @@ from lusid.exceptions import ApiException
 from flatten_json import flatten
 
 
+class CocoonPrinter:
+    VALID_KEYS = [
+        "portfolios",
+        "instruments",
+        "transactions",
+        "quotes",
+        "holdings",
+        "reference_portfolios",
+    ]
+
+    def __init__(
+        self, response, extended_error_details=False, data_entity_details=False
+    ):
+        self.validate(response)
+
+        self.response = response
+        self.file_type = list(response.keys())[0]
+        self.extended_error_details = extended_error_details
+        self.data_entity_details = data_entity_details
+
+    def validate(self, response):
+        if len(response.keys()) == 0:
+            message = (
+                f"Response doesn't contain any keys. Valid keys are {self.VALID_KEYS}"
+            )
+            raise ValueError(message)
+
+        if len(response.keys()) > 1:
+            message = f"Response contains too many keys - only one is allowed, but received {list(response.keys())}"
+            raise ValueError(message)
+
+        key = list(response.keys())[0]
+
+        if key not in self.VALID_KEYS:
+            message = f"Response contains invalid key. Valid keys are {self.VALID_KEYS}, but received {key}"
+            raise ValueError(message)
+
+    def format_instruments_response(self):
+        return format_instruments_response(
+            self.response,
+            extended_error_details=self.extended_error_details,
+            data_entity_details=self.data_entity_details,
+        )
+
+    def format_portfolios_response(self):
+        return format_portfolios_response(
+            self.response, extended_error_details=self.extended_error_details
+        )
+
+    def format_transactions_response(self):
+        return format_transactions_response(
+            self.response, extended_error_details=self.extended_error_details
+        )
+
+    def format_quotes_response(self):
+        return format_quotes_response(
+            self.response, extended_error_details=self.extended_error_details,
+        )
+
+    def format_holdings_response(self):
+        return format_holdings_response(
+            self.response, extended_error_details=self.extended_error_details,
+        )
+
+    def format_reference_portfolios_response(self):
+        return format_reference_portfolios_response(
+            self.response, extended_error_details=self.extended_error_details,
+        )
+
+    def format_response(self):
+        return getattr(CocoonPrinter, f"format_{self.file_type}_response")(self)
+
+
 @checkargs
 def check_dict_for_required_keys(
     target_dict: dict, target_name: str, required_keys: list

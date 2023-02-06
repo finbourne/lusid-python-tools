@@ -6,6 +6,7 @@ import lusid
 import pandas as pd
 import logging
 from http import HTTPStatus
+import numpy as np
 
 # Map Numpy data types to LUSID data types
 global_constants = {
@@ -178,18 +179,19 @@ def create_property_definitions_from_file(
     missing_property_data_frame = data_frame.loc[:, missing_property_columns]
 
     # Ensure that all data types in the file have been mapped
-    if not (
-        set(
-            [
-                str(data_type)
-                for data_type in missing_property_data_frame.dtypes.unique()
-            ]
-        )
-        <= set(global_constants["data_type_mapping"])
-    ):
+    actual_data_types = set(
+        [str(data_type) for data_type in missing_property_data_frame.dtypes]
+    )
+    allowed_data_types = set(global_constants["data_type_mapping"])
+    if not (actual_data_types <= allowed_data_types):
+        unmapped_data_types = [
+            np.dtype(value) for value in actual_data_types - allowed_data_types
+        ]
+        unmapped_columns = missing_property_data_frame.dtypes[
+            missing_property_data_frame.dtypes.isin(unmapped_data_types)
+        ]
         raise TypeError(
-            """There are data types in the data_frame which have not been mapped to LUSID data types,
-            please ensure that all data types have been mapped before retrying"""
+            invalid_columns_error_message(unmapped_columns, allowed_data_types)
         )
 
     # Initialise a dictionary to hold the keys
@@ -308,6 +310,15 @@ def create_missing_property_definitions_from_file(
     return data_frame
 
 
+def invalid_columns_error_message(unmapped_columns, allowed_data_types):
+    formatted_unmapped_columns = {
+        k: str(v) for k, v in unmapped_columns.to_dict().items()
+    }
+    return f"""The following columns in the data_frame have not been mapped to LUSID data types: {formatted_unmapped_columns}.
+                           LUSID supports the following data types: {allowed_data_types}. 
+                           Please ensure that all data types have been mapped before retrying."""
+
+
 @checkargs
 def create_property_values(
     row: pd.Series, column_to_scope: dict, scope: str, domain: str, dtypes: pd.Series
@@ -333,14 +344,15 @@ def create_property_values(
     properties : dict {str, models.PerpetualProperty}
     """
 
+    actual_data_types = set([str(data_type) for data_type in dtypes])
+    allowed_data_types = set(global_constants["data_type_mapping"])
+
     # Ensure that all data types in the file have been mapped
-    if not (
-        set([str(data_type) for data_type in dtypes.unique()])
-        <= set(global_constants["data_type_mapping"])
-    ):
+    if not (actual_data_types <= allowed_data_types):
+        unmapped_data_types = actual_data_types - allowed_data_types
+        unmapped_columns = dtypes[dtypes.isin(unmapped_data_types)]
         raise TypeError(
-            """There are data types in the data_frame which have not been mapped to LUSID data types,
-            please ensure that all data types have been mapped before retrying"""
+            invalid_columns_error_message(unmapped_columns, allowed_data_types)
         )
 
     # Initialise the empty properties dictionary
