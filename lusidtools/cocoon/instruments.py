@@ -22,7 +22,7 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
     identifier_lusid : str
         The LUSID identifier in either full key format or code only
     full_key_format : bool
-        Whether or not they key needs to be in the full key format
+        Whether they key needs to be in the full key format
 
     Returns
     -------
@@ -69,7 +69,7 @@ def create_identifiers(
     unique_identifiers : list
         The list of allowable unique instrument identifiers
     full_key_format : bool
-        Whether or not the full key format i.e. 'Instrument/default/Figi' is required
+        Whether the full key format i.e. 'Instrument/default/Figi' is required
     prepare_key : callable
         The function to use to prepare the key
 
@@ -88,7 +88,7 @@ def create_identifiers(
         if file_type == "instrument"
         else row[identifier_column]
         for identifier_lusid, identifier_column in instrument_identifier_mapping.items()
-        if not pd.isna(  # Only use the identifier it has a value
+        if not pd.isna(  # Only use the identifier if it has a value
             row[identifier_column]
         )
     }
@@ -202,7 +202,7 @@ def resolve_instruments(
         found_with_current = []
         # Initialise a value of False for the row's resolvability to an instrument in LUSID
         resolvable_current = False
-        # Initilise the LUID value
+        # Initialise the LUID value
         luid_current = None
         # Initialise the comment value
         comment_current = "No instruments found for the given identifiers"
