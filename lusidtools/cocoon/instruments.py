@@ -83,12 +83,12 @@ def create_identifiers(
     identifiers = {
         # Handles specifying the entire property key e.g. Instrument/default/Figi or just the code e.g. Figi
         prepare_key(identifier_lusid, full_key_format): models.InstrumentIdValue(
-            value=row[identifier_column]
+            value=str(row[identifier_column])
         )
         if file_type == "instrument"
         else row[identifier_column]
         for identifier_lusid, identifier_column in instrument_identifier_mapping.items()
-        if not pd.isna(  # Only use the identifier it it has a value
+        if not pd.isna(  # Only use the identifier it has a value
             row[identifier_column]
         )
     }
@@ -220,7 +220,7 @@ def resolve_instruments(
                 key=f"Instrument/default/{identifier_lusid}"
                 if "Instrument/" not in identifier_lusid
                 else identifier_lusid,
-                value=row[identifier_dataframe],
+                value=str(row[identifier_dataframe]),
             )
             for identifier_lusid, identifier_dataframe in identifier_mapping.items()
             if not pd.isnull(row[identifier_dataframe])
