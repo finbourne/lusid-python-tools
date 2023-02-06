@@ -30,7 +30,7 @@ class CocoonSeedDataTestsBase(object):
     Class description:
     ------------------
     This class creates the tests we use in other classes below.
-    We split the the file loading and tests into separate classes to improve readability and reuse.
+    We split the file loading and tests into separate classes to improve readability and reuse.
     This class can be extended to your own tests as follows:
     (1) Create a new class with this class as a subclass.
     (2) Load data into LUSID via the setup of new class.
