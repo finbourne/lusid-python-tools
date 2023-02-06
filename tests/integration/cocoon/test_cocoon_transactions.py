@@ -11,6 +11,7 @@ from parameterized import parameterized
 import lusid
 from lusidtools import logger
 from lusidtools.cocoon.utilities import create_scope_id
+from lusidtools.cocoon import load_from_data_frame
 
 client_internal = "Instrument/default/ClientInternal"
 sedol = "Instrument/default/Sedol"
@@ -269,17 +270,17 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
-        expected_outcome,
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            batch_size,
+            expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -396,16 +397,16 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_properties_dicts(
-        self,
-        _,
-        scope,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        expected_property_scope,
-        expected_property_code,
+            self,
+            _,
+            scope,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            expected_property_scope,
+            expected_property_code,
     ) -> None:
         """
         Test that transactions
@@ -501,11 +502,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-        self,
-        _,
-        file_name,
-        return_unmatched_items,
-        expected_unmatched_transactions,
+            self,
+            _,
+            file_name,
+            return_unmatched_items,
+            expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
@@ -586,7 +587,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-10")
     def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(
-        self,
+            self,
     ):
         scope = "unmatched_transactions_test"
         code = "MIS_INST_FUND"
@@ -710,11 +711,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_filter_unmatched_transactions_method_only_returns_transactions_originally_present_in_dataframe(
-        self,
-        _,
-        data_frame_path,
-        unmatched_transactions,
-        expected_filtered_unmatched_transactions,
+            self,
+            _,
+            data_frame_path,
+            unmatched_transactions,
+            expected_filtered_unmatched_transactions,
     ):
         """
         Test that unmatched transactions that were not part of the current load_from_data_frame operation are
@@ -745,7 +746,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-14")
     def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(
-        self,
+            self,
     ):
         """
         The GetTransactions API will only return up to 2,000 transactions per request. This test is to verify that
@@ -863,18 +864,18 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_dataframe_non_existent_subholding_keys(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
-        sub_holding_keys,
-        expected_sub_holdings_keys,
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            property_columns,
+            properties_scope,
+            batch_size,
+            sub_holding_keys,
+            expected_sub_holdings_keys,
     ):
         """
         This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
@@ -946,13 +947,12 @@ class CocoonTestsTransactions(unittest.TestCase):
             set(portfolio_details.sub_holding_keys), set(expected_sub_holdings_keys)
         )
 
-    @lusid_feature("T8-70")
     @parameterized.expand(
         [
             [
-                "Test standard transaction load",
-                "load_dataframe_test",
-                "data/gloabl-fund-uk-transactions.csv",
+                "Test standard transaction load with no commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
                 {
                     "code": "portfolio_code",
                     "transaction_id": "id",
@@ -972,26 +972,99 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "ClientInternal": "client_internal",
                     "Currency": "currency_transaction",
                 },
-                ["exposure_counterparty", "compls", "val", "location_region"],
-                "load_dataframe_test",
                 None,
-                None,
-                ValueError,
-            ]
+                None
+            ],
+            [
+                "Test standard transaction load with incorrect commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                "Not_a_valid_commit_mode",
+                None
+            ],
+            [
+                "Test standard transaction load with partial commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                "Partial",
+                9
+            ],
+            [
+                "Test standard transaction load with atomic commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                "Atomic",
+                9
+            ],
         ]
     )
-    def test_load_from_data_frame_transactions_with_no_commit_mode(
-        self,
-        _,
-        scope,
-        file_name,
-        mapping_required,
-        mapping_optional,
-        identifier_mapping,
-        property_columns,
-        properties_scope,
-        batch_size,
-        expected_outcome,
+    def test_load_from_data_frame_transactions_with_commit_mode(
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            transactions_commit_mode,
+            expected_outcome
     ) -> None:
         """
         Test that transactions
@@ -1001,28 +1074,191 @@ class CocoonTestsTransactions(unittest.TestCase):
         :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
         :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
         :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
-        :param list[str] property_columns: The columns to create properties for
-        :param str properties_scope: The scope to add the properties to
-        :param any expected_outcome: The expected outcome
+        :param str transactions_commit_mode: The transaction commit mode to try and execute
 
         :return: None
         """
+        # Arrange
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
-        self.assertRaises(
-            expected_exception=ValueError,
-            callable=cocoon.cocoon.load_from_data_frame(
-                api_factory=self.api_factory,
-                scope=scope,
-                data_frame=data_frame,
-                mapping_required=mapping_required,
-                mapping_optional=mapping_optional,
-                file_type="transactions_with_commit",
-                identifier_mapping=identifier_mapping,
-                property_columns=property_columns,
-                properties_scope=properties_scope,
-                batch_size=batch_size,
-            ),
+        # Act
+        if transactions_commit_mode is None or transactions_commit_mode not in ('Atomic', "Partial"):
+            with self.assertRaises(KeyError):
+                cocoon.cocoon.load_from_data_frame(
+                    api_factory=self.api_factory,
+                    scope=scope,
+                    data_frame=data_frame,
+                    mapping_required=mapping_required,
+                    mapping_optional=mapping_optional,
+                    file_type="transactions_with_commit_mode",
+                    identifier_mapping=identifier_mapping
+                )
+            return True
+
+        response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions_with_commit_mode",
+            transactions_commit_mode=transactions_commit_mode,
+            identifier_mapping=identifier_mapping
+        )
+
+        # Assert
+        self.assertEqual(
+            len(response["transactions_with_commit_modes"]["success"][0].values),
+            expected_outcome
+        )
+
+    @parameterized.expand(
+        [
+            [
+                "Test failed load with atomic commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions-with-failed-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                "Atomic",
+                0
+            ],
+
+        ]
+    )
+    def test_load_from_data_frame_transactions_with_atomic_commit_mode_expect_failures(
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            transactions_commit_mode,
+            expected_outcome
+    ) -> None:
+        """
+        Test that transactions
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param str transactions_commit_mode: The transaction commit mode to try and execute
+
+        :return: None
+        """
+        # Arrange
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        # Act
+        response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions_with_commit_mode",
+            transactions_commit_mode=transactions_commit_mode,
+            identifier_mapping=identifier_mapping
+        )
+
+        # Assert
+        self.assertEqual(
+            len(response["transactions_with_commit_modes"]["success"]),
+            expected_outcome
+        )
+
+    @parameterized.expand(
+        [
+            [
+                "Test failed load with partial commit mode",
+                "prime_broker_test",
+                "data/global-fund-combined-transactions-with-failed-transactions.csv",
+                {
+                    "code": "portfolio_code",
+                    "transaction_id": "id",
+                    "type": "transaction_type",
+                    "transaction_date": "transaction_date",
+                    "settlement_date": "settlement_date",
+                    "units": "units",
+                    "transaction_price.price": "transaction_price",
+                    "transaction_price.type": "price_type",
+                    "total_consideration.amount": "amount",
+                    "total_consideration.currency": "trade_currency",
+                },
+                {"transaction_currency": "trade_currency"},
+                {
+                    "Isin": "isin",
+                    "Figi": "figi",
+                    "ClientInternal": "client_internal",
+                    "Currency": "currency_transaction",
+                },
+                "Partial",
+                8
+            ]
+        ]
+    )
+    def test_load_from_data_frame_transactions_with_partial_commit_mode_expect_failures(
+            self,
+            _,
+            scope,
+            file_name,
+            mapping_required,
+            mapping_optional,
+            identifier_mapping,
+            transactions_commit_mode,
+            expected_outcome
+    ) -> None:
+        """
+        Test that transactions
+
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param str transactions_commit_mode: The transaction commit mode to try and execute
+
+        :return: None
+        """
+        # Arrange
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+
+        # Act
+        response = cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required=mapping_required,
+            mapping_optional=mapping_optional,
+            file_type="transactions_with_commit_mode",
+            transactions_commit_mode=transactions_commit_mode,
+            identifier_mapping=identifier_mapping
+        )
+
+        # Assert
+        self.assertEqual(
+            len(response["transactions_with_commit_modes"]["success"][0].values),
+            expected_outcome
         )
 
     @classmethod
