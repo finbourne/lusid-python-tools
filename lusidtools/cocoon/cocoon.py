@@ -191,7 +191,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transactions_with_commit_mode_batch(
-            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
+            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: List, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID with specified type of upsert.
@@ -202,10 +202,11 @@ class BatchLoader:
             The api factory to use
         code : str
             The code of the TransactionPortfolio to upsert the transactions into
-        transaction_batch : list[lusid.models.TransactionRequest]
+        transaction_batch : List[lusid.models.TransactionRequest]
             The batch of transactions to upsert
         kwargs
             code -The code of the TransactionPortfolio to upsert the transactions into
+            transactions_commit_mode - The type of upsert method to use (Atomic or Partial)
 
         Returns
         -------
