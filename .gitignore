@@ -249,3 +249,5 @@ venv.bak/
 
 **/*secrets*
 **/*.data/
+
+**/.vscode
