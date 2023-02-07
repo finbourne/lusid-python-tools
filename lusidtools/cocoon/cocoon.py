@@ -6,7 +6,7 @@ import lusid
 import pandas as pd
 import json
 
-from typing import List
+from typing import List, Tuple
 
 from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
@@ -99,7 +99,7 @@ class BatchLoader:
                     instrument, unique_identifiers
                 ): instrument
                 for instrument in instrument_batch
-            }
+            },
         )
 
     @staticmethod
@@ -186,6 +186,67 @@ class BatchLoader:
             scope=kwargs["scope"],
             code=kwargs["code"],
             transaction_request=transaction_batch,
+        )
+
+    @staticmethod
+    @run_in_executor
+    def load_transactions_with_commit_mode_batch(
+            api_factory: lusid.utilities.ApiClientFactory, transaction_batch: List, **kwargs
+    ) -> lusid.models.UpsertPortfolioTransactionsResponse:
+        """
+        Upserts a batch of transactions into LUSID with specified type of upsert.
+
+        Parameters
+        ----------
+        api_factory : lusid.utilities.ApiClientFactory
+            The api factory to use
+        code : str
+            The code of the TransactionPortfolio to upsert the transactions into
+        transaction_batch : List[lusid.models.TransactionRequest]
+            The batch of transactions to upsert
+        kwargs
+            code -The code of the TransactionPortfolio to upsert the transactions into
+            transactions_commit_mode - The type of upsert method to use (Atomic or Partial)
+
+        Returns
+        -------
+        lusid.models.BatchUpsertPortfolioTransactionsResponse
+            The response from LUSID
+        """
+
+        if "scope" not in list(kwargs.keys()):
+            raise KeyError(
+                "You are trying to load transactions without a scope, please ensure that a scope is provided."
+            )
+
+        if "code" not in list(kwargs.keys()):
+            raise KeyError(
+                "You are trying to load transactions without a portfolio code, please ensure that a code is provided."
+            )
+
+        if kwargs["transactions_commit_mode"] is None:
+            raise KeyError(
+                "You are trying to load transactions without a commit mode (transaction_commit_mode), please provide a commit mode (Atomic or Partial)."
+            )
+
+        if kwargs["transactions_commit_mode"].lower() not in ("atomic", "partial"):
+            raise KeyError(
+                "You are trying to load transactions without an accepted type of commit mode, please provide either Atomic or Partial to the commit mode."
+            )
+
+        request_body = {
+            f"transaction_{idx}": transaction
+            for idx, transaction in enumerate(transaction_batch)
+        }
+
+
+        return api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        ).batch_upsert_transactions(
+            scope=kwargs["scope"],
+            code=kwargs["code"],
+            success_mode=kwargs["transactions_commit_mode"],
+            request_body=request_body
         )
 
     @staticmethod
@@ -364,7 +425,7 @@ class BatchLoader:
     @run_in_executor
     def load_instrument_property_batch(
             api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
-    ) -> [lusid.models.UpsertInstrumentPropertiesResponse]:
+    ) -> List[lusid.models.UpsertInstrumentPropertiesResponse]:
         """
         Add properties to the set instruments
 
@@ -944,7 +1005,10 @@ async def _construct_batches(
     }
 
     # For successful transactions or holdings file types, optionally return unmatched identifiers with the responses
-    if check_for_unmatched_items(flag=return_unmatched_items, file_type=file_type, ):
+    if check_for_unmatched_items(
+            flag=return_unmatched_items,
+            file_type=file_type,
+    ):
         logging.debug("returning unmatched identifiers with the responses")
         returned_response["unmatched_items"] = unmatched_items(
             api_factory=api_factory,
@@ -1036,7 +1100,9 @@ def unmatched_items(
         )
     elif file_type == "holding":
         return _unmatched_holdings(
-            api_factory=api_factory, scope=scope, sync_batches=sync_batches,
+            api_factory=api_factory,
+            scope=scope,
+            sync_batches=sync_batches,
         )
 
 
@@ -1162,7 +1228,9 @@ def return_unmatched_transactions(
 
 
 def filter_unmatched_transactions(
-        data_frame: pd.DataFrame, mapping_required: dict, unmatched_transactions: list,
+        data_frame: pd.DataFrame,
+        mapping_required: dict,
+        unmatched_transactions: list,
 ):
     """
     This method will take the full list of unmatched transactions and remove any transactions that were not
@@ -1226,7 +1294,9 @@ def _unmatched_holdings(
     for code_tuple in code_tuples:
         unmatched_holdings.extend(
             return_unmatched_holdings(
-                api_factory=api_factory, scope=scope, code_tuple=code_tuple,
+                api_factory=api_factory,
+                scope=scope,
+                code_tuple=code_tuple,
             )
         )
 
@@ -1234,7 +1304,9 @@ def _unmatched_holdings(
 
 
 def return_unmatched_holdings(
-        api_factory: lusid.utilities.ApiClientFactory, scope: str, code_tuple: (str, str),
+        api_factory: lusid.utilities.ApiClientFactory,
+        scope: str,
+        code_tuple: Tuple[str, str],
 ):
     """
     Call the get holdings adjustments api and return a list of holding objects that have unresolved identifiers.
@@ -1294,6 +1366,7 @@ def load_from_data_frame(
         batch_size: int = None,
         remove_white_space: bool = True,
         instrument_name_enrichment: bool = False,
+        transactions_commit_mode: str = None,
         sub_holding_keys: list = None,
         holdings_adjustment_only: bool = False,
         thread_pool_max_workers: int = 5,
@@ -1411,6 +1484,23 @@ def load_from_data_frame(
             mapping_required=mapping["transactions"]["required"],
             mapping_optional=mapping["transactions"]["optional"],
             file_type="transactions",
+            identifier_mapping=mapping["transactions"]["identifier_mapping"],
+            property_columns=mapping["transactions"]["properties"],
+            properties_scope=scope
+        )
+    
+    * Loading Transactions with Commit Mode
+
+    .. code-block:: none
+
+        result = lusidtools.cocoon.load_from_data_frame(
+            api_factory=api_factory,
+            scope=scope,
+            data_frame=txn_df,
+            mapping_required=mapping["transactions"]["required"],
+            mapping_optional=mapping["transactions"]["optional"],
+            file_type="transactions_with_commit",
+            transactions_commit_mode="(Atomic|Partial)"
             identifier_mapping=mapping["transactions"]["identifier_mapping"],
             property_columns=mapping["transactions"]["properties"],
             properties_scope=scope
@@ -1673,12 +1763,18 @@ def load_from_data_frame(
 
     # If the transaction contains subholding keys which aren't defined in the portfolio. We first create the
     # properties that don't already exist, then we make the properties sub-holding keys in the portfolios.
-    if file_type == "transaction" and sub_holding_keys is not None and sub_holding_keys != []:
+    if (
+            file_type in ("transaction", "transactions_commit_mode")
+            and sub_holding_keys is not None
+            and sub_holding_keys != []
+    ):
         # if the SHK key is written in {domain}/{scope}/{code} form we extract the code since when we add it to
         # the properties there will be issues due to different formats. Also, there are issues with the
         # create_missing_property_definitions_from_file function as it extracts data from columns using the
         # sub-holding keys.
-        sub_holding_keys_codes = [key if '/' not in key else key.split('/')[2] for key in sub_holding_keys]
+        sub_holding_keys_codes = [
+            key if "/" not in key else key.split("/")[2] for key in sub_holding_keys
+        ]
 
         # Check for and create missing property definitions for the sub-holding-keys
         data_frame = cocoon.properties.create_missing_property_definitions_from_file(
@@ -1689,20 +1785,33 @@ def load_from_data_frame(
             property_columns=[{"source": key} for key in sub_holding_keys_codes],
         )
 
-        transaction_portfolio_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
+        transaction_portfolio_api = api_factory.build(
+            lusid.api.TransactionPortfoliosApi
+        )
 
         # Add subholding keys to the portfolios we are going to apply the transactions to
-        for code in set(data_frame[mapping_required['code']]):
-            transaction_portfolio_api.patch_portfolio_details(scope, code,
-                                                              [{"value": cocoon.properties._infer_full_property_keys(
-                                                                  partial_keys=sub_holding_keys,
-                                                                  properties_scope=properties_scope,
-                                                                  domain="Transaction",
-                                                              ), "path": "/subHoldingKeys", "op": "add"}])
+        for code in set(data_frame[mapping_required["code"]]):
+            transaction_portfolio_api.patch_portfolio_details(
+                scope,
+                code,
+                [
+                    {
+                        "value": cocoon.properties._infer_full_property_keys(
+                            partial_keys=sub_holding_keys,
+                            properties_scope=properties_scope,
+                            domain="Transaction",
+                        ),
+                        "path": "/subHoldingKeys",
+                        "op": "add",
+                    }
+                ],
+            )
 
         # Add sub-holding keys to the properties, so it is created for each transaction.
-        property_columns += [{'source': sub_holding_key, 'target': sub_holding_key} for sub_holding_key in
-                             sub_holding_keys_codes]
+        property_columns += [
+            {"source": sub_holding_key, "target": sub_holding_key}
+            for sub_holding_key in sub_holding_keys_codes
+        ]
 
     # Start a new event loop in a new thread, this is required to run inside a Jupyter notebook
     loop = cocoon.async_tools.start_event_loop_new_thread()
@@ -1717,6 +1826,7 @@ def load_from_data_frame(
         "unique_identifiers": cocoon.instruments.get_unique_identifiers(
             api_factory=api_factory
         ),
+        "transactions_commit_mode": transactions_commit_mode,
         "holdings_adjustment_only": holdings_adjustment_only,
         "thread_pool": thread_pool,
         "instrument_scope": instrument_scope,
