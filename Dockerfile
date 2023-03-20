@@ -1,8 +1,6 @@
-FROM python:3.7.0
+FROM python:3.11.2
 
 WORKDIR /usr/src/
-
-RUN apt-get update && apt-get -y install jq
 
 # cache requirements as pip install can take long
 # and requirements shouldn't change often
