@@ -11,9 +11,6 @@ from lusidtools import logger
 class TestDriveFileUpload(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
-        cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
-
     def test_upload_file_positive(self) -> None:
         """
         Test that a file can be created successfully
