@@ -16,3 +16,5 @@ services:
       - FBN_ACCESS_TOKEN
     volumes:
       - .:/usr/src
+    env_file:
+      - .env
