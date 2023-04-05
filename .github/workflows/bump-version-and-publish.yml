@@ -24,9 +24,9 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
       - uses: "actions/setup-python@v2"
       
-      - name: Install dependancies
+      - name: Install dependencies
         run: |
-          pip install bump2version==1.0.0 twine
+          pip install poetry==1.4.2
     
       - name: Bump version of package
         env:
