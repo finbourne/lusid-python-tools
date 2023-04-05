@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lusidtoolsdeploymenttest"
-version = "2.0.1"
+version = "2.0.0a0"
 description = "Python Tools for LUSID"
 authors = ["FINBOURNE Technology"]
 license = "MIT"
