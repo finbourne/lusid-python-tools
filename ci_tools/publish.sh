@@ -16,7 +16,6 @@ fi
 
 pypi_username=$1
 pypi_password=$2
-poetry config repositories.test-pypi https://test.pypi.org/legacy/
-poetry config http-basic.test-pypi $pypi_username $pypi_password
+poetry config http-basic.pypi $pypi_username $pypi_password
 poetry build
-poetry publish -r test-pypi
+poetry publish
