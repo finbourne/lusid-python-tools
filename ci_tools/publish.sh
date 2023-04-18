@@ -18,4 +18,4 @@ pypi_username=$1
 pypi_password=$2
 poetry config http-basic.pypi $pypi_username $pypi_password
 poetry build
-poetry publish
+poetry publish --skip-existing
