@@ -56,3 +56,13 @@ The Core Team reviews pull requests on a regular basis and will give feedback on
 
 - A build will run as part of your pull request; at a minimum, this needs to pass before your contribution is accepted.
 - After feedback has been given, it is expected that you respond within two weeks. The pull request may be closed if it does not show any signs of activity.
+
+## Working with the code
+
+We use [poetry](https://python-poetry.org/) to manage dependencies, build and package lusidtools.
+
+To ensure you have all the correct packages, and an editable install of lusidtools, run `poetry install` at the root of the project.
+
+To run tests and code coverage, ensure Python 3.11 is installed and run `tox`.
+
+To update the installed packages, run `poetry update`. This will update the poetry.lock file, which must be committed to source control.
