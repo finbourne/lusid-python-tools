@@ -59,7 +59,9 @@ The Core Team reviews pull requests on a regular basis and will give feedback on
 
 ## Working with the code
 
-We use [poetry](https://python-poetry.org/) to manage dependencies, build and package lusidtools.
+We use [poetry](https://python-poetry.org/) to manage dependencies, build and package lusidtools. Install poetry using pip:
+
+    pip install poetry
 
 To ensure you have all the correct packages, and an editable install of lusidtools, run `poetry install` at the root of the project.
 
