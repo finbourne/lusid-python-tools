@@ -102,7 +102,6 @@ def create_identifiers(
 
     # Check that at least one unique identifier exists if it is an instrument file (need to move this out of here)
     if file_type == "instrument":
-
         # Get the unique list of unique identifiers which have been populated
         unique_identifiers_populated = list(
             set(unique_identifiers).intersection(set(list(identifiers.keys())))
@@ -195,7 +194,6 @@ def resolve_instruments(
     logging.info("Beginning instrument resolution process")
     # Iterate over each row in the DataFrame
     for index, row in _data_frame.iterrows():
-
         if index % 10 == 0:
             logging.info(f"Up to row {index}")
         # Initialise list to hold the identifiers used to resolve
@@ -255,7 +253,6 @@ def resolve_instruments(
             search_request_number = -1
 
             for result in response:
-
                 search_request_number += 1
                 # If there are matches
                 if len(result.mastered_instruments) == 1:
@@ -299,7 +296,6 @@ def resolve_instruments(
 
 @checkargs
 def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
-
     """
     Tests getting the unique instrument identifiers
 

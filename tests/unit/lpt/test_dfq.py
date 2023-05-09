@@ -31,7 +31,10 @@ class DfqTests(unittest.TestCase):
         )
 
         expected_df = pandas.DataFrame(
-            [{"Name": "Foo", "Value": 2}, {"Name": "Foo", "Value": 5},]
+            [
+                {"Name": "Foo", "Value": 2},
+                {"Name": "Foo", "Value": 5},
+            ]
         ).to_string(index=False)
         expected = f"First 2\n{expected_df}"
 
@@ -51,9 +54,11 @@ class DfqTests(unittest.TestCase):
             ),
         )
 
-        expected_df = pandas.DataFrame([{"Name": "Bar", "Value": 7},]).to_string(
-            index=False
-        )
+        expected_df = pandas.DataFrame(
+            [
+                {"Name": "Bar", "Value": 7},
+            ]
+        ).to_string(index=False)
         expected = f"Last 1\n{expected_df}"
 
         self.assertEqual(expected, mock_stdout.getvalue().strip())
@@ -98,7 +103,10 @@ class DfqTests(unittest.TestCase):
 
         assert_frame_equal(
             pandas.DataFrame(
-                [{"Name": "Bar", "Value": 7}, {"Name": "Foo", "Value": 7},]
+                [
+                    {"Name": "Bar", "Value": 7},
+                    {"Name": "Foo", "Value": 7},
+                ]
             ),
             result,
         )
@@ -108,7 +116,14 @@ class DfqTests(unittest.TestCase):
         args = dfq.parse(False, ["--columns"])
 
         with self.assertRaises(SystemExit):
-            dfq.dfq(args, pandas.DataFrame([{"Name": "Foo", "Value": 2},]))
+            dfq.dfq(
+                args,
+                pandas.DataFrame(
+                    [
+                        {"Name": "Foo", "Value": 2},
+                    ]
+                ),
+            )
 
             expected = "Name\nValue"
 
@@ -140,7 +155,10 @@ class DfqTests(unittest.TestCase):
         )
 
         expected_df = pandas.DataFrame(
-            [{"Name": "Bar", "Value": 4}, {"Name": "Baz", "Value": 10},]
+            [
+                {"Name": "Bar", "Value": 4},
+                {"Name": "Baz", "Value": 10},
+            ]
         )
 
         assert_frame_equal(
@@ -162,7 +180,11 @@ class DfqTests(unittest.TestCase):
         )
 
         assert_frame_equal(
-            pandas.DataFrame([{"Name": "Baz", "Value": 10},]).reset_index(drop=True),
+            pandas.DataFrame(
+                [
+                    {"Name": "Baz", "Value": 10},
+                ]
+            ).reset_index(drop=True),
             result.reset_index(drop=True),
         )
 

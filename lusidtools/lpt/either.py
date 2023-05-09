@@ -1,6 +1,5 @@
 class Either:
     def __init__(self, *args, **kwargs):
-
         # at least 2 arguments. Assume first two are Left and Right
         if len(args) >= 2:
             self.left = args[0]

@@ -42,7 +42,6 @@ def lusid_response_to_data_frame(
         return pd.DataFrame()
 
     elif type(lusid_response) == list and len(lusid_response) > 0:
-
         first_item_type = type(lusid_response[0])
 
         if not all(isinstance(x, first_item_type) for x in lusid_response):
@@ -58,7 +57,6 @@ def lusid_response_to_data_frame(
     # Check if lusid_response has a values attribute with data type of list
 
     elif hasattr(lusid_response, "values") and type(lusid_response.values) == list:
-
         response_df = pd.DataFrame(
             flatten(value.to_dict(), ".") for value in lusid_response.values
         )
@@ -66,14 +64,12 @@ def lusid_response_to_data_frame(
     # Check if response object has to_dict() method
 
     elif hasattr(lusid_response, "to_dict"):
-
         response_df = pd.DataFrame.from_dict(
             (flatten(lusid_response.to_dict(), ".")),
             orient="index",
             columns=["response_values"],
         )
     else:
-
         raise TypeError(
             """Cannot map response object to pandas DataFrame or Series. The LUSID response object must have
                         either the values attribute or the to_dict() method, or be a list of objects with 
@@ -81,7 +77,6 @@ def lusid_response_to_data_frame(
         )
 
     if rename_properties:
-
         # Collect columns to drop - these are meta-data columns for properties and sub-holding keys
         columns_to_drop = list(
             response_df.filter(
@@ -101,7 +96,6 @@ def lusid_response_to_data_frame(
         ).columns
 
         for column in columns_to_rename:
-
             # find the property code substring
             # The property code should always be displayed after the second "/"
             # Example: sub_holding_keys.Transaction/MultiAssetScope/PortionSubClass.value.label_value
@@ -122,7 +116,6 @@ def lusid_response_to_data_frame(
         response_df.rename(columns=rename_dict, inplace=True)
 
     if column_name_mapping:
-
         response_df.rename(columns=column_name_mapping, inplace=True)
 
     return response_df.dropna(axis=1, how="all")

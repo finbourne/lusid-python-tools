@@ -14,7 +14,6 @@ from parameterized import parameterized
 class CocoonTestsReferencePortfolios(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -64,7 +63,12 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_attributes_and_properties_success(
-        self, _, file_name, mapping_required, mapping_optional, property_columns,
+        self,
+        _,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        property_columns,
     ) -> None:
         """
         Test that a reference portfolio can be loaded successfully
@@ -125,7 +129,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         # Check that properties get added to portfolio
 
         for portfolio in responses["reference_portfolios"]["success"]:
-
             get_portfolio = self.portfolios_api.get_portfolio(
                 scope=portfolio.id.scope,
                 code=portfolio.id.code,
@@ -142,12 +145,12 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
             ]
 
             self.assertCountEqual(
-                [prop for prop in get_portfolio.properties], property_keys_from_params,
+                [prop for prop in get_portfolio.properties],
+                property_keys_from_params,
             )
 
     @lusid_feature("T11-4")
     def test_portfolio_missing_attribute(self):
-
         unique_id = create_scope_id()
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(self.file_name))
         data_frame["FundCode"] = data_frame["FundCode"] + "-" + unique_id
@@ -160,7 +163,6 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
         }
 
         with self.assertRaises(ValueError) as error:
-
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
                 scope=self.scope,

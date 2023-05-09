@@ -10,7 +10,7 @@ class LusidLogger:
     @staticmethod
     def begin_logger(log_level, logging_file) -> None:
         """
-        This function gets an instance of the root logger and sets the log_level. 
+        This function gets an instance of the root logger and sets the log_level.
         :param log_level: A string defining what log level to set logger at
         :param logging_file: Path to file to store log messages
         :return:

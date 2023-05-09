@@ -354,7 +354,6 @@ class CocoonTestsFailures(unittest.TestCase):
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         with self.assertRaises(expected_exception):
-
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
                 scope=scope,
@@ -425,7 +424,6 @@ class CocoonTestsFailures(unittest.TestCase):
         )
 
         with self.assertRaises(expected_exception):
-
             cocoon.cocoon.load_from_data_frame(
                 api_factory=self.api_factory,
                 scope=scope,

@@ -23,7 +23,6 @@ def parse(extend=None, args=None):
 
 
 def process_args(api, args):
-
     colmap = {"P:" + p: p[10:] for p in args.properties}
 
     def fetch_page(page_token):

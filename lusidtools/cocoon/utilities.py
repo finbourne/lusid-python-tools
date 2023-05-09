@@ -42,7 +42,6 @@ def checkargs(function: typing.Callable) -> typing.Callable:
 
     @functools.wraps(function)
     def _f(*args, **kwargs):
-
         # Get all the function arguments in order
         function_arguments = inspect.signature(function).parameters
 
@@ -56,7 +55,6 @@ def checkargs(function: typing.Callable) -> typing.Callable:
 
         # For each argument raise an error if it is of the incorrect type and if it has an invalid default value
         for argument_name, argument_value in keyed_arguments.items():
-
             if argument_name not in list(function_arguments.keys()):
                 raise ValueError(
                     f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments"
@@ -259,7 +257,6 @@ def set_attributes_recursive(
 
     # For each of the attributes to populate
     for key in list(populate_attributes):
-
         # Get the attribute type
         attribute_type = obj_attr[key]
 
@@ -337,7 +334,9 @@ def set_attributes_recursive(
         actual_class = model_object.discriminator_value_class_map[discriminator]
 
         return set_attributes_recursive(
-            model_object=getattr(lusid.models, actual_class), mapping=mapping, row=row,
+            model_object=getattr(lusid.models, actual_class),
+            mapping=mapping,
+            row=row,
         )
 
     return instance
@@ -571,7 +570,6 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
     open_api_types = model_object.openapi_types
 
     for required_attribute in required_attributes:
-
         required_attribute_type = open_api_types[required_attribute]
 
         # Check to see if there is a LUSID model for this required attribute, if no further nesting then add this attribute
@@ -845,10 +843,8 @@ def handle_nested_default_and_column_mapping(
     mapping_updated = {}
 
     for key, value in mapping.items():
-
         # If the value of the mapping is a dictionary
         if isinstance(value, dict):
-
             # If the dictionary contains a column and a default, fill nulls with the default in that column
             if ("column" in list(value.keys())) and ("default" in list(value.keys())):
                 mapping_updated[key] = value["column"]
@@ -879,7 +875,6 @@ def handle_nested_default_and_column_mapping(
                 )
 
         elif isinstance(value, str):
-
             if len(value) == 0:
                 raise IndexError(
                     f"Unspecified mapping field: {key}. Please assign a value or remove this from the "
@@ -1708,9 +1703,7 @@ def group_request_into_one(
     base_request = request_list[batch_index]
 
     for attrib in attribute_for_grouping:
-
         if "list" in getattr(models, model_type).openapi_types[attrib]:
-
             # Collect the attributes from each request onto a list
 
             batch_attrib = [
@@ -1728,7 +1721,6 @@ def group_request_into_one(
             setattr(base_request, attrib, batch_attrib)
 
         elif "dict" in getattr(models, model_type).openapi_types[attrib]:
-
             # Collect the attributes from each request onto a dictionary
 
             batch_attrib = dict(
@@ -1788,7 +1780,10 @@ def extract_unique_portfolio_codes_effective_at_tuples(sync_batches: list):
     """
     code_tuples = []
     for sync_batch in sync_batches:
-        for code, effective_at in zip(sync_batch["codes"], sync_batch["effective_at"],):
+        for code, effective_at in zip(
+            sync_batch["codes"],
+            sync_batch["effective_at"],
+        ):
             # Append a tuple of (code, effective_at) to the code_tuples list
             code_tuples.append((code, effective_at))
     return list(set(code_tuples))

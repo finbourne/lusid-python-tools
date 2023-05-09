@@ -456,7 +456,6 @@ class TxnConfigYaml:
             self.side_definitions = side_definitions
 
     def dump(self, obj, filename, raw=False):
-
         if raw:
             with open(filename, "w") as stream:
                 yaml.dump(obj, stream)

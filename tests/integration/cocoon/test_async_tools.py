@@ -13,7 +13,7 @@ import concurrent.futures
 
 
 class CocoonTestsAsyncTools(unittest.TestCase):
-    """"
+    """ "
     These tests are to ensure that the Asynchronous Tools work as expected.
     """
 

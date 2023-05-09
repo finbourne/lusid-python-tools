@@ -89,11 +89,8 @@ def upsert_transaction_type_alias(api_factory, new_transaction_config):
     # Define function to delete current alias if it already exists
 
     def delete_current_alias(updated_alias):
-
         for txn_index, trans_type in enumerate(transaction_configs_list):
-
             for alias_index, alias in enumerate(trans_type.aliases):
-
                 if (
                     alias.type == updated_alias.type
                     and alias.transaction_group == updated_alias.transaction_group

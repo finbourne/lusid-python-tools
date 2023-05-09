@@ -156,7 +156,6 @@ class CocoonTestsQuotes(unittest.TestCase):
         quotes_mapping_optional,
         expected_outcome,
     ) -> None:
-
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         # replace Valuation date values with numpy DateTime values

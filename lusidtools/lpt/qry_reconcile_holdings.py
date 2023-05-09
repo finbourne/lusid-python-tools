@@ -54,7 +54,9 @@ def run_query(
 
     # form reconciliation request
     request = api.models.PortfoliosReconciliationRequest(
-        left=left, right=right, instrument_property_keys=instr_props + [AGG_INSTR],
+        left=left,
+        right=right,
+        instrument_property_keys=instr_props + [AGG_INSTR],
     )
 
     return api.call.reconcile_holdings(portfolios_reconciliation_request=request).bind(

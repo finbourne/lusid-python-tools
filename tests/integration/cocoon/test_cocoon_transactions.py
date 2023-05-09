@@ -270,17 +270,17 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            batch_size,
-            expected_outcome,
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        batch_size,
+        expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -397,16 +397,16 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_properties_dicts(
-            self,
-            _,
-            scope,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            expected_property_scope,
-            expected_property_code,
+        self,
+        _,
+        scope,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        expected_property_scope,
+        expected_property_code,
     ) -> None:
         """
         Test that transactions
@@ -502,11 +502,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_data_frame_transactions_success_with_correct_unmatched_identifiers(
-            self,
-            _,
-            file_name,
-            return_unmatched_items,
-            expected_unmatched_transactions,
+        self,
+        _,
+        file_name,
+        return_unmatched_items,
+        expected_unmatched_transactions,
     ) -> None:
         """
         Test that transactions are uploaded and have the expected response from load_from_data_frame
@@ -587,7 +587,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-10")
     def test_return_unmatched_transactions_extracts_relevant_transactions_and_instruments(
-            self,
+        self,
     ):
         scope = "unmatched_transactions_test"
         code = "MIS_INST_FUND"
@@ -711,11 +711,11 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_filter_unmatched_transactions_method_only_returns_transactions_originally_present_in_dataframe(
-            self,
-            _,
-            data_frame_path,
-            unmatched_transactions,
-            expected_filtered_unmatched_transactions,
+        self,
+        _,
+        data_frame_path,
+        unmatched_transactions,
+        expected_filtered_unmatched_transactions,
     ):
         """
         Test that unmatched transactions that were not part of the current load_from_data_frame operation are
@@ -746,7 +746,7 @@ class CocoonTestsTransactions(unittest.TestCase):
 
     @lusid_feature("T8-14")
     def test_filter_unmatched_transactions_can_paginate_responses_for_2001_transactions_returned(
-            self,
+        self,
     ):
         """
         The GetTransactions API will only return up to 2,000 transactions per request. This test is to verify that
@@ -864,18 +864,18 @@ class CocoonTestsTransactions(unittest.TestCase):
         ]
     )
     def test_load_from_dataframe_non_existent_subholding_keys(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            property_columns,
-            properties_scope,
-            batch_size,
-            sub_holding_keys,
-            expected_sub_holdings_keys,
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        property_columns,
+        properties_scope,
+        batch_size,
+        sub_holding_keys,
+        expected_sub_holdings_keys,
     ):
         """
         This checks whether load_from_data_frame creates subholding keys for transactions when they don't already exist.
@@ -973,7 +973,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 None,
-                None
+                None,
             ],
             [
                 "Test standard transaction load with incorrect commit mode",
@@ -999,7 +999,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 "Not_a_valid_commit_mode",
-                None
+                None,
             ],
             [
                 "Test standard transaction load with partial commit mode",
@@ -1025,7 +1025,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 "Partial",
-                9
+                9,
             ],
             [
                 "Test standard transaction load with atomic commit mode",
@@ -1051,20 +1051,20 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 "Atomic",
-                9
+                9,
             ],
         ]
     )
     def test_load_from_data_frame_transactions_with_commit_mode(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            transactions_commit_mode,
-            expected_outcome
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        transactions_commit_mode,
+        expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -1082,7 +1082,10 @@ class CocoonTestsTransactions(unittest.TestCase):
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         # Act
-        if transactions_commit_mode is None or transactions_commit_mode not in ('Atomic', "Partial"):
+        if transactions_commit_mode is None or transactions_commit_mode not in (
+            "Atomic",
+            "Partial",
+        ):
             with self.assertRaises(KeyError):
                 cocoon.cocoon.load_from_data_frame(
                     api_factory=self.api_factory,
@@ -1091,7 +1094,7 @@ class CocoonTestsTransactions(unittest.TestCase):
                     mapping_required=mapping_required,
                     mapping_optional=mapping_optional,
                     file_type="transactions_with_commit_mode",
-                    identifier_mapping=identifier_mapping
+                    identifier_mapping=identifier_mapping,
                 )
             return True
 
@@ -1103,13 +1106,13 @@ class CocoonTestsTransactions(unittest.TestCase):
             mapping_optional=mapping_optional,
             file_type="transactions_with_commit_mode",
             transactions_commit_mode=transactions_commit_mode,
-            identifier_mapping=identifier_mapping
+            identifier_mapping=identifier_mapping,
         )
 
         # Assert
         self.assertEqual(
             len(response["transactions_with_commit_modes"]["success"][0].values),
-            expected_outcome
+            expected_outcome,
         )
 
     @parameterized.expand(
@@ -1138,21 +1141,20 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 "Atomic",
-                0
+                0,
             ],
-
         ]
     )
     def test_load_from_data_frame_transactions_with_atomic_commit_mode_expect_failures(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            transactions_commit_mode,
-            expected_outcome
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        transactions_commit_mode,
+        expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -1178,13 +1180,12 @@ class CocoonTestsTransactions(unittest.TestCase):
             mapping_optional=mapping_optional,
             file_type="transactions_with_commit_mode",
             transactions_commit_mode=transactions_commit_mode,
-            identifier_mapping=identifier_mapping
+            identifier_mapping=identifier_mapping,
         )
 
         # Assert
         self.assertEqual(
-            len(response["transactions_with_commit_modes"]["success"]),
-            expected_outcome
+            len(response["transactions_with_commit_modes"]["success"]), expected_outcome
         )
 
     @parameterized.expand(
@@ -1213,20 +1214,20 @@ class CocoonTestsTransactions(unittest.TestCase):
                     "Currency": "currency_transaction",
                 },
                 "Partial",
-                8
+                8,
             ]
         ]
     )
     def test_load_from_data_frame_transactions_with_partial_commit_mode_expect_failures(
-            self,
-            _,
-            scope,
-            file_name,
-            mapping_required,
-            mapping_optional,
-            identifier_mapping,
-            transactions_commit_mode,
-            expected_outcome
+        self,
+        _,
+        scope,
+        file_name,
+        mapping_required,
+        mapping_optional,
+        identifier_mapping,
+        transactions_commit_mode,
+        expected_outcome,
     ) -> None:
         """
         Test that transactions
@@ -1252,13 +1253,13 @@ class CocoonTestsTransactions(unittest.TestCase):
             mapping_optional=mapping_optional,
             file_type="transactions_with_commit_mode",
             transactions_commit_mode=transactions_commit_mode,
-            identifier_mapping=identifier_mapping
+            identifier_mapping=identifier_mapping,
         )
 
         # Assert
         self.assertEqual(
             len(response["transactions_with_commit_modes"]["success"][0].values),
-            expected_outcome
+            expected_outcome,
         )
 
     @classmethod

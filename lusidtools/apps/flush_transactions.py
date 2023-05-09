@@ -8,7 +8,8 @@ from lusidtools.logger import LusidLogger
 def parse(extend=None, args=None):
     return (
         stdargs.Parser(
-            "Flush Transactions", ["scope", "optional_portfolio", "date_range", "group", "flush_scope"],
+            "Flush Transactions",
+            ["scope", "optional_portfolio", "date_range", "group", "flush_scope"],
         )
         .extend(extend)
         .parse(args)
@@ -186,7 +187,9 @@ def get_portfolios_from_group(expanded_group):
     return temp_portfolio_lst
 
 
-def get_all_transactions_from_portfolio_list(args, portfolio_list, transaction_portfolios_api):
+def get_all_transactions_from_portfolio_list(
+    args, portfolio_list, transaction_portfolios_api
+):
     """
     Gets all transactions from the list of portfolio scope and codes that are passed in. Pagination is handled.
 
@@ -209,18 +212,16 @@ def get_all_transactions_from_portfolio_list(args, portfolio_list, transaction_p
     return {
         (portfolio_scope, portfolio_code): [
             transaction
-            for page
-            in get_paginated_txns(
+            for page in get_paginated_txns(
                 portfolio_scope,
                 portfolio_code,
                 args.start_date,
                 args.end_date,
                 transaction_portfolios_api,
             )
-            for transaction
-            in page.values]
-        for (portfolio_scope, portfolio_code)
-        in portfolio_list
+            for transaction in page.values
+        ]
+        for (portfolio_scope, portfolio_code) in portfolio_list
     }
 
 
@@ -250,19 +251,24 @@ def get_all_txns(args):
         )
         portfolio_lst = get_portfolios_from_group(portfolios_response)
 
-        return get_all_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
+        return get_all_transactions_from_portfolio_list(
+            args, portfolio_lst, transaction_portfolios_api
+        )
 
     elif args.flush_scope:
         # Get a list of all portfolios in the scope
         portfolios_api = api_factory.build(lusid.api.PortfoliosApi)
 
         portfolio_lst = [
-            (portfolio.id.scope, portfolio.id.code) for
-            portfolio in
-            portfolios_api.list_portfolios_for_scope(scope=args.scope).values
+            (portfolio.id.scope, portfolio.id.code)
+            for portfolio in portfolios_api.list_portfolios_for_scope(
+                scope=args.scope
+            ).values
         ]
 
-        return get_all_transactions_from_portfolio_list(args, portfolio_lst, transaction_portfolios_api)
+        return get_all_transactions_from_portfolio_list(
+            args, portfolio_lst, transaction_portfolios_api
+        )
 
     else:
         # Return the portfolio and scope passed in
@@ -283,17 +289,17 @@ def get_all_txns(args):
 
 def flush(args):
     """
-        Cancels all transactions found in a given date range for a portfolio, portfolio group or scope
+    Cancels all transactions found in a given date range for a portfolio, portfolio group or scope
 
-        Parameters
-        ----------
-        args : Namespace
-            The arguments taken in when command is run
+    Parameters
+    ----------
+    args : Namespace
+        The arguments taken in when command is run
 
-        Returns
-        ----------
-        Number of successful batches : int
-        Number of failed batches : int
+    Returns
+    ----------
+    Number of successful batches : int
+    Number of failed batches : int
     """
 
     # Initialise the api

@@ -21,13 +21,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_get_swagger_dict_success(self, _, api_url):
-
         swagger_dict = cocoon.utilities.get_swagger_dict(api_url=api_url)
 
         self.assertTrue(expr=isinstance(swagger_dict, dict))
 
     @lusid_feature("T14-3")
     def test_get_swagger_dict_fail(self):
-
         with self.assertRaises(ValueError):
             cocoon.utilities.get_swagger_dict(api_url="https://fbn-prd.lusid.com")

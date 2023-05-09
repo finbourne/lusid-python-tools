@@ -2,7 +2,6 @@ from IPython.core.display import display, HTML
 
 
 def toggle_code(button_message):
-
     toggle_code_str = f"""
     <form action="javascript:code_toggle()"><input type="submit" id="toggleButton" value="{button_message}"></form>
     """

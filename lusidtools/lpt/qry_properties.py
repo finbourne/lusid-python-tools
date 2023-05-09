@@ -27,7 +27,10 @@ def parse(extend=None, args=None):
 def process_args(api, args):
     def success(result):
         return lpt.trim_df(
-            lpt.to_df(result, ["scope", "domain", "code", "type", "display_name"],),
+            lpt.to_df(
+                result,
+                ["scope", "domain", "code", "type", "display_name"],
+            ),
             args.limit,
             sort=["scope", "domain", "code"],
         )
