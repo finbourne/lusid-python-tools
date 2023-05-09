@@ -92,18 +92,18 @@ class ComplexInstrumentTests(unittest.TestCase):
 
     def test_load_from_dataframe_bond(self) -> None:
         """
-            Test that instruments can be loaded successfully using load_from_data_frame()
+        Test that instruments can be loaded successfully using load_from_data_frame()
 
-            :param str scope: The scope of the portfolios to load the transactions into
-            :param str file_name: The name of the test data file
-            :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
-            :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
-            :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
-            :param list[str] property_columns: The columns to create properties for
-            :param str properties_scope: The scope to add the properties to
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
 
-            :return: None
-            """
+        :return: None
+        """
         # Load parameters
         scope = self.scope
         mapping_required = self.mapping_required
@@ -164,18 +164,18 @@ class ComplexInstrumentTests(unittest.TestCase):
 
     def test_load_from_dataframe_with_unsupported_inst_type(self) -> None:
         """
-            Tests that an invalid instrument_type raises a ValueError in load_from_data_frame()
+        Tests that an invalid instrument_type raises a ValueError in load_from_data_frame()
 
-            :param str scope: The scope of the portfolios to load the transactions into
-            :param str file_name: The name of the test data file
-            :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
-            :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
-            :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
-            :param list[str] property_columns: The columns to create properties for
-            :param str properties_scope: The scope to add the properties to
+        :param str scope: The scope of the portfolios to load the transactions into
+        :param str file_name: The name of the test data file
+        :param dict{str, str} mapping_required: The dictionary mapping the dataframe fields to LUSID's required base transaction/holding schema
+        :param dict{str, str} mapping_optional: The dictionary mapping the dataframe fields to LUSID's optional base transaction/holding schema
+        :param dict{str, str} identifier_mapping: The dictionary mapping of LUSID instrument identifiers to identifiers in the dataframe
+        :param list[str] property_columns: The columns to create properties for
+        :param str properties_scope: The scope to add the properties to
 
-            :return: None
-            """
+        :return: None
+        """
 
         # Load parameters
         scope = self.scope

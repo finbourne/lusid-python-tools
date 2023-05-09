@@ -18,7 +18,6 @@ logger = logging.getLogger()
 class CocoonTestPortfolioGroup(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-
         cls.portfolio_scope = create_scope_id()
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
@@ -41,7 +40,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
             return model
 
         try:
-
             for code in cls.unique_portfolios:
                 cls.api_factory.build(
                     lusid.api.TransactionPortfoliosApi
@@ -67,11 +65,13 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         cls,
         scope,
         data_frame,
-        mapping_optional={"values.scope": "Scope", "values.code": "FundCode",},
+        mapping_optional={
+            "values.scope": "Scope",
+            "values.code": "FundCode",
+        },
         property_columns=[],
         properties_scope=None,
     ):
-
         return cocoon.cocoon.load_from_data_frame(
             api_factory=cls.api_factory,
             scope=scope,
@@ -88,7 +88,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-1")
     def test_01_pg_create_with_portfolios(self) -> None:
-
         """
         Test description:
         ------------------
@@ -164,7 +163,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-2")
     def test_02_pg_create_with_no_portfolio(self) -> None:
-
         """
         Test description:
         -----------------
@@ -215,7 +213,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-3")
     def test_03_pg_create_multiple_groups_no_portfolio(self) -> None:
-
         """
         Test description:
         -----------------
@@ -261,7 +258,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-4")
     def test_04_pg_create_with_portfolio_not_exist(self):
-
         """
         Test description:
         -----------------
@@ -297,7 +293,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-5")
     def test_05_pg_create_with_duplicate_portfolios(self):
-
         """
         Test description:
         -----------------
@@ -363,7 +358,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-6")
     def test_06_pg_create_duplicate_port_group(self):
-
         """
         Test description:
         -----------------
@@ -402,7 +396,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-7")
     def test_07_pg_create_with_properties(self) -> None:
-
         """
         Test description:
         -----------------
@@ -431,7 +424,8 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         response_with_properties = self.api_factory.build(
             lusid.api.PortfolioGroupsApi
         ).get_group_properties(
-            scope=test_case_scope, code=data_frame["PortGroupCode"].tolist()[0],
+            scope=test_case_scope,
+            code=data_frame["PortGroupCode"].tolist()[0],
         )
 
         self.assertEqual(
@@ -458,7 +452,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-8")
     def test_08_pg_add_bad_portfolio(self):
-
         """
         Description:
         ------------
@@ -502,7 +495,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-9")
     def test_09_pg_add_duplicate_portfolio(self) -> None:
-
         """
         Description:
         ------------
@@ -544,7 +536,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-10")
     def test_10_pg_add_no_new_portfolio(self) -> None:
-
         """
         Test description:
         ------------
@@ -572,11 +563,13 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, create_portfolio_group_request=port_group_request,
+            scope=test_case_scope,
+            create_portfolio_group_request=port_group_request,
         )
 
         responses = self.cocoon_load_from_dataframe(
-            scope=test_case_scope, data_frame=data_frame,
+            scope=test_case_scope,
+            data_frame=data_frame,
         )
 
         self.log_error_requests_title("portfolio_groups", responses)
@@ -590,7 +583,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-11")
     def test_11_pg_add_bad_and_good_portfolios(self):
-
         """
         Test description:
         -----------------
@@ -651,7 +643,6 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
 
     @lusid_feature("T5-12")
     def test_12_pg_add_portfolios_different_scopes(self) -> None:
-
         """
         Test description:
         -----------------
@@ -690,11 +681,13 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         )
 
         self.api_factory.build(lusid.api.PortfolioGroupsApi).create_portfolio_group(
-            scope=test_case_scope, create_portfolio_group_request=port_group_request,
+            scope=test_case_scope,
+            create_portfolio_group_request=port_group_request,
         )
 
         responses = self.cocoon_load_from_dataframe(
-            scope=test_case_scope, data_frame=data_frame,
+            scope=test_case_scope,
+            data_frame=data_frame,
         )
 
         self.log_error_requests_title("portfolio_groups", responses)

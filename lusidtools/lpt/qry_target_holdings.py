@@ -22,7 +22,6 @@ def parse(extend=None, args=None):
 
 
 def process_args(api, args):
-
     taxlot_fields = [
         "units",
         "cost.currency",

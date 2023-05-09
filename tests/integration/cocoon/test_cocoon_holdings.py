@@ -1137,7 +1137,12 @@ class CocoonTestsHoldings(unittest.TestCase):
         ]
     )
     def test_failed_load_from_data_frame_holdings_returns_useful_errors_and_skips_validation_logic(
-        self, _, file_name, sub_holding_keys, error_name, skip_portfolio,
+        self,
+        _,
+        file_name,
+        sub_holding_keys,
+        error_name,
+        skip_portfolio,
     ) -> None:
         """
         Test that a failed holding upload is handled gracefully by the whole load_from_data_frame function.

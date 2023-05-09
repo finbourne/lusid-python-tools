@@ -4,7 +4,6 @@ import argparse
 
 
 class Parser:
-
     # Create a parser and add in the standard arguments
     def __init__(self, description, sections=[]):
         self.parser = argparse.ArgumentParser(
@@ -65,10 +64,7 @@ class Parser:
 
         if "optional_portfolio" in sections:
             self.add(
-                "-p",
-                "--portfolio",
-                dest="portfolio",
-                help="Optional Portfolio id"
+                "-p", "--portfolio", dest="portfolio", help="Optional Portfolio id"
             )
 
         if "flush_scope" in sections:
@@ -76,7 +72,7 @@ class Parser:
                 "--flush_scope",
                 dest="flush_scope",
                 action="store_true",
-                help="Flush all transactions in scope"
+                help="Flush all transactions in scope",
             )
 
         self.add(

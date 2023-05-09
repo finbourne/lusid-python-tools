@@ -20,7 +20,6 @@ txn_type_source = "LPT_TXN_CFG_TESTS"
 class CocoonTestTransactionTypeUpload(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -98,11 +97,11 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         ]
 
         for trans_type in cls.class_transaction_type_config:
-
             try:
-
-                cls.create_transaction_response = cls.system_configuration_api.create_configuration_transaction_type(
-                    transaction_configuration_data_request=trans_type
+                cls.create_transaction_response = (
+                    cls.system_configuration_api.create_configuration_transaction_type(
+                        transaction_configuration_data_request=trans_type
+                    )
                 )
 
             except lusid.exceptions.ApiException as e:
@@ -111,7 +110,6 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
     @lusid_feature("T13-1")
     def test_update_current_alias_with_new_movements(self):
-
         new_movements_alias = deepcopy(self.class_transaction_type_config)[0]
         new_movements_alias.movements[0].direction = -1
         new_movements_alias.movements[1].direction = -1
@@ -126,14 +124,16 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == new_movements_alias.aliases[0].type and alias.source == txn_type_source:
+                if (
+                    alias.type == new_movements_alias.aliases[0].type
+                    and alias.source == txn_type_source
+                ):
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias[0], new_movements_alias)
 
     @lusid_feature("T13-2")
     def test_update_alias_which_does_not_exist(self):
-
         alias_which_does_not_exist = deepcopy(self.class_transaction_type_config)[0]
         alias_which_does_not_exist.aliases[0].type = create_scope_id()
 
@@ -147,14 +147,16 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type == alias_which_does_not_exist.aliases[0].type and alias.source == txn_type_source:
+                if (
+                    alias.type == alias_which_does_not_exist.aliases[0].type
+                    and alias.source == txn_type_source
+                ):
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias[0], alias_which_does_not_exist)
 
     @lusid_feature("T13-3")
     def test_update_multiple_current_alias_with_new_movements(self):
-
         trans_type_with_multiple_alias = self.class_transaction_type_config.copy()
 
         trans_type_with_multiple_alias_1 = trans_type_with_multiple_alias[0]
@@ -175,7 +177,10 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
         for trans_type in get_transaction_types.transaction_configs:
             for alias in trans_type.aliases:
-                if alias.type in [new_buy_transaction_type, new_sell_transaction_type] and alias.source == txn_type_source:
+                if (
+                    alias.type in [new_buy_transaction_type, new_sell_transaction_type]
+                    and alias.source == txn_type_source
+                ):
                     uploaded_alias.append(trans_type)
 
         self.assertEqual(uploaded_alias, trans_type_with_multiple_alias)

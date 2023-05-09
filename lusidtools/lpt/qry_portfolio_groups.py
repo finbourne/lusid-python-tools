@@ -22,7 +22,13 @@ def process_args(api, args):
         return lpt.trim_df(df, args.limit, sort="id.code")
 
     def success_get_group(result):
-        df = lpt.to_df(result.content.portfolios, ["scope", "code",])
+        df = lpt.to_df(
+            result.content.portfolios,
+            [
+                "scope",
+                "code",
+            ],
+        )
         return lpt.trim_df(df, args.limit, sort=["scope", "code"])
 
     if args.group:

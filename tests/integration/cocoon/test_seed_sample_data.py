@@ -112,7 +112,8 @@ class CocoonSeedDataTestsBase(object):
         holdings_response = self.api_factory.build(
             lusid.api.TransactionPortfoliosApi
         ).get_holdings(
-            scope=self.scope, code=self.sample_data["portfolio_code"].to_list()[0],
+            scope=self.scope,
+            code=self.sample_data["portfolio_code"].to_list()[0],
         )
 
         list_of_prop_values = [
@@ -131,7 +132,6 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
 ):
     @classmethod
     def setUpClass(cls) -> None:
-
         cls.scope = create_scope_id().replace("-", "_")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -159,7 +159,6 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
 
     @lusid_feature("T12-6")
     def test_return_dict(self):
-
         seed_data = self.seed_data
 
         self.assertEqual(type(seed_data), dict)
@@ -271,7 +270,6 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
 
     @lusid_feature("T12-9")
     def test_inconsistent_file_extensions(self):
-
         self.file_extension = "xlsx"
 
         with self.assertRaises(ValueError) as error:
@@ -290,7 +288,6 @@ class CocoonTestSeedDataUnsupportedFile(unittest.TestCase):
 
     @lusid_feature("T12-10")
     def test_file_not_exist(self):
-
         self.transaction_file = "data/seed_sample_data/file_not_exist.csv"
 
         self.assertRaises(

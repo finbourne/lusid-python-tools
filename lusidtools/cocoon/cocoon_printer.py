@@ -61,17 +61,20 @@ class CocoonPrinter:
 
     def format_quotes_response(self):
         return format_quotes_response(
-            self.response, extended_error_details=self.extended_error_details,
+            self.response,
+            extended_error_details=self.extended_error_details,
         )
 
     def format_holdings_response(self):
         return format_holdings_response(
-            self.response, extended_error_details=self.extended_error_details,
+            self.response,
+            extended_error_details=self.extended_error_details,
         )
 
     def format_reference_portfolios_response(self):
         return format_reference_portfolios_response(
-            self.response, extended_error_details=self.extended_error_details,
+            self.response,
+            extended_error_details=self.extended_error_details,
         )
 
     def format_response(self):
@@ -198,14 +201,12 @@ def get_non_href_response(response: dict, file_type: str, data_entity_details=Fa
         return pd.DataFrame(value[0] for value in data_entity_dict)
 
     if data_entity_details:
-
         return (
             extract_value_details_from_success_request(dict_items_success),
             extract_value_details_from_success_request(dict_items_failed),
         )
 
     else:
-
         return (
             extract_key_details_from_success_request(dict_items_success),
             extract_key_details_from_success_request(dict_items_failed),
@@ -256,7 +257,8 @@ def format_instruments_response(
 
 
 def format_portfolios_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from portfolio requests and returns successful and errored statuses for
@@ -292,7 +294,8 @@ def format_portfolios_response(
 
 
 def format_transactions_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from transaction requests and returns successful and errored statuses for
@@ -336,7 +339,8 @@ def format_transactions_response(
 
 
 def format_holdings_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from holding requests and returns successful and errored statuses for
@@ -380,7 +384,8 @@ def format_holdings_response(
 
 
 def format_quotes_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from quotes requests and returns successful, failed and errored statuses for
@@ -420,7 +425,8 @@ def format_quotes_response(
 
 
 def format_reference_portfolios_response(
-    response: dict, extended_error_details: bool = False,
+    response: dict,
+    extended_error_details: bool = False,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
     This function unpacks a response from reference portfolio requests and returns successful and errored statuses for request constituents.

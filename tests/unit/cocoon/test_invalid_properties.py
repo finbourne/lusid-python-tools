@@ -32,7 +32,9 @@ class CocoonInvalidPropertiesTests(unittest.TestCase):
         with self.assertRaises(TypeError) as context:
             cocoon.properties.create_property_definitions_from_file(
                 api_factory=self.api_factory,
-                column_to_scope={column: "abc" for column in data_frame.columns.to_list()},
+                column_to_scope={
+                    column: "abc" for column in data_frame.columns.to_list()
+                },
                 domain="def",
                 data_frame=data_frame,
                 missing_property_columns=data_frame.columns.to_list(),
@@ -54,7 +56,11 @@ class CocoonInvalidPropertiesTests(unittest.TestCase):
     def test_create_property_values(self, _, row, dtypes, expected_message) -> None:
         with self.assertRaises(TypeError) as context:
             cocoon.properties.create_property_values(
-                row=row, scope="abc", domain="def", dtypes=dtypes, column_to_scope={column: "abc" for column in row}
+                row=row,
+                scope="abc",
+                domain="def",
+                dtypes=dtypes,
+                column_to_scope={column: "abc" for column in row},
             )
         self.assertTrue(
             expected_message in str(context.exception), str(context.exception)

@@ -56,7 +56,6 @@ def expected_response(property_scope="TestPropertiesScope1"):
 class CocoonTestsInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -300,7 +299,9 @@ class CocoonTestsInstruments(unittest.TestCase):
         # Assert that instruments has been assigned a scope value
         self.assertTrue(
             expr=all(
-                instrument.scope == instrument_scope if instrument_scope is not None else "default"
+                instrument.scope == instrument_scope
+                if instrument_scope is not None
+                else "default"
                 for response in responses["instruments"]["success"]
                 for instrument in response.values.values()
             )
@@ -511,7 +512,9 @@ class CocoonTestsInstruments(unittest.TestCase):
         )
 
     @lusid_feature("T4-13")
-    def test_load_instrument_properties(self,):
+    def test_load_instrument_properties(
+        self,
+    ):
         data_frame = pd.DataFrame(
             {
                 "instrument_name": [
@@ -628,7 +631,9 @@ class CocoonTestsInstruments(unittest.TestCase):
                     "data/lookthrough_instr_tests/load_lookthrough_instrument.csv"
                 ),
                 {
-                    "identifier_mapping": {"ClientInternal": "client_internal",},
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
                     "required": {"name": "instrument_name"},
                     "optional": {
                         "look_through_portfolio_id.scope": "lookthrough_scope",
@@ -642,7 +647,9 @@ class CocoonTestsInstruments(unittest.TestCase):
                     "data/lookthrough_instr_tests/mixed_lookthrough_instruments.csv"
                 ),
                 {
-                    "identifier_mapping": {"ClientInternal": "client_internal",},
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
                     "required": {"name": "instrument_name"},
                     "optional": {
                         "look_through_portfolio_id.scope": "lookthrough_scope",
@@ -656,7 +663,9 @@ class CocoonTestsInstruments(unittest.TestCase):
                     "data/lookthrough_instr_tests/mixed_instruments_default_scope.csv"
                 ),
                 {
-                    "identifier_mapping": {"ClientInternal": "client_internal",},
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
                     "required": {"name": "instrument_name"},
                     "optional": {
                         "look_through_portfolio_id.scope": "$test-lookthrough-loading-lusidtools",
@@ -670,7 +679,9 @@ class CocoonTestsInstruments(unittest.TestCase):
                     "data/lookthrough_instr_tests/mixed_lookthrough_instruments_multiple portfolios.csv"
                 ),
                 {
-                    "identifier_mapping": {"ClientInternal": "client_internal",},
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
                     "required": {"name": "instrument_name"},
                     "optional": {
                         "look_through_portfolio_id.scope": "$test-lookthrough-loading-lusidtools",
@@ -684,7 +695,9 @@ class CocoonTestsInstruments(unittest.TestCase):
                     "data/lookthrough_instr_tests/multiple_instruments_with_same_portfolio.csv"
                 ),
                 {
-                    "identifier_mapping": {"ClientInternal": "client_internal",},
+                    "identifier_mapping": {
+                        "ClientInternal": "client_internal",
+                    },
                     "required": {"name": "instrument_name"},
                     "optional": {
                         "look_through_portfolio_id.scope": "$test-lookthrough-loading-lusidtools",
@@ -695,7 +708,6 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
     )
     def test_load_instrument_lookthrough(self, _, df, mapping):
-
         if "default scope" in _:
             self.skipTest("Default parameter using '$' is not supported")
 
@@ -772,7 +784,8 @@ class CocoonTestsInstruments(unittest.TestCase):
         ]
         [
             self.api_factory.build(lusid.api.InstrumentsApi).delete_instrument(
-                "ClientInternal", CI,
+                "ClientInternal",
+                CI,
             )
             for CI in list(df["client_internal"])
         ]

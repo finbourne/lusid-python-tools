@@ -28,7 +28,6 @@ class CocoonExtractGroupHoldingsTests(unittest.TestCase):
         """
 
         def __init__(self, **override_init_kwargs):
-
             default_init_kwargs = {
                 "instrument_uid": "LUID_12345678",
                 "properties": {
@@ -185,7 +184,6 @@ class CocoonExtractGroupHoldingsTests(unittest.TestCase):
     def test_join_holdings(
         self, _, holdings_to_join, group_by_portfolio, dict_key, expected_outcome
     ):
-
         joined_holdings = _join_holdings(
             holdings_to_join=holdings_to_join,
             group_by_portfolio=group_by_portfolio,
