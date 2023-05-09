@@ -1,0 +1,6 @@
+.tox
+.venv
+.vscode
+.pytest_cache
+.docs
+.ci_tools

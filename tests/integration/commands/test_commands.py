@@ -189,7 +189,10 @@ class CommandsTests(unittest.TestCase):
 
         result = get_instr_id_types.main(
             parse=lambda: get_instr_id_types.parse(
-                args=["--secrets", f"{self.secrets_file}",]
+                args=[
+                    "--secrets",
+                    f"{self.secrets_file}",
+                ]
             ),
             display_df=self.display_df,
         )
@@ -200,7 +203,10 @@ class CommandsTests(unittest.TestCase):
 
         result = list_instruments.main(
             parse=lambda: list_instruments.parse(
-                args=["--secrets", f"{self.secrets_file}",]
+                args=[
+                    "--secrets",
+                    f"{self.secrets_file}",
+                ]
             ),
             display_df=self.display_df,
         )
