@@ -50,7 +50,6 @@ def seed_data(
         data_frame = transaction_file
 
     else:
-
         # Gather a dictionary of supported files
 
         supported_files = {"csv": "csv", "xlsx": "excel"}
@@ -97,7 +96,6 @@ def seed_data(
         return mapping
 
     def generic_load_from_data_frame(file_type):
-
         return (
             load_from_data_frame(
                 api_factory=api_factory,
@@ -120,7 +118,6 @@ def seed_data(
     mappings = check_or_set_default_value(mappings, "properties", [])
 
     for domain in domains:
-
         if domain not in mappings:
             raise ValueError(
                 f"The provided file_type of {domain} has no associated mapping"

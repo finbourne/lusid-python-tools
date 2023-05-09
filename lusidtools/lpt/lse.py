@@ -137,7 +137,12 @@ class Caller:
 
             # If successful, return the output as a 'right'
             if result[2].get("lusid-meta-success", "False") == "True":
-                return Either.Right(Rec(stats=statistics, content=result[0],))
+                return Either.Right(
+                    Rec(
+                        stats=statistics,
+                        content=result[0],
+                    )
+                )
             # Otherwise return a 'left' (a failure)
             return Either.Left(result[0])
 

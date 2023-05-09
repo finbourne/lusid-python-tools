@@ -147,7 +147,6 @@ def apply_args(args, given_df):
 
     if args.where:
         for c in args.where:
-
             # Get keys, values and operations
             kv = re.findall(r"[^>,<,=]+", c)
             ops = re.findall(r"[>,<,=]", c)

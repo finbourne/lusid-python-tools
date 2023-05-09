@@ -42,7 +42,6 @@ def parse(extend=None, args=None):
 
 
 def process_args(api, args):
-
     if len(args.dates) == 1:
         return run_query(api, args, args.dates[0]).bind(lambda x: x[1])
     else:
@@ -99,7 +98,6 @@ def process_args(api, args):
             )
 
         def finished(error=None):
-
             if error is not None:
                 lpt.display_error(error)
 

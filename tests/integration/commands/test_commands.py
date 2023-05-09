@@ -73,7 +73,6 @@ class CommandsTests(unittest.TestCase):
 
     @unittest.skip("Calling list scopes in CI will be a very lengthy test.")
     def test_scopes(self):
-
         result = scopes.main(
             parse=lambda: scopes.parse(args=["--secrets", f"{self.secrets_file}"]),
             display_df=self.display_df,
@@ -82,7 +81,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_agg(self):
-
         result = agg.main(
             parse=lambda: agg.parse(
                 args=[
@@ -99,7 +97,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_portfolios(self):
-
         result = portfolios.main(
             parse=lambda: portfolios.parse(
                 args=[self.test_scope, "--secrets", f"{self.secrets_file}"]
@@ -109,7 +106,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_instr(self):
-
         result = get_instruments.main(
             parse=lambda: get_instruments.parse(
                 args=[self.test_scope, "--secrets", f"{self.secrets_file}"]
@@ -119,7 +115,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_list_portfolio_group(self):
-
         result = list_portfolio_group.main(
             parse=lambda: list_portfolio_group.parse(
                 args=[self.test_scope, "--secrets", f"{self.secrets_file}"]
@@ -129,7 +124,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_port_props(self):
-
         result = get_port_props.main(
             parse=lambda: get_port_props.parse(
                 args=[
@@ -147,7 +141,6 @@ class CommandsTests(unittest.TestCase):
         "Jira: SENG-40 - Property search was deprecated and this query requires updating"
     )
     def test_get_props(self):
-
         result = get_props.main(
             parse=lambda: get_props.parse(args=["--secrets", f"{self.secrets_file}"]),
             display_df=self.display_df,
@@ -155,7 +148,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_port_cons(self):
-
         result = get_port_cons.main(
             parse=lambda: get_port_cons.parse(
                 args=[
@@ -171,7 +163,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_port_holdings(self):
-
         result = get_port_holdings.main(
             parse=lambda: get_port_holdings.parse(
                 args=[
@@ -186,7 +177,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_instr_id_types(self):
-
         result = get_instr_id_types.main(
             parse=lambda: get_instr_id_types.parse(
                 args=[
@@ -200,7 +190,6 @@ class CommandsTests(unittest.TestCase):
 
     @unittest.skip("Listing all instruments in CI may be a very lengthy process")
     def test_list_instruments(self):
-
         result = list_instruments.main(
             parse=lambda: list_instruments.parse(
                 args=[
@@ -213,7 +202,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_port_commands(self):
-
         result = get_port_commands.main(
             parse=lambda: get_port_commands.parse(
                 args=[self.test_scope, "abc", "--secrets", f"{self.secrets_file}"]
@@ -223,7 +211,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_dict(result)
 
     def test_get_holdings_adj(self):
-
         result = get_holdings_adj.main(
             parse=lambda: get_holdings_adj.parse(
                 args=[
@@ -239,7 +226,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_get_transactions(self):
-
         result = get_transactions.main(
             parse=lambda: get_transactions.parse(
                 args=[
@@ -255,7 +241,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_search_instruments(self):
-
         result = search_instruments.main(
             parse=lambda: search_instruments.parse(
                 args=[
@@ -271,7 +256,6 @@ class CommandsTests(unittest.TestCase):
         self.validate_results_df(result)
 
     def test_create_group_portfolios(self):
-
         data_file = (
             Path(__file__).parent.joinpath("data").joinpath("ExampleData.xlsx:Groups")
         )
@@ -289,7 +273,6 @@ class CommandsTests(unittest.TestCase):
         )
 
     def test_create_portfolio(self):
-
         portfolio = f"pf-{str(uuid.uuid4())}"
 
         up.main(
@@ -309,7 +292,6 @@ class CommandsTests(unittest.TestCase):
         )
 
     def test_upload_quotes(self):
-
         data_file = (
             Path(__file__).parent.joinpath("data").joinpath("ExampleData.xlsx:Quotes")
         )

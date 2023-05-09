@@ -138,6 +138,5 @@ class CocoonDateOrCutLabelTests(unittest.TestCase):
     def test_dateorcutlabel_with_custom_format(
         self, test_name, datetime_value, custom_format, expected_outcome
     ):
-
         date_or_cut_label = DateOrCutLabel(datetime_value, custom_format)
         self.assertEqual(first=expected_outcome, second=str(date_or_cut_label.data))

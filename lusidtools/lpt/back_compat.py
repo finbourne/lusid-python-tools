@@ -1,7 +1,6 @@
 # Make backwards compatibility adjustments
 # When reading old files
 def convert(frame_type, df):
-
     # Security is now known as instrument_id
     if "security_uid" in df.columns.values:
         df.rename(columns={"security_uid": "instrument_uid"}, inplace=True)

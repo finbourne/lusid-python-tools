@@ -9,12 +9,10 @@ from collections import UserString
 
 class RefreshingToken(UserString):
     def __init__(self, token_url, token_request_body, headers):
-
         token_data = {"expires": datetime.now(), "credentials": ""}
 
         def get_token():
             if token_data["expires"] <= datetime.now():
-
                 okta_response = requests.post(
                     token_url, data=token_request_body, headers=headers
                 )

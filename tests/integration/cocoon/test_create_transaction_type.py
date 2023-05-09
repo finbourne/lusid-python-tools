@@ -13,7 +13,6 @@ from lusidtools.cocoon.transaction_type_upload import (
 
 
 class CocoonTestTransactionTypeUpload(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
@@ -58,7 +57,6 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
     @lusid_feature("T9-1")
     def test_create_new_txn_type(self):
-
         """
         Create a new transaction type.
         Verify that the new transaction type is created.
@@ -73,7 +71,8 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         ][0]
 
         self.assertEqual(
-            set(new_alias.to_dict().items()), set(self.alias.to_dict().items()),
+            set(new_alias.to_dict().items()),
+            set(self.alias.to_dict().items()),
         )
 
         self.assertEqual(
@@ -94,14 +93,12 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
 
     @lusid_feature("T9-2")
     def test_create_duplication_txn_type_throws_error(self):
-
         """
         Attempt to create a transaction type which already exists.
         Verify that function returns the correct log message.
         """
 
         with self.assertLogs() as context_manager:
-
             create_transaction_type_configuration(
                 self.api_factory, self.alias, self.movements
             )

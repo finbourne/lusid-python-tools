@@ -23,7 +23,6 @@ def set_transaction_mapping(client, transaction_mapping):
 
     # Iterate over your configurations in the default mapping
     for configuration in transaction_mapping["values"]:
-
         # Initialise your list of aliases for this configuration
         aliases = []
 
@@ -45,7 +44,6 @@ def set_transaction_mapping(client, transaction_mapping):
 
         # Iterate over the movements in the impoted config
         for movement in configuration["movements"]:
-
             # Add properties if they exist in the config
             if len(movement["properties"]) > 0:
                 key = movement["properties"][0]["key"]

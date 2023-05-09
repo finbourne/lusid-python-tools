@@ -50,7 +50,9 @@ def process_args(api, args):
         df = df.groupby("Scopes", as_index=False).sum()
 
     return lpt.trim_df(
-        df, args.limit, sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
+        df,
+        args.limit,
+        sort=["Scope", "Portfolio"] if args.portfolios else "Scopes",
     )
 
 

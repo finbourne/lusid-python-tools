@@ -21,7 +21,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_check_allowed_value_success(self, _, value, value_name, allowed_values):
-
         Validator(value, value_name).check_allowed_value(allowed_values)
 
     @parameterized.expand(
@@ -66,7 +65,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_check_allowed_value_exception(
         self, _, value, value_name, allowed_values, expected_exception
     ):
-
         with self.assertRaises(expected_exception):
             Validator(value, value_name).check_allowed_value(allowed_values)
 
@@ -89,7 +87,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_make_singular(self, _, value, value_name, expected_outcome):
-
         singular = Validator(value, value_name).make_singular()
 
         self.assertIsInstance(singular, Validator)
@@ -105,7 +102,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_make_lower(self, _, value, value_name, expected_outcome):
-
         lower_case = Validator(value, value_name).make_lower()
 
         self.assertIsInstance(lower_case, Validator)
@@ -128,7 +124,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_set_default_value_if_none(
         self, _, value, value_name, default, expected_outcome
     ):
-
         updated_value = Validator(value, value_name).set_default_value_if_none(default)
 
         self.assertIsInstance(updated_value, Validator)
@@ -152,7 +147,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_override_value(
         self, _, value, value_name, override_flag, override_value, expected_outcome
     ):
-
         updated_value = Validator(value, value_name).override_value(
             override_flag, override_value
         )
@@ -190,7 +184,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_discard_dict_keys_none_value(self, _, value, value_name, expected_outcome):
-
         update_dict = Validator(value, value_name).discard_dict_keys_none_value()
 
         self.assertIsInstance(update_dict, Validator)
@@ -223,7 +216,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_get_dict_values(self, _, value, value_name, expected_outcome):
-
         dict_values = Validator(value, value_name).get_dict_values()
 
         self.assertIsInstance(dict_values, Validator)
@@ -258,7 +250,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_filter_list_using_first_character(
         self, _, value, value_name, first_character, expected_outcome
     ):
-
         updated_list = Validator(value, value_name).filter_list_using_first_character(
             first_character
         )
@@ -281,7 +272,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_check_subset_of_list_success(
         self, _, value, value_name, superset, superset_name
     ):
-
         Validator(value, value_name).check_subset_of_list(superset, superset_name)
 
     @parameterized.expand(
@@ -299,7 +289,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_check_subset_of_list_exception(
         self, _, value, value_name, superset, superset_name, expected_exception
     ):
-
         with self.assertRaises(expected_exception):
             Validator(value, value_name).check_subset_of_list(superset, superset_name)
 
@@ -317,7 +306,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_check_no_intersection_with_list_success(
         self, _, value, value_name, other_list, list_name
     ):
-
         Validator(value, value_name).check_no_intersection_with_list(
             other_list, list_name
         )
@@ -337,7 +325,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_check_no_intersection_with_list_exception(
         self, _, value, value_name, other_list, list_name, expected_exception
     ):
-
         with self.assertRaises(expected_exception):
             Validator(value, value_name).check_no_intersection_with_list(
                 other_list, list_name
