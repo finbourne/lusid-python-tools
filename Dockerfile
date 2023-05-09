@@ -4,4 +4,4 @@ WORKDIR /usr/src
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
 RUN poetry install --only dev
-ENTRYPOINT poetry run tox
+ENTRYPOINT poetry run tox -e lint_and_test
