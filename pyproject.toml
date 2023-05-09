@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "lusidtools"
+version = "2.0.0a0"
+description = "Python Tools for LUSID"
+authors = ["FINBOURNE Technology"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://www.lusid.com/app/home"
+repository = "https://github.com/finbourne/lusid-python-tools"
+keywords = ["FINBOURNE", "LUSID", "LUSID API", "python"]
+exclude = ["tests*"]
+
+[tool.poetry.scripts]
+upsert_portfolios = "lusidtools.apps.upsert_portfolios:main"
+lusidtools = "lusidtools.commands.commands:main"
+upsert_instruments = "lusidtools.apps.upsert_instruments:main"
+upsert_holdings = "lusidtools.apps.upsert_holdings:main"
+upsert_quotes = "lusidtools.apps.upsert_quotes:main"
+upsert_transactions= "lusidtools.apps.upsert_transactions:main"
+flush_transactions = "lusidtools.apps.flush_transactions:main"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+urllib3 = ">=1.26.9"
+requests = ">=2.27.1"
+coloredlogs = ">=14.0"
+detect-delimiter = ">=0.1"
+flatten-json = ">=0.1.7"
+pandas = ">=1.1.4"
+PyYAML = ">=5.4"
+tqdm = ">=4.52.0"
+openpyxl = ">=3.0.7"
+xlrd = ">=1.2,<2.0"
+pytz = ">=2019.3"
+ipython = ">=7.31.1"
+lusid-sdk-preview = ">=0.11.4425, < 2"
+lusidfeature = "^0.2.4"
+finbourne-access-sdk = "^0.0.2857"
+finbourne-identity-sdk = "^0.0.2331"
+numpy = ">=1.21.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+parameterized = "^0.8.1"
+unittest-parallel = "^1.5.3"
+tox = "^4.4.7"
+coverage = {extras = ["toml"], version = "^7.2.2"}
+
+[tool.coverage.run]
+source = ["lusidtools"]
+branch = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
