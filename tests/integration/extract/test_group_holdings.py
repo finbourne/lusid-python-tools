@@ -118,7 +118,6 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
     def check_holdings_correct(
         self, group_holdings, expected_values, lusid_results_keyed
     ):
-
         # Check that there are the right number of results and they have the correct keys
         self.assertSetEqual(set(group_holdings.keys()), set(expected_values.keys()))
 
@@ -129,7 +128,6 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
 
         # Iterate over each result
         for portfolio, holdings in group_holdings.items():
-
             # Key the result by the instrument name
             holdings_by_instrument_name = {
                 holding.properties["Instrument/default/Name"].value.label_value: holding
@@ -353,7 +351,6 @@ class CocoonTestsExtractGroupHoldings(unittest.TestCase):
     def test_get_holdings_for_group_grouped_by_portfolio(
         self, _, group_code, group_by_portfolio, expected_results
     ) -> None:
-
         # Get the group holdings
         group_holdings = get_holdings_for_group(
             api_factory=self.api_factory,

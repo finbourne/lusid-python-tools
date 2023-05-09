@@ -41,9 +41,7 @@ def parse(extend=None, args=None):
 
 
 def process_args(api, args):
-
     if len(args.dates) <= 1:
-
         # Successful query of a single date
         def success(result):
             (stats, df) = result
@@ -57,7 +55,6 @@ def process_args(api, args):
         ).bind(success)
 
     else:
-
         i = [1]
         records = []
 

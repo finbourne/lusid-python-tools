@@ -315,8 +315,16 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     },
                 },
                 pd.Series(
-                    data=["GlobalCreditFund", "SingaporeBranch", "PORT_12490FKS9",],
-                    index=["instrument_name", "lookthrough_scope", "lookthrough_code",],
+                    data=[
+                        "GlobalCreditFund",
+                        "SingaporeBranch",
+                        "PORT_12490FKS9",
+                    ],
+                    index=[
+                        "instrument_name",
+                        "lookthrough_scope",
+                        "lookthrough_code",
+                    ],
                 ),
                 instr_def(
                     lusid.models.ResourceId(
@@ -347,8 +355,13 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     ),
                 },
                 [],
-                {"name": "instrument_name",},
-                pd.Series(data=["GlobalCreditFund"], index=["instrument_name"],),
+                {
+                    "name": "instrument_name",
+                },
+                pd.Series(
+                    data=["GlobalCreditFund"],
+                    index=["instrument_name"],
+                ),
                 instr_def(),
             ],
             # Test building a CreateTransactionPortfolioRequest
@@ -732,7 +745,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "S&PCreditRating(UK)ThisIsAReallyLongCodeThatExceedsTheCharacterLimit",
                 ValueError,
             ],
-            ["Code cannot be converted to a string", ReturnBytes(), Exception,],
+            [
+                "Code cannot be converted to a string",
+                ReturnBytes(),
+                Exception,
+            ],
         ]
     )
     def test_make_code_lusid_friendly_failure(
@@ -827,7 +844,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["Test on ResourceId where the model does exist", "ResourceId", True,],
+            [
+                "Test on ResourceId where the model does exist",
+                "ResourceId",
+                True,
+            ],
             ["Test where it is a string does not exist at all", "str", False],
             [
                 "Test where it is inside a dictionary",
@@ -1035,7 +1056,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         ]
                     }
                 ),
-                {"name": {"column": "instrument_name",}},
+                {
+                    "name": {
+                        "column": "instrument_name",
+                    }
+                },
                 [
                     pd.DataFrame(
                         data={
@@ -1063,7 +1088,11 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         ]
                     }
                 ),
-                {"name": {"default": "unknown_name",}},
+                {
+                    "name": {
+                        "default": "unknown_name",
+                    }
+                },
                 [
                     pd.DataFrame(
                         data={
@@ -1565,7 +1594,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         )
 
         with self.assertRaises(AssertionError):
-
             self.assertListEqual(4, len(list(dataframe["instrument_name"])))
             self.assertListEqual(expected_values, list(dataframe["instrument_name"]))
             self.assertDictEqual(mappings_expected_value, mappings_test)
@@ -1608,7 +1636,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
         identifier_mapping = {"Figi": "figi"}
 
         mappings = {
-            file_type: {"identifier_mapping": identifier_mapping,},
+            file_type: {
+                "identifier_mapping": identifier_mapping,
+            },
             "cash_flag": cash_flag,
         }
         mappings_expected_value = copy.deepcopy(mappings)
@@ -1684,7 +1714,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
         identifier_mapping = {"Figi": "figi"}
 
         mappings = {
-            file_type: {"identifier_mapping": identifier_mapping,},
+            file_type: {
+                "identifier_mapping": identifier_mapping,
+            },
             "cash_flag": cash_flag,
         }
         mappings_expected_value = copy.deepcopy(mappings)
@@ -1734,7 +1766,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         self.assertEqual(first=expected_outcome, second=scope_id)
 
     def test_create_scope_id_uuid_success(self):
-
         scope_id = create_scope_id(use_uuid=True)
 
         self.assertTrue(uuid.UUID(scope_id))
@@ -1754,7 +1785,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
         ]
     )
     def test_create_scope_id_failure(self, _, time_generator, expected_exception):
-
         with self.assertRaises(expected_exception):
             create_scope_id(time_generator)
 
@@ -1783,7 +1813,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_get_required_attributes_from_model(
         self, _, model_object, expected_outcome
     ):
-
         required_attributes = cocoon.utilities.get_required_attributes_from_model(
             model_object
         )
@@ -1812,7 +1841,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_extract_lusid_model_from_attribute_type(
         self, _, attribute_type, expected_attribute, expected_nested
     ):
-
         (
             attribute_type,
             nested_type,
@@ -1958,7 +1986,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_default_fx_forward_model_success(
         self, _, df, df_gt, mapping, mapping_gt, fun1, fun2
     ):
-
         df_test, mapping_test = default_fx_forward_model(df, "FW", fun1, fun2, mapping)
 
         self.assertIsNone(
@@ -2012,15 +2039,15 @@ class CocoonUtilitiesTests(unittest.TestCase):
         self, _, df_with_no_fx_transactions, mapping, expected_exception
     ):
         """
-                This tests that an exception is raised if a set of transactions is passed in  and do not contain
-                any transactions with an fx type as defined by the fx_code parameter.
+        This tests that an exception is raised if a set of transactions is passed in  and do not contain
+        any transactions with an fx type as defined by the fx_code parameter.
 
-                :param pd.dataFrame df_with_no_fx_transactions : input set of transactions with no fx transactions
-                :param dict mapping: fx transactions mapping
-                :param expected_exception: expected exception on missing fx transaction
+        :param pd.dataFrame df_with_no_fx_transactions : input set of transactions with no fx transactions
+        :param dict mapping: fx transactions mapping
+        :param expected_exception: expected exception on missing fx transaction
 
-                :return: None
-                """
+        :return: None
+        """
 
         with self.assertRaises(expected_exception):
             default_fx_forward_model(
@@ -2033,18 +2060,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace one single matching value standard syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2053,18 +2098,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2073,18 +2136,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace two matching values standard standard syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2093,18 +2174,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2", "a3"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2113,18 +2212,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace all matching search values standard syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2133,18 +2250,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2153,8 +2288,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace one single matching value default-column syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2162,12 +2303,21 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "old"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2176,8 +2326,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2185,12 +2341,21 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "new"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2199,8 +2364,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace two matching values default-column syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2208,7 +2379,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "old"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
@@ -2216,7 +2390,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "old"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2225,8 +2402,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2", "a3"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2234,7 +2417,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "new"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
@@ -2242,7 +2428,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "new"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2251,8 +2440,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace all matching search values default-column syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2260,7 +2455,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "old"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
@@ -2268,7 +2466,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "old"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2277,8 +2478,14 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "new",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "new",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
@@ -2286,7 +2493,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "new"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
@@ -2294,7 +2504,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
                             "c1": "old",
                             "c2": {"default": "NotFound", "column": "new"},
                         },
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2303,18 +2516,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace one single matching value constant syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2323,18 +2554,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2343,18 +2592,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace two matching values constant syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2363,18 +2630,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 ["a2", "a3"],
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2383,18 +2668,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "Replace all matching search values constant syntax",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": "$old",},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": "$old",
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2403,18 +2706,36 @@ class CocoonUtilitiesTests(unittest.TestCase):
                 "",
                 {
                     "a1": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a2": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                     "a3": {
-                        "b1": {"c1": "old", "c2": {"default": "old", "column": "new"},},
-                        "b2": {"c3": "old", "c4": "old",},
+                        "b1": {
+                            "c1": "old",
+                            "c2": {"default": "old", "column": "new"},
+                        },
+                        "b2": {
+                            "c3": "old",
+                            "c4": "old",
+                        },
                         "b3": {"c5": "old", "c6": "old"},
                     },
                 },
@@ -2424,7 +2745,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     def test_update_dict_value(
         self, _, d, search_key, new_value, top_level_values_to_search, gt
     ):
-
         dict_test = update_dict_value(
             d, search_key, new_value, top_level_values_to_search
         )
@@ -2710,7 +3030,6 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
         )
 
     def test_group_request_into_one_holdings(self):
-
         holding_requests = [
             models.HoldingAdjustment(
                 instrument_identifiers="TEST_ID",
@@ -2781,7 +3100,6 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
         )
 
     def test_group_request_into_one_bad_model(self):
-
         holding_requests = [
             models.HoldingAdjustment(
                 instrument_identifiers="TEST_ID",
@@ -2826,7 +3144,6 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
         )
 
     def test_group_request_into_one_empty_list(self):
-
         holding_requests = [
             models.HoldingAdjustment(
                 instrument_identifiers="TEST_ID",

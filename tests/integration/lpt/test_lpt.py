@@ -29,7 +29,12 @@ class LptTests(unittest.TestCase):
         if personal_access_token is None:
             cls.api = lse.connect(secrets=secrets_file, stats="-")  # stats to stdout
         else:
-            cls.api = lse.connect(env=["token"], apiUrl=os.getenv("FBN_LUSID_API_URL"), token=personal_access_token, stats="-")  # stats to stdout
+            cls.api = lse.connect(
+                env=["token"],
+                apiUrl=os.getenv("FBN_LUSID_API_URL"),
+                token=personal_access_token,
+                stats="-",
+            )  # stats to stdout
 
         # delete the properties that are created in the tests
         properties = [
@@ -94,7 +99,6 @@ class LptTests(unittest.TestCase):
         self.assertTrue("Missing the following config" in str(context.exception))
 
     def test_load_instruments(self):
-
         # Load instruments from the file: examples/ibm-msft.csv
         ci.process_args(
             self.api,
@@ -116,7 +120,6 @@ class LptTests(unittest.TestCase):
         ).if_left(lambda r: self.fail(r))
 
     def test_create_properties(self):
-
         # Create Properties
         result = cp.process_args(
             self.api,
@@ -135,7 +138,6 @@ class LptTests(unittest.TestCase):
             result.if_left(lambda left: self.fail(lpt.display_error(left)))
 
     def test_upload_holding(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -156,7 +158,6 @@ class LptTests(unittest.TestCase):
         )
 
     def test_upload_multiple_holdings(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -178,7 +179,6 @@ class LptTests(unittest.TestCase):
         )
 
     def test_upload_transactions(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -199,7 +199,6 @@ class LptTests(unittest.TestCase):
         )
 
     def test_upload_multiple_transaction(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -220,7 +219,6 @@ class LptTests(unittest.TestCase):
         )
 
     def test_get_holdings(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -231,7 +229,6 @@ class LptTests(unittest.TestCase):
         )
 
     def test_aggregate_holdings(self):
-
         if not self.target_portfolios_exist():
             self.skipTest("missing target portfolios")
 
@@ -254,7 +251,9 @@ class LptTests(unittest.TestCase):
             ),
         ).match(
             lambda left: self.fail(lpt.display_error(left)),
-            lambda right: self.assertIsInstance(right, DataFrame, f"{right} is not of type DataFrame"),
+            lambda right: self.assertIsInstance(
+                right, DataFrame, f"{right} is not of type DataFrame"
+            ),
         )
 
     def test_reconcile_holdings(self):

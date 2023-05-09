@@ -94,12 +94,14 @@ class AppTests(unittest.TestCase):
         if not all(x in existing_portfolios for x in cls.test_list):
             for portfolio in cls.test_list:
                 if portfolio not in existing_portfolios:
-                    transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
-                        display_name=portfolio,
-                        code=portfolio,
-                        base_currency="GBP",
-                        created="2018-03-05T12:00:00+00:00",
-                        sub_holding_keys=[f"Transaction/{cls.testscope}/currency"],
+                    transaction_portfolio_request1 = (
+                        lusid.models.CreateTransactionPortfolioRequest(
+                            display_name=portfolio,
+                            code=portfolio,
+                            base_currency="GBP",
+                            created="2018-03-05T12:00:00+00:00",
+                            sub_holding_keys=[f"Transaction/{cls.testscope}/currency"],
+                        )
                     )
                     transactions_portfolio_response1 = cls.transaction_portfolios_api.create_portfolio(
                         scope=cls.testscope,
@@ -131,11 +133,13 @@ class AppTests(unittest.TestCase):
             if not all(x in existing_portfolios for x in cls.groups_test_list):
                 for portfolio in cls.groups_test_list:
                     if portfolio not in existing_portfolios:
-                        transaction_portfolio_request1 = lusid.models.CreateTransactionPortfolioRequest(
-                            display_name=portfolio,
-                            code=portfolio,
-                            base_currency="GBP",
-                            created="2018-03-05T12:00:00+00:00",
+                        transaction_portfolio_request1 = (
+                            lusid.models.CreateTransactionPortfolioRequest(
+                                display_name=portfolio,
+                                code=portfolio,
+                                base_currency="GBP",
+                                created="2018-03-05T12:00:00+00:00",
+                            )
                         )
                         cls.transaction_portfolios_api.create_portfolio(
                             scope=scope,
@@ -194,7 +198,6 @@ class AppTests(unittest.TestCase):
         )
 
     def test_upsert_instruments_with_valid_mapping(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("instruments.csv")
@@ -223,7 +226,6 @@ class AppTests(unittest.TestCase):
         )
 
     def test_upsert_instruments_with_invalid_mapping(self):
-
         args = self.invalid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("instruments.csv")
@@ -253,7 +255,6 @@ class AppTests(unittest.TestCase):
         )
 
     def test_upsert_holdings_with_valid_mapping(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("holdings.csv")
@@ -265,7 +266,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, len(responses["holdings"]["success"]))
 
     def test_upsert_holdings_with_invalid_mapping(self):
-
         args = self.invalid_args.copy()
         file_type = "holdings"
         test_data_root = Path(__file__).parent.joinpath("test_data")
@@ -278,7 +278,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(0, len(responses["holdings"]["success"]))
 
     def test_upsert_transactions_with_valid_mapping(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = self.valid_transactions
@@ -290,7 +289,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, len(responses["transactions"]["success"]))
 
     def test_upsert_transactions_with_invalid_mapping(self):
-
         args = self.invalid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = self.valid_transactions
@@ -302,7 +300,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(0, len(responses["transactions"]["success"]))
 
     def test_upsert_transactions_with_empty_column_name(self):
-
         args = self.invalid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = self.valid_transactions
@@ -320,7 +317,6 @@ class AppTests(unittest.TestCase):
         )
 
     def test_upsert_quotes_with_valid_mapping(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("quotes.csv")
@@ -335,7 +331,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(14, len(succ))
 
     def test_upsert_quotes_with_missing_cash_flag(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("quotes_minimal.csv")
@@ -350,7 +345,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(6, len(succ))
 
     def test_upsert_quotes_with_valid_mapping_check_scaled_values(self):
-
         args = self.valid_args.copy()
         test_data_root = Path(__file__).parent.joinpath("test_data")
         args["file_path"] = test_data_root.joinpath("quotes.csv")
@@ -437,7 +431,7 @@ class AppTests(unittest.TestCase):
                         "2020-02-20T00:00:00.0000000+00:00",
                         "-e",
                         "2020-02-28T23:59:59.0000000+00:00",
-                        "--flush_scope"
+                        "--flush_scope",
                     ]
                 ),
                 6,
@@ -451,7 +445,7 @@ class AppTests(unittest.TestCase):
                         "2020-02-18T00:00:00.0000000+00:00",
                         "-e",
                         "2020-02-28T23:59:59.0000000+00:00",
-                        "--flush_scope"
+                        "--flush_scope",
                     ]
                 ),
                 4,
@@ -465,7 +459,7 @@ class AppTests(unittest.TestCase):
                         "2017-02-10T00:00:00.0000000+00:00",
                         "-e",
                         "2020-02-28T23:59:59.0000000+00:00",
-                        "--flush_scope"
+                        "--flush_scope",
                     ]
                 ),
                 0,

@@ -332,7 +332,6 @@ class CocoonPropertiesTests(unittest.TestCase):
     def test_infer_full_property_keys(
         self, _, partial_keys, properties_scope, domain, expected_outcome
     ):
-
         full_keys = cocoon.properties._infer_full_property_keys(
             partial_keys=partial_keys, properties_scope=properties_scope, domain=domain
         )

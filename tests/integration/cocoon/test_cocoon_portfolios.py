@@ -263,7 +263,6 @@ class CocoonTestsPortfolios(unittest.TestCase):
             return
 
         for portfolio_code in response_codes:
-
             portfolio_details = self.api_factory.build(
                 lusid.api.TransactionPortfoliosApi
             ).get_details(scope=scope, code=portfolio_code)
@@ -323,7 +322,6 @@ class CocoonTestsPortfolios(unittest.TestCase):
         from lusid.exceptions import ApiValueError
 
         with self.assertRaises(ApiValueError):
-
             responses = (
                 cocoon.cocoon.load_from_data_frame(
                     api_factory=self.api_factory,
@@ -400,7 +398,9 @@ class CocoonTestsPortfolios(unittest.TestCase):
             response = self.api_factory.build(
                 lusid.api.PropertyDefinitionsApi
             ).get_property_definition(
-                domain="Portfolio", scope=properties_scope, code=property_column,
+                domain="Portfolio",
+                scope=properties_scope,
+                code=property_column,
             )
             self.assertEqual(
                 f"Portfolio/{properties_scope}/{property_column}", response.key

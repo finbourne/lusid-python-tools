@@ -147,7 +147,6 @@ class CocoonInstrumentsTests(unittest.TestCase):
     def test_enrich_instruments(
         self, _, file_name, mapping_required, instrument_identifier_mapping
     ):
-
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         data_frame_updated, mapping_required = asyncio.run_coroutine_threadsafe(

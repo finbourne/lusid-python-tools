@@ -12,7 +12,7 @@ class TestResponseToPandasObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
-        
+
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.api_factory = lusid.utilities.ApiClientFactory(
             api_secrets_filename=secrets_file
@@ -116,7 +116,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_response_to_df(self):
-
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
             version=1, values=[self.holding_no_props_1, self.holding_no_props_2]
         )
@@ -126,13 +125,11 @@ class TestResponseToPandasObject(unittest.TestCase):
         self.assertEqual(holdings_df.loc[0]["instrument_uid"], "LUID_XQ6VSO8F")
 
     def test_instrument_response_to_df(self):
-
         instrument_df = lusid_response_to_data_frame(self.test_instrument_response_1)
         self.assertEqual(type(instrument_df), pd.DataFrame)
         self.assertEqual(instrument_df.loc["lusid_instrument_id"][0], "LUID_TEST1")
 
     def test_transaction_alias_response_to_df(self):
-
         transaction_alias_response = lusid.models.transaction_configuration_type_alias.TransactionConfigurationTypeAlias(
             type="Buy",
             description="Purchase",
@@ -154,17 +151,14 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_response_to_df_fail(self):
-
         self.assertRaises(
             TypeError, lambda: lusid_response_to_data_frame("test_string")
         )
 
     def test_response_none(self):
-
         self.assertRaises(TypeError, lambda: lusid_response_to_data_frame(None))
 
     def test_response_to_df_format(self):
-
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
             version=1, values=[self.holding_1]
         )
@@ -182,7 +176,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         self.assertNotIn("JunkBadColumn(SubHoldingKey)", df_columns)
 
     def test_response_to_df_rename_mapping_format(self):
-
         rename_mapping = {
             "instrument_uid": "Instrument ID",
             "holding_type": "Holding Type",
@@ -214,7 +207,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_response_to_df_rename_mapping_no_format(self):
-
         rename_mapping = {
             "instrument_uid": "Instrument ID",
             "holding_type": "Holding Type",
@@ -248,7 +240,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_response_to_df_rename_mapping_with_column_not_exist(self):
-
         rename_mapping = {
             "instrument_uid": "Instrument ID",
             "holding_type": "Holding Type",
@@ -281,7 +272,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         self.assertNotIn("settled_units", df_columns)
 
     def test_response_to_df_rename_property(self):
-
         rename_mapping = {
             "instrument_uid": "Instrument ID",
             "holding_type": "Holding Type",
@@ -328,7 +318,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_list_of_lusid_objects(self):
-
         list_response = [
             self.test_instrument_response_1,
             self.test_instrument_response_2,
@@ -355,9 +344,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_list_of_different_lusid_objects(self):
-
         with self.assertRaises(TypeError) as error:
-
             list_response = [
                 self.test_instrument_response_1,
                 self.test_instrument_response_2,
@@ -367,13 +354,12 @@ class TestResponseToPandasObject(unittest.TestCase):
             lusid_response_to_data_frame(list_response)
 
         self.assertEqual(
-            error.exception.args[0], "All items in list must be of the same data type",
+            error.exception.args[0],
+            "All items in list must be of the same data type",
         )
 
     def test_list_of_same_lusid_objects_no_to_dict(self):
-
         with self.assertRaises(TypeError) as error:
-
             bad_list = ["random_string_1", "random_string_2"]
 
             lusid_response_to_data_frame(bad_list)
@@ -384,7 +370,6 @@ class TestResponseToPandasObject(unittest.TestCase):
         )
 
     def test_empty_list_lusid_response(self):
-
         empty_list = []
 
         empty_df = lusid_response_to_data_frame(empty_list)

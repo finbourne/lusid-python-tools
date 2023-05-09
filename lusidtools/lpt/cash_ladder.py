@@ -16,7 +16,6 @@ TOOLTIP = "Demo Cash-Ladder report"
 
 
 def cash_ladder(api, scope, portfolio, date):
-
     qry_date = pd.to_datetime(date, utc=True)
 
     # Function to make sure there are cash positions

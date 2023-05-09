@@ -7,7 +7,6 @@ class Validator:
         self.value_name = value_name
 
     def check_is_not_instance(self, instance_type):
-
         if isinstance(self.value, instance_type):
             raise TypeError(
                 f"The {self.value_name} must be of type {str(instance_type)}, you supplied '{str(type(self.value))}' instead."

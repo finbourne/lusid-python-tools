@@ -30,7 +30,6 @@ def process_args(api, args):
 
     # Sort the dataframe in order for the sub-groups to be created before the groups (takes care of the dependency sub-group group)
     def sorted_group_df(df):
-
         df_sorted = df[df[SUB_GROUPS].isnull()]
         df_not_sorted = df[df[SUB_GROUPS].notnull()]
 
