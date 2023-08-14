@@ -188,10 +188,10 @@ def resolve_instruments(
     _data_frame = data_frame.copy(deep=True)
 
     # Set up the result Pandas Series to track resolution
-    found_with = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
-    resolvable = pd.Series(index=_data_frame.index, dtype=np.dtype(bool))
-    luid = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
-    comment = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
+    found_with : pd.Series = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
+    resolvable : pd.Series = pd.Series(index=_data_frame.index, dtype=np.dtype(bool))
+    luid : pd.Series = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
+    comment : pd.Series = pd.Series(index=_data_frame.index, dtype=np.dtype(object))
     logging.info("Beginning instrument resolution process")
     # Iterate over each row in the DataFrame
     for index, row in _data_frame.iterrows():

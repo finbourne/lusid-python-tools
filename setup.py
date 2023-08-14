@@ -20,7 +20,7 @@ setup(
         "coloredlogs>=14.0",
         "detect_delimiter>=0.1",
         "flatten-json>=0.1.7",
-        "pandas>=1.1.4",
+        "pandas>=2.0.0",
         "PyYAML>=5.4",
         "tqdm>=4.52.0",
         "openpyxl>=3.0.7",
