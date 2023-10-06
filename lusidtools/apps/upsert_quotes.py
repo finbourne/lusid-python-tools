@@ -1,7 +1,7 @@
 import logging
 import sys
 import lusid
-from lusid.utilities import ApiClientFactory
+from lusid.extensions import ApiClientFactory, EnvironmentVariablesConfigurationLoader, SecretsFileConfigurationLoader
 from lusidtools.cocoon import (
     load_from_data_frame,
     load_data_to_df_and_detect_delimiter,
@@ -20,7 +20,7 @@ def load_quotes(args):
     file_type = "quotes"
 
     # create ApiFactory
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    factory = ApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(),SecretsFileConfigurationLoader(args["secrets_file"])))
 
     # get data
     if args["delimiter"]:

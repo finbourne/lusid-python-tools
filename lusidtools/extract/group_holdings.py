@@ -109,14 +109,14 @@ def _join_holdings(
 
 @run_in_executor
 def _get_portfolio_group(
-    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str, **kwargs
+    api_factory: lusid.extensions.ApiClientFactory, scope: str, code: str, **kwargs
 ) -> lusid.models.PortfolioGroup:
     """
     This function gets a Portfolio Group from LUSID.
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     scope : str
         The scope of the Portfolio Group
@@ -144,23 +144,21 @@ def _get_portfolio_group(
     }
 
     # Call LUSID to get the portfolio group
-    response = lusid.api.PortfolioGroupsApi(
-        api_factory.build(lusid.api.PortfolioGroupsApi)
-    ).get_portfolio_group(scope=scope, code=code, **lusid_keyword_arguments)
+    response = api_factory.build(lusid.api.PortfolioGroupsApi).get_portfolio_group(scope=scope, code=code, **lusid_keyword_arguments)
 
     return response
 
 
 @run_in_executor
 def _get_portfolio_holdings(
-    api_factory: lusid.utilities.ApiClientFactory, scope: str, code: str, **kwargs
+    api_factory: lusid.extensions.ApiClientFactory, scope: str, code: str, **kwargs
 ) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function gets the holdings of a Portfolio from LUSID.
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     scope : str
         The scope of the Portfolio
@@ -203,16 +201,14 @@ def _get_portfolio_holdings(
     }
 
     # Call LUSID to get the holdings for the Portfolio
-    response = lusid.api.TransactionPortfoliosApi(
-        api_factory.build(lusid.api.TransactionPortfoliosApi)
-    ).get_holdings(scope=scope, code=code, **lusid_keyword_arguments)
+    response = api_factory.build(lusid.api.TransactionPortfoliosApi).get_holdings(scope=scope, code=code, **lusid_keyword_arguments)
 
     # Key the response with the unique scope/code combination
     return {f"{scope} : {code}": response.values}
 
 
 async def _get_holdings_for_group_recursive(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     group_scope: str,
     group_code: str,
     group_by_portfolio=False,
@@ -224,7 +220,7 @@ async def _get_holdings_for_group_recursive(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     group_scope : str
         The scope of the Portfolio Group
@@ -337,7 +333,7 @@ async def _get_holdings_for_group_recursive(
 
 
 def get_holdings_for_group(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     group_scope: str,
     group_code: str,
     group_by_portfolio: bool = False,
@@ -349,7 +345,7 @@ def get_holdings_for_group(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     group_scope : str
         The scope of the Portfolio Group

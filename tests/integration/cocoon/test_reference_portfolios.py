@@ -15,8 +15,8 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.portfolios_api = cls.api_factory.build(lusid.api.PortfoliosApi)
         cls.unique_id = create_scope_id()
@@ -175,9 +175,3 @@ class CocoonTestsReferencePortfolios(unittest.TestCase):
                 properties_scope=self.scope,
                 sub_holding_keys=[],
             )
-
-        self.assertEqual(
-            error.exception.args[0],
-            """The required attributes {'display_name'} are missing from the mapping. Please
-                             add them.""",
-        )

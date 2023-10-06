@@ -97,7 +97,7 @@ class Caller:
             startTime = datetime.datetime.now()
             try:
                 result = fn(*args, **(adjKwargs))
-                request_id = result[2].get("lusid-meta-requestId", "n/a")
+                request_id = result.headers.get("lusid-meta-requestId", "n/a")
             except self.exceptionClass as err:
                 data = {} if err.body == "" or err.body == b"" else json.loads(err.body)
 
@@ -105,9 +105,8 @@ class Caller:
                 s = instance.split("insights/logs/")
                 request_id = "n/a" if len(s) != 2 else s[1]
 
-                result = [
-                    Rec(
-                        status=err.status,
+                result = Rec(
+                        status_code=err.status,
                         reason=err.reason,
                         code=data.get("code", "n/a"),
                         message=data.get("title", "n/a"),
@@ -115,10 +114,10 @@ class Caller:
                         items=data.get("errorDetails", []),
                         instance=instance,
                         requestId=request_id,
-                    ),
-                    err.status,
-                    {},
-                ]
+                        headers = err.headers,
+                        data=data
+                    )
+                    
 
             endTime = datetime.datetime.now()
 
@@ -127,8 +126,8 @@ class Caller:
                 startTime=startTime,
                 endTime=endTime,
                 duration=(endTime - startTime).total_seconds(),
-                elapsed=float(result[2].get("lusid-meta-duration", 0)) / 1000,
-                status=result[1],
+                elapsed=float(result.headers.get("lusid-meta-duration", 0)) / 1000,
+                status=result.status_code,
                 requestId=request_id,
             )
 
@@ -136,15 +135,15 @@ class Caller:
                 self.stats.append(statistics)
 
             # If successful, return the output as a 'right'
-            if result[2].get("lusid-meta-success", "False") == "True":
+            if result.headers.get("lusid-meta-success", "False") == "True":
                 return Either.Right(
                     Rec(
                         stats=statistics,
-                        content=result[0],
+                        content=result.data,
                     )
                 )
             # Otherwise return a 'left' (a failure)
-            return Either.Left(result[0])
+            return Either.Left(result.data)
 
         return callApiFn
 

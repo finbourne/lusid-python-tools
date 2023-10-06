@@ -7,7 +7,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 import lusid.models as models
-from lusid.utilities import ApiClientFactory
+from lusid.extensions import ApiClientFactory
 from lusidtools import logger
 from datetime import datetime
 import pytz
@@ -17,8 +17,8 @@ class ComplexInstrumentTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
         cls.instruments_api = cls.api_factory.build(lusid.api.InstrumentsApi)
@@ -80,8 +80,8 @@ class ComplexInstrumentTests(unittest.TestCase):
                 name="DISNEY_7_2032",
                 # unique instrument identifier
                 identifiers={
-                    "ClientInternal": models.InstrumentIdValue("imd_34534538"),
-                    "Isin": models.InstrumentIdValue("US25468PBW59"),
+                    "ClientInternal": models.InstrumentIdValue(value="imd_34534538"),
+                    "Isin": models.InstrumentIdValue(value="US25468PBW59"),
                 },
                 # instrument definition
                 definition=instrument_definition,
@@ -114,7 +114,7 @@ class ComplexInstrumentTests(unittest.TestCase):
         expected_outcome = self.expected_response()
 
         # Load data frame with instrument data
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name), dtype = {})
 
         responses = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,

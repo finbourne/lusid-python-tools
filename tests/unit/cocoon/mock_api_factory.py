@@ -3,10 +3,13 @@ from http import HTTPStatus
 import lusid
 
 
-class MockApiFactory(lusid.utilities.ApiClientFactory):
+class MockApiFactory(lusid.extensions.ApiClientFactory):
     """
-    This is a mock of the lusid.utilities.ApiClientFactory class
+    This is a mock of the lusid.extensions.ApiClientFactory class
     """
+    def __init__(self, config_loaders):
+        pass
+
 
     def build(self, api):
         """

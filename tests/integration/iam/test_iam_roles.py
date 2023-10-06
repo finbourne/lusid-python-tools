@@ -22,27 +22,13 @@ class IAMTestsRoles(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
-
-        # Get the LUSID API URL and the access token from the current api_factory
-        api_client = cls.api_factory.api_client
-        lusid_api_url = api_client.configuration.host
-        access_token = api_client.configuration.access_token
-
-        # Build the access and identity API URLs from the LUSID API URL
-        access_api_url = lusid_api_url[: lusid_api_url.rfind("/") + 1] + "access"
-        identity_api_url = lusid_api_url[: lusid_api_url.rfind("/") + 1] + "identity"
 
         # Build the access and identity API factories
-        cls.access_api_factory = finbourne_access.utilities.ApiClientFactory(
-            token=access_token, access_url=access_api_url
-        )
-        cls.identity_api_factory = finbourne_identity.utilities.ApiClientFactory(
-            token=access_token,
-            api_url=identity_api_url,
-        )
+        cls.access_api_factory = finbourne_access.utilities.ApiClientFactory()
+        cls.identity_api_factory = finbourne_identity.utilities.ApiClientFactory()
 
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 

@@ -11,12 +11,11 @@ from typing import Callable
 import lusid
 import numpy as np
 import pandas as pd
-from pandas.util.testing import assert_frame_equal, assert_series_equal
+from pandas.util.testing import assert_frame_equal
 import pytz
 from parameterized import parameterized
 from lusidtools import cocoon
 from lusidtools.cocoon.utilities import (
-    checkargs,
     get_delimiter,
     check_mapping_fields_exist,
     identify_cash_items,
@@ -32,22 +31,18 @@ from lusidtools import logger
 import lusid.models as models
 
 
-@checkargs
 def checkargs_list(a_list: list):
     return isinstance(a_list, list)
 
 
-@checkargs
 def checkargs_dict(a_dict: dict):
     return isinstance(a_dict, dict)
 
 
-@checkargs
 def checkargs_tuple(a_tuple: tuple):
     return isinstance(a_tuple, tuple)
 
 
-@checkargs
 def checkargs_function(a_function: Callable):
     return isinstance(a_function, Callable)
 
@@ -61,16 +56,16 @@ def instr_def(look_through_portfolio_id=None):
             ),
             "Instrument/default/Ticker": lusid.models.InstrumentIdValue(value="IBM"),
         },
-        properties={
-            "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+        properties=[
+            lusid.models.PerpetualProperty(
                 key="Instrument/CreditRatings/Moodys",
                 value=lusid.models.PropertyValue(label_value="A2"),
             ),
-            "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+            lusid.models.PerpetualProperty(
                 key="Instrument/CreditRatings/SandP",
                 value=lusid.models.PropertyValue(label_value="A-"),
             ),
-        },
+        ],
         look_through_portfolio_id=look_through_portfolio_id,
     )
 
@@ -288,16 +283,16 @@ class CocoonUtilitiesTests(unittest.TestCase):
             [
                 "Test building an InstrumentDefinition",
                 lusid.models.InstrumentDefinition,
-                {
-                    "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                [
+                    lusid.models.PerpetualProperty(
                         key="Instrument/CreditRatings/Moodys",
                         value=lusid.models.PropertyValue(label_value="A2"),
                     ),
-                    "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                    lusid.models.PerpetualProperty(
                         key="Instrument/CreditRatings/SandP",
                         value=lusid.models.PropertyValue(label_value="A-"),
                     ),
-                },
+                ],
                 {
                     "Instrument/default/Figi": lusid.models.InstrumentIdValue(
                         value="BBG000BLNNH6"
@@ -336,16 +331,16 @@ class CocoonUtilitiesTests(unittest.TestCase):
             [
                 "Test building an InstrumentDefinition with no lookthrough instrument",
                 lusid.models.InstrumentDefinition,
-                {
-                    "Instrument/CreditRatings/Moodys": lusid.models.PerpetualProperty(
+                [
+                    lusid.models.PerpetualProperty(
                         key="Instrument/CreditRatings/Moodys",
                         value=lusid.models.PropertyValue(label_value="A2"),
                     ),
-                    "Instrument/CreditRatings/SandP": lusid.models.PerpetualProperty(
+                    lusid.models.PerpetualProperty(
                         key="Instrument/CreditRatings/SandP",
                         value=lusid.models.PropertyValue(label_value="A-"),
                     ),
-                },
+                ],
                 {
                     "Instrument/default/Figi": lusid.models.InstrumentIdValue(
                         value="BBG000BLNNH6"
@@ -593,20 +588,17 @@ class CocoonUtilitiesTests(unittest.TestCase):
                         "Instrument/default/Figi": "BBG000BLNNH6",
                         "Instrument/default/Ticker": "IBM",
                     },
-                    properties={
-                        "Holding/Operations/MarketDataVendor": lusid.models.PerpetualProperty(
-                            key="Holding/Operations/MarketDataVendor",
-                            value=lusid.models.PropertyValue(label_value="ipsum_lorem"),
-                        ),
-                        "Holding/Operations/MarketValBaseCurrency": lusid.models.PerpetualProperty(
+                    properties={"Holding/Operations/MarketDataVendor":lusid.models.PerpetualProperty(
+                        key="Holding/Operations/MarketDataVendor",
+                        value=lusid.models.PropertyValue(label_value="ipsum_lorem")),
+                        "Holding/Operations/MarketValBaseCurrency":lusid.models.PerpetualProperty(
                             key="Holding/Operations/MarketValBaseCurrency",
                             value=lusid.models.PropertyValue(
                                 metric_value=lusid.models.MetricValue(
                                     value=4567002.43, unit="GBP"
                                 )
-                            ),
-                        ),
-                    },
+                            )
+                    )},
                     sub_holding_keys={
                         "Transaction/Operations/Strategy_Tag": lusid.models.PerpetualProperty(
                             key="Transaction/Operations/Strategy_Tag",
@@ -821,7 +813,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     }
                 },
                 lusid.models.InstrumentDefinition,
-                ["name", "identifiers.value"],
+                ["name", "identifiers"],
             ]
         ]
     )
@@ -852,10 +844,10 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ["Test where it is a string does not exist at all", "str", False],
             [
                 "Test where it is inside a dictionary",
-                "dict(str, InstrumentIdValue)",
+                "Dict(str, InstrumentIdValue)",
                 True,
             ],
-            ["Test where it is inside a list", "list[ModelProperty]", True],
+            ["Test where it is inside a list", "conlist(ModelProperty)", True],
         ]
     )
     def test_check_nested_model(
@@ -923,9 +915,9 @@ class CocoonUtilitiesTests(unittest.TestCase):
     @parameterized.expand(
         [
             # Test no required attributes provided via an empty dictionary
-            [{}, lusid.models.InstrumentDefinition, ValueError],
+            [{}, lusid.models.InstrumentDefinition.__name__, ValueError],
             # Test no required attributes required via None provided
-            [None, lusid.models.InstrumentDefinition, TypeError],
+            [None, lusid.models.InstrumentDefinition.__name__, ValueError],
             # Test a missing required attribute
             [
                 {
@@ -938,7 +930,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
                     "total_consideration.amount": "amount",
                     "total_consideration.currency": "trade_currency",
                 },
-                lusid.models.TransactionRequest,
+                lusid.models.TransactionRequest.__name__,
                 ValueError,
             ],
         ]
@@ -959,7 +951,7 @@ class CocoonUtilitiesTests(unittest.TestCase):
         with self.assertRaises(expected_exception):
             cocoon.utilities.verify_all_required_attributes_mapped(
                 mapping=mapping,
-                model_object=model_object,
+                model_object_name=model_object,
                 exempt_attributes=[
                     "identifiers",
                     "properties",
@@ -1235,114 +1227,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            # Test properties_scope as a list
-            [
-                cocoon.cocoon.load_from_data_frame,
-                TypeError,
-                [
-                    lusid.utilities.ApiClientFactory(
-                        api_secrets_filename=Path(
-                            __file__
-                        ).parent.parent.parent.joinpath("secrets.json")
-                    ),
-                    "test_scope",
-                    pd.DataFrame(),
-                    {"name": "instrument_name"},
-                    {"definition.format": "json"},
-                    "instrument",
-                ],
-                {
-                    "identifier_mapping": {},
-                    "property_columns": [],
-                    "properties_scope": ["help"],
-                },
-            ],
-            # Test with no keyword arguments and a Pandas Series instead of a DataFrame
-            [
-                cocoon.cocoon.load_from_data_frame,
-                TypeError,
-                [
-                    lusid.utilities.ApiClientFactory(
-                        api_secrets_filename=Path(
-                            __file__
-                        ).parent.parent.parent.joinpath("secrets.json")
-                    ),
-                    "test_scope",
-                    pd.Series(),
-                    {"name": "instrument_name"},
-                    {"definition.format": "json"},
-                    "instrument",
-                ],
-                {},
-            ],
-            # Test properties_scope as a list but as the first keyword argument
-            [
-                cocoon.cocoon.load_from_data_frame,
-                TypeError,
-                [
-                    lusid.utilities.ApiClientFactory(
-                        api_secrets_filename=Path(
-                            __file__
-                        ).parent.parent.parent.joinpath("secrets.json")
-                    ),
-                    "test_scope",
-                    pd.DataFrame(),
-                    {"name": "instrument_name"},
-                    {"definition.format": "json"},
-                    "instrument",
-                ],
-                {
-                    "properties_scope": ["help"],
-                    "identifier_mapping": {},
-                    "property_columns": [],
-                },
-            ],
-            # Test identifier_mapping as a string but as a positional argument
-            [
-                cocoon.cocoon.load_from_data_frame,
-                TypeError,
-                [
-                    lusid.utilities.ApiClientFactory(
-                        api_secrets_filename=Path(
-                            __file__
-                        ).parent.parent.parent.joinpath("secrets.json")
-                    ),
-                    "test_scope",
-                    pd.DataFrame(),
-                    {"name": "instrument_name"},
-                    {"definition.format": "json"},
-                    "instrument",
-                    "instrument_identifiers: figi",
-                ],
-                {"properties_scope": ["help"], "property_columns": []},
-            ],
-            # Test identifier_mapping as None with a properties scope as a list
-            [
-                cocoon.cocoon.load_from_data_frame,
-                TypeError,
-                [
-                    lusid.utilities.ApiClientFactory(
-                        api_secrets_filename=Path(
-                            __file__
-                        ).parent.parent.parent.joinpath("secrets.json")
-                    ),
-                    "test_scope",
-                    pd.DataFrame(),
-                    {"name": "instrument_name"},
-                    {"definition.format": "json"},
-                    "instrument",
-                    None,
-                ],
-                {"properties_scope": ["help"], "property_columns": []},
-            ],
-        ]
-    )
-    def test_checkargs_lusid(self, function, expected_exception, args, kwargs):
-        with self.assertRaises(expected_exception):
-            function(*args, **kwargs)
-
-    @parameterized.expand(
-        [
             ("list_string", checkargs_list, ["a", "b", "c"]),
             ("list_number", checkargs_list, [1, 2, 3]),
             ("dict_string", checkargs_dict, {"a": "b"}),
@@ -1353,26 +1237,6 @@ class CocoonUtilitiesTests(unittest.TestCase):
     )
     def test_checkargs(self, _, function, param):
         self.assertTrue(function(param))
-
-    @parameterized.expand(
-        [
-            ("list_string", checkargs_list, {}),
-            ("list_none", checkargs_list, None),
-            ("dict_string", checkargs_dict, "a"),
-            ("dict_string", checkargs_dict, None),
-            ("function", checkargs_function, []),
-            ("function", checkargs_function, None),
-        ]
-    )
-    def test_checkargs_with_incorrect_type(self, _, function, param):
-        with self.assertRaises(TypeError):
-            function(param)
-
-    @parameterized.expand([["list_string", checkargs_list, {"b_list": []}]])
-    def test_checkargs_with_invalid_argument(self, _, function, kwargs):
-        with self.assertRaises(ValueError):
-            function(**kwargs)
-
     @parameterized.expand(
         [
             (
@@ -1829,13 +1693,13 @@ class CocoonUtilitiesTests(unittest.TestCase):
             ],
             [
                 "A dict type with a LUSID model",
-                "dict(str, ModelProperty)",
+                "Dict(str, ModelProperty)",
                 "ModelProperty",
                 "dict",
             ],
-            ["A dict type with a primitive value", "dict(str, str)", "str", "dict"],
-            ["A list type with a LUSID model", "list[TaxLot]", "TaxLot", "list"],
-            ["A list type with a primitive value", "list[str]", "str", "list"],
+            ["A dict type with a primitive value", "Dict(str, str)", "str", "dict"],
+            ["A list type with a LUSID model", "conlist(TaxLot)", "TaxLot", "list"],
+            ["A list type with a primitive value", "conlist(str)", "str", "list"],
         ]
     )
     def test_extract_lusid_model_from_attribute_type(
@@ -2937,12 +2801,12 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 display_name=port_group,
                 values=[models.ResourceId(scope="TEST1", code="PORT1")],
                 properties={
-                    "test": models.ModelProperty(key="test", value="prop1"),
-                    "test2": models.ModelProperty(key="test", value="prop2"),
+                    "test": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop1")),
+                    "test2": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop2")),
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2950,11 +2814,11 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 values=[models.ResourceId(scope="TEST1", code="PORT2")],
                 sub_groups=None,
                 properties={
-                    "test3": models.ModelProperty(key="test", value="prop3"),
-                    "test2": models.ModelProperty(key="test", value="prop4"),
+                    "test3": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop3")),
+                    "test2": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop4")),
                 },
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2962,7 +2826,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 values=[models.ResourceId(scope="TEST1", code="PORT3")],
                 sub_groups=None,
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2970,7 +2834,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 values=[models.ResourceId(scope="TEST1", code="PORT4")],
                 sub_groups=None,
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
         ]
 
@@ -2993,12 +2857,12 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                     lusid.models.ResourceId(code="PORT4", scope="TEST1"),
                 ],
                 properties={
-                    "test": models.ModelProperty(key="test", value="prop1"),
-                    "test2": models.ModelProperty(key="test", value="prop2"),
+                    "test": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop1")),
+                    "test2": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop2")),
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
         )
 
@@ -3019,22 +2883,22 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                     lusid.models.ResourceId(code="PORT4", scope="TEST1"),
                 ],
                 properties={
-                    "test": models.ModelProperty(key="test", value="prop1"),
-                    "test2": models.ModelProperty(key="test", value="prop4"),
-                    "test3": models.ModelProperty(key="test", value="prop3"),
+                    "test": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop1")),
+                    "test2": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop4")),
+                    "test3": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop3")),
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01",
+                created="2019-01-01T00:00",
             ),
         )
 
     def test_group_request_into_one_holdings(self):
         holding_requests = [
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3042,15 +2906,15 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3058,8 +2922,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
@@ -3074,9 +2938,9 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
         self.assertEqual(
             first=list_grouped_request,
             second=models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3084,16 +2948,16 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     ),
                     models.TargetTaxLot(
                         units=20,
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     ),
                 ],
             ),
@@ -3102,9 +2966,9 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
     def test_group_request_into_one_bad_model(self):
         holding_requests = [
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3112,15 +2976,15 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3128,8 +2992,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
@@ -3146,9 +3010,9 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
     def test_group_request_into_one_empty_list(self):
         holding_requests = [
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3156,15 +3020,15 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3172,8 +3036,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
@@ -3190,9 +3054,9 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
     def test_group_request_into_one_index_greater_than_range(self):
         holding_requests = [
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3200,15 +3064,15 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),
             models.HoldingAdjustment(
-                instrument_identifiers="TEST_ID",
+                instrument_identifiers={"TEST_ID":"TEST_LUID"},
                 instrument_uid="TEST_LUID",
-                sub_holding_keys="Startegy1",
+                sub_holding_keys=dict(TEST_ID=lusid.models.PerpetualProperty(key="Startegy1")),
                 properties=None,
                 tax_lots=[
                     models.TargetTaxLot(
@@ -3216,8 +3080,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20",
-                        settlement_date="2020-02-22",
+                        purchase_date="2020-02-20T00:00",
+                        settlement_date="2020-02-22T00:00",
                     )
                 ],
             ),

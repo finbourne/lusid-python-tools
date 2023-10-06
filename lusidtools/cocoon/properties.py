@@ -1,6 +1,5 @@
 from typing import List
 
-from lusidtools.cocoon.utilities import checkargs
 from lusidtools import cocoon
 import lusid
 import pandas as pd
@@ -20,16 +19,15 @@ global_constants = {
 }
 
 
-@checkargs
 def check_property_definitions_exist_in_scope_single(
-    api_factory: lusid.utilities.ApiClientFactory, property_key: str
+    api_factory: lusid.extensions.ApiClientFactory, property_key: str
 ) -> (bool, str):
     """
     This function takes a list of property keys and looks to see which property definitions already exist inside LUSID
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The ApiFactory to use
     property_key: str
         The property key to get from LUSID
@@ -65,9 +63,8 @@ def check_property_definitions_exist_in_scope_single(
     return exists, data_type
 
 
-@checkargs
 def check_property_definitions_exist_in_scope(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     domain: str,
     data_frame: pd.DataFrame,
     target_columns: list,
@@ -78,7 +75,7 @@ def check_property_definitions_exist_in_scope(
 
     Parameters
     ----------
-    api_factory :   lusid.utilities.ApiClientFactory
+    api_factory :   lusid.extensions.ApiClientFactory
         The Api Factory to use
     domain : str
         The domain to check for property definitions in
@@ -145,9 +142,8 @@ def check_property_definitions_exist_in_scope(
     return missing_property_columns, data_frame
 
 
-@checkargs
 def create_property_definitions_from_file(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     domain: str,
     data_frame: pd.DataFrame,
     missing_property_columns: list,
@@ -158,7 +154,7 @@ def create_property_definitions_from_file(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The ApiFactory to use
     domain : domain
         The domain to create the property definitions in
@@ -241,9 +237,8 @@ def create_property_definitions_from_file(
     return property_key_mapping, data_frame
 
 
-@checkargs
 def create_missing_property_definitions_from_file(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     properties_scope: str,
     data_frame: pd.DataFrame,
     property_columns: list,
@@ -316,7 +311,6 @@ def invalid_columns_error_message(unmapped_columns, allowed_data_types):
                            Please ensure that all data types have been mapped before retrying."""
 
 
-@checkargs
 def create_property_values(
     row: pd.Series, column_to_scope: dict, scope: str, domain: str, dtypes: pd.Series
 ) -> dict:
@@ -368,7 +362,7 @@ def create_property_values(
         if lusid_data_type == "string":
             if pd.isna(row_value):
                 continue
-            property_value = lusid.models.PropertyValue(label_value=row_value)
+            property_value = lusid.models.PropertyValue(label_value=str(row_value))
 
         if lusid_data_type == "number":
             # Handle null values given the input null value override

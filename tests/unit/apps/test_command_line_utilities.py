@@ -20,7 +20,7 @@ class AppTests(unittest.TestCase):
     secrets = str(Path(__file__).parent.parent.parent.joinpath("secrets.json"))
     testscope = "test-scope"
     code = "FAndFTestPortfolio01"
-    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=secrets)
+    api_factory = lusid.extensions.ApiClientFactory(config_loaders=((lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets))))
 
     valid_args = {
         "file_path": os.path.join(cur_dir, valid_instruments),
@@ -369,7 +369,7 @@ class AppTests(unittest.TestCase):
             self.testscope,
             self.code,
             flush_test_data.gen_transaction_data(
-                txn_num, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                txn_num, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()).isoformat()
             ),
         )
         args.secrets = self.secrets

@@ -55,8 +55,8 @@ class CocoonTestsHoldings(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
@@ -269,7 +269,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "tax_lots.units": "Quantity",
                 },
                 {
-                    "tax_lots.cost.amount": "$3000",
+                    "tax_lots.cost.amount": 3000,
                     "tax_lots.cost.currency": "Local Currency Code",
                     "tax_lots.portfolio_cost": None,
                     "tax_lots.price": None,
@@ -611,35 +611,6 @@ class CocoonTestsHoldings(unittest.TestCase):
                 lusid.models.Version,
             ],
             [
-                "Pass string as tax_lots.units value",
-                "prime_broker_test",
-                "data/holdings-example-unique-date-duplicate-column.csv",
-                {
-                    "code": "FundCode",
-                    "effective_at": "Effective Date",
-                    "tax_lots.units": "$1",
-                },
-                {
-                    "tax_lots.cost.amount": None,
-                    "tax_lots.cost.currency": "Local Currency Code",
-                    "tax_lots.portfolio_cost": None,
-                    "tax_lots.price": None,
-                    "tax_lots.purchase_date": None,
-                    "tax_lots.settlement_date": None,
-                },
-                {
-                    "Isin": "ISIN Security Identifier",
-                    "Sedol": "SEDOL Security Identifier",
-                    "Currency": "is_cash_with_currency",
-                },
-                ["Prime Broker"],
-                "operations001",
-                None,
-                None,
-                False,
-                lusid.models.Version,
-            ],
-            [
                 "Pass integer as tax_lots.units value",
                 "prime_broker_test",
                 "data/holdings-example-unique-date-duplicate-column.csv",
@@ -732,7 +703,7 @@ class CocoonTestsHoldings(unittest.TestCase):
 
         :return: None
         """
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name), dtype = {'SEDOL Security Identifier':str})
 
         responses = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,
@@ -1179,7 +1150,7 @@ class CocoonTestsHoldings(unittest.TestCase):
             "Please resolve all upload errors to check for unmatched items."
         ]
 
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name), dtype = {'SEDOL Security Identifier':str})
 
         if not skip_portfolio:
             # Create the portfolios

@@ -7,7 +7,7 @@ def set_transaction_mapping(client, transaction_mapping):
 
     Parameters
     ----------
-    client : lusid.utilities.ClientApiFactory
+    client : lusid.extensions.ClientApiFactory
         The LusidApi client to use
     transaction_mapping : dict
         The transaction mapping configuration

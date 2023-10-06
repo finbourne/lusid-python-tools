@@ -6,6 +6,7 @@ import uuid
 
 import numpy as np
 import lusid
+import lusid.models
 from collections.abc import Mapping
 import pandas as pd
 from detect_delimiter import detect
@@ -22,74 +23,7 @@ import time as default_time
 from lusidtools.cocoon.validator import Validator
 import types
 import typing
-
-
-def checkargs(function: typing.Callable) -> typing.Callable:
-    """
-    This can be used as a decorator to test the type of arguments are correct. It checks that the provided arguments
-    match any type annotations and/or the default value for the parameter.
-
-    Parameters
-    ----------
-    function : typing.Callable
-        The function to wrap with annotated types, all parameters must be annotated with a type
-
-    Returns
-    -------
-    _f : typing.Callable
-        The wrapped function
-    """
-
-    @functools.wraps(function)
-    def _f(*args, **kwargs):
-        # Get all the function arguments in order
-        function_arguments = inspect.signature(function).parameters
-
-        # Collect each non keyword argument value and key it by the argument name
-        keyed_arguments = {
-            list(function_arguments.keys())[i]: args[i] for i in range(0, len(args))
-        }
-
-        # Update this with the keyword argument values
-        keyed_arguments.update(kwargs)
-
-        # For each argument raise an error if it is of the incorrect type and if it has an invalid default value
-        for argument_name, argument_value in keyed_arguments.items():
-            if argument_name not in list(function_arguments.keys()):
-                raise ValueError(
-                    f"The argument {argument_name} is not a valid keyword argument for this function, valid arguments"
-                    + f" are {str(list(function_arguments.keys()))}"
-                )
-
-            # Get the arguments details
-            argument_details = function_arguments[argument_name]
-            # Assume that there is no default value for this parameter
-            is_default_value = False
-
-            # If there is a default value
-            if argument_details.default is not argument_details.empty:
-                # Check to see if the argument value matches the default
-                if argument_details.default is None:
-                    is_default_value = argument_value is argument_details.default
-                else:
-                    is_default_value = argument_value == argument_details.default
-
-            # If the argument value is of the wrong type e.g. list instead of dict then throw an error
-            if (
-                not isinstance(argument_value, argument_details.annotation)
-                and argument_details.annotation is not argument_details.empty
-            ):
-                # Only exception to this is if it matches the default value which may be of a different type e.g. None
-                if not is_default_value:
-                    raise TypeError(
-                        f"""The value provided for {argument_name} is of type {type(argument_value)} not of 
-                    type {argument_details.annotation}. Please update the provided value to be of type 
-                    {argument_details.annotation}"""
-                    )
-
-        return function(*args, **kwargs)
-
-    return _f
+from pydantic.error_wrappers import ValidationError
 
 
 def make_code_lusid_friendly(raw_code) -> str:
@@ -140,7 +74,7 @@ def make_code_lusid_friendly(raw_code) -> str:
     return friendly_code
 
 
-@checkargs
+
 def populate_model(
     model_object_name: str,
     required_mapping: dict,
@@ -198,7 +132,7 @@ def populate_model(
     )
 
 
-@checkargs
+
 def set_attributes_recursive(
     model_object,
     mapping: dict,
@@ -233,8 +167,8 @@ def set_attributes_recursive(
     """
 
     # Get the object attributes
-    obj_attr = model_object.openapi_types
-    obj_attr_required_map = model_object.required_map
+    obj_attr = inspect.get_annotations(model_object)
+    obj_attr_required_map = get_required_attributes_from_model(model_object)
     obj_init_values = {}
 
     # Additional attributes which are used on most models but will be populated outside the provided mapping
@@ -262,8 +196,9 @@ def set_attributes_recursive(
 
         # If it is an additional attribute, populate it with the provided values and move to the next attribute
         if key in list(additional_attributes.keys()):
+            total_count+=1
             # Handle identifiers provided within instrument definition (e.g. 'Bond', 'Future', etc.)
-            if (key, attribute_type) == ("identifiers", "dict(str, str)"):
+            if (key, attribute_type) == ("identifiers", "Optional[Dict[str, StrictStr]]") or (key, attribute_type) == ("identifiers", "Dict[str, StrictStr]"):
                 obj_init_values[key] = {
                     str_key: row[str_value]
                     for str_key, str_value in mapping[key].items()
@@ -294,7 +229,7 @@ def set_attributes_recursive(
                     obj_init_values[key] = [row[mapping[key]]]
                 else:
                     obj_init_values[key] = row[mapping[key]]
-            elif obj_attr_required_map[key] == "required":
+            elif key in obj_attr_required_map:
                 missing_value = True
             elif mapping[key]:
                 none_count += 1
@@ -325,13 +260,17 @@ def set_attributes_recursive(
         return None
 
     # Create an instance of and populate the model object
-    instance = model_object(**obj_init_values)
+    try:
+        instance = model_object(**obj_init_values)
+    except ValidationError:
+        logging.exception("Error validating model parameters, please ensure all required parameters are mapped correctly.")
+        raise
 
     # Support for polymorphism, we can identify these `abstract` classes by the existence of the below
-    if getattr(instance, "discriminator"):
-        discriminator = getattr(instance, getattr(instance, "discriminator"))
-
-        actual_class = model_object.discriminator_value_class_map[discriminator]
+    if hasattr(instance, "get_discriminator_value"):
+        actual_class = model_object.get_discriminator_value(instance.to_dict())
+        if model_object.__name__ == actual_class:
+            return instance
 
         return set_attributes_recursive(
             model_object=getattr(lusid.models, actual_class),
@@ -342,7 +281,6 @@ def set_attributes_recursive(
     return instance
 
 
-@checkargs
 def update_dict(orig_dict: dict, new_dict) -> None:
     """
     This is used to update a dictionary with another dictionary. Using the default Python update method does not merge
@@ -377,7 +315,7 @@ def update_dict(orig_dict: dict, new_dict) -> None:
     return orig_dict
 
 
-@checkargs
+
 def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
     """
     Takes a flat dictionary (no nesting) with keys separated by a separator and converts it into a nested
@@ -410,7 +348,7 @@ def expand_dictionary(dictionary: dict, key_separator: str = ".") -> dict:
     return dict_expanded
 
 
-@checkargs
+
 def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dict:
     """
     Takes a list of keys and a value and turns it into a nested dictionary. This is a recursive function.
@@ -441,7 +379,7 @@ def expand_dictionary_single_recursive(index: int, key_list: list, value) -> dic
     return {key: expand_dictionary_single_recursive(index + 1, key_list, value)}
 
 
-@checkargs
+
 def get_swagger_dict(api_url: str) -> dict:
     """
     Gets the lusid.json swagger file
@@ -480,7 +418,7 @@ def generate_required_attributes_list():
     pass
 
 
-@checkargs
+
 def verify_all_required_attributes_mapped(
     mapping: dict,
     model_object_name: str,
@@ -507,6 +445,7 @@ def verify_all_required_attributes_mapped(
     key_separator : str
         The separator to use to join the required attributes together
     """
+    mapping = mapping or {}
 
     # Check that the provided model name actually exists
     model_object = getattr(lusid.models, model_object_name, None)
@@ -541,7 +480,7 @@ def verify_all_required_attributes_mapped(
         )
 
 
-@checkargs
+
 def get_required_attributes_model_recursive(model_object, key_separator: str = "."):
     """
     This is a recursive function which gets all of the required attributes on a LUSID model. If the model is nested
@@ -567,7 +506,7 @@ def get_required_attributes_model_recursive(model_object, key_separator: str = "
     required_attributes = get_required_attributes_from_model(model_object)
 
     # Get the types of the attributes for the current model
-    open_api_types = model_object.openapi_types
+    open_api_types = inspect.get_annotations(model_object)
 
     for required_attribute in required_attributes:
         required_attribute_type = open_api_types[required_attribute]
@@ -617,59 +556,9 @@ def get_required_attributes_from_model(model_object) -> list:
     """
 
     # Get the source code for the model
-    model_details = inspect.getsource(model_object)
+    model_details = inspect.get_annotations(model_object)
 
-    # Get all the setter function definitions
-    setters = re.findall(r"(?<=.setter).+?(?:@|to_dict)", model_details, re.DOTALL)
-
-    # Set the status (required or optional) for each attribute based on whether "is None:" exists in the setter function
-    '''
-    Here are two examples
-    
-    A) A None value is not allowed and hence this is required. Notice the "if identifiers is None:" condition. 
-    
-    @identifiers.setter
-    def identifiers(self, identifiers):
-        """Sets the identifiers of this InstrumentDefinition.
-        A set of identifiers that can be used to identify the instrument. At least one of these must be configured to be a unique identifier.  # noqa: E501
-        :param identifiers: The identifiers of this InstrumentDefinition.  # noqa: E501
-        :type: dict(str, InstrumentIdValue)
-        """
-        if identifiers is None:
-            raise ValueError("Invalid value for `identifiers`, must not be `None`")  # noqa: E501
-
-        self._identifiers = identifiers
-        
-    B) A None value is allowed and hence this is optional
-    
-    @look_through_portfolio_id.setter
-    def look_through_portfolio_id(self, look_through_portfolio_id):
-        """Sets the look_through_portfolio_id of this InstrumentDefinition.
-        :param look_through_portfolio_id: The look_through_portfolio_id of this InstrumentDefinition.  # noqa: E501
-        :type: ResourceId
-        """
-
-        self._look_through_portfolio_id = look_through_portfolio_id
-
-    '''
-    attribute_status = {
-        re.search(r"(?<=def ).+?(?=\(self)", setter).group(0): "Required"
-        if "is None:" in setter
-        else "Optional"
-        for setter in setters
-    }
-
-    # If there are required attributes collect them as a list
-    required_attributes = [
-        key for key, value in attribute_status.items() if value == "Required"
-    ]
-
-    # If there are no required attributes on a model, assume that all attributes are required
-    # This is for cases such as lusid.models.TransactionRequest.transaction_price
-    if len(required_attributes) == 0:
-        required_attributes = list(attribute_status.keys())
-
-    return required_attributes
+    return [attribute for attribute, _type in model_details.items() if _type[0:8] !="Optional"]
 
 
 def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
@@ -691,20 +580,23 @@ def extract_lusid_model_from_attribute_type(attribute_type: str) -> str:
     """
 
     nested_type = None
-
+    #Optional[conlist(x)]
+    if 'Optional' in attribute_type:
+        attribute_type ="".join(attribute_type.split("Optional[")[1].rsplit("]", 1))
+        attribute_type, nested_type = extract_lusid_model_from_attribute_type(attribute_type)
     # If the attribute type is a dictionary e.g. dict(str, InstrumentIdValue), extract the type
-    if "dict" in attribute_type:
+    elif "Dict" in attribute_type:
         attribute_type = attribute_type.split(", ")[1].rstrip(")")
-        nested_type = "dict"
+        nested_type = 'dict'
     # If it is a list e.g. list[ModelProperty] extract the type
-    if "list" in attribute_type:
-        attribute_type = attribute_type.split("list[")[1].rstrip("]")
-        nested_type = "list"
+    elif "conlist" in attribute_type:
+        attribute_type = attribute_type.split("conlist(")[1].rstrip(")")
+        nested_type = 'list'
 
     return attribute_type, nested_type
 
 
-@checkargs
+
 def check_nested_model(required_attribute_type: str) -> bool:
     """
     Takes the properties of a required attribute on a model and searches as to whether or not this attribute
@@ -733,7 +625,7 @@ def check_nested_model(required_attribute_type: str) -> bool:
     return True
 
 
-@checkargs
+
 def gen_dict_extract(key, var: dict):
     """
     Searches a nested dictionary for a key, yielding any values it finds against that key
@@ -764,7 +656,7 @@ def gen_dict_extract(key, var: dict):
                         yield result
 
 
-@checkargs
+
 def camel_case_to_pep_8(attribute_name: str) -> str:
     """
     Converts a camel case name to PEP 8 standard
@@ -926,7 +818,7 @@ def load_json_file(file_path: str) -> dict:
     return data
 
 
-@checkargs
+
 def load_data_to_df_and_detect_delimiter(args: dict) -> pd.DataFrame:
     """
     This function loads data from given file path and converts it into a pandas DataFrame
@@ -1703,7 +1595,7 @@ def group_request_into_one(
     base_request = request_list[batch_index]
 
     for attrib in attribute_for_grouping:
-        if "list" in getattr(models, model_type).openapi_types[attrib]:
+        if "conlist" in inspect.get_annotations(getattr(models, model_type))[attrib]:
             # Collect the attributes from each request onto a list
 
             batch_attrib = [
@@ -1720,7 +1612,7 @@ def group_request_into_one(
 
             setattr(base_request, attrib, batch_attrib)
 
-        elif "dict" in getattr(models, model_type).openapi_types[attrib]:
+        elif "Dict" in inspect.get_annotations(getattr(models, model_type))[attrib]:
             # Collect the attributes from each request onto a dictionary
 
             batch_attrib = dict(

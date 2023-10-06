@@ -63,8 +63,8 @@ class CocoonTestsTransactions(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
@@ -463,8 +463,8 @@ class CocoonTestsTransactions(unittest.TestCase):
             property_keys=[
                 f"Transaction/{expected_property_scope}/{expected_property_code}"
             ],
-            from_transaction_date=pd.to_datetime("2019-09-01", utc=True),
-            to_transaction_date=pd.to_datetime("2019-09-12", utc=True),
+            from_transaction_date=pd.to_datetime("2019-09-01", utc=True).isoformat(),
+            to_transaction_date=pd.to_datetime("2019-09-12", utc=True).isoformat(),
         )
 
         for tx in transactions_from_response.values:

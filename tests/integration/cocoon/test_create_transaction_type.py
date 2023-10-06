@@ -18,8 +18,8 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.alias = models.TransactionConfigurationTypeAlias(
@@ -78,7 +78,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         self.assertEqual(
             sorted(
                 [
-                    mvmts.to_dict()
+                    mvmts.dict()
                     for txn_configs in self.response.transaction_configs
                     for mvmts in txn_configs.movements
                     if any(x.type == new_alias.type for x in txn_configs.aliases)
@@ -86,7 +86,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
                 key=lambda item: item.get("movement_types"),
             ),
             sorted(
-                [item.to_dict() for item in self.movements],
+                [item.dict() for item in self.movements],
                 key=lambda item: item.get("movement_types"),
             ),
         )

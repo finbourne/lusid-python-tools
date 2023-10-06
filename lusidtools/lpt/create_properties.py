@@ -35,7 +35,7 @@ def process_args(api, args):
                 value_required=False,
                 display_name=p[2],
                 life_time="Perpetual",
-                data_type_id=api.models.ResourceId("system", res_type[args.type]),
+                data_type_id=api.models.ResourceId(scope="system", code=res_type[args.type]),
             )
             for p in map(lambda v: v.split("/"), args.property)
         ]

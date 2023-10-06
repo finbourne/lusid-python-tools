@@ -12,7 +12,6 @@ from lusidtools import cocoon
 from lusidtools.cocoon.async_tools import run_in_executor, ThreadPool
 from lusidtools.cocoon.dateorcutlabel import DateOrCutLabel
 from lusidtools.cocoon.utilities import (
-    checkargs,
     strip_whitespace,
     group_request_into_one,
     extract_unique_portfolio_codes,
@@ -22,6 +21,7 @@ from lusidtools.cocoon.validator import Validator
 from datetime import datetime
 import pytz
 import logging
+import inspect
 
 
 class BatchLoader:
@@ -33,14 +33,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_batch(
-        api_factory: lusid.utilities.ApiClientFactory, instrument_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
         Upserts a batch of instruments to LUSID
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         instrument_batch : list[lusid.models.InstrumentDefinition]
             The batch of instruments to upsert
@@ -61,7 +61,6 @@ class BatchLoader:
         else:
             unique_identifiers = kwargs["unique_identifiers"]
 
-        @checkargs
         def get_alphabetically_first_identifier_key(
             instrument: lusid.models.InstrumentDefinition, unique_identifiers: list
         ):
@@ -105,14 +104,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_quote_batch(
-        api_factory: lusid.utilities.ApiClientFactory, quote_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, quote_batch: list, **kwargs
     ) -> lusid.models.UpsertQuotesResponse:
         """
         Upserts a batch of quotes into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         quote_batch : list[lusid.models.UpsertQuoteRequest]
             The batch of quotes to upsert
@@ -148,14 +147,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transaction_batch(
-        api_factory: lusid.utilities.ApiClientFactory, transaction_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, transaction_batch: list, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         code : str
             The code of the TransactionPortfolio to upsert the transactions into
@@ -191,14 +190,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transactions_with_commit_mode_batch(
-        api_factory: lusid.utilities.ApiClientFactory, transaction_batch: List, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, transaction_batch: List, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID with specified type of upsert.
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         code : str
             The code of the TransactionPortfolio to upsert the transactions into
@@ -251,14 +250,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_holding_batch(
-        api_factory: lusid.utilities.ApiClientFactory, holding_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
         """
         Upserts a batch of holdings into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         holding_batch : list[lusid.models.AdjustHoldingRequest]
             The batch of holdings
@@ -316,14 +315,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_batch(
-        api_factory: lusid.utilities.ApiClientFactory, portfolio_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, portfolio_batch: list, **kwargs
     ) -> lusid.models.Portfolio:
         """
         Upserts a batch of portfolios to LUSID
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             the api factory to use
         portfolio_batch : list[lusid.models.CreateTransactionPortfolioRequest]
             The batch of portfolios to create
@@ -363,12 +362,12 @@ class BatchLoader:
                     create_transaction_portfolio_request=portfolio_batch[0],
                 )
             else:
-                return e
+                raise e
 
     @staticmethod
     @run_in_executor
     def load_reference_portfolio_batch(
-        api_factory: lusid.utilities.ApiClientFactory,
+        api_factory: lusid.extensions.ApiClientFactory,
         reference_portfolio_batch: list,
         **kwargs,
     ) -> lusid.models.Portfolio:
@@ -377,7 +376,7 @@ class BatchLoader:
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             the api factory to use
         portfolio_batch : list[lusid.models.CreateReferencePortfolioRequest]
             The batch of reference portfolios to create
@@ -423,14 +422,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_property_batch(
-        api_factory: lusid.utilities.ApiClientFactory, property_batch: list, **kwargs
+        api_factory: lusid.extensions.ApiClientFactory, property_batch: list, **kwargs
     ) -> List[lusid.models.UpsertInstrumentPropertiesResponse]:
         """
         Add properties to the set instruments
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             The api factory to use
         property_batch : list[lusid.models.UpsertInstrumentPropertyRequest]
             Properties to add,
@@ -496,7 +495,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_group_batch(
-        api_factory: lusid.utilities.ApiClientFactory,
+        api_factory: lusid.extensions.ApiClientFactory,
         portfolio_group_batch: list,
         **kwargs,
     ) -> lusid.models.PortfolioGroup:
@@ -505,7 +504,7 @@ class BatchLoader:
 
         Parameters
         ----------
-        api_factory : lusid.utilities.ApiClientFactory
+        api_factory : lusid.extensions.ApiClientFactory
             the api factory to use
         portfolio_group_batch : list[lusid.models.CreateTransactionPortfolioRequest]
             The batch of portfilios to create
@@ -598,7 +597,7 @@ class BatchLoader:
 
 
 async def _load_data(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     single_requests: list,
     file_type: str,
     **kwargs,
@@ -608,7 +607,7 @@ async def _load_data(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     single_requests
         The list of single requests for LUSID
@@ -694,15 +693,15 @@ def _convert_batch_to_models(
     property_dtypes = data_frame.loc[:, source_columns].dtypes
 
     # Get the types of the attributes on the top level model for this request
-    open_api_types = getattr(
+    open_api_types = inspect.get_annotations(getattr(
         lusid.models, domain_lookup[file_type]["top_level_model"]
-    ).openapi_types
+    ))
 
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to be populated with property values
     if (
         "sub_holding_keys" in open_api_types.keys()
-        and "dict" in open_api_types["sub_holding_keys"]
+        and "Dict" in open_api_types["sub_holding_keys"]
     ):
         sub_holding_key_dtypes = data_frame.loc[:, sub_holding_keys].dtypes
     # If not and they are provided as full keys
@@ -743,7 +742,7 @@ def _convert_batch_to_models(
         # Create the sub-holding-keys for this row
         if (
             "sub_holding_keys" in open_api_types.keys()
-            and "dict" in open_api_types["sub_holding_keys"]
+            and "Dict" in open_api_types["sub_holding_keys"]
         ):
             sub_holding_keys_row = cocoon.properties.create_property_values(
                 row=row,
@@ -785,7 +784,7 @@ def _convert_batch_to_models(
 
 
 async def _construct_batches(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
@@ -805,7 +804,7 @@ async def _construct_batches(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The api factory to use
     data_frame : pd.DataFrame
         The DataFrame containing the data to load
@@ -1038,9 +1037,8 @@ def check_for_unmatched_items(flag, file_type):
     return condition_1 and condition_2
 
 
-@checkargs
 def unmatched_items(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1057,7 +1055,7 @@ def unmatched_items(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1098,7 +1096,7 @@ def unmatched_items(
 
 
 def _unmatched_transactions(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1109,7 +1107,7 @@ def _unmatched_transactions(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1164,7 +1162,7 @@ def _unmatched_transactions(
 
 
 def return_unmatched_transactions(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     code: str,
     from_transaction_date: str,
@@ -1177,7 +1175,7 @@ def return_unmatched_transactions(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1253,7 +1251,7 @@ def filter_unmatched_transactions(
 
 
 def _unmatched_holdings(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     sync_batches: list = None,
 ):
@@ -1262,7 +1260,7 @@ def _unmatched_holdings(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1294,7 +1292,7 @@ def _unmatched_holdings(
 
 
 def return_unmatched_holdings(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     code_tuple: Tuple[str, str],
 ):
@@ -1303,7 +1301,7 @@ def return_unmatched_holdings(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1342,9 +1340,8 @@ def return_unmatched_holdings(
     ]
 
 
-@checkargs
 def load_from_data_frame(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1368,7 +1365,7 @@ def load_from_data_frame(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory api_factory
+    api_factory : lusid.extensions.ApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1603,13 +1600,13 @@ def load_from_data_frame(
         Validator(mapping_required, "mapping_required")
         .discard_dict_keys_none_value()
         .value
-    )
+    ) or dict()
 
     mapping_optional = (
         Validator(mapping_optional, "mapping_optional")
         .discard_dict_keys_none_value()
         .value
-    )
+    ) or dict()
 
     required_call_attributes = domain_lookup[file_type]["required_call_attributes"]
     if "scope" in required_call_attributes:
@@ -1620,12 +1617,12 @@ def load_from_data_frame(
         required_call_attributes, "required_attributes_for_call"
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
-    # Verify that all the required attributes for this top level model exist in the provided required mapping
-    cocoon.utilities.verify_all_required_attributes_mapped(
-        mapping=mapping_required,
-        model_object_name=domain_lookup[file_type]["top_level_model"],
-        exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
-    )
+    # # Verify that all the required attributes for this top level model exist in the provided required mapping
+    # cocoon.utilities.verify_all_required_attributes_mapped(
+    #     mapping=mapping_required,
+    #     model_object_name=domain_lookup[file_type]["top_level_model"],
+    #     exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
+    # )
 
     # Create the thread pool to use with the async_tools.run_in_executor decorator to make sync functions awaitable
     thread_pool = ThreadPool(thread_pool_max_workers).thread_pool
@@ -1718,15 +1715,15 @@ def load_from_data_frame(
         data_frame = strip_whitespace(data_frame, column_list)
 
     # Get the types of the attributes on the top level model for this request
-    open_api_types = getattr(
+    open_api_types = inspect.get_annotations(getattr(
         lusid.models, domain_lookup[file_type]["top_level_model"]
-    ).openapi_types
+    ))
 
     # If there is a sub_holding_keys attribute and it has a dict type this means the sub_holding_keys
     # need to have a property definition and be populated with values from the provided dataframe columns
     if (
         "sub_holding_keys" in open_api_types.keys()
-        and "dict" in open_api_types["sub_holding_keys"]
+        and "Dict" in open_api_types["sub_holding_keys"]
     ):
         Validator(sub_holding_keys, "sub_holding_key_columns").check_subset_of_list(
             data_frame_columns, "DataFrame Columns"

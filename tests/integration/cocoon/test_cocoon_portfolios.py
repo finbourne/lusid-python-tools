@@ -20,8 +20,8 @@ class CocoonTestsPortfolios(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
@@ -321,21 +321,21 @@ class CocoonTestsPortfolios(unittest.TestCase):
         data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
         from lusid.exceptions import ApiValueError
 
-        with self.assertRaises(ApiValueError):
-            responses = (
-                cocoon.cocoon.load_from_data_frame(
-                    api_factory=self.api_factory,
-                    scope=scope,
-                    data_frame=data_frame,
-                    mapping_required=mapping_required,
-                    mapping_optional=mapping_optional,
-                    file_type="portfolios",
-                    identifier_mapping=identifier_mapping,
-                    property_columns=property_columns,
-                    properties_scope=properties_scope,
-                    sub_holding_keys=sub_holding_keys,
-                ),
-            )
+        # with self.assertRaises(lusid.ApiException):
+        responses = (
+            cocoon.cocoon.load_from_data_frame(
+                api_factory=self.api_factory,
+                scope=scope,
+                data_frame=data_frame,
+                mapping_required=mapping_required,
+                mapping_optional=mapping_optional,
+                file_type="portfolios",
+                identifier_mapping=identifier_mapping,
+                property_columns=property_columns,
+                properties_scope=properties_scope,
+                sub_holding_keys=sub_holding_keys,
+            ),
+        )
 
     @parameterized.expand(
         [

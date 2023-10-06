@@ -50,14 +50,14 @@ def process_args(api, args):
 def create_instr(api, args, df, identifiers, prop_keys):
     def make_identifiers(row):
         return {
-            identifier: api.models.InstrumentIdValue(row[identifier])
+            identifier: api.models.InstrumentIdValue(value=row[identifier])
             for identifier in identifiers
             if pd.notna(row[identifier])
         }
 
     def make_properties(row):
         return [
-            api.models.ModelProperty(key[2:], api.models.PropertyValue(row[key]))
+            api.models.ModelProperty(key=key[2:], value=api.models.PropertyValue(label_value=row[key]))
             for key in prop_keys
             if pd.notna(row[key])
         ]
@@ -70,10 +70,10 @@ def create_instr(api, args, df, identifiers, prop_keys):
     has_lookthrough = LT_SCOPE in df.columns.values
     requests = [
         api.models.InstrumentDefinition(
-            row["name"],
-            make_identifiers(row),
-            make_properties(row),
-            api.models.ResourceId(row[LT_SCOPE], row[LT_CODE])
+            name=row["name"],
+            identifiers=make_identifiers(row),
+            properties=make_properties(row),
+            look_through_portfolio_id=api.models.ResourceId(scope=row[LT_SCOPE], code=row[LT_CODE])
             if (has_lookthrough and pd.notna(row[LT_SCOPE]))
             else None,
         )

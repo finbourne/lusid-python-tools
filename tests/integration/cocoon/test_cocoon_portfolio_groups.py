@@ -20,8 +20,8 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.portfolio_scope = create_scope_id()
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.unique_portfolios = pd.read_csv(
             Path(__file__).parent.joinpath(
@@ -129,7 +129,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         self.assertEqual(
             first=sorted(
                 [
-                    code.to_dict()
+                    code.dict()
                     for code in responses["portfolio_groups"]["success"][0].portfolios
                 ],
                 key=lambda item: item.get("code"),
@@ -138,10 +138,10 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                 [
                     lusid.models.ResourceId(
                         code=data_frame["FundCode"][1], scope=data_frame["Scope"][1]
-                    ).to_dict(),
+                    ).dict(),
                     lusid.models.ResourceId(
                         code=data_frame["FundCode"][0], scope=data_frame["Scope"][0]
-                    ).to_dict(),
+                    ).dict(),
                 ],
                 key=lambda item: item.get("code"),
             ),
@@ -191,7 +191,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         self.assertEqual(
             first=len(
                 [
-                    port_group._id
+                    port_group.id
                     for port_group in responses["portfolio_groups"]["success"]
                 ]
             ),
@@ -240,7 +240,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         self.assertEqual(
             first=len(
                 [
-                    port_group._id
+                    port_group.id
                     for port_group in responses["portfolio_groups"]["success"]
                 ]
             ),
@@ -338,7 +338,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         self.assertEqual(
             first=sorted(
                 [
-                    code.to_dict()
+                    code.dict()
                     for code in responses["portfolio_groups"]["success"][0].portfolios
                 ],
                 key=lambda item: item.get("code"),
@@ -347,10 +347,10 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                 [
                     lusid.models.ResourceId(
                         code=data_frame["FundCode"][0], scope=data_frame["Scope"][0]
-                    ).to_dict(),
+                    ).dict(),
                     lusid.models.ResourceId(
                         code=data_frame["FundCode"][1], scope=data_frame["Scope"][1]
-                    ).to_dict(),
+                    ).dict(),
                 ],
                 key=lambda item: item.get("code"),
             ),
@@ -621,7 +621,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
         self.assertEqual(
             first=sorted(
                 [
-                    code.to_dict()
+                    code.dict()
                     for code in responses["portfolio_groups"]["success"][0].portfolios
                 ],
                 key=lambda item: item.get("code"),
@@ -631,11 +631,11 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
                     lusid.models.ResourceId(
                         code=remove_dupe_df["FundCode"].tolist()[0],
                         scope=self.portfolio_scope,
-                    ).to_dict(),
+                    ).dict(),
                     lusid.models.ResourceId(
                         code=remove_dupe_df["FundCode"].tolist()[1],
                         scope=self.portfolio_scope,
-                    ).to_dict(),
+                    ).dict(),
                 ],
                 key=lambda item: item.get("code"),
             ),

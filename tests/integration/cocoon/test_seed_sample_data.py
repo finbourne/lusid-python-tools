@@ -133,8 +133,8 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.sample_data = pd.read_csv(sample_data_csv)
@@ -171,8 +171,8 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.sample_data = pd.read_csv(seed_sample_data_override_csv)
@@ -216,8 +216,8 @@ class CocoonTestSeedDataNoMappingOverrideExcel(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.sample_data = pd.read_excel(
@@ -305,8 +305,8 @@ class CocoonTestSeedDataPassDataFrame(unittest.TestCase, CocoonSeedDataTestsBase
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.test_dataframe = pd.read_csv(sample_data_csv)

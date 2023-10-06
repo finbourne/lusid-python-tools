@@ -8,7 +8,7 @@ from lusidfeature import lusid_feature
 from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 from lusidtools import logger
-
+from pydantic.error_wrappers import ValidationError
 
 class CocoonTestsFailures(unittest.TestCase):
     api_factory = None
@@ -16,9 +16,14 @@ class CocoonTestsFailures(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
+        cls.api_factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
+        )
+
+
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @lusid_feature(
@@ -103,7 +108,7 @@ class CocoonTestsFailures(unittest.TestCase):
                 "TestPropertiesScope1",
                 "instruments",
                 None,
-                TypeError,
+                ValidationError,
             ],
             [
                 "A file with missing names for two instruments",

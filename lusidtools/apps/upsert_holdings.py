@@ -1,6 +1,6 @@
 import logging
 import sys
-from lusid.utilities import ApiClientFactory
+from lusid.extensions import ApiClientFactory, EnvironmentVariablesConfigurationLoader, SecretsFileConfigurationLoader
 
 from lusidtools.logger import LusidLogger
 from lusidtools.cocoon import (
@@ -17,7 +17,7 @@ from lusidtools.cocoon import (
 def load_holdings(args):
     file_type = "holdings"
 
-    factory = ApiClientFactory(api_secrets_filename=args["secrets_file"])
+    factory = ApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(),SecretsFileConfigurationLoader(args["secrets_file"])))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")

@@ -7,7 +7,6 @@ from dateutil.tz import tzutc
 from pathlib import Path
 from lusid import PortfoliosApi, TransactionPortfoliosApi, PortfolioGroupsApi
 import lusid
-from lusid.utilities import ApiClientBuilder
 import json
 from unittest.mock import patch
 
@@ -37,8 +36,8 @@ class AppTests(unittest.TestCase):
         cls.secrets = Path(__file__).parent.parent.parent.joinpath("secrets.json")
         cls.testscope = "testscope0001"
         cls.proptestscope = "testscope0001"
-
-        cls.factory = lusid.utilities.ApiClientFactory(api_secrets_filename=cls.secrets)
+        cls.config_loaders = (lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(cls.secrets))
+        cls.factory = lusid.extensions.ApiClientFactory(config_loaders=cls.config_loaders)
         cls.transaction_portfolios_api = cls.factory.build(TransactionPortfoliosApi)
         cls.groups_api = cls.factory.build(PortfolioGroupsApi)
 
@@ -152,7 +151,7 @@ class AppTests(unittest.TestCase):
                     scope,
                     portfolio,
                     flush_test_data.gen_transaction_data(
-                        2, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+                        2, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()).isoformat()
                     ),
                 )
 
@@ -189,9 +188,10 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, len(responses["portfolios"]["success"]))
 
         # delete test portfolio before next test
-        factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=args["secrets_file"]
-        )
+        factory = lusid.extensions.ApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(
+            args["secrets_file"])
+        ))
         portfolios_api = factory.build(PortfoliosApi)
         response = portfolios_api.delete_portfolio(
             self.testscope, "temp_upsert_portfolios_lpt"
@@ -469,9 +469,9 @@ class AppTests(unittest.TestCase):
     def test_flush_between_dates(self, _, args, expected_txn_count):
         # Upsert Test Transaction Data
         dates = [
-            datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()),
-            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()),
-            datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc()),
+            datetime.datetime(2020, 2, 12, 0, 0, tzinfo=tzutc()).isoformat(),
+            datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()).isoformat(),
+            datetime.datetime(2020, 2, 19, 15, 0, tzinfo=tzutc()).isoformat(),
         ]
 
         for date in dates:
@@ -528,7 +528,7 @@ class AppTests(unittest.TestCase):
         )
         args.secrets = self.secrets
         transactions = flush_test_data.gen_transaction_data(
-            150, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc())
+            150, datetime.datetime(2020, 2, 14, 0, 0, tzinfo=tzutc()).isoformat()
         )
 
         self.transaction_portfolios_api.upsert_transactions(
@@ -539,7 +539,7 @@ class AppTests(unittest.TestCase):
             flush_transactions.transaction_batcher_by_character_count(
                 args.scope,
                 args.portfolio,
-                self.factory.api_client.configuration.host,
+                lusid.extensions.get_api_configuration(self.config_loaders).api_url,
                 [txn["transactionId"] for txn in transactions],
             )
         )

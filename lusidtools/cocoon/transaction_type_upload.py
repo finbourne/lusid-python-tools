@@ -11,7 +11,7 @@ def create_transaction_type_configuration(api_factory, alias, movements):
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ClientApiFactory
+    api_factory : lusid.extensions.ClientApiFactory
         The LUSID api factory to use
     alias : lusid.models.TransactionConfigurationTypeAlias
         An aliases with type and group
@@ -67,7 +67,7 @@ def upsert_transaction_type_alias(api_factory, new_transaction_config):
 
     Parameters
     ----------
-    api_factory: lusid.utilities.ClientApiFactory
+    api_factory: lusid.extensions.ApiClientFactory
         The LUSID api factory to use.
     new_transaction_config: list[lusid.models.TransactionConfigurationDataRequest]
         A list of new transaction type configurations

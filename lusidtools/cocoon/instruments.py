@@ -3,7 +3,6 @@ import lusid.models as models
 from lusid.api import InstrumentsApi, SearchApi
 import numpy as np
 import time
-from lusidtools.cocoon.utilities import checkargs
 import pandas as pd
 import logging
 import re
@@ -12,7 +11,6 @@ import asyncio
 from typing import Callable
 
 
-@checkargs
 def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
     """
     This function prepares the key for the identifier based on whether the full key or just the code is required
@@ -44,7 +42,6 @@ def prepare_key(identifier_lusid: str, full_key_format: bool) -> str:
         )
 
 
-@checkargs
 def create_identifiers(
     index,
     row: pd.Series,
@@ -125,9 +122,8 @@ def create_identifiers(
     return identifiers
 
 
-@checkargs
 def resolve_instruments(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     data_frame: pd.DataFrame,
     identifier_mapping: dict,
 ):
@@ -136,7 +132,7 @@ def resolve_instruments(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         An instance of the Lusid Api Factory
     data_frame : pd.DataFrame
         The DataFrame containing the transactions or holdings to resolve to unique instruments
@@ -294,14 +290,13 @@ def resolve_instruments(
     return _data_frame
 
 
-@checkargs
-def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
+def get_unique_identifiers(api_factory: lusid.extensions.ApiClientFactory):
     """
     Tests getting the unique instrument identifiers
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The LUSID api factory to use
 
     Returns
@@ -323,7 +318,7 @@ def get_unique_identifiers(api_factory: lusid.utilities.ApiClientFactory):
 
 
 async def enrich_instruments(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     data_frame: pd.DataFrame,
     instrument_identifier_mapping: dict,
     mapping_required: dict,
@@ -413,14 +408,14 @@ async def enrich_instruments(
 
 
 async def instrument_search(
-    api_factory: lusid.utilities.ApiClientFactory, search_requests: list, **kwargs
+    api_factory: lusid.extensions.ApiClientFactory, search_requests: list, **kwargs
 ) -> list:
     """
     Conducts an instrument search for a single instrument
 
     Parameters
     ----------
-    api_factory :       lusid.utilities.ApiClientFactory
+    api_factory :       lusid.extensions.ApiClientFactory
                         The api factory to use
     search_requests:    list[lusid.models.InstrumentSearchProperty]
                         The search requests for this instrument
@@ -447,7 +442,7 @@ async def instrument_search(
 
 @run_in_executor
 def instrument_search_single(
-    api_factory: lusid.utilities.ApiClientFactory,
+    api_factory: lusid.extensions.ApiClientFactory,
     search_request: lusid.models.InstrumentSearchProperty,
     **kwargs,
 ) -> list:
@@ -456,7 +451,7 @@ def instrument_search_single(
 
     Parameters
     ----------
-    api_factory : lusid.utilities.ApiClientFactory
+    api_factory : lusid.extensions.ApiClientFactory
         The Api factory to use
     search_request : lusid.models.InstrumentSearchProperty
         The search request
@@ -468,6 +463,4 @@ def instrument_search_single(
         The results of the search
     """
 
-    return lusid.api.SearchApi(
-        api_factory.build(lusid.api.SearchApi)
-    ).instruments_search(instrument_search_property=[search_request])
+    return api_factory.build(lusid.api.SearchApi).instruments_search(instrument_search_property=[search_request])
