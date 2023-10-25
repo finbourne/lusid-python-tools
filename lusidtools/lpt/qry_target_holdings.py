@@ -73,12 +73,12 @@ def process_args(api, args):
         return api.call.list_holdings_adjustments(
             scope=args.scope,
             code=args.portfolio,
-            from_effective_at=lpt.to_date(args.start_date)
+            from_effective_at=lpt.to_date(args.start_date).isoformat()
             if args.start_date
-            else lpt.to_date("1900-01-01"),
-            to_effective_at=lpt.to_date(args.end_date)
+            else lpt.to_date("1900-01-01").isoformat(),
+            to_effective_at=lpt.to_date(args.end_date).isoformat()
             if args.end_date
-            else lpt.to_date(datetime.now()),
+            else lpt.to_date(datetime.now()).isoformat(),
         ).bind(list_success)
 
 

@@ -13,7 +13,7 @@ import logging
 
 
 def create_role(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     access_role_creation_request: access_models.RoleCreationRequest,
 ):
     """
@@ -21,7 +21,7 @@ def create_role(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     access_role_creation_request : access_models.RoleCreationRequest
         The role creation request to use

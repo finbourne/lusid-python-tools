@@ -6,4 +6,4 @@ def connect(config):
     lusid_config.access_token = config["token"]
     lusid_config.host = config["apiUrl"]
 
-    return lusid.ApiClient(lusid_config), lusid
+    return lusid.extensions.SyncApiClient(lusid_config), lusid

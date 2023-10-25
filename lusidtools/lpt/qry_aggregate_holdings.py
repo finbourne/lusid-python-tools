@@ -122,20 +122,20 @@ def process_args(api, args):
 
 def run_query(api, args, date):
     metrics = [
-        api.models.AggregateSpec(AGG_INSTR, "Value"),
-        api.models.AggregateSpec(AGG_UID, "Value"),
-        api.models.AggregateSpec(AGG_TYPE, "Value"),
-        api.models.AggregateSpec(AGG_PV, "Value"),
-        api.models.AggregateSpec(AGG_UNITS, "Value"),
-        api.models.AggregateSpec(AGG_COST, "Value"),
-        api.models.AggregateSpec(AGG_RATE, "Value"),
-        api.models.AggregateSpec(AGG_PRC, "Value"),
+        api.models.AggregateSpec(key=AGG_INSTR, op="Value"),
+        api.models.AggregateSpec(key=AGG_UID, op="Value"),
+        api.models.AggregateSpec(key=AGG_TYPE, op="Value"),
+        api.models.AggregateSpec(key=AGG_PV, op="Value"),
+        api.models.AggregateSpec(key=AGG_UNITS, op="Value"),
+        api.models.AggregateSpec(key=AGG_COST, op="Value"),
+        api.models.AggregateSpec(key=AGG_RATE, op="Value"),
+        api.models.AggregateSpec(key=AGG_PRC, op="Value"),
     ]
-    metrics.extend([api.models.AggregateSpec(v, "Value") for v in args.properties])
+    metrics.extend([api.models.AggregateSpec(key=v, op="Value") for v in args.properties])
 
     request = api.models.ValuationRequest(
-        recipe_id=api.models.ResourceId(args.pricing_scope or args.scope, args.recipe),
-        valuation_schedule=api.models.ValuationSchedule(effective_at=lpt.to_date(date)),
+        recipe_id=api.models.ResourceId(scope = args.pricing_scope or args.scope, code=args.recipe),
+        valuation_schedule=api.models.ValuationSchedule(effective_at=lpt.to_date(date).isoformat()),
         metrics=metrics,
         portfolio_entity_ids=[
             api.models.PortfolioEntityId(

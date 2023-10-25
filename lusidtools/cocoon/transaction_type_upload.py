@@ -67,7 +67,7 @@ def upsert_transaction_type_alias(api_factory, new_transaction_config):
 
     Parameters
     ----------
-    api_factory: lusid.extensions.ApiClientFactory
+    api_factory: lusid.extensions.SyncApiClientFactory
         The LUSID api factory to use.
     new_transaction_config: list[lusid.models.TransactionConfigurationDataRequest]
         A list of new transaction type configurations

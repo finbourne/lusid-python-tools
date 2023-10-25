@@ -37,7 +37,7 @@ class AppTests(unittest.TestCase):
         cls.testscope = "testscope0001"
         cls.proptestscope = "testscope0001"
         cls.config_loaders = (lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(cls.secrets))
-        cls.factory = lusid.extensions.ApiClientFactory(config_loaders=cls.config_loaders)
+        cls.factory = lusid.extensions.SyncApiClientFactory(config_loaders=cls.config_loaders)
         cls.transaction_portfolios_api = cls.factory.build(TransactionPortfoliosApi)
         cls.groups_api = cls.factory.build(PortfolioGroupsApi)
 
@@ -188,7 +188,7 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, len(responses["portfolios"]["success"]))
 
         # delete test portfolio before next test
-        factory = lusid.extensions.ApiClientFactory(
+        factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(
             args["secrets_file"])
         ))

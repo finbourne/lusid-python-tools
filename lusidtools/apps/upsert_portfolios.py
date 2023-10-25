@@ -1,6 +1,6 @@
 import logging
 import sys
-from lusid.extensions import ApiClientFactory, EnvironmentVariablesConfigurationLoader, SecretsFileConfigurationLoader
+from lusid.extensions import SyncApiClientFactory, EnvironmentVariablesConfigurationLoader, SecretsFileConfigurationLoader
 
 from lusidtools.logger import LusidLogger
 from lusidtools.cocoon import (
@@ -16,7 +16,7 @@ from lusidtools.cocoon import (
 def load_portfolios(args):
     file_type = "portfolios"
 
-    factory = ApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(),SecretsFileConfigurationLoader(args["secrets_file"])))
+    factory = SyncApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(),SecretsFileConfigurationLoader(args["secrets_file"])))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")

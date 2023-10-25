@@ -133,7 +133,7 @@ class CocoonTestSeedDataNoMappingOverrideCSV(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
@@ -171,7 +171,7 @@ class CocoonTestSeedDataWithMappingOverrideCSV(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
@@ -216,7 +216,7 @@ class CocoonTestSeedDataNoMappingOverrideExcel(
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
@@ -305,7 +305,7 @@ class CocoonTestSeedDataPassDataFrame(unittest.TestCase, CocoonSeedDataTestsBase
     @classmethod
     def setUpClass(cls) -> None:
         cls.scope = create_scope_id().replace("-", "_")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 

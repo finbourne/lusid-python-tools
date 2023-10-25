@@ -123,7 +123,7 @@ def create_identifiers(
 
 
 def resolve_instruments(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     data_frame: pd.DataFrame,
     identifier_mapping: dict,
 ):
@@ -132,7 +132,7 @@ def resolve_instruments(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         An instance of the Lusid Api Factory
     data_frame : pd.DataFrame
         The DataFrame containing the transactions or holdings to resolve to unique instruments
@@ -290,13 +290,13 @@ def resolve_instruments(
     return _data_frame
 
 
-def get_unique_identifiers(api_factory: lusid.extensions.ApiClientFactory):
+def get_unique_identifiers(api_factory: lusid.extensions.SyncApiClientFactory):
     """
     Tests getting the unique instrument identifiers
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The LUSID api factory to use
 
     Returns
@@ -318,7 +318,7 @@ def get_unique_identifiers(api_factory: lusid.extensions.ApiClientFactory):
 
 
 async def enrich_instruments(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     data_frame: pd.DataFrame,
     instrument_identifier_mapping: dict,
     mapping_required: dict,
@@ -408,14 +408,14 @@ async def enrich_instruments(
 
 
 async def instrument_search(
-    api_factory: lusid.extensions.ApiClientFactory, search_requests: list, **kwargs
+    api_factory: lusid.extensions.SyncApiClientFactory, search_requests: list, **kwargs
 ) -> list:
     """
     Conducts an instrument search for a single instrument
 
     Parameters
     ----------
-    api_factory :       lusid.extensions.ApiClientFactory
+    api_factory :       lusid.extensions.SyncApiClientFactory
                         The api factory to use
     search_requests:    list[lusid.models.InstrumentSearchProperty]
                         The search requests for this instrument
@@ -442,7 +442,7 @@ async def instrument_search(
 
 @run_in_executor
 def instrument_search_single(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     search_request: lusid.models.InstrumentSearchProperty,
     **kwargs,
 ) -> list:
@@ -451,7 +451,7 @@ def instrument_search_single(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The Api factory to use
     search_request : lusid.models.InstrumentSearchProperty
         The search request

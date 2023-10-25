@@ -109,14 +109,14 @@ def _join_holdings(
 
 @run_in_executor
 def _get_portfolio_group(
-    api_factory: lusid.extensions.ApiClientFactory, scope: str, code: str, **kwargs
+    api_factory: lusid.extensions.SyncApiClientFactory, scope: str, code: str, **kwargs
 ) -> lusid.models.PortfolioGroup:
     """
     This function gets a Portfolio Group from LUSID.
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     scope : str
         The scope of the Portfolio Group
@@ -151,14 +151,14 @@ def _get_portfolio_group(
 
 @run_in_executor
 def _get_portfolio_holdings(
-    api_factory: lusid.extensions.ApiClientFactory, scope: str, code: str, **kwargs
+    api_factory: lusid.extensions.SyncApiClientFactory, scope: str, code: str, **kwargs
 ) -> Dict[str, List[lusid.models.PortfolioHolding]]:
     """
     This function gets the holdings of a Portfolio from LUSID.
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     scope : str
         The scope of the Portfolio
@@ -208,7 +208,7 @@ def _get_portfolio_holdings(
 
 
 async def _get_holdings_for_group_recursive(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     group_scope: str,
     group_code: str,
     group_by_portfolio=False,
@@ -220,7 +220,7 @@ async def _get_holdings_for_group_recursive(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     group_scope : str
         The scope of the Portfolio Group
@@ -333,7 +333,7 @@ async def _get_holdings_for_group_recursive(
 
 
 def get_holdings_for_group(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     group_scope: str,
     group_code: str,
     group_by_portfolio: bool = False,
@@ -345,7 +345,7 @@ def get_holdings_for_group(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     group_scope : str
         The scope of the Portfolio Group

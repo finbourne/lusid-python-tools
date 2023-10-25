@@ -1,6 +1,6 @@
 import sys
 import logging
-from lusid.extensions import ApiClientFactory, SecretsFileConfigurationLoader, EnvironmentVariablesConfigurationLoader
+from lusid.extensions import SyncApiClientFactory, SecretsFileConfigurationLoader, EnvironmentVariablesConfigurationLoader
 
 from lusidtools.cocoon import (
     load_data_to_df_and_detect_delimiter,
@@ -17,7 +17,7 @@ from lusidtools.logger import LusidLogger
 def load_transactions(args):
     file_type = "transactions"
 
-    factory = ApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(), SecretsFileConfigurationLoader(args["secrets_file"])))
+    factory = SyncApiClientFactory(config_loaders=(EnvironmentVariablesConfigurationLoader(), SecretsFileConfigurationLoader(args["secrets_file"])))
 
     if args["delimiter"]:
         logging.info(f"delimiter specified as {repr(args['delimiter'])}")

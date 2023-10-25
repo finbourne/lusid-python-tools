@@ -33,14 +33,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_batch(
-        api_factory: lusid.extensions.ApiClientFactory, instrument_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, instrument_batch: list, **kwargs
     ) -> lusid.models.UpsertInstrumentsResponse:
         """
         Upserts a batch of instruments to LUSID
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         instrument_batch : list[lusid.models.InstrumentDefinition]
             The batch of instruments to upsert
@@ -104,14 +104,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_quote_batch(
-        api_factory: lusid.extensions.ApiClientFactory, quote_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, quote_batch: list, **kwargs
     ) -> lusid.models.UpsertQuotesResponse:
         """
         Upserts a batch of quotes into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         quote_batch : list[lusid.models.UpsertQuoteRequest]
             The batch of quotes to upsert
@@ -147,14 +147,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transaction_batch(
-        api_factory: lusid.extensions.ApiClientFactory, transaction_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, transaction_batch: list, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         code : str
             The code of the TransactionPortfolio to upsert the transactions into
@@ -190,14 +190,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_transactions_with_commit_mode_batch(
-        api_factory: lusid.extensions.ApiClientFactory, transaction_batch: List, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, transaction_batch: List, **kwargs
     ) -> lusid.models.UpsertPortfolioTransactionsResponse:
         """
         Upserts a batch of transactions into LUSID with specified type of upsert.
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         code : str
             The code of the TransactionPortfolio to upsert the transactions into
@@ -250,14 +250,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_holding_batch(
-        api_factory: lusid.extensions.ApiClientFactory, holding_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, holding_batch: list, **kwargs
     ) -> lusid.models.HoldingsAdjustment:
         """
         Upserts a batch of holdings into LUSID
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         holding_batch : list[lusid.models.AdjustHoldingRequest]
             The batch of holdings
@@ -315,14 +315,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_batch(
-        api_factory: lusid.extensions.ApiClientFactory, portfolio_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, portfolio_batch: list, **kwargs
     ) -> lusid.models.Portfolio:
         """
         Upserts a batch of portfolios to LUSID
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             the api factory to use
         portfolio_batch : list[lusid.models.CreateTransactionPortfolioRequest]
             The batch of portfolios to create
@@ -367,7 +367,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_reference_portfolio_batch(
-        api_factory: lusid.extensions.ApiClientFactory,
+        api_factory: lusid.extensions.SyncApiClientFactory,
         reference_portfolio_batch: list,
         **kwargs,
     ) -> lusid.models.Portfolio:
@@ -376,7 +376,7 @@ class BatchLoader:
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             the api factory to use
         portfolio_batch : list[lusid.models.CreateReferencePortfolioRequest]
             The batch of reference portfolios to create
@@ -422,14 +422,14 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_instrument_property_batch(
-        api_factory: lusid.extensions.ApiClientFactory, property_batch: list, **kwargs
+        api_factory: lusid.extensions.SyncApiClientFactory, property_batch: list, **kwargs
     ) -> List[lusid.models.UpsertInstrumentPropertiesResponse]:
         """
         Add properties to the set instruments
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             The api factory to use
         property_batch : list[lusid.models.UpsertInstrumentPropertyRequest]
             Properties to add,
@@ -495,7 +495,7 @@ class BatchLoader:
     @staticmethod
     @run_in_executor
     def load_portfolio_group_batch(
-        api_factory: lusid.extensions.ApiClientFactory,
+        api_factory: lusid.extensions.SyncApiClientFactory,
         portfolio_group_batch: list,
         **kwargs,
     ) -> lusid.models.PortfolioGroup:
@@ -504,7 +504,7 @@ class BatchLoader:
 
         Parameters
         ----------
-        api_factory : lusid.extensions.ApiClientFactory
+        api_factory : lusid.extensions.SyncApiClientFactory
             the api factory to use
         portfolio_group_batch : list[lusid.models.CreateTransactionPortfolioRequest]
             The batch of portfilios to create
@@ -597,7 +597,7 @@ class BatchLoader:
 
 
 async def _load_data(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     single_requests: list,
     file_type: str,
     **kwargs,
@@ -607,7 +607,7 @@ async def _load_data(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     single_requests
         The list of single requests for LUSID
@@ -784,7 +784,7 @@ def _convert_batch_to_models(
 
 
 async def _construct_batches(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     data_frame: pd.DataFrame,
     mapping_required: dict,
     mapping_optional: dict,
@@ -804,7 +804,7 @@ async def _construct_batches(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     data_frame : pd.DataFrame
         The DataFrame containing the data to load
@@ -1038,7 +1038,7 @@ def check_for_unmatched_items(flag, file_type):
 
 
 def unmatched_items(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1055,7 +1055,7 @@ def unmatched_items(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1096,7 +1096,7 @@ def unmatched_items(
 
 
 def _unmatched_transactions(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1107,7 +1107,7 @@ def _unmatched_transactions(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1162,7 +1162,7 @@ def _unmatched_transactions(
 
 
 def return_unmatched_transactions(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     code: str,
     from_transaction_date: str,
@@ -1175,7 +1175,7 @@ def return_unmatched_transactions(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1251,7 +1251,7 @@ def filter_unmatched_transactions(
 
 
 def _unmatched_holdings(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     sync_batches: list = None,
 ):
@@ -1260,7 +1260,7 @@ def _unmatched_holdings(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1292,7 +1292,7 @@ def _unmatched_holdings(
 
 
 def return_unmatched_holdings(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     code_tuple: Tuple[str, str],
 ):
@@ -1301,7 +1301,7 @@ def return_unmatched_holdings(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into
@@ -1341,7 +1341,7 @@ def return_unmatched_holdings(
 
 
 def load_from_data_frame(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     scope: str,
     data_frame: pd.DataFrame,
     mapping_required: dict,
@@ -1365,7 +1365,7 @@ def load_from_data_frame(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory api_factory
+    api_factory : lusid.extensions.SyncApiClientFactory api_factory
         The api factory to use
     scope : str
         The scope of the resource to load the data into

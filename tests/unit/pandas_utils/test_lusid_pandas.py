@@ -6,6 +6,8 @@ import unittest
 from lusidtools.pandas_utils.lusid_pandas import lusid_response_to_data_frame
 import pandas as pd
 import datetime
+from lusidtools import logger
+import os
 
 
 class TestResponseToPandasObject(unittest.TestCase):
@@ -14,7 +16,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
@@ -337,7 +339,9 @@ class TestResponseToPandasObject(unittest.TestCase):
             instrument_df.columns.to_list(),
             [
                 "lusid_instrument_id",
-                "version",
+                'version.effective_from',
+                'version.as_at_date',
+                'version.as_at_version_number',
                 "name",
                 "identifiers.ClientInternal",
                 "identifiers.Figi",
@@ -374,7 +378,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         self.assertEqual(
             error.exception.args[0],
-            "All object items in list must have a to_dict() method",
+            "All object items in list must have a dict() method",
         )
 
     def test_empty_list_lusid_response(self):

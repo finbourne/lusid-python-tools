@@ -18,7 +18,7 @@ def parse(extend=None, args=None):
 def batch_upsert_quotes(api, scope, df):
     quotes = {
         index: api.models.UpsertQuoteRequest(
-            quote_id=api.models.QuoteId(
+            quote_id=api.models.QuoteId(quote_series_id=
                 api.models.QuoteSeriesId(
                     provider=row["provider"],
                     price_source=row["source"],
@@ -27,10 +27,10 @@ def batch_upsert_quotes(api, scope, df):
                     quote_type=row["quote_type"],
                     field=row["field"],
                 ),
-                effective_at=lpt.to_date(row["effective_at"]),
+                effective_at=lpt.to_date(row["effective_at"]).isoformat(),
             ),
             metric_value=api.models.MetricValue(
-                value=row["metric_value"], unit=row["metric_unit"]
+                value=float(row["metric_value"]), unit=row["metric_unit"]
             ),
             lineage="InternalSystem",
         )

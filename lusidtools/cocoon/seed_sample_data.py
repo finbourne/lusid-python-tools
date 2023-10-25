@@ -24,7 +24,7 @@ def seed_data(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The api factory to use
     domains : list[str]
         A list of the file_types for upload.

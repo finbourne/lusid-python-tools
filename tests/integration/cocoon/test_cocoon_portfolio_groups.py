@@ -20,7 +20,7 @@ class CocoonTestPortfolioGroup(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.portfolio_scope = create_scope_id()
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.unique_portfolios = pd.read_csv(

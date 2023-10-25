@@ -33,7 +33,7 @@ def process_args(api, args):
             return "No Matches"
 
     request = [
-        api.models.InstrumentSearchProperty(s[0], s[1])
+        api.models.InstrumentSearchProperty(key=s[0], value=s[1])
         for s in [p.split("=") for p in args.properties]
     ]
     return api.call.instruments_search(

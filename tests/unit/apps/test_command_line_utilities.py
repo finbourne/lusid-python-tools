@@ -20,7 +20,7 @@ class AppTests(unittest.TestCase):
     secrets = str(Path(__file__).parent.parent.parent.joinpath("secrets.json"))
     testscope = "test-scope"
     code = "FAndFTestPortfolio01"
-    api_factory = lusid.extensions.ApiClientFactory(config_loaders=((lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets))))
+    api_factory = lusid.extensions.SyncApiClientFactory(config_loaders=((lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets))))
 
     valid_args = {
         "file_path": os.path.join(cur_dir, valid_instruments),

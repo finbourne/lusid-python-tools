@@ -7,7 +7,7 @@ from lusidtools import cocoon as cocoon
 from parameterized import parameterized
 import lusid
 import lusid.models as models
-from lusid.extensions import ApiClientFactory
+from lusid.extensions import SyncApiClientFactory
 from lusidtools import logger
 from datetime import datetime
 import pytz
@@ -17,7 +17,7 @@ class ComplexInstrumentTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))

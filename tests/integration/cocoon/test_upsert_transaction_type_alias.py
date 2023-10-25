@@ -21,7 +21,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 

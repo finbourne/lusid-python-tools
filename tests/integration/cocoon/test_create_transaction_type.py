@@ -18,7 +18,7 @@ class CocoonTestTransactionTypeUpload(unittest.TestCase):
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.extensions.ApiClientFactory(
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
             config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 

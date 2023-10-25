@@ -20,14 +20,14 @@ global_constants = {
 
 
 def check_property_definitions_exist_in_scope_single(
-    api_factory: lusid.extensions.ApiClientFactory, property_key: str
+    api_factory: lusid.extensions.SyncApiClientFactory, property_key: str
 ) -> (bool, str):
     """
     This function takes a list of property keys and looks to see which property definitions already exist inside LUSID
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The ApiFactory to use
     property_key: str
         The property key to get from LUSID
@@ -64,7 +64,7 @@ def check_property_definitions_exist_in_scope_single(
 
 
 def check_property_definitions_exist_in_scope(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     domain: str,
     data_frame: pd.DataFrame,
     target_columns: list,
@@ -75,7 +75,7 @@ def check_property_definitions_exist_in_scope(
 
     Parameters
     ----------
-    api_factory :   lusid.extensions.ApiClientFactory
+    api_factory :   lusid.extensions.SyncApiClientFactory
         The Api Factory to use
     domain : str
         The domain to check for property definitions in
@@ -143,7 +143,7 @@ def check_property_definitions_exist_in_scope(
 
 
 def create_property_definitions_from_file(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     domain: str,
     data_frame: pd.DataFrame,
     missing_property_columns: list,
@@ -154,7 +154,7 @@ def create_property_definitions_from_file(
 
     Parameters
     ----------
-    api_factory : lusid.extensions.ApiClientFactory
+    api_factory : lusid.extensions.SyncApiClientFactory
         The ApiFactory to use
     domain : domain
         The domain to create the property definitions in
@@ -238,7 +238,7 @@ def create_property_definitions_from_file(
 
 
 def create_missing_property_definitions_from_file(
-    api_factory: lusid.extensions.ApiClientFactory,
+    api_factory: lusid.extensions.SyncApiClientFactory,
     properties_scope: str,
     data_frame: pd.DataFrame,
     property_columns: list,

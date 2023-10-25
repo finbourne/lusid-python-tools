@@ -58,6 +58,4 @@ class CocoonUtilitiesTests(unittest.TestCase):
             identifier_lusid=identifier_lusid, full_key_format=full_key_format
         )
 
-        logging.info(output_key, expected_outcome)
-
         self.assertEqual(output_key, expected_outcome)
