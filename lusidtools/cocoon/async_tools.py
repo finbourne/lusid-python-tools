@@ -38,6 +38,7 @@ def stop_event_loop_new_thread(loop: asyncio.AbstractEventLoop) -> None:
     match = [thread for thread in threads if thread.ident == thread_id]
     if len(match) == 1:
         match[0].join(timeout=1)
+    loop.close()
 
 
 def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
