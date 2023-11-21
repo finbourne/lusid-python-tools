@@ -196,6 +196,7 @@ def set_attributes_recursive(
 
         # If it is an additional attribute, populate it with the provided values and move to the next attribute
         if key in list(additional_attributes.keys()):
+            
             total_count+=1
             # Handle identifiers provided within instrument definition (e.g. 'Bond', 'Future', etc.)
             if (key, attribute_type) == ("identifiers", "Optional[Dict[str, StrictStr]]") or (key, attribute_type) == ("identifiers", "Dict[str, StrictStr]"):
@@ -258,6 +259,9 @@ def set_attributes_recursive(
     """
     if total_count == none_count or missing_value:
         return None
+    for key, value in obj_init_values.items():
+        value = obj_init_values[key]
+        obj_init_values[key] = float(value) if "amount" in key else value
 
     # Create an instance of and populate the model object
     try:

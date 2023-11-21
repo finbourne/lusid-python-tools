@@ -269,7 +269,7 @@ class CocoonTestsHoldings(unittest.TestCase):
                     "tax_lots.units": "Quantity",
                 },
                 {
-                    "tax_lots.cost.amount": 3000,
+                    "tax_lots.cost.amount": "$3000",
                     "tax_lots.cost.currency": "Local Currency Code",
                     "tax_lots.portfolio_cost": None,
                     "tax_lots.price": None,
