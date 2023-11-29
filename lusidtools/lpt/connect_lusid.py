@@ -60,4 +60,4 @@ def connect(config, **kwargs):
     config = lusid.Configuration()
     config.access_token = RefreshingToken(token_url, token_request_body, headers)
     config.host = api_url
-    return (lusid.extensions.SyncApiClient(config), lusid)
+    return (lusid.extensions.api_client.SyncApiClient(config), lusid)

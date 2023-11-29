@@ -539,7 +539,7 @@ class AppTests(unittest.TestCase):
             flush_transactions.transaction_batcher_by_character_count(
                 args.scope,
                 args.portfolio,
-                lusid.extensions.get_api_configuration(self.config_loaders).api_url,
+                lusid.extensions.configuration_loaders.get_api_configuration(self.config_loaders).api_url,
                 [txn["transactionId"] for txn in transactions],
             )
         )

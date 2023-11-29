@@ -305,7 +305,7 @@ def flush(args):
     # Initialise the api
     config_loaders = (lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(args.secrets))
     api_factory = lusid.extensions.SyncApiClientFactory(config_loaders=config_loaders)
-    api_configuration = lusid.extensions.get_api_configuration(config_loaders)
+    api_configuration = lusid.extensions.configuration_loaders.get_api_configuration(config_loaders)
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     # Get the Transaction Data
