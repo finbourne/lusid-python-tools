@@ -313,7 +313,7 @@ def flush(args):
     total_failed_batch_count = 0
 
     for portfolio_id, transactions in get_all_txns(args).items():
-        txn_ids = [txn.transaction_id.replace("+", "%2B") for txn in transactions]
+        txn_ids = [txn.transaction_id for txn in transactions]
 
         logging.info(
             f"Looking at portfolio with scope: {portfolio_id[0]} and code: {portfolio_id[1]}"

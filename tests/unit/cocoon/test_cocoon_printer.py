@@ -3,6 +3,8 @@ import os
 import lusid
 import lusid.models as models
 import unittest
+
+from pandas import Timestamp
 from lusidtools import logger
 from lusidtools.cocoon.cocoon_printer import (
     format_portfolios_response,
@@ -16,6 +18,7 @@ from lusidtools.cocoon.cocoon_printer import (
 )
 from parameterized import parameterized
 import datetime
+import pandas as pd
 
 instrument_id = "ClientInternal: imd_00001234"
 # Set up api responses
@@ -24,7 +27,7 @@ instrument_success = models.UpsertInstrumentsResponse(
     values={
         instrument_id: models.Instrument(
             lusid_instrument_id="LUID_01234567",
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00"),
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00+00:00", as_at_date="2023-09-28T00:00+00:00"),
             name="name1",
             identifiers={"0":"Luid", "1":"Figi"},
             state="Active",
@@ -37,19 +40,19 @@ instrument_success = models.UpsertInstrumentsResponse(
             'lusid_instrument_id': 'LUID_01234567',
             'name': 'name1',
             'state': 'Active',
-            'version.as_at_date': datetime.datetime(2023, 9, 28, 0, 0).isoformat(),
+            'version.as_at_date': datetime.datetime(2023, 9, 28, 0, 0, tzinfo=datetime.timezone.utc).isoformat(),
             'version.as_at_version_number': "1",
-            'version.effective_from': datetime.datetime(2023, 9, 28, 0, 0).isoformat()}])
+            'version.effective_from': datetime.datetime(2023, 9, 28, 0, 0, tzinfo=datetime.timezone.utc).isoformat()}])
     },
 )
 
 portfolio_success = models.Portfolio(
     links=[],
-    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00"),
+    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00+00:00", as_at_date="2023-09-28T00:00+00:00"),
     type="Transaction",
     display_name="name2",
     description="test portfolio",
-    created="2019-01-01T00:00",
+    created="2019-01-01T00:00+00:00",
     href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
     id=models.ResourceId(code="ID00001", scope="default test"),
 )
@@ -57,7 +60,7 @@ portfolio_success = models.Portfolio(
 transaction_success = models.UpsertPortfolioTransactionsResponse(
     href="https://www.notadonaim.lusid.com/api/api/code/transactions?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
     links=[],
-    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00"),
+    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00"),
 )
 
 quote_success = models.UpsertQuotesResponse(
@@ -66,8 +69,8 @@ quote_success = models.UpsertQuotesResponse(
             id="BBG001MM1KV4",
             error_details=[
                 {
-                    "as_at":"2019-01-16T00:00",
-                    "effective_at":"2019-01-16T00:00",
+                    "as_at":"2019-01-16T00:00+00:00",
+                    "effective_at":"2019-01-16T00:00+00:00",
                     "quote_id.quote_series_id.provider":"Default",
                     "quote_id.quote_series_id.instrument_id":"BBG001MM1KV4",
                     "quote_id.quote_series_id.instrument_id_type":"Figi",
@@ -80,7 +83,7 @@ quote_success = models.UpsertQuotesResponse(
     ,
     values={
         "BBG001MM1KV4-Figi_2019-10-28": models.Quote(
-            as_at="2019-01-16T00:00",
+            as_at="2019-01-16T00:00+00:00",
             quote_id=models.QuoteId(
                 quote_series_id=models.QuoteSeriesId(
                     provider="Default",
@@ -89,7 +92,7 @@ quote_success = models.UpsertQuotesResponse(
                     quote_type="Price",
                     field="Mid",
                 ),
-                effective_at="2019-01-16T00:00",
+                effective_at="2019-01-16T00:00+00:00",
             ),
             uploaded_by="test",
         )
@@ -98,16 +101,16 @@ quote_success = models.UpsertQuotesResponse(
 
 adjust_holding_success = models.AdjustHolding(
     href="https://notadomain.lusid.com/api/api/code/holdings?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
-    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00"),
+    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00"),
 )
 
 reference_portfolio_success = models.Portfolio(
     links=[],
-    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00"),
+    version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00"),
     type="Transaction",
     display_name="name3",
     description="test reference portfolio",
-    created="2019-01-01T00:00",
+    created="2019-01-01T00:00+00:00",
     href="https://www.tes.lusid/code/portfolio?asAt=2019-12-05T10%3A25%3A45.6141270%2B00%3A00",
     id=models.ResourceId(code="ID00002", scope="default test"),
 )
@@ -298,7 +301,6 @@ class CocoonPrinterTests(unittest.TestCase):
                 self.assertEqual(
                     expected_value["failed"][index], row[failed.columns[0]]
                 )
-        self.maxDiff = None
         if failed is not None and data_entity_details:
             self.assertEqual(num_items, len(failed))
             for index, row in failed.iterrows():
@@ -364,9 +366,9 @@ class CocoonPrinterTests(unittest.TestCase):
                     "succ": [
                         {
                             "lusid_instrument_id": "LUID_01234567",
-                            'version.as_at_date': datetime.datetime.fromisoformat('2023-09-28 00:00:00'),
+                            'version.as_at_date': pd.Timestamp(datetime.datetime.fromisoformat('2023-09-28 00:00'), tz='UTC'),
                             'version.as_at_version_number': 1,
-                            'version.effective_from': datetime.datetime.fromisoformat('2023-09-28 00:00:00'),
+                            'version.effective_from': pd.Timestamp(datetime.datetime.fromisoformat('2023-09-28 00:00'), tz='UTC'),
                             "state": "Active",
                             "identifiers.0": "Luid",
                             "identifiers.1": "Figi",
@@ -374,9 +376,9 @@ class CocoonPrinterTests(unittest.TestCase):
                         },
                         {
                             "lusid_instrument_id": "LUID_01234567",
-                            'version.as_at_date': datetime.datetime.fromisoformat('2023-09-28 00:00:00'),
+                            'version.as_at_date': pd.Timestamp(datetime.datetime.fromisoformat('2023-09-28 00:00'), tz='UTC'),
                             'version.as_at_version_number': 1,
-                            'version.effective_from': datetime.datetime.fromisoformat('2023-09-28 00:00:00'),
+                            'version.effective_from': pd.Timestamp(datetime.datetime.fromisoformat('2023-09-28 00:00'), tz='UTC'),
                             "state": "Active",
                             "identifiers.0": "Luid",
                             "identifiers.1": "Figi",
@@ -391,11 +393,11 @@ class CocoonPrinterTests(unittest.TestCase):
                             'error_details.0.lusid_instrument_id': 'LUID_01234567', 
                             'error_details.0.name': 'name1', 
                             'error_details.0.state': 'Active', 
-                            'error_details.0.version.as_at_date': '2023-09-28T00:00:00', 
+                            'error_details.0.version.as_at_date': '2023-09-28T00:00:00+00:00', 
                             'error_details.0.version.as_at_version_number': '1', 
-                            'error_details.0.version.effective_from': '2023-09-28T00:00:00'
+                            'error_details.0.version.effective_from': '2023-09-28T00:00:00+00:00'
                         },
-                        {'id': 'ClientInternal: imd_00001234', 'error_details.0.identifiers.0': 'Luid', 'error_details.0.identifiers.1': 'Figi', 'error_details.0.lusid_instrument_id': 'LUID_01234567', 'error_details.0.name': 'name1', 'error_details.0.state': 'Active', 'error_details.0.version.as_at_date': '2023-09-28T00:00:00', 'error_details.0.version.as_at_version_number': '1', 'error_details.0.version.effective_from': '2023-09-28T00:00:00'},
+                        {'id': 'ClientInternal: imd_00001234', 'error_details.0.identifiers.0': 'Luid', 'error_details.0.identifiers.1': 'Figi', 'error_details.0.lusid_instrument_id': 'LUID_01234567', 'error_details.0.name': 'name1', 'error_details.0.state': 'Active', 'error_details.0.version.as_at_date': '2023-09-28T00:00:00+00:00', 'error_details.0.version.as_at_version_number': '1', 'error_details.0.version.effective_from': '2023-09-28T00:00:00+00:00'},
                     ],
                     "err": ["not found", "not found"],
                 },

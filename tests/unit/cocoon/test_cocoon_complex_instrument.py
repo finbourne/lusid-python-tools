@@ -114,7 +114,7 @@ class ComplexInstrumentTests(unittest.TestCase):
         expected_outcome = self.expected_response()
 
         # Load data frame with instrument data
-        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name), dtype = {})
+        data_frame = pd.read_csv(Path(__file__).parent.joinpath(file_name))
 
         responses = cocoon.cocoon.load_from_data_frame(
             api_factory=self.api_factory,

@@ -1618,11 +1618,6 @@ def load_from_data_frame(
     ).check_subset_of_list(list(mapping_required.keys()), "required_mapping")
 
     # # Verify that all the required attributes for this top level model exist in the provided required mapping
-    # cocoon.utilities.verify_all_required_attributes_mapped(
-    #     mapping=mapping_required,
-    #     model_object_name=domain_lookup[file_type]["top_level_model"],
-    #     exempt_attributes=["identifiers", "properties", "instrument_identifiers"],
-    # )
 
     # Create the thread pool to use with the async_tools.run_in_executor decorator to make sync functions awaitable
     thread_pool = ThreadPool(thread_pool_max_workers).thread_pool

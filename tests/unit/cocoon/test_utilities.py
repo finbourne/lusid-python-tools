@@ -2806,7 +2806,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2818,7 +2818,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                     "test2": models.ModelProperty(key="test", value=models.PropertyValue(label_value="prop4")),
                 },
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2826,7 +2826,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 values=[models.ResourceId(scope="TEST1", code="PORT3")],
                 sub_groups=None,
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
             models.CreatePortfolioGroupRequest(
                 code="PORT_GROUP1",
@@ -2834,7 +2834,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 values=[models.ResourceId(scope="TEST1", code="PORT4")],
                 sub_groups=None,
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
         ]
 
@@ -2862,7 +2862,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
         )
 
@@ -2889,7 +2889,7 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                 },
                 sub_groups=None,
                 description=None,
-                created="2019-01-01T00:00",
+                created="2019-01-01T00:00:00+00:00",
             ),
         )
 
@@ -2906,8 +2906,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -2922,8 +2922,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -2948,16 +2948,16 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     ),
                     models.TargetTaxLot(
                         units=20,
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     ),
                 ],
             ),
@@ -2976,8 +2976,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -2992,8 +2992,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -3020,8 +3020,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -3036,8 +3036,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -3064,8 +3064,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=10,
                         price=10,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),
@@ -3080,8 +3080,8 @@ class GroupRequestUtilitiesTests(unittest.TestCase):
                         cost=models.CurrencyAndAmount(amount=1, currency="GBP"),
                         portfolio_cost=20,
                         price=20,
-                        purchase_date="2020-02-20T00:00",
-                        settlement_date="2020-02-22T00:00",
+                        purchase_date="2020-02-20T00:00:00+00:00",
+                        settlement_date="2020-02-22T00:00:00+00:00",
                     )
                 ],
             ),

@@ -91,7 +91,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         cls.test_instrument_response_1 = lusid.models.instrument.Instrument(
             lusid_instrument_id="LUID_TEST1",
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 ,
             name="Test LUID1",
             identifiers={
@@ -106,7 +106,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         cls.test_instrument_response_2 = lusid.models.instrument.Instrument(
             lusid_instrument_id="LUID_TEST2",
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 ,
             name="Test LUID2",
             identifiers={
@@ -121,7 +121,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_response_to_df(self):
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_no_props_1, self.holding_no_props_2]
         )
 
@@ -165,7 +165,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_response_to_df_format(self):
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_1]
         )
 
@@ -192,7 +192,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_1]
         )
 
@@ -224,7 +224,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_1]
         )
 
@@ -258,7 +258,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_1]
         )
 
@@ -292,7 +292,7 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00", as_at_date="2023-09-28T00:00")
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
 , values=[self.holding_1]
         )
 
