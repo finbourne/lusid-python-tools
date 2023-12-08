@@ -37,7 +37,7 @@ class CocoonTestsQuotes(unittest.TestCase):
                 },
                 {
                     "quote_id.quote_series_id.price_source": None,
-                    "metric_value.value": 30,
+                    "metric_value.value": "$30",
                     "metric_value.unit": "currency",
                     "lineage": "$CocoonTestInitial",
                 },
@@ -57,7 +57,7 @@ class CocoonTestsQuotes(unittest.TestCase):
                 },
                 {
                     "quote_id.quote_series_id.price_source": None,
-                    "metric_value.value": 30,
+                    "metric_value.value": "$30",
                     "metric_value.unit": "currency",
                     "lineage": "$CocoonTestInitial",
                 },
@@ -77,7 +77,7 @@ class CocoonTestsQuotes(unittest.TestCase):
                 },
                 {
                     "quote_id.quote_series_id.price_source": None,
-                    "metric_value.value": 30,
+                    "metric_value.value": "$30",
                     "metric_value.unit": "currency",
                     "lineage": "$CocoonTestInitial",
                 },
@@ -139,7 +139,7 @@ class CocoonTestsQuotes(unittest.TestCase):
                 },
                 {
                     "quote_id.quote_series_id.price_source": None,
-                    "metric_value.value": 30,
+                    "metric_value.value": "$30",
                     "metric_value.unit": "currency",
                     "lineage": "$CocoonTestInitial",
                 },

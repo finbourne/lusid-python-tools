@@ -228,6 +228,12 @@ def set_attributes_recursive(
                     row[mapping[key]], list
                 ):
                     obj_init_values[key] = [row[mapping[key]]]
+                elif "bool" in attribute_type.lower():
+                    obj_init_values[key] = True if row[mapping[key]].lower() == "true" else False
+                elif "float" in attribute_type.lower():
+                    obj_init_values[key] = float(row[mapping[key]])
+                elif "int" in attribute_type.lower():
+                    obj_init_values[key] = int(row[mapping[key]])
                 else:
                     obj_init_values[key] = row[mapping[key]]
             elif key in obj_attr_required_map:
@@ -259,9 +265,6 @@ def set_attributes_recursive(
     """
     if total_count == none_count or missing_value:
         return None
-    for key, value in obj_init_values.items():
-        value = obj_init_values[key]
-        obj_init_values[key] = float(value) if "amount" in key else value
 
     # Create an instance of and populate the model object
     try:
