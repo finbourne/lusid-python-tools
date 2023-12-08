@@ -50,9 +50,9 @@ def to_df(data, columns):
 
     # Try standard representations
     try:
-        iterator = iter(data)
-    except:
         iterator = iter(data.values)
+    except:
+        iterator = iter(data)
 
     records = [to_record(o) for o in iterator]
 

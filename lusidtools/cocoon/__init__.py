@@ -8,7 +8,6 @@ from lusidtools.cocoon.properties import create_property_values
 from lusidtools.cocoon.utilities import set_attributes_recursive
 from lusidtools.cocoon.cocoon import load_from_data_frame
 from lusidtools.cocoon.utilities import (
-    checkargs,
     load_data_to_df_and_detect_delimiter,
     check_mapping_fields_exist,
     parse_args,

@@ -228,7 +228,11 @@ class TxnConfigYaml:
 
                 :return: lusid.models: The populated LUSID model
                 """
-                return constructor_read_model(*con(loader, node))
+                args = con(loader, node)
+                try:
+                    return constructor_read_model(**args)
+                except TypeError:
+                    return constructor_read_model(*args)
 
             def constructor_function_update(loader, node, con=constructor_function):
                 """
@@ -241,7 +245,11 @@ class TxnConfigYaml:
 
                 :return: lusid.models: The populated LUSID model
                 """
-                return constructor_update_model(*con(loader, node))
+                args = con(loader, node)
+                try:
+                    return constructor_update_model(**args)
+                except TypeError:
+                    return constructor_update_model(*args)
 
             # Add the YAML to LUSID model constructor for reading from LUSID
             yaml.add_constructor(
@@ -301,7 +309,7 @@ class TxnConfigYaml:
             cls.find_by_tag(node, "transactionConfigRequests")
         )
         side = loader.construct_sequence(cls.find_by_tag(node, "sideConfigRequests"))
-        return txn, side
+        return {"transaction_config_requests":txn, "side_config_requests":side}
 
     # Set up the YAML converter for the TransactionConfigurationData (transaction_configs)
     @staticmethod
@@ -319,33 +327,30 @@ class TxnConfigYaml:
         p = cls.prepare_properties(
             loader.construct_sequence(cls.find_by_tag(node, "properties"))
         )
-        return a, m, p
+        return {"aliases":a, "movements":m, "properties":p}
 
     # Set up the YAML converter for the TransactionConfigurationMovementData (movements)
     @staticmethod
     def mvmt_rep(data):
-        return [
-            [abbrev(data.side), data.direction, abbrev(data.movement_types)],
-            list(data.properties.values()),
-            data.mappings,
-        ] + ([data.name] if data.name else [])
+        return {
+            "side":abbrev(data.side), "direction":data.direction, "movement_types":abbrev(data.movement_types),
+            "properties":list(data.properties.values()),
+            "mappings":data.mappings,
+            "name":data.name
+         }
 
     @classmethod
     def mvmt_con(cls, loader, node):
-        s = loader.construct_sequence(node.value[0])
-        properties = cls.prepare_properties(loader.construct_sequence(node.value[1]))
-        side = unabbrev(s[0])
-        direction = s[1]
-        movement_types = unabbrev(s[2])
-        mappings = loader.construct_sequence(node.value[2])
+        s = loader.construct_mapping(node)
+        properties = cls.prepare_properties(s["properties"])
+        side = unabbrev(s["side"])
+        direction = s["direction"]
+        movement_types = unabbrev(s["movement_types"])
+        mappings = s["mappings"]
 
-        name = None
-        if len(node.value) > 3:
-            name = node.value[3].value
-            if name == "null":
-                name = None
+        name = s.get("name")
 
-        return movement_types, side, direction, properties, mappings, name
+        return {"movement_types":movement_types, "side":side, "direction":direction, "properties":properties, "mappings":mappings, "name":name}
 
     # Set up the YAML converter for the TransactionPropertyMapping (mappings)
     @staticmethod
@@ -368,45 +373,59 @@ class TxnConfigYaml:
             set_to = s[1][2:]
             map_from = None
 
-        return property_key, map_from, set_to
+        return {"property_key":property_key,"map_from": map_from, "set_to":set_to}
 
     # Set up the YAML converter for the TransactionConfigurationTypeAlias (aliases)
     @staticmethod
     def alias_rep(data):
-        return [
-            data.type,
-            data.description,
-            data.transaction_group,
-            data.source,
-            data.transaction_class,
-            abbrev(data.transaction_roles),
-        ] + (["default"] if data.is_default else [])
+
+        return {
+            "type":data.type,
+            "description":data.description,
+            "transaction_group":data.transaction_group,
+            "source":data.source,
+            "transaction_class":data.transaction_class,
+            "transaction_roles":abbrev(data.transaction_roles),
+            "is_default":"default" if data.is_default else None
+        }
 
     @staticmethod
     def alias_con(loader, node):
-        s = loader.construct_sequence(node)
+        try:
+            s = loader.construct_sequence(node)
+        except yaml.constructor.ConstructorError:
+            s = loader.construct_mapping(node)
+            return {
+                "type":s.get("type"),
+                "description":s.get("description"),
+                "transaction_class":s.get("transaction_class"),
+                "transaction_group":s.get("transaction_group"),
+                "source":s.get("source"),
+                "transaction_roles":unabbrev(s.get("transaction_roles")),
+                "is_default":s.get("is_default"),
+            }
         # If old yaml files are used with only 5 params set for txn type alias (SENG-41)
         if len(s) == 5:
-            return (
-                s[0],
-                s[1],
-                s[3],
-                s[3],
-                s[2],
-                unabbrev(s[4]),
-                (len(s) > 5 and s[5] == "default"),
-            )
+            return {
+                "type":s[0],
+                "description":s[1],
+                "transaction_class":s[3],
+                "transaction_group":s[3],
+                "source":s[2],
+                "transaction_roles":unabbrev(s[4]),
+                "is_default":(len(s) > 5 and s[5] == "default"),
+            }
         # If newer yaml files are used with additional params set for txn type alias (SENG-41)
         else:
-            return (
-                s[0],
-                s[1],
-                s[4],
-                s[3],
-                s[2],
-                unabbrev(s[5]),
-                (len(s) > 6 and s[6] == "default"),
-            )
+            return {
+                "type":s[0],
+                "description":s[1],
+                "transaction_class":s[4],
+                "transaction_group":s[3],
+                "source":s[2],
+                "transaction_roles":unabbrev(s[5]),
+                "is_default":(len(s) > 6 and s[6] == "default"),
+            }
 
     # Set up the YAML converter for the SideConfigurationDataRequest (side)
     @staticmethod
@@ -429,7 +448,7 @@ class TxnConfigYaml:
         rate = s[3]
         units = s[4]
         amount = s[5]
-        return side, security, currency, rate, units, amount
+        return {"side":side,"security": security,"currency": currency,"rate": rate, "units":units, "amount":amount}
 
     # Set up the YAML converter for PerpetualProperties (properties)
     @staticmethod
@@ -439,7 +458,7 @@ class TxnConfigYaml:
     @staticmethod
     def pp_con(loader, node):
         s = unabbrev(node.value).split("=")
-        return (s[0], models.property_value.PropertyValue(s[1]))
+        return {"key":s[0], "value":models.property_value.PropertyValue(label_value=s[1])}
 
     # END OF THE INITIALISER ############################################
 

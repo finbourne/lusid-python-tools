@@ -2,6 +2,7 @@ from lusidtools.lpt import lpt
 from lusidtools.lpt import lse
 from lusidtools.lpt import stdargs
 from lusidtools.lpt.either import Either
+import pandas as pd
 
 # Protfolio Group column names
 GROUP_NAME = "Group Name"
@@ -26,7 +27,7 @@ def parse(extend=None, args=None):
 def process_args(api, args):
     # Build the ResourceID variables
     def resource_id_vars(names):
-        return [api.models.ResourceId(args.scope, code) for code in names]
+        return [api.models.ResourceId(scope=args.scope,code= code) for code in names]
 
     # Sort the dataframe in order for the sub-groups to be created before the groups (takes care of the dependency sub-group group)
     def sorted_group_df(df):
@@ -36,7 +37,7 @@ def process_args(api, args):
         while not df_not_sorted.empty:
             for i, row in df_not_sorted.iterrows():
                 if row[SUB_GROUPS] in df_sorted[GROUP_NAME].to_list():
-                    df_sorted = df_sorted.append(row)
+                    df_sorted = pd.concat([df_sorted,row])
                     df_not_sorted = df_not_sorted.drop(i)
             if (
                 not any(

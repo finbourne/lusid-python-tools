@@ -30,11 +30,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="GBP"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(0.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=0.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(100.0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         difference_units=100.0,
                         sub_holding_keys={},
                     ),
@@ -46,11 +46,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="GBP"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(100.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(-100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=-100.0, currency="GBP"),
                         difference_units=-100.0,
                         sub_holding_keys={},
                     ),
@@ -79,11 +79,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="GBP"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(0.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=0.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(100.0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         difference_units=100.0,
                         sub_holding_keys={
                             "Transaction/SE-1558/key1": PerpetualProperty(
@@ -100,11 +100,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="GBP"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(100.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(-100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=-100.0, currency="GBP"),
                         difference_units=-100.0,
                         sub_holding_keys={
                             "Transaction/SE-1558/key1": PerpetualProperty(
@@ -139,11 +139,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="LUID_1234"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(0.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=0.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(100.0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         difference_units=100.0,
                         sub_holding_keys={
                             "Transaction/SE-1558/key1": PerpetualProperty(
@@ -160,11 +160,11 @@ class QueryReconcileHoldingsTests(unittest.TestCase):
                                 value=PropertyValue(label_value="LUID_1234"),
                             )
                         ],
-                        left_cost=CurrencyAndAmount(100.0, "GBP"),
+                        left_cost=CurrencyAndAmount(amount=100.0, currency="GBP"),
                         left_units=100.0,
-                        right_cost=CurrencyAndAmount(0, "GBP"),
+                        right_cost=CurrencyAndAmount(amount=0, currency="GBP"),
                         right_units=100.0,
-                        difference_cost=CurrencyAndAmount(-100.0, "GBP"),
+                        difference_cost=CurrencyAndAmount(amount=-100.0, currency="GBP"),
                         difference_units=-100.0,
                         sub_holding_keys={
                             "Transaction/SE-1558/key1": PerpetualProperty(

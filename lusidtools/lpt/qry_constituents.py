@@ -41,7 +41,7 @@ def process_args(api, args):
     result = api.call.get_reference_portfolio_constituents(
         args.scope,
         args.portfolio,
-        effective_at=lpt.to_date(args.date),
+        effective_at=lpt.to_date(args.date).isoformat(),
         property_keys=properties,
     )
 

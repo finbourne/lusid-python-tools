@@ -15,7 +15,7 @@ class CocoonPropertiesTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         # Use a mock of the lusid.ApiClientFactory
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = MockApiFactory(api_secrets_filename=secrets_file)
+        cls.api_factory = MockApiFactory(secrets_file)
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
     @parameterized.expand(

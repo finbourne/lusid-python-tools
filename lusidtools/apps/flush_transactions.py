@@ -239,7 +239,7 @@ def get_all_txns(args):
     Dictionary with key: (scope, code) and value: list of transactions
     """
 
-    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=args.secrets)
+    api_factory = lusid.extensions.SyncApiClientFactory(config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(args.secrets)))
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     if args.group:
@@ -303,7 +303,9 @@ def flush(args):
     """
 
     # Initialise the api
-    api_factory = lusid.utilities.ApiClientFactory(api_secrets_filename=args.secrets)
+    config_loaders = (lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(args.secrets))
+    api_factory = lusid.extensions.SyncApiClientFactory(config_loaders=config_loaders)
+    api_configuration = lusid.extensions.configuration_loaders.get_api_configuration(config_loaders)
     transaction_portfolios_api = api_factory.build(lusid.api.TransactionPortfoliosApi)
 
     # Get the Transaction Data
@@ -329,7 +331,7 @@ def flush(args):
         txn_ids_batches = transaction_batcher_by_character_count(
             args.scope,
             args.portfolio,
-            api_factory.api_client.configuration.host,
+            api_configuration.api_url,
             txn_ids,
         )
 

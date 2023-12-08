@@ -6,6 +6,8 @@ import unittest
 from lusidtools.pandas_utils.lusid_pandas import lusid_response_to_data_frame
 import pandas as pd
 import datetime
+from lusidtools import logger
+import os
 
 
 class TestResponseToPandasObject(unittest.TestCase):
@@ -14,8 +16,8 @@ class TestResponseToPandasObject(unittest.TestCase):
         cls.logger = logger.LusidLogger(os.getenv("FBN_LOG_LEVEL", "info"))
 
         secrets_file = Path(__file__).parent.parent.parent.joinpath("secrets.json")
-        cls.api_factory = lusid.utilities.ApiClientFactory(
-            api_secrets_filename=secrets_file
+        cls.api_factory = lusid.extensions.SyncApiClientFactory(
+            config_loaders=(lusid.extensions.EnvironmentVariablesConfigurationLoader(), lusid.extensions.SecretsFileConfigurationLoader(secrets_file))
         )
 
         cls.holding_no_props_1 = lusid.models.portfolio_holding.PortfolioHolding(
@@ -89,7 +91,8 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         cls.test_instrument_response_1 = lusid.models.instrument.Instrument(
             lusid_instrument_id="LUID_TEST1",
-            version=1,
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+,
             name="Test LUID1",
             identifiers={
                 "ClientInternal": "imd_35349922",
@@ -103,7 +106,8 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         cls.test_instrument_response_2 = lusid.models.instrument.Instrument(
             lusid_instrument_id="LUID_TEST2",
-            version=1,
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+,
             name="Test LUID2",
             identifiers={
                 "ClientInternal": "imd_35349900",
@@ -117,7 +121,8 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_response_to_df(self):
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_no_props_1, self.holding_no_props_2]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_no_props_1, self.holding_no_props_2]
         )
 
         holdings_df = lusid_response_to_data_frame(test_holdings_response)
@@ -160,7 +165,8 @@ class TestResponseToPandasObject(unittest.TestCase):
 
     def test_response_to_df_format(self):
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_1]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_1]
         )
 
         holdings_df = lusid_response_to_data_frame(
@@ -186,7 +192,8 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_1]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_1]
         )
 
         holdings_df = lusid_response_to_data_frame(
@@ -217,7 +224,8 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_1]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_1]
         )
 
         holdings_df = lusid_response_to_data_frame(
@@ -250,7 +258,8 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_1]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_1]
         )
 
         holdings_df = lusid_response_to_data_frame(
@@ -283,7 +292,8 @@ class TestResponseToPandasObject(unittest.TestCase):
         }
 
         test_holdings_response = lusid.models.versioned_resource_list_of_portfolio_holding.VersionedResourceListOfPortfolioHolding(
-            version=1, values=[self.holding_1]
+            version=lusid.models.Version(as_at_version_number=1, effective_from = "2023-09-28T00:00:00+00:00", as_at_date="2023-09-28T00:00:00+00:00")
+, values=[self.holding_1]
         )
 
         holdings_df = lusid_response_to_data_frame(
@@ -329,7 +339,9 @@ class TestResponseToPandasObject(unittest.TestCase):
             instrument_df.columns.to_list(),
             [
                 "lusid_instrument_id",
-                "version",
+                'version.effective_from',
+                'version.as_at_date',
+                'version.as_at_version_number',
                 "name",
                 "identifiers.ClientInternal",
                 "identifiers.Figi",
@@ -366,7 +378,7 @@ class TestResponseToPandasObject(unittest.TestCase):
 
         self.assertEqual(
             error.exception.args[0],
-            "All object items in list must have a to_dict() method",
+            "All object items in list must have a dict() method",
         )
 
     def test_empty_list_lusid_response(self):

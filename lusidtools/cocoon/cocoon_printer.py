@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from lusidtools.cocoon import checkargs
 from lusid.exceptions import ApiException
 from flatten_json import flatten
 
@@ -81,7 +80,6 @@ class CocoonPrinter:
         return getattr(CocoonPrinter, f"format_{self.file_type}_response")(self)
 
 
-@checkargs
 def check_dict_for_required_keys(
     target_dict: dict, target_name: str, required_keys: list
 ):
@@ -179,7 +177,6 @@ def get_portfolio_from_href(href: list, file_type: str):
     return codes
 
 
-@checkargs
 def get_non_href_response(response: dict, file_type: str, data_entity_details=False):
     dict_items_success = [
         (key, value)
@@ -194,7 +191,7 @@ def get_non_href_response(response: dict, file_type: str, data_entity_details=Fa
 
     def extract_value_details_from_success_request(data_entity_dict):
         return pd.DataFrame(
-            flatten(value[1].to_dict(), ".") for value in data_entity_dict
+            flatten(value[1].dict(), ".") for value in data_entity_dict
         )
 
     def extract_key_details_from_success_request(data_entity_dict):

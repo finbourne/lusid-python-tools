@@ -45,20 +45,20 @@ def process_args(api, args):
 
 def upsert_orders(api, args, df, identifiers, prop_keys):
     def success(r):
-        df = lpt.to_df(r.content, ["id"])
+        df = lpt.to_df(r.content.values, ["id"])
         return lpt.trim_df(df, args.limit)
 
     order_request = api.models.OrderSetRequest(
         order_requests=[
             api.models.OrderRequest(
-                id=api.models.ResourceId(row["id.scope"], row["id.code"]),
+                id=api.models.ResourceId(scope=row["id.scope"], code=row["id.code"]),
                 side=row["side"],
-                quantity=row["quantity"],
+                quantity=int(row["quantity"]),
                 order_book_id=api.models.ResourceId(
-                    row["orderBookId.scope"], row["orderBookId.code"]
+                    scope=row["orderBookId.scope"], code=row["orderBookId.code"]
                 ),
                 portfolio_id=api.models.ResourceId(
-                    row["portfolioId.scope"], row["portfolioId.code"]
+                    scope=row["portfolioId.scope"], code=row["portfolioId.code"]
                 ),
                 instrument_identifiers={
                     "Instrument/default/" + identifier: row[identifier]
@@ -66,7 +66,8 @@ def upsert_orders(api, args, df, identifiers, prop_keys):
                 },
                 properties={
                     key[2:]: api.models.ModelProperty(
-                        key[2:], api.models.PropertyValue(row[key])
+                        key=key[2:],
+                        value=api.models.PropertyValue(label_value=row[key]),
                     )
                     for key in prop_keys
                     if pd.notna(row[key])
