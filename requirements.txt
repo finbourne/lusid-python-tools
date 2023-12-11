@@ -16,5 +16,5 @@ IPython>=7.31.1
 lusid-sdk-preview>=0.11.4425, < 2
 lusidfeature
 
-finbourne-access-sdk
-finbourne-identity-sdk
+finbourne-access-sdk < 2
+finbourne-identity-sdk < 2
