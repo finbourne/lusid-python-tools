@@ -4,3 +4,4 @@ bump2version==1.0.0
 parameterized==0.7.4
 pytest==5.4.3
 unittest-parallel==0.8.2
+pandas-stubs>=2.0.0
