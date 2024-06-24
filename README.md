@@ -1,8 +1,9 @@
+![LUSID_by_Finbourne](./resources/Finbourne_Logo_Teal.svg)
+
 # Python tools for LUSID
 
 This package contains a set of utility functions and a Command Line Interface (CLI) for interacting with [LUSID by FINBOURNE](https://www.finbourne.com/lusid-technology). To use it you'll need a LUSID account. [Sign up for free at lusid.com](https://www.lusid.com/app/signup)
 
-![LUSID by Finbourne](https://content.finbourne.com/LUSID_repo.png)
 
 ![PyPI](https://img.shields.io/pypi/v/lusidtools?color=blue)
 ![Daily build](https://github.com/finbourne/lusid-python-tools/workflows/Daily%20build/badge.svg) 
